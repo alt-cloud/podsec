@@ -8,10 +8,18 @@ getSigStore() {
   then
     lookaside=$(yq "if .docker[$registry] then .docker[$registry].lookaside else .\"default-docker\".lookaside end" < /etc/containers/registries.d/default.yaml)
   else
-    lookaside=$(yq ".\"default-docker\".lookaside end" < /etc/containers/registries.d/default.yaml)
+    lookaside=$(yq ".\"default-docker\".lookaside" < /etc/containers/registries.d/default.yaml)
   fi
   url=$(echo "$lookaside/$url" | tr -d '"')
   echo $url
+}
+
+getDefaultSigStore()  {
+  lookaside=$(yq '."default-docker".lookaside'  /etc/containers/registries.d/default.yaml)
+  if [ "$lookaside" != 'null' ]
+  then
+    echo $lookaside
+  fi
 }
 
 export mes="\"host\":\"$HOSTNAME\""
@@ -22,6 +30,16 @@ then
   if [ -n "$DEBUG" ]
   then
     echo -ne "В /etc/containers/policy.json установлена политика по умолчанию '$defaultPolicy' отличная от reject\n\n" >&2
+  fi
+fi
+
+defaultSigStore=$(getDefaultSigStore)
+if [ -z "$defaultSigStore" ]
+then
+  mes="${mes}\n\"noDefaultSigStore\":\"true\""
+  if [ -n "$DEBUG" ]
+  then
+    echo -ne "В /etc/containers/registries.d/default.yaml отсутствует URL хранителя подписи по умолчанию default-docker.lookaside\n\n" >&2
   fi
 fi
 
@@ -115,7 +133,7 @@ $out  )
     else
       if [ -n "$DEBUG" ]
       then
-        echo "Рабочее местр $HOSTNAME, пользователь $user имеет некорректный образ:" >&2
+        echo "Рабочее место $HOSTNAME, пользователь $user имеет некорректный образ:" >&2
         cat $TMPFILE >&2
         echo -ne "\n\n" >&2
       fi

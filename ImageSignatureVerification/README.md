@@ -339,6 +339,10 @@ registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275
   }
 }
 ```
+Время выполнения скрипта:
+```
+9.21user 1.91system 0:20.25elapsed 54%CPU (0avgtext+0avgdata 58928maxresident)k
+```
 
 По умолчанию на доступность и наличие цифровой подписи проверяются образы входящие в `inPolicyImages`.
 
