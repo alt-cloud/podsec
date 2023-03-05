@@ -1,68 +1,24 @@
 #!/bin/sh
 
-getSigStore() {
-  image=$1
-  registry=$(echo $image | jq '. | split("/")[0]')
-  url=$(echo $image | jq '. | split("/")[1:] | join("/")' | tr ':' '=')
-  if [ -n "$registry" ]
-  then
-    lookaside=$(yq "if .docker[$registry] then .docker[$registry].lookaside else .\"default-docker\".lookaside end" < /etc/containers/registries.d/default.yaml)
-  else
-    lookaside=$(yq ".\"default-docker\".lookaside" < /etc/containers/registries.d/default.yaml)
-  fi
-  url=$(echo "$lookaside/$url" | tr -d '"')
-  echo $url
-}
-
-getDefaultSigStore()  {
-  lookaside=$(yq '."default-docker".lookaside'  /etc/containers/registries.d/default.yaml)
-  if [ "$lookaside" != 'null' ]
-  then
-    echo $lookaside
-  fi
-}
-
-export mes="\"host\":\"$HOSTNAME\""
-defaultPolicy=$(jq '.default[].type' /etc/containers/policy.json  | tr -d '"')
-if [ $defaultPolicy != 'reject' ]
-then
-  mes="${mes}\n\"incorrectDefaultPolicy\":\"$defaultPolicy\""
-  if [ -n "$DEBUG" ]
-  then
-    echo -ne "В /etc/containers/policy.json установлена политика по умолчанию '$defaultPolicy' отличная от reject\n\n" >&2
-  fi
-fi
-
-defaultSigStore=$(getDefaultSigStore)
-if [ -z "$defaultSigStore" ]
-then
-  mes="${mes}\n\"noDefaultSigStore\":\"true\""
-  if [ -n "$DEBUG" ]
-  then
-    echo -ne "В /etc/containers/registries.d/default.yaml отсутствует URL хранителя подписи по умолчанию default-docker.lookaside\n\n" >&2
-  fi
-fi
-
-notSigned=$(jq '.transports.docker  | to_entries | .[]  | if .value[].type != "signedBy" then .key else empty end' /etc/containers/policy.json)
-if [ -n "$notSigned" ]
-then
-  notSignedRegistry=$(echo $notSigned | tr ' ' "\n")
-  if [ -n "$DEBUG" ]
-  then
-    echo "Регистраторы не использующие механизм подписи в  /etc/containers/policy.json:" >&2
-    echo -ne "$notSignedRegistry\n\n" >&2
-  fi
-  mes="${mes}\n\"notSignedRegistry\":[$notSignedRegistry]"
-#   exit 1
-fi
-export registries=$(jq '.transports.docker | keys | .[]' /etc/containers/policy.json | tr -d '"')
+. ./functions.sh
 
 checkUserImages() {
   user=$1
-  mes="${mes}\n\"$user\": {\"user\": \"$user\""
+  configDir=$2
+  tab="\\t\\t"
+  policyFile="$configDir/policy.json"
+  ret="\n$tab\"user\": \"$user\"\n"
+  userPolicyConfig=$(checkPolicyConfig $policyFile)
+  ret+=",$userPolicyConfig"
+  registries=$(getRegistries $policyFile)
+  if [ -z "$registries" ]
+  then
+    registries='""'
+  fi
   n=0
-  for registry in $registries
+  for Registry in $registries
   do
+    registry=${Registry:1:-1}
     if [ $n -eq 0 ]
     then
       in="    (. | startswith(\"$registry/\"))\n"
@@ -71,63 +27,68 @@ checkUserImages() {
       in="$in    or \n    (. | startswith(\"$registry/\"))\n"
       out="$out    and \n    (. | startswith(\"$registry/\") | not)\n"
     fi
-    let n=$n+1
+    let n=$n+1$notSigned
   done
 
   in="su - -c 'podman images --format json' $user 2>/dev/null |
-  jq '[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Id] end | .[]] |
+  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Id] end | .[]] |
 map(
   select(
 $in  )
-) | sort| unique | .[]'
+) | sort| unique | .[]]' | jq .
 "
 
   out="su - -c 'podman images --format json' $user 2>/dev/null |
-  jq '[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Id] end | .[]] |
+  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Id] end | .[]] |
 map(
   select(
 $out  )
-) | sort| unique | .[]'
+) | sort| unique | .[]]' | jq .
 "
 
   TMPFILE="/tmp/checkImagesSignature.$$"
   echo -ne "$in" > $TMPFILE
   in=$(sh $TMPFILE )
+#   cp $TMPFILE "/tmp/in.$user"
 
   echo -ne "$out" > $TMPFILE
-  out=$(sh $TMPFILE | grep -v "localhost/podman-pause" )
+  out=$(sh $TMPFILE)
+#   cp $TMPFILE "/tmp/outtm.$user"
   rm -f $TMPFILE
 
   if [ -n "$out" ]
   then
-    outPolicyImages=$(echo $out | tr ' ' "\n")
+    outPolicyImages=$(echo -ne "$out")
     if [ -n "$DEBUG" ]
     then
-      echo "Рабочее местр $HOSTNAME, пользователь $user: Образы вне политики файла /etc/containers/policy.json:" >&2
+      echo "Рабочее место $HOSTNAME, пользователь $user: Образы вне политики файла $policyFile:" >&2
       echo -ne "$outPolicyImages\n\n" >&2
     fi
-    mes="${mes}\n\"outPolicyImages\": [$outPolicyImages]"
+#     outPolicyImages=$(echo $outPolicyImages | jq .)
+    ret+="\n,\"outPolicyImages\": $outPolicyImages"
   fi
 
   if [ -n "$in" ]
   then
-    inPolicyImages=$(echo $in | tr ' ' "\n")
+    inPolicyImages=$(echo -ne "$in")
     if [ -n "$DEBUG" ]
     then
-      echo "Рабочее местр $HOSTNAME, пользователь $user: Образы согласно политики файла /etc/containers/policy.json:" >&2
+      echo "Рабочее местр $HOSTNAME, пользователь $user: Образы согласно политики файла $policyFile:" >&2
       echo -ne "$inPolicyImages\n\n" >&2
     fi
-    mes="${mes}\n\"inPolicyImages\": [$inPolicyImages]"
+#     inPolicyImages=$(echo $inPolicyImages | jq .)
+    ret+="\n,\"inPolicyImages\": $inPolicyImages"
   fi
+
   inCorrectImages=
   images=$in
   if [ -n "$CHECKALLIMAGES" ]
   then
     images="$in $out"
   fi
-  for image in $images
+  for image in $(echo $images | jq '.[]')
   do
-    Image=$(echo $image | tr -d '"')
+    Image=${image:1:-1}
     if podman pull --tls-verify=false $Image >/dev/null 2>$TMPFILE
     then :; # echo "OK";
     else
@@ -137,41 +98,84 @@ $out  )
         cat $TMPFILE >&2
         echo -ne "\n\n" >&2
       fi
-      inCorrectImages="{$image:\"$(tr '"' '\"' < $TMPFILE)\"}"
+      inCorrectImages+=$(echo ${inCorrectImages:+,})
+      inCorrectImages+=$(tr "\n" ' '<$TMPFILE | jq --raw-input ". | {$image:.}"  )
     fi
   done
-  mes="${mes},\"inCorrectImages\":[$inCorrectImages]"
+  ret+=",\"inCorrectImages\":[$inCorrectImages]"
 
   notSignedImages=
   signedImages=
-  for image in $images
+  for image in $(echo $images | jq '.[]')
   do
-    sigStoreURL=$(getSigStore $image)
+    sigStoreURL=$(getSigStoreURLForImage $configDir ${image:1:-1})
     sigStoreURL="$sigStoreURL/signature-1"
     if wget -q -O $TMPFILE $sigStoreURL 2>/dev/null
     then
-      signedImages=$(echo ${signedImages}${signedImages:+\\n}$image)
+      signedImages+=$(echo ${signedImages:+,}$image)
     else
-      notSignedImages=$(echo ${notSignedImages}${notSignedImages:+\\n}$image)
+      notSignedImages+=$(echo ${notSignedImages:+,}$image)
     fi
   done
-  mes="${mes}\n\"signedImages\": [$signedImages]"
-  mes="${mes}\n\"notSignedImages\": [$notSignedImages]"
-
-  mes="${mes}}"
   rm -f $TMPFILE
+  ret+="\n,\"signedImages\": [$signedImages]"
+  ret+="\n,\"notSignedImages\": [$notSignedImages]"
+
+  echo -ne "$ret";
 }
 
-checkUserImages root
-
-for user in /home/*
-do
-  if [ -d "$user/.local/share/containers/storage/overlay" ]
+checkUserConfigAndImages() {
+  # удалить конечные /
+  userDir=$(dirname "$1/./")
+  user=$(basename $userDir)
+  if [ "$user" == 'root' ]
   then
-    user=$(basename $user)
-    checkUserImages $user
+    configDir="/etc/containers"
+    policyFile="/etc/containers/policy.json"
+  else
+    if [ ! -d "$userDir/.local/share/containers/storage/overlay" ]
+    then
+      return
+    fi
+    configDir="$userDir/.config/containers"
+    policyFile="$userDir/.config/containers/policy.json"
+    if [ ! -f $policyFile ]
+    then
+      configDir="/etc/containers"
+      policyFile="/etc/containers/policy.json"
+    fi
   fi
-done
-mes=$(echo -ne "{$mes}" | tr "\n" ',')
-echo -ne "$mes"
+  userImages=$(checkUserImages $user $configDir)
+  ret="\"$user\":{$userImages}"
+  echo -ne "$ret"
+}
+
+
+checkUsersConfigAndImages() {
+  ret=
+#   userDir="/home/imagedeveloper/"
+#   userImages=$(checkUserConfigAndImages $userDir)
+#   ret+="\n$userImages"
+  userDir="/root"
+  userImages=$(checkUserConfigAndImages $userDir)
+  ret+="\n$userImages"
+  for userDir in /home/*
+  do
+    if [ -d "$userDir/.local/share/containers/storage/overlay" ]
+    then
+      userImages=$(checkUserConfigAndImages $userDir)
+      user=$(basename $userDir)
+      ret+="\n,\"$user\":{$userImages}"
+    fi
+  done
+  ret="\"users\":{$ret}"
+  echo -ne "$ret"
+}
+
+
+# MAIN
+mes="$tab\"host\":\"$HOSTNAME\",\n"
+
+mes+=$(checkUsersConfigAndImages)
+echo -ne "{${mes}}"
 

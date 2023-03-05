@@ -113,7 +113,7 @@ $ gpg2 --output /var/sigstore/keys/group1.pgp  --armor --export 'Images Develope
 
 Если в системе отсутствует регистратор настройте его запуск.
 <pre>
-$ sudo podman run --name registry -d -p 80:5000 -v registry:/var/lib/registry  docker.io/registry</pre>
+$ sudo podman run --name registry -d -p 80:5000 -v registry:/var/lib/registry  registry.altlinux.org/alt/registry
 </pre>
 После его запуска 
 <pre>
