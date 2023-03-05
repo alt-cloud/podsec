@@ -15,3 +15,9 @@
 >     * сведения о критичности события безопасности.
 > 
 > В журнал событий безопасности информационной (автоматизированной) системы должна обеспечиваться запись событий > > > > > безопасности контейнеров с указанием идентификатора пользователя хостовой ОС, от имени которого был запущен контейнер.
+
+
+Ссылки:
+* [A Practical Guide to Kubernetes Logging](https://logz.io/blog/a-practical-guide-to-kubernetes-logging/)
+* [Logging Architecture](https://kubernetes.io/docs/concepts/cluster-administration/logging/)
+* [Securing Kubernetes with Open Source Falco and Logz.io Cloud SIEM](https://logz.io/blog/k8s-security-with-falco-and-cloud-siem/)

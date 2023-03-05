@@ -4,18 +4,36 @@
 [checkImagesSignature.sh](./checkImagesSignature.sh).
 
 Скрипт 
-* просматривает файл политики `/etc/containers/policy.json` на некорректные настройки;
-* просматривает файл в `/etc/containers/registries.d/default.yaml` для определения для каждого описанного регистратора  `URL` сервера, хранящегоо подписи образов;
-* просматривает список образов пользователя `root` и всех пользователей в `/home`, имеющих каталог `~/.local/share/containers/storage/overlay`, хранящий образы пользователей;
+* для пользователя `root`:
+  * просматривает файл политики `/etc/containers/policy.json` на некорректные настройки;
+  * просматривает `YAML-файлы` привязки хранилищ электронных подписей образов в каталоге  в `/etc/containers/registries.d` для определения для каждого описанного регистратора  `URL` сервера, хранящегоо подписи образов;
+  * просматривает список образов пользователя `root`   и согласно файлу политики `/etc/containers/policy.json`  и `YAML-файлам` привязки хранилищ электронных подписей образов в каталоге  в `/etc/containers/registries.d` классифицирует и проверяет образы на доступность и наличие электронной подписи.
+* для пользователей каталого `home`, имеющих образы в каталоге `~/.local/share/containers/storage/overlay` 
+  * если существует файл политики `~/.config/containers/policy.json` на некорректные настройки;
+  * если существует YAML-файлы привязки хранилищ электронных подписей образов в каталоге `~/.config/containers/registries.d/`;
+  * просматривает список образов пользователя и согласно файлу политики пользователя  и `YAML-файлам` привязки хранилищ электронных подписей образов классифицирует и проверяет образы на доступность и наличие электронной подписи.
 
 Всю проанализированную информацию скрипт выводит в формате `json`.
 В начале `json` помещается поле 
+
+Общая структура json:
 ```
 {
   "host": "<hostname>",
-  ...
+  "users": { 
+    "root": {
+      ...
+    },
+    "<user>": {
+      ...
+    },
+     ...
+  }
 }
 ```
+
+## Анализ rootfull режима пользователя root
+
 
 Рассмотрим файл политик `/etc/containers/policy.json`:
 ```
@@ -58,32 +76,25 @@ docker:
 В данном примере для остальных образов также идет проверка подписей на том же сайте `http://sigstore.local:81/sigstore/`.
 В общем случае для образов с разными префиксами можно указывать разные сайты.
 
-Политика по умолчанию должна быть `reject`, Если это не так, то в json добавляется поле `incorrectDefaultPolicy`:
-```
-{
-  "host": "basealt",
-  "incorrectDefaultPolicy": "insecureAcceptAnything"
-}
-
-```
-Далее скрипт в поле `transports.docker` просмативает список доступных регистраторов и их типы.
-Если тип регистратора отличается от `signedBy` в `json` добавляется поле `notSignedRegistry` со списком некорректных регистраторов:
-```
-  "notSignedRegistry": [
-    "registry.altlinux.org"
-  ]
-```
-
-После этого скрипт просматривает список доступных образов для пользователя `root` (`rootfull` режим) и остальных пользователей (`rootless` режим), имеющих каталог `~/.local/share/containers/storage/overlay`. 
-
-Для каждого пользователя в `json` добавляется запись типа:
+Для каждого пользователя  включая `root` в `json` добавляется запись типа:
 ```
   "<user>": {
     "user": "<user>",
-    "outPolicyImages": [
+    "configDir":"..." ,
+    "defaultPolicy": "...",
+    "signedRegistries": [
+      ...
+    ],
+    "notSignedRegistries": [
+      ...
+    ],
+    "forbiddenTransports": [
       ...
     ],
     "inPolicyImages": [
+      ...
+    ],
+    "outPolicyImages": [
       ...
     ],
     "inCorrectImages": [
@@ -94,15 +105,31 @@ docker:
     ],
     "notSignedImages": [
       ...
-    ]        
+    ] 
   }
 ```
-Значение полей:
-* Массив `outPolicyImages` содержит список образов, которые не соответсвуют регистраторам. описанных в `/etc/containers/policy.json`.
+
+Политика по умолчанию должна быть `reject`, Если это не так, то в `json` для пользователя `root` добавляется поле `incorrectDefaultPolicy`:
+```
+  "incorrectDefaultPolicy": "<имя_политики>"
+
+```
+Далее скрипт в поле `transports.docker` просмативает список доступных регистраторов и их типы.
+Регистраторы типа `signedBy` помещаются в список  `signedRegistries`.
+Остальные в список 
+Если тип регистратора - `signedBy` в поле `signedRegistries`.
+Остальные в поле `notSignedRegistries`.
+
+Если в поле `.transports` json-файла `/etc/containers/policy.json` присутсвуют другие транспорты, кроме `docker они попадают в список поля `forbiddenTransports`.
+
+
+После этого скрипт просматривает список доступных образов для пользователя `root` (`rootfull` режим) 
+и классифицирует их по следующим полям:
 * Массив `inPolicyImages` содержит список образов, которые соответсвуют регистраторам. описанных в `/etc/containers/policy.json`.
+* Массив `outPolicyImages` содержит список образов, которые не соответсвуют регистраторам. описанных в `/etc/containers/policy.json`.
 * Массив `inCorrectImages` содержит список образов, которые получены транспортами, не описанными в `/etc/containers/policy.json` (например через архивацию образов: `podman save ...; podman load` или каким другим каналам.) или отсутсвующие на регистраторах. 
-* Массив `signedImages` содержит список образов, которые подписаны в регистраторах, указанных в файле `/etc/containers/registries.d/default.yaml`. На данный момент проверяется только наличие подписи. Информация о подписавшем не извлекается.
-* Массив `notSignedImages` содержит список образов, которые не подписаны в регистраторах, указанных в файле `/etc/containers/registries.d/default.yaml`.
+* Массив `signedImages` содержит список образов, которые подписаны в регистраторах, указанных в YAML-файлах каталога `/etc/containers/registries.d/`. На данный момент проверяется только наличие подписи. Информация о подписавшем не извлекается.
+* Массив `notSignedImages` содержит список образов, которые не подписаны в регистраторах, указанных в YAML-файлах каталога `/etc/containers/registries.d/`.
 
 Следует обратить внимание на то, что если у пользователя хранятся два образа с разными регистраторами, но с одинаковыми  "тропами" и `sha256` например:
 ```
@@ -111,231 +138,392 @@ registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275
 ```
 и один из образов (`registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5`) хранится в локальном регистраторе и подписан, то подписанным считается и второй алиасный образ.
 
+## Анализ пользователей rootless режима
+
+Далее просматриваются пользователи имеющих образы в каталоге `~/.local/share/containers/storage/overlay`.
+
+Если в каталоге `~/.config/containers/` содержится файл политики `policy,json` и в каталоге `.config/containers/registries.d/` YAML-файлы привязки привязки хранилищ электронных подписей образов, то для анализа используются они.
+Иначе системный файл политики `/etc/containers/` и YAML-файлы привязки привязки хранилищ электронных подписей образов в системном файле `/etc/containers/registries.d/`
+
+Производится анализ аналогичныый вышеописанному анализу для пользователя `root`.
+
+## Пример вывода скрипта
+
 Пример вывода скрипта:
 ```
 {
   "host": "basealt",
-  "incorrectDefaultPolicy": "insecureAcceptAnything",
-  "notSignedRegistry": [
-    "registry.altlinux.org"
-  ],
-  "root": {
-    "user": "root",
-    "outPolicyImages": [
-      "altlinux.io/quay/postgres11@sha256:016071b61000dce475df4fdb3647f9f092b442ef179e8860f3253285b9a61b4a",
-      "altlinux.io/quay/postgres14@sha256:b3d4046f83293b001a3523da18f8dfc695d9a3052f3e2c5812c82bf2b96bc9eb",
-      "altlinux.io/quay/postgres@sha256:cf4da8111483b5e2055311a58313cde7c4d7719686240479dd1662ad692786ec",
-      "altlinux.io/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
-      "altlinux.io/quay/redis@sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553",
-      "altlinux.io/quay/redis@sha256:db485f2e245b5b3329fdc7eff4eb00f913e09d8feb9ca720788059fdc2ed8339",
-      "altlinux.io/quay/redis@sha256:e946a000d38f338c1312d1e2fd95ef711b20aa65b12c38d9c523f308e19a727d",
-      "docker.io/aquasec/trivy@sha256:906c909a441949317c252039ce8543ef79bcb9a59e7dd9b94e619191b82fedd2",
-      "docker.io/aquasec/trivy@sha256:fbf4fd64d54f56d9175ae804839becb7cc7bd45c41abc93bc6c295a99dda2630",
-      "docker.io/kafbasealt/quay.io/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
-      "docker.io/library/alpine@sha256:69665d02cb32192e52e07644d76bc6f25abeb5410edc1c7a81a10ba3f0efb90a",
-      "docker.io/library/alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501",
-      "docker.io/library/golang@sha256:ea080cc817b02a946461d42c02891bf750e3916c52f7ea8187bccde8f312b59f",
-      "docker.io/library/golang@sha256:eb7ebf06372b4930e0b9539b3510422c4860ec3361bb2f22b63a857990cf9efe",
-      "docker.io/library/mono@sha256:68c13839726a683dc2813dac20d04c0fdb61cf76dff9bfe04a9dee6ca679fa33",
-      "docker.io/library/mono@sha256:b7be758362e54c396084131c0aea604e29e6de56c4501f7dc5027fd7934367c8",
-      "docker.io/library/nginx@sha256:30bba6c267c24237c5b6f3c59a6e566365b80662f80935535ba3d6a694afe7e8",
-      "docker.io/library/nginx@sha256:345f8a22bd5dfa57137d8101358e80027a649c8f84683a5baf8026d0547a445f",
-      "docker.io/library/nginx@sha256:6650513efd1d27c1f8a5351cbd33edf85cc7e0d9d0fcb4ffb23d8fa89b601ba8",
-      "docker.io/library/nginx@sha256:7f797701ded5055676d656f11071f84e2888548a2e7ed12a4977c28ef6114b17",
-      "docker.io/library/node@sha256:01627afeb110b3054ba4a1405541ca095c8bfca1cb6f2be9479c767a2711879e",
-      "docker.io/library/node@sha256:3a69ea1270dbf4ef20477361be4b7a43400e559c6abdfaf69d73f7c755f434f5",
-      "docker.io/library/redis@sha256:54043f92c16727f142fa93c377b279f91879abf974c244ce72099b35fefbd7b2",
-      "docker.io/library/redis@sha256:c2c4a465b8cb636a4f1ca272f290106d8e6e797948f3ca69ce1989251652a204",
-      "docker.io/library/registry@sha256:3f71055ad7c41728e381190fee5c4cf9b8f7725839dcf5c0fe3e5e20dc5db1fa",
-      "docker.io/library/registry@sha256:a001a2f72038b13c1cbee7cdd2033ac565636b325dfee98d8b9cc4ba749ef337",
-      "k8s.gcr.io/coredns/coredns@sha256:10683d82b024a58cc248c468c2632f9d1b260500f7cd9bb8e73f751048d7d6d4",
-      "k8s.gcr.io/coredns/coredns@sha256:6e5a02c21641597998b4be7cb5eb1e7b02c0d8d23cce4dd09f4682d463798890",
-      "k8s.gcr.io/coredns@sha256:242d440e3192ffbcecd40e9536891f4d9be46a650363f3a004497c2070f96f5a",
-      "k8s.gcr.io/coredns@sha256:73ca82b4ce829766d4f1f10947c3a338888f876fbed0540dc849c89ff256e90c",
-      "k8s.gcr.io/coredns@sha256:f7f0b545f05fbfa9719687dfc58cc4bc6d4c7dc384da4ae8d9e7925705e4e819",
-      "k8s.gcr.io/etcd@sha256:9ce33ba33d8e738a5b85ed50b5080ac746deceed4a7496c550927a7a19ca3b6d",
-      "k8s.gcr.io/etcd@sha256:de6a50021feadfde321d44cf1934a806595e59d9cc77d68f0ce85cef8d1ab2ed",
-      "k8s.gcr.io/kube-apiserver@sha256:0ce5d87bc57a9030f472edf3c0844618e7ce567bfbe2af0fd44cf051d3feab4e",
-      "k8s.gcr.io/kube-apiserver@sha256:4a165184c779c0a4f2d31d6676b7790589b977c3c8fbc0577dac2544fd69cade",
-      "k8s.gcr.io/kube-apiserver@sha256:88dc8559130e7596832eefaffdd0c2b868a42f31744d36223cbcc8a2524890ae",
-      "k8s.gcr.io/kube-apiserver@sha256:bba61f4f66e22144208a14555b6e71cfbdedfe3acd7fc2ac8ce59c2bbca01b30",
-      "k8s.gcr.io/kube-controller-manager@sha256:317e0aabe5b41c47043568cae36445b14b1985bc9d35e81ed99639c217f3f372",
-      "k8s.gcr.io/kube-controller-manager@sha256:3d2bce27ea65768929ef3f181a1deba6048fa6d1ca584efdb8f5e6d73872987d",
-      "k8s.gcr.io/kube-proxy@sha256:ca89368a93e7122e30d8561c2a35d714e7f3d0eed6fd6837b6b4d9eaa96771fb",
-      "k8s.gcr.io/kube-proxy@sha256:d0c27dc89863edcf2ebede5d7ddca3d8521a48792c1c754fedc58a0511fd2ff8",
-      "k8s.gcr.io/kube-scheduler@sha256:073834aade22f64133ffb38293bd35f3d5fa7e5bbfceb518cfd029687d4bae9f",
-      "k8s.gcr.io/kube-scheduler@sha256:20fcad0757f5c0161d6f22cdc58ea744ae5da559ff52dd7995a15ca80eb90135",
-      "k8s.gcr.io/pause@sha256:1ff6c18fbef2045af6b9c16bf034cc421a29027b800e4f9b68ae9b1cb3e9ae07",
-      "k8s.gcr.io/pause@sha256:369201a612f7b2b585a8e6ca99f77a36bcdbd032463d815388a96800b63ef2c8",
-      "k8s.gcr.io/pause@sha256:ffcd898c566e8db01646765401c902a9a7a80112dc44c8dbe18ee9926fae09b8",
-      "localhost/quay/postgres@sha256:b667a1fb8fe94a9f5f7c9fa00aaa4ae5742f91460236b82f5e911915ba9a7ed2",
-      "localhost/quay/redis@sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553",
-      "localhost/quay/redis@sha256:db485f2e245b5b3329fdc7eff4eb00f913e09d8feb9ca720788059fdc2ed8339",
-      "localhost/quay/redis@sha256:e946a000d38f338c1312d1e2fd95ef711b20aa65b12c38d9c523f308e19a727d",
-      "localhost/quay@sha256:5ef3b0ced33f1b037856e6d60b929e28c00676ae77abe828d78de3be80993b23",
-      "localhost/quay_postgres@sha256:810c9ee49898228d08cc6ca65a8ee4fb4510fc6c6669a2a40ef10196efb93aee",
-      "localhost/sampleformetrics/app@sha256:b89fb3140f16f85aa3bd33277a93453897e750ced7fa33f6f5c3b1bd8f858103",
-      "localhost/sampleformetrics/app@sha256:f374ea6a544f48091724588bd724afdb97f264569947f4ec59a5fd5efa3fcf44",
-      "localhost/sampleformetrics/postgre-sql@sha256:f2f26d732e082736914f417cf82566a76084924d7fbc34e41137168e6c93dade",
-      "localhost:5000/alt@sha256:c406cd20d695ddbadcf70e88fc1f0b8d967aede2d882e4c286523f65bb43d626",
-      "mcr.microsoft.com/dotnet/aspnet@sha256:31740421c9c67f0cb99f31b16ae3d2fab4e2b5443ffb605a700e6e4a7369ad09",
-      "mcr.microsoft.com/dotnet/aspnet@sha256:c30ae929a3cfef278f140c6e2ec050ea2bbab17cfc6b3426c8fe806d9fb3b6dd",
-      "mcr.microsoft.com/dotnet/sdk@sha256:28ab344bca8209cd67d2b1478192da7b78416a8d71ed364f0c4e004f9d7fb804",
-      "mcr.microsoft.com/dotnet/sdk@sha256:ed737e6920105e2a5cdcd13b9697e7973011e5619339ea64e30871ba0b53fec8",
-      "node5.hub.ics.perm.ru/kaf/test@sha256:bbaca716bf1d1729e731c63da63c92b70e3d24f375f4d7f454cd004154e9c35e",
-      "node5.hub.ics.perm.ru/kaf/test@sha256:e298a4a6d45af7dd2652e818309c40be82e68d75999eeeffe4a1cc1288459f09",
-      "quay.io/altlinux/kaf/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
-      "quay.io/altlinux/postgres11@sha256:00bd75988fda8703b99a6c70dad4ede4ed61da88a56097f4136191fe5abd332b",
-      "quay.io/altlinux/postgres14@sha256:53c3673d7d9ba503ddd750dab555110ffa8697aee8a397f8ff60ef4f10cd0e71",
-      "quay.io/altlinux/quay/postgres14@sha256:b3d4046f83293b001a3523da18f8dfc695d9a3052f3e2c5812c82bf2b96bc9eb",
-      "quay.io/centos/centos@sha256:499873ceba5e63c393ee78712e576b388c71c6ab70e35f3e92042a8bcdcf7a77",
-      "quay.io/centos/centos@sha256:bd4069d6190064abb1c956da937480c4e52d20f1c084ce2f04311e3ff0580a99",
-      "quay.io/coreos/butane@sha256:417d1c7f995d4d65a6dd4a8f55aa012ed516c96c010dbfbf1b8d1d29e63b3e3b",
-      "quay.io/coreos/butane@sha256:ed8115db5202578e903591e295e81f5fa3bd8d4ae4a1a5aa90f2157fbae36d02",
-      "quay.io/coreos/coreos-installer@sha256:0fbec544e559b8e872afbf1afc03e91757757dde934c4198c6a94436e3ec296d",
-      "quay.io/coreos/coreos-installer@sha256:1f11e57e31434845978d79de53607c1dc5ad6efa838858c043cce9cc00300763",
-      "quay.io/coreos/coreos-installer@sha256:45523b0e5027ced93998548400e27b5479aed5319043f2d71be914102d4fa33b",
-      "quay.io/coreos/coreos-installer@sha256:ca12b95b03c9a26fdfbbb282b82c3a481855b92e8948480d01d62b306095cd1d",
-      "quay.io/quay/quay@sha256:08f234f8e2c3b344a336159e04127aad664dee940f3bf9ded6f2c19cd4abdb9d",
-      "quay.io/quay/quay@sha256:142270391958b1cb3b1b4971ff2b330355b2eb7f468d1034f892bf4c2ff05193",
-      "quay.io/quay/quay@sha256:5c6f34016b118dfbf605f52879dca04f21fc3bbe6c275af1c0c264ea356029e6",
-      "quay.io/quay/quay@sha256:90b9db3ceb8ba67deb08ecaf26b0c5cf1d41e8723056dfe8cceb2a094c414cee",
-      "quay.io/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
-      "registry.ci.openshift.org/origin/release@sha256:b4d45ef68ad9e228d1b77a3e9f4ac1f24e7ce715892a37a9b7ca6697f55eaa47"
-    ],
-    "inPolicyImages": [
-      "registry.altlinux.org/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.altlinux.org/alt/alt@sha256:063e35ca0183cfa2d98d5cdbe2ec8acacef1ae90c5e17e592f8036cdd2edcefd",
-      "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.altlinux.org/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
-      "registry.altlinux.org/alt/alt@sha256:7ef584814021b6b98564215dfe4a4b51a51cea9bf80bcc6de1ce2e9d273b44ed",
-      "registry.altlinux.org/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.altlinux.org/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
-      "registry.altlinux.org/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.altlinux.org/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.altlinux.org/alt/registry@sha256:5340b9f3e4e0df91d629e9030446b6de61a7d4f9fc2eb5e5c3b1abe13150839e",
-      "registry.altlinux.org/alt/registry@sha256:8816ffdbec99e4cc89364ee261ea9eeab34abcbf4717ebe171db74231123b1c1",
-      "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.local/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
-      "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.local/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
-      "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.local/alt/registry@sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5",
-      "registry.local/alt/registry@sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5"
-    ],
-    "inCorrectImages": [],
-    "signedImages": [
-      "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.altlinux.org/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.local/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
-      "registry.local/alt/registry@sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5"
-    ],
-    "notSignedImages": [
-      "registry.altlinux.org/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.altlinux.org/alt/alt@sha256:063e35ca0183cfa2d98d5cdbe2ec8acacef1ae90c5e17e592f8036cdd2edcefd",
-      "registry.altlinux.org/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
-      "registry.altlinux.org/alt/alt@sha256:7ef584814021b6b98564215dfe4a4b51a51cea9bf80bcc6de1ce2e9d273b44ed",
-      "registry.altlinux.org/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.altlinux.org/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.altlinux.org/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.altlinux.org/alt/registry@sha256:5340b9f3e4e0df91d629e9030446b6de61a7d4f9fc2eb5e5c3b1abe13150839e",
-      "registry.altlinux.org/alt/registry@sha256:8816ffdbec99e4cc89364ee261ea9eeab34abcbf4717ebe171db74231123b1c1",
-      "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.local/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
-      "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.local/alt/registry@sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5"
-    ]
-  },
-  "imagedeveloper": {
-    "user": "imagedeveloper",
-    "outPolicyImages": [
-      "docker.io/library/registry@sha256:3f71055ad7c41728e381190fee5c4cf9b8f7725839dcf5c0fe3e5e20dc5db1fa",
-      "docker.io/library/registry@sha256:a001a2f72038b13c1cbee7cdd2033ac565636b325dfee98d8b9cc4ba749ef337"
-    ],
-    "inPolicyImages": [
-      "registry.altlinux.org/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.altlinux.org/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.altlinux.org/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.altlinux.org/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.altlinux.org/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951",
-      "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.local/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951"
-    ],
-    "inCorrectImages": [],
-    "signedImages": [
-      "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
-    ],
-    "notSignedImages": [
-      "registry.altlinux.org/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.altlinux.org/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.altlinux.org/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.altlinux.org/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.altlinux.org/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951",
-      "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
-      "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
-      "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
-      "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
-      "registry.local/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951"
-    ]
-  },
-  "kaf": {
-    "user": "kaf",
-    "outPolicyImages": [
-      "dh.ics.perm.ru/sampleformetrics/app@sha256:d6e89fdf60471c46db4c770d3d7d1410b9ccd4ea8e3b2fb7832ff603b71712fa",
-      "dh.ics.perm.ru/sampleformetrics/postgre-sql@sha256:81092e67cee91cbd70e049b59b95ae0464205a0563963832d670926014b3cdc4",
-      "docker.io/library/mono@sha256:68c13839726a683dc2813dac20d04c0fdb61cf76dff9bfe04a9dee6ca679fa33",
-      "docker.io/library/mono@sha256:b7be758362e54c396084131c0aea604e29e6de56c4501f7dc5027fd7934367c8",
-      "docker.io/library/nginx@sha256:345f8a22bd5dfa57137d8101358e80027a649c8f84683a5baf8026d0547a445f",
-      "docker.io/library/node@sha256:01627afeb110b3054ba4a1405541ca095c8bfca1cb6f2be9479c767a2711879e",
-      "docker.io/library/node@sha256:3a69ea1270dbf4ef20477361be4b7a43400e559c6abdfaf69d73f7c755f434f5"
-    ],
-    "inPolicyImages": [
-      "registry.altlinux.org/alt/nginx@sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a",
-      "registry.altlinux.org/alt/nginx@sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90",
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
-    ],
-    "inCorrectImages": [],
-    "signedImages": [
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
-    ],
-    "notSignedImages": [
-      "registry.altlinux.org/alt/nginx@sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a",
-      "registry.altlinux.org/alt/nginx@sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90"
-    ]
-  },
-  "kafpodman": {
-    "user": "kafpodman",
-    "inCorrectImages": [],
-    "signedImages": [],
-    "notSignedImages": []
-  },
-  "user": {
-    "user": "user",
-    "outPolicyImages": [
-      "docker.io/library/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18"
-    ],
-    "inPolicyImages": [
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
-      "registry.local/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18"
-    ],
-    "inCorrectImages": [],
-    "signedImages": [
-      "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
-    ],
-    "notSignedImages": [
-      "registry.local/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18"
-    ]
+  "users": {
+    "root": {
+      "user": "root",
+      "configDir": "/etc/containers",
+      "defaultPolicy": "insecureAcceptAnything",
+      "incorrectDefaultPolicy": "insecureAcceptAnything",
+      "signedRegistries": [
+        "registry.local"
+      ],
+      "notSignedRegistries": [
+        "registry.altlinux.org",
+        "registry.altlinux.org/alt"
+      ],
+      "forbiddenTransports": [],
+      "outPolicyImages": [
+        "altlinux.io/quay/postgres11@sha256:016071b61000dce475df4fdb3647f9f092b442ef179e8860f3253285b9a61b4a",
+        "altlinux.io/quay/postgres14@sha256:b3d4046f83293b001a3523da18f8dfc695d9a3052f3e2c5812c82bf2b96bc9eb",
+        "altlinux.io/quay/postgres@sha256:cf4da8111483b5e2055311a58313cde7c4d7719686240479dd1662ad692786ec",
+        "altlinux.io/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
+        "altlinux.io/quay/redis@sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553",
+        "altlinux.io/quay/redis@sha256:db485f2e245b5b3329fdc7eff4eb00f913e09d8feb9ca720788059fdc2ed8339",
+        "altlinux.io/quay/redis@sha256:e946a000d38f338c1312d1e2fd95ef711b20aa65b12c38d9c523f308e19a727d",
+        "dh.ics.perm.ru/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+        "dh.ics.perm.ru/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+        "dh.ics.perm.ru/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
+        "dh.ics.perm.ru/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+        "dh.ics.perm.ru/flexberry/ember-flexberry-stand-postgres@sha256:bfeac218db44506d3792d3e9ed124edcac1f3debfb5af236a18c66dbb3f70ee4",
+        "dh.ics.perm.ru/flexberry/ember-flexberry-stand-postgres@sha256:c53fff98b98568d6ef218b7f7348bab9f4a2663ab99294aca266a0e733b0ee54",
+        "dh.ics.perm.ru/sampleformetrics/app@sha256:4c30af2266d4e71e3f4623c523919a642c357a73b7edc4332dd4c094fae8d634",
+        "dh.ics.perm.ru/sampleformetrics/app@sha256:c575308a32176ddf21eecbba8a076b7bb90398426972a2d8f0757046f0968957",
+        "dh.ics.perm.ru/sampleformetrics/postgre-sql@sha256:c98e2f95d07dd40b64802cf2fee3a03961f833732b7ca9b3c1c9d5e6223e1850",
+        "dh.ics.perm.ru/sampleformetrics/postgre-sql@sha256:e79621387d48d0bc5e0128ebe0a5fdd0773356dbe0d44b80b90320fac345e8d4",
+        "dh.ics.perm.ru/sampleformetrics/postgre-sql@sha256:ffa5a86dccf63f27f6651254f3bff6767802757cfafe87eaa23939e4da0086ca",
+        "docker.io/aquasec/trivy@sha256:906c909a441949317c252039ce8543ef79bcb9a59e7dd9b94e619191b82fedd2",
+        "docker.io/aquasec/trivy@sha256:fbf4fd64d54f56d9175ae804839becb7cc7bd45c41abc93bc6c295a99dda2630",
+        "docker.io/flexberry/alt.p8-postgresql@sha256:f8cb8c8b1b662c6412826332397813339182e81115996d7286bbfdecfb6272eb",
+        "docker.io/flexberry/ember-flexberry-stand-backend@sha256:597edd624427c16dd12bb2e10b7dd67f61f2be81d437e56ba127a04cc1325c75",
+        "docker.io/flexberry/ember-flexberry-stand-postgres@sha256:a1502b99ccf12930522df7739cc5488cf71a773b83ce2ad33c82369f5d7393de",
+        "docker.io/flexberry/mono-xsp@sha256:e59b8fb266bdaa33a2f51642f3daa494762b66cff6fcadb15cc571e9d0ac1e7d",
+        "docker.io/kafbasealt/quay.io/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
+        "docker.io/library/alpine@sha256:69665d02cb32192e52e07644d76bc6f25abeb5410edc1c7a81a10ba3f0efb90a",
+        "docker.io/library/alpine@sha256:e2e16842c9b54d985bf1ef9242a313f36b856181f188de21313820e177002501",
+        "docker.io/library/golang@sha256:ea080cc817b02a946461d42c02891bf750e3916c52f7ea8187bccde8f312b59f",
+        "docker.io/library/golang@sha256:eb7ebf06372b4930e0b9539b3510422c4860ec3361bb2f22b63a857990cf9efe",
+        "docker.io/library/mono@sha256:68c13839726a683dc2813dac20d04c0fdb61cf76dff9bfe04a9dee6ca679fa33",
+        "docker.io/library/mono@sha256:b7be758362e54c396084131c0aea604e29e6de56c4501f7dc5027fd7934367c8",
+        "docker.io/library/nginx@sha256:30bba6c267c24237c5b6f3c59a6e566365b80662f80935535ba3d6a694afe7e8",
+        "docker.io/library/nginx@sha256:345f8a22bd5dfa57137d8101358e80027a649c8f84683a5baf8026d0547a445f",
+        "docker.io/library/nginx@sha256:6650513efd1d27c1f8a5351cbd33edf85cc7e0d9d0fcb4ffb23d8fa89b601ba8",
+        "docker.io/library/nginx@sha256:7f797701ded5055676d656f11071f84e2888548a2e7ed12a4977c28ef6114b17",
+        "docker.io/library/node@sha256:01627afeb110b3054ba4a1405541ca095c8bfca1cb6f2be9479c767a2711879e",
+        "docker.io/library/node@sha256:3a69ea1270dbf4ef20477361be4b7a43400e559c6abdfaf69d73f7c755f434f5",
+        "docker.io/library/redis@sha256:54043f92c16727f142fa93c377b279f91879abf974c244ce72099b35fefbd7b2",
+        "docker.io/library/redis@sha256:c2c4a465b8cb636a4f1ca272f290106d8e6e797948f3ca69ce1989251652a204",
+        "docker.io/library/registry@sha256:3f71055ad7c41728e381190fee5c4cf9b8f7725839dcf5c0fe3e5e20dc5db1fa",
+        "docker.io/library/registry@sha256:a001a2f72038b13c1cbee7cdd2033ac565636b325dfee98d8b9cc4ba749ef337",
+        "k8s.gcr.io/coredns/coredns@sha256:10683d82b024a58cc248c468c2632f9d1b260500f7cd9bb8e73f751048d7d6d4",
+        "k8s.gcr.io/coredns/coredns@sha256:6e5a02c21641597998b4be7cb5eb1e7b02c0d8d23cce4dd09f4682d463798890",
+        "k8s.gcr.io/coredns@sha256:242d440e3192ffbcecd40e9536891f4d9be46a650363f3a004497c2070f96f5a",
+        "k8s.gcr.io/coredns@sha256:73ca82b4ce829766d4f1f10947c3a338888f876fbed0540dc849c89ff256e90c",
+        "k8s.gcr.io/coredns@sha256:f7f0b545f05fbfa9719687dfc58cc4bc6d4c7dc384da4ae8d9e7925705e4e819",
+        "k8s.gcr.io/etcd@sha256:9ce33ba33d8e738a5b85ed50b5080ac746deceed4a7496c550927a7a19ca3b6d",
+        "k8s.gcr.io/etcd@sha256:de6a50021feadfde321d44cf1934a806595e59d9cc77d68f0ce85cef8d1ab2ed",
+        "k8s.gcr.io/kube-apiserver@sha256:0ce5d87bc57a9030f472edf3c0844618e7ce567bfbe2af0fd44cf051d3feab4e",
+        "k8s.gcr.io/kube-apiserver@sha256:4a165184c779c0a4f2d31d6676b7790589b977c3c8fbc0577dac2544fd69cade",
+        "k8s.gcr.io/kube-apiserver@sha256:88dc8559130e7596832eefaffdd0c2b868a42f31744d36223cbcc8a2524890ae",
+        "k8s.gcr.io/kube-apiserver@sha256:bba61f4f66e22144208a14555b6e71cfbdedfe3acd7fc2ac8ce59c2bbca01b30",
+        "k8s.gcr.io/kube-controller-manager@sha256:317e0aabe5b41c47043568cae36445b14b1985bc9d35e81ed99639c217f3f372",
+        "k8s.gcr.io/kube-controller-manager@sha256:3d2bce27ea65768929ef3f181a1deba6048fa6d1ca584efdb8f5e6d73872987d",
+        "k8s.gcr.io/kube-proxy@sha256:ca89368a93e7122e30d8561c2a35d714e7f3d0eed6fd6837b6b4d9eaa96771fb",
+        "k8s.gcr.io/kube-proxy@sha256:d0c27dc89863edcf2ebede5d7ddca3d8521a48792c1c754fedc58a0511fd2ff8",
+        "k8s.gcr.io/kube-scheduler@sha256:073834aade22f64133ffb38293bd35f3d5fa7e5bbfceb518cfd029687d4bae9f",
+        "k8s.gcr.io/kube-scheduler@sha256:20fcad0757f5c0161d6f22cdc58ea744ae5da559ff52dd7995a15ca80eb90135",
+        "k8s.gcr.io/pause@sha256:1ff6c18fbef2045af6b9c16bf034cc421a29027b800e4f9b68ae9b1cb3e9ae07",
+        "k8s.gcr.io/pause@sha256:369201a612f7b2b585a8e6ca99f77a36bcdbd032463d815388a96800b63ef2c8",
+        "k8s.gcr.io/pause@sha256:ffcd898c566e8db01646765401c902a9a7a80112dc44c8dbe18ee9926fae09b8",
+        "localhost/flexberry/ember-flexberry-stand-backend@sha256:8ea025b171b07afc2a2001a243a9096e8a2776fb47e2bc74b08a1899b0807b88",
+        "localhost/flexberry/ember-flexberry-stand-postgres@sha256:bfeac218db44506d3792d3e9ed124edcac1f3debfb5af236a18c66dbb3f70ee4",
+        "localhost/flexberry/ember-flexberry-stand-postgres@sha256:c53fff98b98568d6ef218b7f7348bab9f4a2663ab99294aca266a0e733b0ee54",
+        "localhost/podman-pause@sha256:09f0e9679eaa1aee2762b59f27e1468706daeddc27b0b0c6f586b6d6550fbd6a",
+        "localhost/quay/postgres@sha256:b667a1fb8fe94a9f5f7c9fa00aaa4ae5742f91460236b82f5e911915ba9a7ed2",
+        "localhost/quay/redis@sha256:563888f63149e3959860264a1202ef9a644f44ed6c24d5c7392f9e2262bd3553",
+        "localhost/quay/redis@sha256:db485f2e245b5b3329fdc7eff4eb00f913e09d8feb9ca720788059fdc2ed8339",
+        "localhost/quay/redis@sha256:e946a000d38f338c1312d1e2fd95ef711b20aa65b12c38d9c523f308e19a727d",
+        "localhost/quay@sha256:5ef3b0ced33f1b037856e6d60b929e28c00676ae77abe828d78de3be80993b23",
+        "localhost/quay_postgres@sha256:810c9ee49898228d08cc6ca65a8ee4fb4510fc6c6669a2a40ef10196efb93aee",
+        "localhost/sampleformetrics/app@sha256:b89fb3140f16f85aa3bd33277a93453897e750ced7fa33f6f5c3b1bd8f858103",
+        "localhost/sampleformetrics/app@sha256:f374ea6a544f48091724588bd724afdb97f264569947f4ec59a5fd5efa3fcf44",
+        "localhost/sampleformetrics/postgre-sql@sha256:f2f26d732e082736914f417cf82566a76084924d7fbc34e41137168e6c93dade",
+        "localhost:5000/alt@sha256:c406cd20d695ddbadcf70e88fc1f0b8d967aede2d882e4c286523f65bb43d626",
+        "mcr.microsoft.com/dotnet/aspnet@sha256:31740421c9c67f0cb99f31b16ae3d2fab4e2b5443ffb605a700e6e4a7369ad09",
+        "mcr.microsoft.com/dotnet/aspnet@sha256:c30ae929a3cfef278f140c6e2ec050ea2bbab17cfc6b3426c8fe806d9fb3b6dd",
+        "mcr.microsoft.com/dotnet/sdk@sha256:28ab344bca8209cd67d2b1478192da7b78416a8d71ed364f0c4e004f9d7fb804",
+        "mcr.microsoft.com/dotnet/sdk@sha256:ed737e6920105e2a5cdcd13b9697e7973011e5619339ea64e30871ba0b53fec8",
+        "node5.hub.ics.perm.ru/kaf/test@sha256:bbaca716bf1d1729e731c63da63c92b70e3d24f375f4d7f454cd004154e9c35e",
+        "node5.hub.ics.perm.ru/kaf/test@sha256:e298a4a6d45af7dd2652e818309c40be82e68d75999eeeffe4a1cc1288459f09",
+        "quay.io/altlinux/kaf/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
+        "quay.io/altlinux/postgres11@sha256:00bd75988fda8703b99a6c70dad4ede4ed61da88a56097f4136191fe5abd332b",
+        "quay.io/altlinux/postgres14@sha256:53c3673d7d9ba503ddd750dab555110ffa8697aee8a397f8ff60ef4f10cd0e71",
+        "quay.io/altlinux/quay/postgres14@sha256:b3d4046f83293b001a3523da18f8dfc695d9a3052f3e2c5812c82bf2b96bc9eb",
+        "quay.io/centos/centos@sha256:499873ceba5e63c393ee78712e576b388c71c6ab70e35f3e92042a8bcdcf7a77",
+        "quay.io/centos/centos@sha256:bd4069d6190064abb1c956da937480c4e52d20f1c084ce2f04311e3ff0580a99",
+        "quay.io/coreos/butane@sha256:417d1c7f995d4d65a6dd4a8f55aa012ed516c96c010dbfbf1b8d1d29e63b3e3b",
+        "quay.io/coreos/butane@sha256:ed8115db5202578e903591e295e81f5fa3bd8d4ae4a1a5aa90f2157fbae36d02",
+        "quay.io/coreos/coreos-installer@sha256:0fbec544e559b8e872afbf1afc03e91757757dde934c4198c6a94436e3ec296d",
+        "quay.io/coreos/coreos-installer@sha256:1f11e57e31434845978d79de53607c1dc5ad6efa838858c043cce9cc00300763",
+        "quay.io/coreos/coreos-installer@sha256:45523b0e5027ced93998548400e27b5479aed5319043f2d71be914102d4fa33b",
+        "quay.io/coreos/coreos-installer@sha256:ca12b95b03c9a26fdfbbb282b82c3a481855b92e8948480d01d62b306095cd1d",
+        "quay.io/quay/quay@sha256:08f234f8e2c3b344a336159e04127aad664dee940f3bf9ded6f2c19cd4abdb9d",
+        "quay.io/quay/quay@sha256:142270391958b1cb3b1b4971ff2b330355b2eb7f468d1034f892bf4c2ff05193",
+        "quay.io/quay/quay@sha256:5c6f34016b118dfbf605f52879dca04f21fc3bbe6c275af1c0c264ea356029e6",
+        "quay.io/quay/quay@sha256:90b9db3ceb8ba67deb08ecaf26b0c5cf1d41e8723056dfe8cceb2a094c414cee",
+        "quay.io/quay/quay@sha256:cc3899760ce94672d157ba087960b5cb8594357fbf50a75e93b5274ad559db04",
+        "registry.ci.openshift.org/origin/release@sha256:b4d45ef68ad9e228d1b77a3e9f4ac1f24e7ce715892a37a9b7ca6697f55eaa47"
+      ],
+      "inPolicyImages": [
+        "registry.altlinux.org/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+        "registry.altlinux.org/alt/alt@sha256:063e35ca0183cfa2d98d5cdbe2ec8acacef1ae90c5e17e592f8036cdd2edcefd",
+        "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+        "registry.altlinux.org/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
+        "registry.altlinux.org/alt/alt@sha256:7ef584814021b6b98564215dfe4a4b51a51cea9bf80bcc6de1ce2e9d273b44ed",
+        "registry.altlinux.org/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+        "registry.altlinux.org/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
+        "registry.altlinux.org/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
+        "registry.altlinux.org/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
+        "registry.altlinux.org/alt/registry@sha256:5340b9f3e4e0df91d629e9030446b6de61a7d4f9fc2eb5e5c3b1abe13150839e",
+        "registry.altlinux.org/alt/registry@sha256:8816ffdbec99e4cc89364ee261ea9eeab34abcbf4717ebe171db74231123b1c1",
+        "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+        "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+        "registry.local/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
+        "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+        "registry.local/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
+        "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
+        "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
+        "registry.local/alt/registry@sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5",
+        "registry.local/alt/registry@sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5"
+      ],
+      "inCorrectImages": [
+        {
+          "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5": "Trying to pull registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5... Error: initializing source docker://registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5: reading manifest sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5 in registry.altlinux.org/alt/alt: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.altlinux.org/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804": "Trying to pull registry.altlinux.org/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804... Error: initializing source docker://registry.altlinux.org/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804: reading manifest sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804 in registry.altlinux.org/alt/alt: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.altlinux.org/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30": "Trying to pull registry.altlinux.org/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30... Error: initializing source docker://registry.altlinux.org/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30: reading manifest sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30 in registry.altlinux.org/alt/nginx: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053": "Trying to pull registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053... Error: initializing source docker://registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053: reading manifest sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053 in registry.local/alt/alt: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5": "Trying to pull registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5... Error: initializing source docker://registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5: reading manifest sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5 in registry.local/alt/alt: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804": "Trying to pull registry.local/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804... Error: initializing source docker://registry.local/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804: reading manifest sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804 in registry.local/alt/alt: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c": "Trying to pull registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c... Error: initializing source docker://registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c: reading manifest sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c in registry.local/alt/alt: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30": "Trying to pull registry.local/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30... Error: initializing source docker://registry.local/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30: reading manifest sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30 in registry.local/alt/nginx: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610": "Trying to pull registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610... Error: initializing source docker://registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610: reading manifest sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610 in registry.local/alt/nginx: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323": "Trying to pull registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323... Error: initializing source docker://registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323: reading manifest sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323 in registry.local/alt/nginx: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/registry@sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5": "Trying to pull registry.local/alt/registry@sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5... Error: initializing source docker://registry.local/alt/registry@sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5: reading manifest sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5 in registry.local/alt/registry: manifest unknown: manifest unknown "
+        },
+        {
+          "registry.local/alt/registry@sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5": "Trying to pull registry.local/alt/registry@sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5... Error: initializing source docker://registry.local/alt/registry@sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5: reading manifest sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5 in registry.local/alt/registry: manifest unknown: manifest unknown "
+        }
+      ],
+      "signedImages": [
+        "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+        "registry.altlinux.org/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
+        "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+        "registry.local/alt/nginx@sha256:ad9bdff4beedff973329aba853e1711969885f9bb3599c644960b730aea31a30",
+        "registry.local/alt/registry@sha256:12b3f03ff8996729ce7f7cf3250515cc89cc01f11ac49b8a8bdce9d6719744e5"
+      ],
+      "notSignedImages": [
+        "registry.altlinux.org/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+        "registry.altlinux.org/alt/alt@sha256:063e35ca0183cfa2d98d5cdbe2ec8acacef1ae90c5e17e592f8036cdd2edcefd",
+        "registry.altlinux.org/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
+        "registry.altlinux.org/alt/alt@sha256:7ef584814021b6b98564215dfe4a4b51a51cea9bf80bcc6de1ce2e9d273b44ed",
+        "registry.altlinux.org/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+        "registry.altlinux.org/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
+        "registry.altlinux.org/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
+        "registry.altlinux.org/alt/registry@sha256:5340b9f3e4e0df91d629e9030446b6de61a7d4f9fc2eb5e5c3b1abe13150839e",
+        "registry.altlinux.org/alt/registry@sha256:8816ffdbec99e4cc89364ee261ea9eeab34abcbf4717ebe171db74231123b1c1",
+        "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+        "registry.local/alt/alt@sha256:29b6b2106663718bb7e1d5a96430f568820ef7e90b710f2ded496c63ff9d9804",
+        "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+        "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
+        "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
+        "registry.local/alt/registry@sha256:c074140c358d0776dce7b0f78dffa6701397fbb46ab062242d09ee6b73522eb5"
+      ]
+    },
+    "imagedeveloper": {
+      "imagedeveloper": {
+        "user": "imagedeveloper",
+        "configDir": "/home/imagedeveloper/.config/containers",
+        "defaultPolicy": "insecureAcceptAnything",
+        "incorrectDefaultPolicy": "insecureAcceptAnything",
+        "noDefaultSigStore": "true",
+        "signedRegistries": [
+          "registry.local"
+        ],
+        "notSignedRegistries": [],
+        "forbiddenTransports": [],
+        "outPolicyImages": [
+          "docker.io/library/registry@sha256:3f71055ad7c41728e381190fee5c4cf9b8f7725839dcf5c0fe3e5e20dc5db1fa",
+          "docker.io/library/registry@sha256:a001a2f72038b13c1cbee7cdd2033ac565636b325dfee98d8b9cc4ba749ef337",
+          "registry.altlinux.org/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+          "registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+          "registry.altlinux.org/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+          "registry.altlinux.org/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
+          "registry.altlinux.org/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
+          "registry.altlinux.org/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951"
+        ],
+        "inPolicyImages": [
+          "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+          "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+          "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+          "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
+          "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
+          "registry.local/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951"
+        ],
+        "inCorrectImages": [
+          {
+            "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053": "Trying to pull registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053... Error: initializing source docker://registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053: reading manifest sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053 in registry.local/alt/alt: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5": "Trying to pull registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5... Error: initializing source docker://registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5: reading manifest sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5 in registry.local/alt/alt: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c": "Trying to pull registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c... Error: initializing source docker://registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c: reading manifest sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c in registry.local/alt/alt: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610": "Trying to pull registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610... Error: initializing source docker://registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610: reading manifest sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610 in registry.local/alt/nginx: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323": "Trying to pull registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323... Error: initializing source docker://registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323: reading manifest sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323 in registry.local/alt/nginx: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.local/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951": "Trying to pull registry.local/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951... Error: initializing source docker://registry.local/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951: reading manifest sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951 in registry.local/alt/registry: manifest unknown: manifest unknown "
+          }
+        ],
+        "signedImages": [
+          "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
+        ],
+        "notSignedImages": [
+          "registry.local/alt/alt@sha256:046572b67bf805d9c23783336708f725ffd785f1441707a049d42cc4a0505053",
+          "registry.local/alt/alt@sha256:97dba12adea4acad4a296241eac35a79bde8cff395c7143faf216547add01a7c",
+          "registry.local/alt/nginx@sha256:c450e4959bab68129e1043984a1c6e908b94e355c75fb3f1ab1b0f16d7ed9610",
+          "registry.local/alt/nginx@sha256:daf3ec4dbe848c3d3cc37ce1df3f989c7aceeae7463cdfe3abc22c8e7b55d323",
+          "registry.local/alt/registry@sha256:110a18ae6c3d14936066a61c5b5103793889daaa96516a805d84a1c8e01f8951"
+        ]
+      }
+    },
+    "kaf": {
+      "kaf": {
+        "user": "kaf",
+        "configDir": "/etc/containers",
+        "defaultPolicy": "insecureAcceptAnything",
+        "incorrectDefaultPolicy": "insecureAcceptAnything",
+        "signedRegistries": [
+          "registry.local"
+        ],
+        "notSignedRegistries": [
+          "registry.altlinux.org",
+          "registry.altlinux.org/alt"
+        ],
+        "forbiddenTransports": [],
+        "outPolicyImages": [
+          "dh.ics.perm.ru/sampleformetrics/app@sha256:d6e89fdf60471c46db4c770d3d7d1410b9ccd4ea8e3b2fb7832ff603b71712fa",
+          "dh.ics.perm.ru/sampleformetrics/postgre-sql@sha256:81092e67cee91cbd70e049b59b95ae0464205a0563963832d670926014b3cdc4",
+          "docker.io/flexberry/alt.p8-postgresql@sha256:f8cb8c8b1b662c6412826332397813339182e81115996d7286bbfdecfb6272eb",
+          "docker.io/flexberry/mono-xsp@sha256:e59b8fb266bdaa33a2f51642f3daa494762b66cff6fcadb15cc571e9d0ac1e7d",
+          "docker.io/library/mono@sha256:68c13839726a683dc2813dac20d04c0fdb61cf76dff9bfe04a9dee6ca679fa33",
+          "docker.io/library/mono@sha256:b7be758362e54c396084131c0aea604e29e6de56c4501f7dc5027fd7934367c8",
+          "docker.io/library/nginx@sha256:345f8a22bd5dfa57137d8101358e80027a649c8f84683a5baf8026d0547a445f",
+          "docker.io/library/node@sha256:01627afeb110b3054ba4a1405541ca095c8bfca1cb6f2be9479c767a2711879e",
+          "docker.io/library/node@sha256:3a69ea1270dbf4ef20477361be4b7a43400e559c6abdfaf69d73f7c755f434f5",
+          "localhost/podman-pause@sha256:7f678507ba43e24b5f1f6a2930dda8fc89b253d46293389b1cdbe82680ed7e3d"
+        ],
+        "inPolicyImages": [
+          "registry.altlinux.org/alt/nginx@sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a",
+          "registry.altlinux.org/alt/nginx@sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90",
+          "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
+        ],
+        "inCorrectImages": [
+          {
+            "registry.altlinux.org/alt/nginx@sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a": "Trying to pull registry.altlinux.org/alt/nginx@sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a... Error: initializing source docker://registry.altlinux.org/alt/nginx@sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a: reading manifest sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a in registry.altlinux.org/alt/nginx: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.altlinux.org/alt/nginx@sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90": "Trying to pull registry.altlinux.org/alt/nginx@sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90... Error: initializing source docker://registry.altlinux.org/alt/nginx@sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90: reading manifest sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90 in registry.altlinux.org/alt/nginx: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5": "Trying to pull registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5... Error: initializing source docker://registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5: reading manifest sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5 in registry.local/alt/alt: manifest unknown: manifest unknown "
+          }
+        ],
+        "signedImages": [
+          "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
+        ],
+        "notSignedImages": [
+          "registry.altlinux.org/alt/nginx@sha256:f26a92afaff93184f3612301fa4a231e87612d24ef273bc4276ee94df4ffb78a",
+          "registry.altlinux.org/alt/nginx@sha256:f5d2dbe29ebd2032fe1335301dc0d7e05e5452d5a2bf6b7c1c81efb85d118d90"
+        ]
+      }
+    },
+    "kafpodman": {
+      "kafpodman": {
+        "user": "kafpodman",
+        "configDir": "/etc/containers",
+        "defaultPolicy": "insecureAcceptAnything",
+        "incorrectDefaultPolicy": "insecureAcceptAnything",
+        "signedRegistries": [
+          "registry.local"
+        ],
+        "notSignedRegistries": [
+          "registry.altlinux.org",
+          "registry.altlinux.org/alt"
+        ],
+        "forbiddenTransports": [],
+        "outPolicyImages": [],
+        "inPolicyImages": [],
+        "inCorrectImages": [],
+        "signedImages": [],
+        "notSignedImages": []
+      }
+    },
+    "user": {
+      "user": {
+        "user": "user",
+        "configDir": "/etc/containers",
+        "defaultPolicy": "insecureAcceptAnything",
+        "incorrectDefaultPolicy": "insecureAcceptAnything",
+        "signedRegistries": [
+          "registry.local"
+        ],
+        "notSignedRegistries": [
+          "registry.altlinux.org",
+          "registry.altlinux.org/alt"
+        ],
+        "forbiddenTransports": [],
+        "outPolicyImages": [
+          "docker.io/library/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18"
+        ],
+        "inPolicyImages": [
+          "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5",
+          "registry.local/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18"
+        ],
+        "inCorrectImages": [
+          {
+            "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5": "Trying to pull registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5... Error: initializing source docker://registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5: reading manifest sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5 in registry.local/alt/alt: manifest unknown: manifest unknown "
+          },
+          {
+            "registry.local/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18": "Trying to pull registry.local/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18... Error: initializing source docker://registry.local/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18: reading manifest sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18 in registry.local/registry: manifest unknown: manifest unknown "
+          }
+        ],
+        "signedImages": [
+          "registry.local/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275387e4e35ed69593f341c5"
+        ],
+        "notSignedImages": [
+          "registry.local/registry@sha256:056235276add59ebe7570a878c6a2465ead3ceceae018d78b90c87e2141a0a18"
+        ]
+      }
+    }
   }
 }
 ```
@@ -343,6 +531,8 @@ registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275
 ```
 9.21user 1.91system 0:20.25elapsed 54%CPU (0avgtext+0avgdata 58928maxresident)k
 ```
+
+## Переменный среды (environments)
 
 По умолчанию на доступность и наличие цифровой подписи проверяются образы входящие в `inPolicyImages`.
 
@@ -360,6 +550,7 @@ registry.altlinux.org/alt/alt@sha256:160a6691c4c9c373461974dcf4c1e06ed221ce76275
 ``` 
 то при работе команды в `stderr` выводится отладочная информация. 
 
+## Необходиме пакеты
 
 Скрипт использует команды 
 * `jq` входящую в пакет `jq`;
