@@ -1,6 +1,12 @@
 > Регистрации подлежат как минимум следующие события безопасности:
 > 
 >     * неуспешные попытки аутентификации пользователей средства контейнеризации;
+* [Auditing](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/)
+
+* [kube-apiserver Audit Configuration (v1)](https://kubernetes.io/docs/reference/config-api/apiserver-audit.v1/)
+
+* [Kubernetes Audit Logs - Best Practices And Configuration](https://signoz.io/blog/kubernetes-audit-logs/)
+
 >     * создание, модификация и удаление образов контейнеров;
 >     * получение доступа к образам контейнеров;
 >     * запуск и остановка контейнеров с указанием причины остановки;
