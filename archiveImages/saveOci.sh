@@ -35,9 +35,6 @@ kube-scheduler:v1.24.8
 pause:3.7
 flannel-cni-plugin:v1.2.0
 cert-manager-controller:v1.9.1
-'
-
-addImagesList='
 cert-manager-cainjector:v1.9.1
 cert-manager-webhook:v1.9.1
 '
@@ -55,7 +52,7 @@ then
     esac
   done
 else
-  set -- arm64 arm ppc64le 386 amd64
+  set -- amd64 arm64 arm ppc64le 386
 fi
 
 for arch
