@@ -1,4 +1,33 @@
 #!/bin/sh
+# Вспомогательные функции
+# Преобразует списое образов вида
+#  [
+#    "kaf1.local/flannel-cni-plugin@sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833",
+#    "news.local/flannel-cni-plugin@sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833",
+#    "news.local/etcd@sha256:381bb6ffd9194578d1801bf06ca10de9cf34ab833ff0bb76f5786f64b73de97a"
+#  ]
+# в дерево
+#  {
+#    "sha256:381bb6ffd9194578d1801bf06ca10de9cf34ab833ff0bb76f5786f64b73de97a": [
+#      "news.local/etcd"
+#    ],
+#    "sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833": [
+#      "kaf1.local/flannel-cni-plugin",
+#      "news.local/flannel-cni-plugin"
+#    ]
+#  }
+imagesTree() {
+  jq '[
+    .[] |
+    {(split("@")[1]):(split("@")[0])} |
+    to_entries
+    ] |
+  flatten |
+  group_by(.key) |
+  map({key:(.[0].key), value:[.[] | .value]}) |
+  from_entries'
+}
+
 
 #######################
 # policy functions
@@ -182,7 +211,7 @@ getSigStoreList() {
   # Объединить описания в файлах $configDir/registries.d/*.yaml
   joinSigStories=$(joinSigStories $configDir)
   # Отсортировать .docker.key по уменьшению длины ключа, выбрать первый соотвествующий $image
-  echo $joinSigStories | yq "[.docker | to_entries | sort_by(.key|(-length))[] | select(.key == \"$image\"[0:.key|length])][0].value"
+  echo $joinSigStories | yq "if .docker then [.docker | to_entries | sort_by(.key|(-length))[] | select(.key == \"$image\"[0:.key|length])][0].value else empty end"
 }
 
 

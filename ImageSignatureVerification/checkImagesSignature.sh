@@ -59,25 +59,27 @@ $out  )
   if [ -n "$out" ]
   then
     outPolicyImages=$(echo -ne "$out")
+    outPolicyImagesTree=$(echo -ne "$out" | imagesTree)
     if [ -n "$DEBUG" ]
     then
       echo "Рабочее место $HOSTNAME, пользователь $user: Образы вне политики файла $policyFile:" >&2
       echo -ne "$outPolicyImages\n\n" >&2
     fi
 #     outPolicyImages=$(echo $outPolicyImages | jq .)
-    ret+="\n,\"outPolicyImages\": $outPolicyImages"
+    ret+="\n,\"outPolicyImagesTree\": $outPolicyImagesTree"
   fi
 
   if [ -n "$in" ]
   then
     inPolicyImages=$(echo -ne "$in")
+    inPolicyImagesTree=$(echo -ne "$in"  | imagesTree)
     if [ -n "$DEBUG" ]
     then
       echo "Рабочее местр $HOSTNAME, пользователь $user: Образы согласно политики файла $policyFile:" >&2
       echo -ne "$inPolicyImages\n\n" >&2
     fi
 #     inPolicyImages=$(echo $inPolicyImages | jq .)
-    ret+="\n,\"inPolicyImages\": $inPolicyImages"
+    ret+="\n,\"inPolicyImagesTree\": $inPolicyImagesTree"
   fi
 
   inCorrectImages=
@@ -118,8 +120,12 @@ $out  )
     fi
   done
   rm -f $TMPFILE
-  ret+="\n,\"signedImages\": [$signedImages]"
-  ret+="\n,\"notSignedImages\": [$notSignedImages]"
+  signedImages="[$signedImages]"
+  notSignedImages="[$notSignedImages]"
+  signedImagesTree=$(echo $signedImages | imagesTree)
+  notSignedImagesTree=$(echo $notSignedImages | imagesTree)
+  ret+="\n,\"signedImagesTree\": $signedImagesTree"
+  ret+="\n,\"notSignedImagesTree\": $notSignedImagesTree"
 
   echo -ne "$ret";
 }
@@ -165,7 +171,7 @@ checkUsersConfigAndImages() {
     then
       userImages=$(checkUserConfigAndImages $userDir)
       user=$(basename $userDir)
-      ret+="\n,\"$user\":{$userImages}"
+      ret+="\n,$userImages"
     fi
   done
   ret="\"users\":{$ret}"
