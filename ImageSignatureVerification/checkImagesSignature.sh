@@ -31,7 +31,7 @@ checkUserImages() {
   done
 
   in="su - -c 'podman images --format json' $user 2>/dev/null |
-  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Id] end | .[]] |
+  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Names] end | .[]] |
 map(
   select(
 $in  )
@@ -39,7 +39,7 @@ $in  )
 "
 
   out="su - -c 'podman images --format json' $user 2>/dev/null |
-  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Id] end | .[]] |
+  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Names] end | .[]] |
 map(
   select(
 $out  )
@@ -53,7 +53,7 @@ $out  )
 
   echo -ne "$out" > $TMPFILE
   out=$(sh $TMPFILE)
-#   cp $TMPFILE "/tmp/outtm.$user"
+#   cp $TMPFILE "/tmp/out.$user"
   rm -f $TMPFILE
 
   if [ -n "$out" ]
@@ -122,6 +122,8 @@ $out  )
   rm -f $TMPFILE
   signedImages="[$signedImages]"
   notSignedImages="[$notSignedImages]"
+#   ret+="\n,\"signedImages\": $signedImages"
+#   ret+="\n,\"notSignedImages\": $notSignedImages"
   signedImagesTree=$(echo $signedImages | imagesTree)
   notSignedImagesTree=$(echo $notSignedImages | imagesTree)
   ret+="\n,\"signedImagesTree\": $signedImagesTree"

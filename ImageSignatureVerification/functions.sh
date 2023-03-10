@@ -1,6 +1,9 @@
 #!/bin/sh
+
 # Вспомогательные функции
-# Преобразует списое образов вида
+#
+# imagesTree
+# Преобразует список образов вида
 #  [
 #    "kaf1.local/flannel-cni-plugin@sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833",
 #    "news.local/flannel-cni-plugin@sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833",

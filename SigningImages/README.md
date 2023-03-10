@@ -37,8 +37,8 @@ $
 Для поддержки всех типов транспорта создайте файл-конфигурации ~/.config/containers/policy.json:
 ```console
 $ export EDITOR=/usr/bin/vim
-$ mkdir -p export EDITOR=/bin/vim
-$ $EDITOR ~/.config/containers/policy.json
+$ mkdir -p ~imagemaker/.config/containers/
+$ $EDITOR ~imagemaker/.config/containers/policy.json
 ```
 ```
 {
@@ -427,11 +427,10 @@ $ sudo du -s /var/lib/containers/storage/volumes/registry/_data/docker/registry/
 *Администратор безопасности средства контейнеризации*
 создает пользователя (например `user`) входящего в группу `podman`:
 ```
-$ sudo adduser user
+$ sudo adduser user -g podman
 $ sudo passwd user
 ```
 ```
-$ sudo usermod -a -G podman user
 $ sudo mkdir -p ~user/.config/containers
 $ sudo cat > ~user/.config/containers/storage.conf
 $ sudo chmod -R 500 ~user/.config/containers

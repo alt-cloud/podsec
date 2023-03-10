@@ -42,7 +42,7 @@ then
   exit 5
 fi
 
-TMPDIR=/tmp/ociDir.$$
+TMPDIR=/var/tmp/ociDir.$$
 mkdir $TMPDIR
 
 if tar xvCf $TMPDIR -
