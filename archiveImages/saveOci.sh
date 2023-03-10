@@ -11,51 +11,59 @@
 # последняя загруженная в containers-storage: архитектура может отличаться от текущей архитектуры процессора
 # При необходимости нужно будет произвести перезагрузку образов для рабочей архитектуры процессора
 
+set -x
+if [ $# -lt 1 ]
+then
+  echo "Не указан каталог архивирования образов"
+  echo -ne "Формат:\n\t$0  <каталог_архивирования_образов> <архитектура>,<архитектура>,...|all <образ> ..."
+  exit 1
+fi
+
+if [ $# -eq 1 ]
+then
+  echo "Не указан список образов"
+  echo -ne "Формат:\n\t$0  <каталог_архивирования_образов> <архитектура>,<архитектура>,...|all <образ> ..."
+  exit 1
+fi
+
 ociDir=$1
+archs=$2
 shift
-# arch=$2
+shift
+images=$*
 
 if [ -d $ociDir ]
 then
   echo "OCI-каталог уже существует"
   exit 1
 fi
-mkdir $ociDir
 
 regName='registry.altlinux.org/k8s-p10'
 
-baseImagesList='
-coredns:v1.8.6
-kube-controller-manager:v1.24.8
-kube-apiserver:v1.24.8
-kube-proxy:v1.24.8
-etcd:3.5.5-0
-flannel:v0.19.2
-kube-scheduler:v1.24.8
-pause:3.7
-flannel-cni-plugin:v1.2.0
-cert-manager-controller:v1.9.1
-cert-manager-cainjector:v1.9.1
-cert-manager-webhook:v1.9.1
-'
+case $archs in
+  'all') archs='amd64 arm64 arm ppc64le 386';;
+  *)
+    ifs=$IFS IFS=,
+    set -- $archs
+    archs=$*
+    IFS=$ifs
+    for arch in $archs
+    do
+      case $1 in
+        amd64 | arm64 | arm | ppc64le | 386) :;;
+        *)
+          echo "Неизвестная архитектура $arch";
+          echo "Допустимые: amd64, arm64, arm, ppc64le, 386"
+          echo -ne "Формат:\n\t$0 каталог_разворачивания_врхивов [архитектура ...]\n"
+          exit 2
+      esac
+    done
 
-if [ $# -gt 0 ]
-then
-  for arch
-  do
-    case $1 in
-      amd64 | arm64 | arm | ppc64le | 386) :;;
-      *)
-        echo "Неизвестная архитектура $arch";
-        echo "Допустимые: amd64, arm64, arm, ppc64le, 386"
-        echo -ne "Формат:\n\t$0 каталог_разворачивания_врхивов [архитектура ...]\n"
-    esac
-  done
-else
-  set -- amd64 arm64 arm ppc64le 386
-fi
+esac
+mkdir $ociDir
 
-for arch
+
+for arch in $archs
 do
   echo $arch
   ociArchDir="$ociDir/$arch"
@@ -63,7 +71,7 @@ do
   then
     mkdir $ociArchDir
   fi
-  for image in $baseImagesList
+  for image
   do
     echo "  image=$image"
     Image="$regName/$image"
@@ -71,4 +79,5 @@ do
     skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers containers-storage:$Image oci:$ociArchDir:$image
   done
   tar cvCf $ociDir -  $arch | xz -9v > $ociArchDir.tar.xz
+  rm -rf $ociArchDir
 done
