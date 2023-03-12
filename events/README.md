@@ -14,7 +14,7 @@
 >     * неуспешные попытки аутентификации пользователей средства контейнеризации;
 
 ```
- jq '. | select(.responseStatus.code == 403)'
+ jq '. | select(.responseStatus.code == 403 and (.user.groups | contains(["system:unauthenticated"])))'
 ```
 <pre>
 {
@@ -75,7 +75,7 @@ kube-system   7m57s       Normal    Pulled              pod/coredns-79cdf897dd-9
 
 Факты и авторов создания выявляем по запросы к аудиту API:
 ```
-jq '. | select( .verb=="create" and .objectRef.resource=="pods")'
+jq '. | select(.verb=="create" and .objectRef.resource=="pods")'
 jq '. | select(.verb=="create" and .objectRef.resource=="deployments")'
 ...
 

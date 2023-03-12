@@ -1,0 +1,13 @@
+FROM registry.altlinux.org/alt/alt:sisyphus
+
+RUN apt-get update && \
+  apt-get install -y nginx && \
+  apt-get install -y trivy
+
+RUN trivy --severity CRITICAL --exit-code 1 --server http://192.168.100.9:4954  rootfs /
+
+EXPOSE 80
+
+STOPSIGNAL SIGQUIT
+
+CMD ["nginx", "-g", "daemon off;"]
