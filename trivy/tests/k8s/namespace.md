@@ -1,7 +1,7 @@
 ```
 trivy k8s -n kube-system --report summary all
 ```
-<pre>
+```
 Summary Report for kubernetes-admin@kubernetes
 
 
@@ -49,4 +49,4 @@ Infra Assessment
 │ kube-system │ Pod/kube-scheduler-host-144          │     │     │     │ 1   │     │
 └─────────────┴──────────────────────────────────────┴─────┴─────┴─────┴─────┴─────┘
 Severities: C=CRITICAL H=HIGH M=MEDIUM L=LOW U=UNKNOWN
-</pre>
+```
