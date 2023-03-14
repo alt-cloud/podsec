@@ -8,7 +8,13 @@ do
   passwd $user
   cd /home/$user
   mkdir -p .config/containers
-  cp /etc/containers/storage.conf .config/containers/storage.conf
+  cat <<EOF > .config/containers/storage.conf
+[storage]
+driver = "overlay"
+[storage.options.overlay]
+mount_program = "/usr/bin/fuse-overlayfs"
+mountopt = "nodev,metacopy=on"
+EOF
   chmod -R 500 .config/containers
   chown -R $user:podman .config/containers
   chattr +i  .config/containers

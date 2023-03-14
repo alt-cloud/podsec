@@ -2,7 +2,7 @@
 
 # Установка пакетов
 apt-get update
-apt-get -y install nginx docker-registry pinentry-common jq yq
+apt-get -y install nginx docker-registry pinentry-common jq yq fuse-overlayfs
 
 # Поддержка возможности работа в rootless режиме
 echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf
@@ -17,7 +17,17 @@ echo "Введите пароль разработчика образов кон
 passwd $user
 
 cd /home/$user
+
 mkdir -p .config/containers/
+
+cat <<EOF > .config/containers/storage.conf
+[storage]
+driver = "overlay"
+[storage.options.overlay]
+mount_program = "/usr/bin/fuse-overlayfs"
+mountopt = "nodev,metacopy=on"
+EOF
+
 echo '{
 "default":[{"type":"insecureAcceptAnything"}],
   "transports":{"docker": {
