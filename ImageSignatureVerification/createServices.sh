@@ -17,6 +17,6 @@ if systemctl | grep httpd2 | grep running >/dev/null 2>&1
 then
   echo "Сервис httpd2 запущен и конфликтует с docker-registry"
   echo "Сервис httpd2 остановлен"
-  systemctl stop httpd2
+  systemctl disable --now httpd2
 fi
 systemctl enable --now docker-registry
