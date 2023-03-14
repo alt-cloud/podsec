@@ -1,6 +1,11 @@
 #!/bin/sh
 
-groupadd -r podman 2 >/dev/null
+if [ $# -eq 0 ]
+then
+  echo -ne "Формат:\n$0 <username> ...\n"
+  exit 1
+fi
+groupadd -r podman 2>/dev/null
 for user
 do
   adduser $user -g podman -G fuse

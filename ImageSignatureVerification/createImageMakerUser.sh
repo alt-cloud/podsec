@@ -4,7 +4,7 @@
 user='imagemaker'
 groupadd -r podman
 groupadd -r podman_dev
-adduser $user -g podman -G podman_dev,wheel,fuse
+adduser $user -g podman -G podman_dev,fuse
 echo "Введите пароль разработчика образов контейнеров"
 passwd $user
 
