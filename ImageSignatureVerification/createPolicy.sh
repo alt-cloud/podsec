@@ -120,4 +120,8 @@ linkedSigStoreYaml="sigstore_local_${now}"
 echo "{\"docker\":{\"registry.local\": $refs }}" | yq -y . > $linkedSigStoreYaml
 ln -sf $linkedSigStoreYaml $sigStoreYaml
 
+# Настройка образа pause
+sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-p10/pause:3.7"|' /usr/share/containers/containers.conf
+
+
 
