@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# Установка пакетов
-apt-get update
-apt-get -y install fuse-overlayfs
-
 groupadd -r podman 2 >/dev/null
 for user
 do
@@ -21,5 +17,5 @@ mountopt = "nodev,metacopy=on"
 EOF
   chmod -R 500 .config/containers
   chown -R $user:podman .config/containers
-  chattr +i  .config/containers
+  chattr +i -R .config/containers
 done

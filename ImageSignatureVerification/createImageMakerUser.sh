@@ -1,13 +1,5 @@
 #!/bin/sh
 
-# Установка пакетов
-apt-get update
-apt-get -y install nginx docker-registry pinentry-common jq yq fuse-overlayfs
-
-# Поддержка возможности работа в rootless режиме
-echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf
-sysctl -w kernel.unprivileged_userns_clone=1
-
 # Создание пользователя imagemaker
 user='imagemaker'
 groupadd -r podman
@@ -69,20 +61,4 @@ sysctl -w kernel.unprivileged_userns_clone=1
 chown root:podman /usr/bin/newuidmap /usr/bin/newgidmap
 chmod 6750 /usr/bin/newuidmap /usr/bin/newgidmap
 
-# Настройка sigStore
-cd /etc/nginx/sites-enabled.d
-sed -i  -e 's/server_name .*;/server_name sigstore.local;/' -e 's|root .*|root /var/sigstore;|' -e 's/listen .*;/listen 0.0.0.0:81;/' ../sites-available.d/default.conf
-ln -sf ../sites-available.d/default.conf .
-systemctl enable --now nginx
 
-# Настройка registry
-podman volume create registry
-sed -i -e 's|rootdirectory:.*|rootdirectory: /var/lib/containers/storage/volumes/registry/_data/|' -e 's/addr:.*/addr: :80/' /etc/docker-registry/config.yml
-if systemctl | grep httpd2 | grep running >/dev/null 2>&1
-then
-  echo "Сервис httpd2 запущен и конфликтует с docker-registry"
-  echo "Сервис httpd2 остановлен"
-  systemctl stop httpd2
-fi
-
-systemctl enable --now docker-registry

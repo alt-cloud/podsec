@@ -34,11 +34,10 @@ do
   fi
 done
 
-if ! (rpm -qa | grep jq-) && (rpm -qa | grep yq-)
-then
-  apt-get update
-  apt-get install -y yq jq
-fi
+
+# Установка пакетов
+apt-get update
+apt-get -y install nginx docker-registry pinentry-common jq yq fuse-overlayfs
 
 # Поддержка возможности работа в rootless режиме
 echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf

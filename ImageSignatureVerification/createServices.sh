@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# Установка пакетов
-apt-get update
-apt-get -y install nginx docker-registry
-
 # Настройка sigStore
 cd /etc/nginx/sites-enabled.d
 sed -i  -e 's/server_name .*;/server_name sigstore.local;/' -e 's|root .*|root /var/sigstore;|' -e 's/listen .*;/listen 0.0.0.0:81;/' ../sites-available.d/default.conf
