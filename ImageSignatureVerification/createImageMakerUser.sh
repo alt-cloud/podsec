@@ -2,7 +2,11 @@
 
 # Установка пакетов
 apt-get update
-apt-get -y install nginx docker-registry pinentry-common
+apt-get -y install nginx docker-registry pinentry-common jq yq
+
+# Поддержка возможности работа в rootless режиме
+echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf
+sysctl -w kernel.unprivileged_userns_clone=1
 
 # Создание пользователя imagemaker
 user='imagemaker'
@@ -64,4 +68,11 @@ systemctl enable --now nginx
 # Настройка registry
 podman volume create registry
 sed -i -e 's|rootdirectory:.*|rootdirectory: /var/lib/containers/storage/volumes/registry/_data/|' -e 's/addr:.*/addr: :80/' /etc/docker-registry/config.yml
+if systemctl | grep httpd2 | grep running >/dev/null 2>&1
+then
+  echo "Сервис httpd2 запущен и конфликтует с docker-registry"
+  echo "Сервис httpd2 остановлен"
+  systemctl stop httpd2
+fi
+
 systemctl enable --now docker-registry

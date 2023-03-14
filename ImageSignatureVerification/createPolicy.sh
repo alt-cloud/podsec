@@ -3,8 +3,8 @@
 
 if [ $# -lt 1 ]
 then
-  echo -ne "Не указан IP-адрес регистратора и сервера подписей"
-  echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>"
+  echo -ne "Не указан IP-адрес регистратора и сервера подписей\n"
+  echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>\n"
   exit 1
 fi
 regIP=$1
@@ -33,6 +33,16 @@ do
     exit 3
   fi
 done
+
+if ! (rpm -qa | grep jq-) && (rpm -qa | grep yq-)
+then
+  apt-get update
+  apt-get install -y yq jq
+fi
+
+# Поддержка возможности работа в rootless режиме
+echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf
+sysctl -w kernel.unprivileged_userns_clone=1
 
 localIP=
 if ip a  | grep $regIP >/dev/null 2>&1

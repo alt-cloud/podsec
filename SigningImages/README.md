@@ -23,7 +23,7 @@
 # Разработчик образов контейнеров (imagemaker)
 
 Пользователь входит в группы `podman`, `podman_dev`, `wheel`.
-```console
+```
 # groupadd -r podman
 # groupadd -r podman_dev
 # adduser imagemaker -g podman -G podman_dev,wheel
@@ -344,7 +344,7 @@ $ sudo $EDITOR /etc/containers/policy.json
 
 Загрузка образов
 ```
-$ podman pull registry.local/... 
+$ podman pull registry.local/...
 $ podman run registry.local/...
 ```
 с префиксом `registry.local/...` осуществляется с проверкой подписи образа, доступного по `URL` `http://sigstore.local/sigstore` на основе открытой подписи, хранящейся в файле `/var/sigstore/keys/group1.pgp`.
