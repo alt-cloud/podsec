@@ -1,0 +1,1 @@
+Документ перенесен в репозиторий `c10` [SigningImages](https://gitea.basealt.ru/kaf/c10/src/branch/main/SigningImages)
