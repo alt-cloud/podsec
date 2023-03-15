@@ -56,3 +56,8 @@ This package contains utilities for:
 
 
 
+
+%changelog
+* Wed Mar 15 2023 Alexey Kostarev <kaf@altlinux.org> 0.1.1-alt1
+- 0.1.1
+
