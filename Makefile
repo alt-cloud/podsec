@@ -43,7 +43,7 @@ bindir = /usr/bin
 datadir = /usr/share
 DESTDIR =
 
-CP = cp -a
+CP = cp -L
 INSTALL = install
 LN_S = ln -s
 MKDIR_P = mkdir -p
@@ -58,12 +58,8 @@ all:
 
 install: all
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
-	pushd podmanbin
-	$(CP) $(PODMANPROGRAMS) $(DESTDIR)$(bindir)/
-	popd
-	pushd ../k8sbin
-	$(CP) $(K8SPROGRAMS) $(DESTDIR)$(bindir)/
-	popd
+	cd ./podmanbin;$(CP) $(PODMANPROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./k8sbin;$(CP) $(K8SPROGRAMS) $(DESTDIR)$(bindir)/
 
 clean:
 

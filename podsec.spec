@@ -22,17 +22,25 @@ Requires: skopeo >= 1.9.1
 
 %description
 This package contains utilities for:
-- setting the most secure container application access policies (directory /etc/containers/)
+- setting the most secure container application access policies
+  (directory /etc/containers/)
 - installation of a registry and a web server for access to image signatures
-- creating a user with rights to create docker images, signing them and placing them in the registry
+- creating a user with rights to create docker images, signing them and
+  placing them in the registry
 - creating users with rights to run containers in rootless mode
-- downloading docker images from the oci archive, placing them on the local system, signing and placing them on the registry
+- downloading docker images from the oci archive, placing them
+  on the local system, signing and placing them on the registry
 
-%package podsec-k8s
+%package k8s
 Summary: Summary: Set of scripts for Kubernetes Security
 Group: Development/Other
+Requires: kubernetes-kubeadm >= 1.24.8
+Requires: kubernetes-kubelet >= 1.24.8
+Requires: kubernetes-crio >= 1.24.8
+Requires:  cri-tools >= 1.22.0
+Requires: podsec >= 0.1.1
 
-%description podsec-k8s
+%description k8s
 This package contains utilities for:
 - cluster node configurations
 - generation of certificates and configuration files for users
@@ -50,12 +58,8 @@ This package contains utilities for:
 %_bindir/podsec*
 %exclude %_bindir/podsec-k8s-*
 
-%files podsec-k8s
+%files k8s
 %_bindir/podsec-k8s-*
-
-
-
-
 
 %changelog
 * Wed Mar 15 2023 Alexey Kostarev <kaf@altlinux.org> 0.1.1-alt1
