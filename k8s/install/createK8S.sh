@@ -6,7 +6,7 @@ then
   exit 1
 fi
 
-apt-get install kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools
+apt-get install kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools skopeo
 
 if ! grep  '^pause_image' /etc/crio/crio.conf
 then
