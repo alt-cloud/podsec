@@ -155,8 +155,7 @@ spec:
           mountPath: /etc/kube-flannel/
       containers:
       - name: kube-flannel
-        image: docker.io/flannel/flannel:v0.21.3
-       #image: docker.io/rancher/mirrored-flannelcni-flannel:v0.21.3
+        image: registry.local/k8s-p10/flannel:v0.19.2
         command:
         - /opt/bin/flanneld
         args:

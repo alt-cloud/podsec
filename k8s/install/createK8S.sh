@@ -6,6 +6,8 @@ then
   exit 1
 fi
 
+user=$1
+
 apt-get install -y kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools skopeo
 
 if ! grep  '^pause_image' /etc/crio/crio.conf
@@ -30,10 +32,10 @@ kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.8 --imag
 mkdir /root/.kube
 cp /etc/kubernetes/admin.conf /root/.kube/config
 chmod -R 600 /root/.kube
+pwd=$PWD
+su -c "kubectl apply -f $pwd/kube-flannel.yml"
 
 cd $user
 cp -r /root/.kube .
 chmod -R 600 .kube
 chown -R $user:podman .kube
-
-kubectl apply -f kube-flannel.yml

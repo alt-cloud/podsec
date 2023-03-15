@@ -8,7 +8,8 @@ fi
 
 archive=$1
 arch=$2
-regName=$(basename $3)
+# regName=$(basename $3)
+regName=$3
 signBy="${4}"
 
 if [ ! -f $archive ]
