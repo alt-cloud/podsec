@@ -34,6 +34,7 @@ jq . > .config/containers/policy.json
 mkdir -p .config/containers/registries.d
 sigStoreURL="http://sigstore.local:81/sigstore/"
 refs="{\"lookaside\":\"$sigStoreURL\""
+refs+=", \"sigstore\":\"$sigStoreURL\""
 refs+=", \"lookaside-staging\": \"file:///var/sigstore/sigstore/\""
 refs+=", \"sigstore-staging\": \"file:///var/sigstore/sigstore/\"}"
 echo "{\"default-docker\":$refs}" | yq -y . > .config/containers/registries.d/default.yaml

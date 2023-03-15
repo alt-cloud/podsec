@@ -6,7 +6,7 @@ then
   exit 1
 fi
 
-apt-get install kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools skopeo
+apt-get install -y kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools skopeo
 
 if ! grep  '^pause_image' /etc/crio/crio.conf
 then
@@ -16,12 +16,16 @@ pause_image = "registry.local/k8s-p10/pause:3.7"
 EOF
 fi
 
+
 . /etc/kubernetes/kubelet
-KUBELET_ARGS+=' --pod-infra-container-image=registry.local/k8s-p10/pause:3.7'
-sed -i -e "s|KUBELET_ARGS.*|KUBELET_ARGS=\"$KUBELET_ARGS\"|" /etc/kubernetes/kubelet
+if ! (echo $KUBELET_ARGS | grep pod-infra-container-image)
+then
+  KUBELET_ARGS+=' --pod-infra-container-image=registry.local/k8s-p10/pause:3.7'
+  sed -i -e "s|KUBELET_ARGS.*|KUBELET_ARGS=\"$KUBELET_ARGS\"|" /etc/kubernetes/kubelet
+fi
 systemctl enable --now crio kubelet
 
-kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.8 --image-repository=registry.local/k8s-p10
+kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.8 --image-repository=registry.local
 
 mkdir /root/.kube
 cp /etc/kubernetes/admin.conf /root/.kube/config

@@ -37,7 +37,7 @@ done
 
 # Установка пакетов
 apt-get update
-apt-get install -y podman shadow-submap nginx docker-registry pinentry-common jq yq fuse-overlayfs
+apt-get install -y podman shadow-submap nginx docker-registry pinentry-common jq yq fuse-overlayfs skopeo
 
 # Создание групп
 groupadd -r podman
