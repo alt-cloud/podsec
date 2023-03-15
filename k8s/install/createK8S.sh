@@ -1,14 +1,22 @@
 #!/bin/sh
 
+. podsec-functions
+
+notInstalled=$(testPackages kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools skopeo)
+
+if [ -n "$notInstalled" ]
+then
+  echo "Пакеты $notInstalled  не установлены"
+  exit 1
+fi
+
 if [ $# -ne 1 ]
 then
-  echo -ne "Формат:\n\t $0 <adminUser>"
+  echo -ne "Формат:\n\t $0 <adminUser>\n"
   exit 1
 fi
 
 user=$1
-
-apt-get install -y kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools skopeo
 
 if ! grep  '^pause_image' /etc/crio/crio.conf
 then

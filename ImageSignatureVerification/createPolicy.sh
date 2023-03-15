@@ -1,35 +1,7 @@
 #!/bin/sh
 # Скрипт создает
 
-getPackageName() {
-  name=$1
-  ifs=$IFS
-  IFS=-
-  set -- $name
-  IFS=$ifs
-  ret=$1
-  shift
-  while [ $# -gt 2 ]; do ret+="_$1"; shift; done
-  echo $ret
-}
-
-testPackages() {
-  listPkgs=$(echo $* | tr ' ' "\n")
-  installed=$(rpm -qa | grep "$listPkgs")
-  for pkg in $installed
-  do
-    name=$(getPackageName $pkg)
-    eval $name=yes
-  done
-  notInstalled=
-  for pkgname
-  do
-    name=$(echo $pkgname | tr '-' '_')
-    eval value=\$$name
-    if [ -z "$value" ]; then notInstalled+=" $name";  fi
-  done
-  echo $notInstalled | tr '_' '-'
-}
+. podsec-functions
 
 notInstalled=$(testPackages podman shadow-submap nginx docker-registry pinentry-common jq yq fuse-overlayfs skopeo)
 
