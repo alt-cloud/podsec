@@ -1,21 +1,22 @@
 #!/bin/sh
-# Скрипт производит разворачивание образов из архива, созданным скриптом saveOci.sh
-# Скрипт разоврачивает все образы записанный в архиве
-# Первым параметром имя архитектуры (amd64 | arm64 | arm | ppc64le | 386)
-# Вторым имя регистратора. Оно должно содержать точку (.) в имени.
-# Если указан третий параметр, то все образы помещаются в регистратор с использованием данного ключа
-# На вход команды поступает tar oci-каталога
-# Для оптимизации размера архива на (ISO) диске его предварительно следует сжать компрессором xz
-# При этом вызов скрипта будет выглядеть например так: xz -d < oci-archive.tar.xz | loadOci.sh amd64 registry.local
 
-if [ $# -ne 2 && $# -ne 3 ]
+if [ $# -ne 4 ]
 then
-  echo -ne "Формат:\n\t$0 архитектура имя_регистратора\n"  >&2
+  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура имя_регистратора EMail_подписанта\n"  >&2
   exit 1
 fi
 
-arch=$1
-regName=$(basename $2)
+archive=$1
+arch=$2
+regName=$(basename $3)
+signBy="${4}"
+
+if [ ! -f $archive ]
+then
+  echo "Архив $archive отсутствует"
+  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура имя_регистратора EMail_подписанта\n"  >&2
+  exit 1
+fi
 
 case $arch in
 amd64 | arm64 | arm | ppc64le | 386) :;;
@@ -34,7 +35,6 @@ then
   exit 4
 fi
 
-
 ifs=$IFS IFS=.
 set -- $regName
 IFS=$ifs
@@ -47,7 +47,7 @@ fi
 TMPDIR=/var/tmp/ociDir.$$
 mkdir -p $TMPDIR
 
-if tar xvCf $TMPDIR -
+if xz -d < $archive | tar xvCf $TMPDIR -
 then
   :;
 else
@@ -76,6 +76,14 @@ do
   echo "Разворачиваение образа $image в локальную систему"
   Image="$regName/$image"
   skopeo --override-arch $arch copy oci:$archDir:$image containers-storage:$Image
+done
+
+for image in $imagesList
+do
+  image=${image:1:-1}
+  echo "Подпись и передача образа $image в регистратор"
+  Image="$regName/$image"
+  podman push --tls-verify=false --sign-by="$signBy" $Image
 done
 
 rm -rf $TMPDIR
