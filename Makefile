@@ -25,7 +25,6 @@ PODSECPROGRAMMS = \
 	podsec-create-podmanusers \
 	podsec-create-policy \
 	podsec-create-services \
-	podsec-functions \
 	podsec-load-sign-oci
 
 PODSECK8SPROGRAMS= \

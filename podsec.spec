@@ -59,6 +59,7 @@ This package contains utilities for:
 %files
 %_bindir/podsec*
 %exclude %_bindir/podsec-k8s-*
+%_mandir/man?/podsec*
 
 %files k8s
 %_bindir/podsec-k8s-*
