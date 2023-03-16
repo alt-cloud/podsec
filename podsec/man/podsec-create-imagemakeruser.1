@@ -1,0 +1,19 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "PODSEC\-CREATE\-IMAGEMAKERUSER" "" "March 2023" "" ""
+.
+.SH "NAME"
+\fBpodsec\-create\-imagemakeruser\fR
+.
+.P
+podsec\-create\-imagemakeruser \- скрипт создает пользователя разработчика образов контейнеров
+.
+.SH "SYNOPSIS"
+podsec\-create\-imagemakeruser [\fIимя\fIпользователя\fRразработчика\fIобразов\fRконтейнеров\fR]
+.
+.SH "DESCRIPTION"
+Cкрипт создает пользователя разработчика образов контейнеров, обладающий правами: \- менять установленный администратором безопасности средства контейнеризации пароль; \- создавать, модифицировать и удалять образы контейнеров\.
+.
+.SH "OPTIONS"
+Если имя пользователя не указано первым параметром принимается имя \fBimagemaker\fR\.

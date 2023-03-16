@@ -20,7 +20,7 @@
 
 PROJECT = podsec
 VERSION = $(shell sed '/^Version: */!d;s///;q' gear.spec)
-PODMANPROGRAMS = \
+PODSECPROGRAMMS = \
 	podsec-create-imagemakeruser \
 	podsec-create-podmanusers \
 	podsec-create-policy \
@@ -28,7 +28,7 @@ PODMANPROGRAMS = \
 	podsec-functions \
 	podsec-load-sign-oci
 
-K8SPROGRAMS= \
+PODSECK8SPROGRAMS= \
 	podsec-k8s-add-context \
 	podsec-k8s-addto-kubeconfig \
 	podsec-k8s-approve-cert \
@@ -38,9 +38,15 @@ K8SPROGRAMS= \
 	podsec-k8s-create-master \
 	podsec-k8s-csr-to-cluster
 
+PODSECMAN1PAGES = $(PODSECPROGRAMMS:=.1)
+PODSECK8SMAN1PAGES = $(PODSECK8SPROGRAMS:=.1)
+MANPAGES = $(PODSECMAN1PAGES)
+#MANPAGES = $(PODSECMAN1PAGES) $(PODSECK8SMAN1PAGES)
 
 bindir = /usr/bin
 datadir = /usr/share
+mandir = $(datadir)/man
+man1dir = $(mandir)/man1
 DESTDIR =
 
 CP = cp -L
@@ -58,8 +64,10 @@ all:
 
 install: all
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
-	cd ./podsec/bin;$(CP) $(PODMANPROGRAMS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s/bin/;$(CP) $(K8SPROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec/bin;$(CP) $(PODSECPROGRAMMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s/bin/;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)$(bindir)/
+	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
+	$(INSTALL) -p -m644 $(MAN1PAGES) $(DESTDIR)$(man1dir)/
 
 clean:
 
