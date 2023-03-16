@@ -41,6 +41,7 @@ Requires: kubernetes-crio >= 1.24.8
 Requires: cri-tools >= 1.22.0
 Requires: podsec >= 0.1.1
 Requires: kubernetes-client >= 1.24.8
+%filter_from_requires /\/etc\/kubernetes/d
 
 %description k8s
 This package contains utilities for:
