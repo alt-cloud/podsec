@@ -58,8 +58,8 @@ all:
 
 install: all
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
-	cd ./podmanbin;$(CP) $(PODMANPROGRAMS) $(DESTDIR)$(bindir)/
-	cd ./k8sbin;$(CP) $(K8SPROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec/bin;$(CP) $(PODMANPROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s/bin/;$(CP) $(K8SPROGRAMS) $(DESTDIR)$(bindir)/
 
 clean:
 
