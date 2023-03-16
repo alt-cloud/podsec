@@ -1,5 +1,5 @@
 Name: podsec
-Version: 0.1.4
+Version: 0.1.6
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -64,8 +64,16 @@ This package contains utilities for:
 
 %files k8s
 %_bindir/podsec-k8s-*
+%_mandir/man?/podsec-k8s-*
+
 
 %changelog
+* Fri Mar 17 2023 Alexey Kostarev <kaf@altlinux.org> 0.1.6-alt1
+- 0.1.6
+
+* Thu Mar 16 2023 Alexey Kostarev <kaf@altlinux.org> 0.1.5-alt1
+- 0.1.5
+
 * Thu Mar 16 2023 Alexey Kostarev <kaf@altlinux.org> 0.1.4-alt1
 - 0.1.4
 

@@ -74,6 +74,7 @@ echo '{
 jq . > $linkedPolicyFile
 ln -sf $linkedPolicyFile $policyFile
 
+# Добавление insecure к registry.local
 registriesConf="registries.conf"
 if [ ! -L $registriesConf ]
 then :;
@@ -88,6 +89,7 @@ else
   ln -sf $linkedRegistriesConf  $registriesConf
 fi
 
+# Создание registries.d/*.yamls's
 cd registries.d
 defaultYaml='default.yaml'
 if [ ! -L $defaultYaml ]
@@ -97,18 +99,18 @@ fi
 linkedDefaultYaml="default_${now}"
 sigStoreURL="http://sigstore.local:81/sigstore/"
 refs="\"lookaside\":\"$sigStoreURL\", \"sigstore\":\"$sigStoreURL\""
-if [ -n "$localIP" ]
-then
-  refs+=",\"lookaside-staging\": \"file:///var/sigstore/sigstore/\""
-fi
+# if [ -n "$localIP" ]
+# then
+#   refs+=",\"lookaside-staging\": \"file:///var/sigstore/sigstore/\""
+# fi
 refs="{$refs}"
 echo "{\"default-docker\":$refs}" | yq -y . > $linkedDefaultYaml
 ln -sf $linkedDefaultYaml $defaultYaml
 
-sigStoreYaml="sigstore_local.yaml"
-linkedSigStoreYaml="sigstore_local_${now}"
-echo "{\"docker\":{\"registry.local\": $refs }}" | yq -y . > $linkedSigStoreYaml
-ln -sf $linkedSigStoreYaml $sigStoreYaml
+# sigStoreYaml="sigstore_local.yaml"
+# linkedSigStoreYaml="sigstore_local_${now}"
+# echo "{\"docker\":{\"registry.local\": $refs }}" | yq -y . > $linkedSigStoreYaml
+# ln -sf $linkedSigStoreYaml $sigStoreYaml
 
 # Настройка образа pause
 sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-p10/pause:3.7"|' /usr/share/containers/containers.conf

@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Проверяет является ли текущий сервер сервером, поддерживающий регистратор (registry.local) и сервер подписи образов (sigstore.local)
+isSigstoreServer() {
+  if [ line=$(grep 'registry.local
+  sigstore.local' /etc/hosts) ]
+  then
+    set -- $line
+    ip=$1
+    if ! ip a | grep $ip >/dev/null 2>&1
+    then
+      echo "Домены registry.local sigstore.local в файле /etc/hosts привязаны не к локальному ip $ip"
+      echo "Запуск сервисов невозможен" >&2
+    fi
+  else
+    echo "Домены registry.local sigstore.local в файле /etc/hosts не привязаны не к локальному"
+    echo "Запуск сервисов невозможен" >&2
+    echo "Запустите скрипт podsec-create-policy"
+  fi
+}

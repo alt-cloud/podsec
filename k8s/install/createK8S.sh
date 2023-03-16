@@ -1,15 +1,5 @@
 #!/bin/sh
 
-. podsec-functions
-
-notInstalled=$(testPackages kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools skopeo)
-
-if [ -n "$notInstalled" ]
-then
-  echo "Пакеты $notInstalled  не установлены"
-  exit 1
-fi
-
 if [ $# -ne 1 ]
 then
   echo -ne "Формат:\n\t $0 <adminUser>\n"
@@ -35,7 +25,7 @@ then
 fi
 systemctl enable --now crio kubelet
 
-kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.8 --image-repository=registry.local
+kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.8 --image-repository=registry.local/k8s-p10
 
 mkdir /root/.kube
 cp /etc/kubernetes/admin.conf /root/.kube/config
@@ -43,7 +33,7 @@ chmod -R 600 /root/.kube
 pwd=$PWD
 su -c "kubectl apply -f $pwd/kube-flannel.yml"
 
-cd $user
+cd /home/$user
 cp -r /root/.kube .
 chmod -R 600 .kube
 chown -R $user:podman .kube

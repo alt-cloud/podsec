@@ -3,7 +3,7 @@ podsec-create-podmanusers - скрипт создает пользователе
 
 ## SYNOPSIS
 
-podsec-create-podmanusers <имя_пользователя> ...
+podsec-create-podmanusers [ <имя_пользователя> <тропа_регистратора> ] ...
 
 ## DESCRIPTION
 
