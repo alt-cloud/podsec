@@ -3,14 +3,6 @@
 
 . podsec-functions
 
-notInstalled=$(testPackages podman shadow-submap nginx docker-registry pinentry-common jq yq fuse-overlayfs skopeo)
-
-if [ -n "$notInstalled" ]
-then
-  echo "Пакеты $notInstalled  не установлены"
-  exit 1
-fi
-
 if [ $# -lt 1 ]
 then
   echo -ne "Не указан IP-адрес регистратора и сервера подписей\n"
@@ -43,11 +35,6 @@ do
     exit 3
   fi
 done
-
-
-# Установка пакетов
-apt-get update
-apt-get install -y podman shadow-submap nginx docker-registry pinentry-common jq yq fuse-overlayfs skopeo
 
 # Создание групп
 groupadd -r podman

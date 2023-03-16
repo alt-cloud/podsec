@@ -1,7 +1,18 @@
 #!/bin/sh
 
+if [ $# -eq 0 ]
+then
+  user='imagemaker'
+else
+  if [ $# -eq 1 ]
+  then
+    user=$1
+  else
+    echo -ne "Формат:\n\t$0 [<имя_пользователя_разработчика_образов>]"
+  fi
+fi
+
 # Создание пользователя imagemaker
-user='imagemaker'
 groupadd -r podman
 groupadd -r podman_dev
 adduser $user -g podman -G podman_dev,fuse
@@ -60,6 +71,8 @@ su - -c "gpg2 --output /var/sigstore/keys/group1.pgp  --armor --export '$uid'" i
 sysctl -w kernel.unprivileged_userns_clone=1
 # Это надо будет заменить на control
 chown root:podman /usr/bin/newuidmap /usr/bin/newgidmap
-chmod 6750 /usr/bin/newuidmap /usr/bin/newgidmap
+setcap cap_setgid,cap_setuid=ep  /usr/bin/newuidmap
+setcap cap_setgid,cap_setuid=ep  /usr/bin/newgidmap
+# chmod 6750 /usr/bin/newuidmap /usr/bin/newgidmap
 
 
