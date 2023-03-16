@@ -19,6 +19,7 @@ Requires: jq >= 1.6
 Requires:yq >= 2.12.2
 Requires: fuse-overlayfs >= 1.1.2.3.800011b
 Requires: skopeo >= 1.9.1
+Requires: sh >= 4.4.23
 
 %description
 This package contains utilities for:
@@ -37,8 +38,9 @@ Group: Development/Other
 Requires: kubernetes-kubeadm >= 1.24.8
 Requires: kubernetes-kubelet >= 1.24.8
 Requires: kubernetes-crio >= 1.24.8
-Requires:  cri-tools >= 1.22.0
+Requires: cri-tools >= 1.22.0
 Requires: podsec >= 0.1.1
+Requires: kubernetes-client >= 1.24.8
 
 %description k8s
 This package contains utilities for:
