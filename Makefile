@@ -67,7 +67,7 @@ install: all
 	cd ./podsec/bin;$(CP) $(PODSECPROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/bin/;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)$(bindir)/
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
-	$(INSTALL) -p -m644 $(MAN1PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec/man;$(INSTALL) -p -m644 $(MANPAGES) $(DESTDIR)$(man1dir)/
 
 clean:
 
