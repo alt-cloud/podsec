@@ -70,12 +70,7 @@ linkedPolicyFile="policy_${now}"
 echo '{
 "default":[{"type":"reject"}],
   "transports":{"docker": {
-    "registry.local":[
-      {
-        "type": "signedBy",
-        "keyType": "GPGKeys",
-        "keyPath": "/var/sigstore/keys/group1.pgp"
-}]}}}' |
+    "registry.local":[]}}}' |
 jq . > $linkedPolicyFile
 ln -sf $linkedPolicyFile $policyFile
 

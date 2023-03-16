@@ -67,7 +67,7 @@ getRegistries() {
   jq "$req" $configPolicyFile
 }
 
-# Получить список регистраторов не требующих подписи (type == signedBy)
+# Получить список регистраторов требующих подписи (type == signedBy)
 # Format:
 #  getSignedRegistries configPolicyFile [json]
 # Если второй параметр json - вывод в формате json
