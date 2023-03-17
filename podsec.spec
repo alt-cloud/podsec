@@ -5,7 +5,7 @@ Release: alt1
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
-Url: https://www.altlinux.org/Gear
+Url: https://github.com/alt-cloud/c10
 BuildArch: noarch
 
 Source: %name-%version.tar
