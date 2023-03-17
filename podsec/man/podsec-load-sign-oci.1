@@ -1,7 +1,57 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-LOAD\-SIGN\-OCI" "" "March 2023" "" ""
+.TH "PODSEC\-LOAD\-SIGN\-OCI" "1" "March 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-load\-sign\-oci\fR \- скрипт извлекает из oci\-архива образы, разворачивает их в файловой системе, подписывает и помещает на регистратор
+\fBpodsec\-load\-sign\-oci\fR \- разворачивание образов из сжатого \fBxz\-oci\-архива\fR, их подписть и помещение на регистратор
+.
+.SH "SYNOPSIS"
+\fBpodsec\-load\-sign\-oci имя_архивного_файла архитектура EMail_подписанта [тропа_регистратора]\fR
+.
+.SH "DESCRIPTION"
+Скрипт:
+.
+.IP "\[ci]" 4
+извлекает из сжатого \fBxz\-oci\-архива\fR образы,
+.
+.IP "\[ci]" 4
+разворачивает их в файловой системе,
+.
+.IP "\[ci]" 4
+подписывает и помещает на регистратор по указаной тропе\.
+.
+.IP "" 0
+.
+.SH "OPTIONS"
+.
+.IP "1." 4
+\fBАрхив oci\-файла\fR, передаваемый первым параметром должен быть сжат компрессором \fBxz\fR\.
+.
+.IP "2." 4
+\fBИмя архитектуры\fR должно принажлежвть списку \fBamd64\fR, \fBarm64\fR, \fBarm\fR, \fBppc64le\fR, \fB386\fR\.
+.
+.IP "3." 4
+\fBEMail_подписанта\fR должно быть указано в подписи пользователя и указывается без обрамляющих скобок \fB<>\fR\.
+.
+.IP "4." 4
+Если \fBтропа_регистратора\fR не указана, принимается тропа \fBregistry\.local/k8s\-p10\fR
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+\fBpodsec\-load\-sign\-oci /mnt/cdrom/containers/amd64\.tar\.xz amd64 immklocal@baseat\.ru registry\.local\fR
+.
+.P
+\fBpodsec\-load\-sign\-oci /mnt/cdrom/containers/amd64\.tar\.xz amd64 immkk8s@baseat\.ru\fR
+.
+.SH "SECURITY CONSIDERATIONS"
+.
+.IP "\[ci]" 4
+Данный скрипт должен запускаться только на узле с доменами \fBregistry\.local\fR, \fBsigstore\-local\fR\. Если это не так, скрипт прекращает свою работу\.
+.
+.IP "\[ci]" 4
+Скрипт должен вызываться пользователем не входящим в группу \fBpodman_dev\fR\.
+.
+.IP "" 0
+

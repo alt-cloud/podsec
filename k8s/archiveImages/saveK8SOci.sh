@@ -1,4 +1,16 @@
 #!/bin/sh
+# Скрипт производит архивацию образов kubernetes версии 1.24.8
+# в указанный первым параметром каталог
+# Второй параметры задает через запятую архивируемые архитектуры.
+# Если второй параметр имеет значение all архивируются все архитектуры: amd64 arm64 arm ppc64le 386
+# Скрипт производит загрузку kubernet-образов с регистратора registry.altlinux.org/k8s-p10 в containers-storage: системы
+# с последующим помещением их в указанный первым параметром каталог в подкаталог с именем архитектуры ($ociDir/$arch)
+# Для улучшения последующей компресии слои образа помещаются несжатыми (параметр --dest-oci-accept-uncompressed-layers)
+# После окончания наполнения подкаталога архитектуры он архивируется, сжимается и помещается в файл $ociDir/$arch.tar.xz
+#
+# Так как скрипт производит загрузку образов различных архитектур
+# последняя загруженная в containers-storage: архитектура может отличаться от текущей архитектуры процессора
+# При необходимости нужно будет произвести перезагрузку образов для рабочей архитектуры процессора
 
 if [ $# -le 1 ]
 then
@@ -18,18 +30,18 @@ ociDir=$1
 archs=$2
 
 imagesList='
-coredns:v1.8.6
-kube-controller-manager:v1.24.8
-kube-apiserver:v1.24.8
-kube-proxy:v1.24.8
-etcd:3.5.5-0
-flannel:v0.19.2
-kube-scheduler:v1.24.8
-pause:3.7
-flannel-cni-plugin:v1.2.0
-cert-manager-controller:v1.9.1
-cert-manager-cainjector:v1.9.1
-cert-manager-webhook:v1.9.1
+k8s-p10/coredns:v1.8.6
+k8s-p10/kube-controller-manager:v1.24.8
+k8s-p10/kube-apiserver:v1.24.8
+k8s-p10/kube-proxy:v1.24.8
+k8s-p10/etcd:3.5.5-0
+k8s-p10/flannel:v0.19.2
+k8s-p10/kube-scheduler:v1.24.8
+k8s-p10/pause:3.7
+k8s-p10/flannel-cni-plugin:v1.2.0
+k8s-p10/cert-manager-controller:v1.9.1
+k8s-p10/cert-manager-cainjector:v1.9.1
+k8s-p10/cert-manager-webhook:v1.9.1
 '
 
-saveOci.sh $ociDir $archs $imagesList
+podsec-save-oci $ociDir $archs $imagesList

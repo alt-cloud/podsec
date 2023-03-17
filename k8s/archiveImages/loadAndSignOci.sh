@@ -1,16 +1,39 @@
 #!/bin/sh
 
-if [ $# -ne 4 ]
+. podsec-functions
+
+mes=$(isSigstoreServer)
+if [ -n "$mes" ]
 then
-  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура имя_регистратора EMail_подписанта\n"  >&2
+  echo $mes >&2
+  echo "Загрузка образов невозможна"
+  exit 1
+fi
+
+if ! id | grep podman_dev
+then
+  echo "Скрипт вызывается пользователем не входящим в группу podman_dev" >&2
+  exit 1
+fi
+
+if [ $# -ne 4 && $# -ne 3 ]
+then
+  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [имя_регистратора]\n"  >&2
   exit 1
 fi
 
 archive=$1
 arch=$2
 # regName=$(basename $3)
-regName=$3
-signBy="${4}"
+signBy="${3}"
+if [ $# -eq 3 ]
+then
+  regName="registry.local/k8s-p10"
+else
+  dir=$(dirname $4)
+  base=$(basename $4)
+  regName="$dir/$base"
+fi
 
 if [ ! -f $archive ]
 then

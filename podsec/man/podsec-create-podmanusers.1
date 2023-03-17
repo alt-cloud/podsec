@@ -1,19 +1,46 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-CREATE\-PODMANUSERS" "" "March 2023" "" ""
+.TH "PODSEC\-CREATE\-PODMANUSERS" "1" "March 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-create\-podmanusers\fR
-.
-.P
-podsec\-create\-podmanusers \- скрипт создает пользователей образов контейнеров, обладающий с правами на запуск подписанных образов с домена registry\.local
+\fBpodsec\-create\-podmanusers\fR \- создание пользователей, запускающих контейнеры подписанных образов
 .
 .SH "SYNOPSIS"
-podsec\-create\-podmanusers \fIимя_пользователя\fR \|\.\|\.\|\.
+\fBpodsec\-create\-podmanusers имя_пользователя \|\.\|\.\|\.\fR
 .
 .SH "DESCRIPTION"
-Cкрипт создает пользователей образов контейнеров, обладающий с правами на запуск подписанных образов с домена registry\.local\.
+Cкрипт создает пользователей образов контейнеров, обладающий с правами на запуск подписанных образов в \fBrootless\fR режиме\.
 .
 .SH "OPTIONS"
+.
+.IP "\[ci]" 4
 Скрипту параметрами передается список создаваемых пользователей\.
+.
+.IP "\[ci]" 4
+Пользователям присваивается группа \fBpodman\fR\. В качестве политик доступа к образам пользователи используют системные файлы\.
+.
+.IP "\[ci]" 4
+Сформированные скриптом локальные файлы конфигурации пользователей в каталоге \fB~/\.config/containers/\fR закрываются на изменения\.
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+\fBpodsec\-create\-podmanusers user1 user2 user3\fR
+.
+.SH "SECURITY CONSIDERATIONS"
+.
+.IP "\[ci]" 4
+Для каждого пользователя создается свой namespace\.
+.
+.IP "\[ci]" 4
+Все используемые образы скачиваются только с указанных в файле политик \fB/etc/containers/policy\.json\fR регистраторов и помещаются в локальный кэш пользователя;
+.
+.IP "\[ci]" 4
+Контейнеры запускаются в собственном namespace, хранятся в локальном кэше и недоступны другим пользователям
+.
+.IP "\[ci]" 4
+Для проверки подписи образов используется системый файл \fB/etc/containers/registries\.d/defaylt\.yaml\fR\. Все подписи храняться в локальном для создаваемого кластера \fBWEB\-сервере по адресу\fR: \fBhttp://sigstore\.local:81/sigstore/\fR
+.
+.IP "" 0
+

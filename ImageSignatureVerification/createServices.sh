@@ -1,5 +1,15 @@
 #!/bin/sh
 
+. podsec-functions
+
+mes=$(isSigstoreServer)
+if [ -n "$mes" ]
+then
+  echo -ne $mes >&2
+  echo "Запуск сервисов невозможен." >&2
+  exit 1
+fi
+
 # Настройка sigStore
 cd /etc/nginx/sites-enabled.d
 sed -i  -e 's/server_name .*;/server_name sigstore.local;/' -e 's|root .*|root /var/sigstore;|' -e 's/listen .*;/listen 0.0.0.0:81;/' ../sites-available.d/default.conf

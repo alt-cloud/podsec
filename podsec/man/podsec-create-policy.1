@@ -1,16 +1,50 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-CREATE\-POLICY" "" "March 2023" "" ""
+.TH "PODSEC\-CREATE\-POLICY" "1" "March 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-create\-policy\fR
-.
-.P
-podsec\-create\-policy \- скрипт создает файлы политик и настраивает системные сервисы для работы podman в rootless режиме
+\fBpodsec\-create\-policy\fR \- создание системных политик и файлов конфигурации
 .
 .SH "SYNOPSIS"
-podsec\-create\-policy \fIip\-адрес\fIрегистратора\fRи\fIсервера\fRподписей\fR
+\fBpodsec\-create\-policy ip\-адрес_регистратора_и_сервера_подписей\fR
 .
 .SH "DESCRIPTION"
-Cкрипт создает файлы политик и настраивает системные сервисы для работы podman в rootless режиме
+Cкрипт создает файлы политик и настраивает системные сервисы для работы \fBpodman\fR как в \fBrootfull\fR, так и в \fBrootless\fR режиме:
+.
+.IP "\[ci]" 4
+Добавляет в файл \fB/etc/hosts\fR привязку доменов \fBregistry\.local\fR, \fBsigstore\.local\fR к указанному \fBip\-адресу_регистратора_и_сервера_подписей\fR;
+.
+.IP "\[ci]" 4
+Создает с сохранением предыдущих файл политик \fB/etc/containers/policy\.json\fR;
+.
+.IP "\[ci]" 4
+Создает с сохранением предыдущих файл \fB/etc/containers/registries\.d/default\.yaml\fR описания доступа к открытым ключам подписантов;
+.
+.IP "\[ci]" 4
+Создает группу \fBpodman\fR;
+.
+.IP "\[ci]" 4
+Если \fBip\-адрес_регистратора_и_сервера_подписей\fR совпадает с локальным IP\-адресов, создает группу \fBpodmen_dev\fR и инициализирует каталог \fB/var/sigstore/\fR и подкаталоги хранения открытых ключей и подписей образов;
+.
+.IP "\[ci]" 4
+Добавлеяет insecure\-доступ к регистратору \fBregistry\.local\fR в файл \fB/etc/containers/registries\.conf\fR;
+.
+.IP "\[ci]" 4
+Настраивает использования образа \fBregistry\.local/k8s\-p10/pause:3\.7\fR при запуска \fBpod\fR\'ов в \fBpodman\fR (\fBpodman pod init\fR);
+.
+.IP "" 0
+.
+.SH "SECURITY CONSIDERATIONS"
+.
+.IP "\[ci]" 4
+\fBIP\-адрес регистратора\fR и сервера подписей не должен быть локальным \fB127\.0\.0\.1\fR
+.
+.IP "\[ci]" 4
+Если привязка доменов \fBregistry\.local\fR, \fBsigstore\.local\fR в файле \fB/etc/hosts\fR уже существует скрипт прекращает свою работу с кодом завершения \fB1\fR\. Необходимо удалить строку привязки и перезапустить скрипт\.
+.
+.IP "\[ci]" 4
+Если скрипт запускается на узле кластера отличным от \fBsigstore\.local\fR, то после работы скрипта необходимо скопировать с узла \fBsigstore\.local\fR файл политик \fB/etc/containets/policy\.json\fR в соответствующий каталог \fB/etc/containets/\fR\. Данную операци\. необходимо производить при каждом добавлении пользователя подписывающего образы на \fBsigstore\.local\fR\.
+.
+.IP "" 0
+

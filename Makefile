@@ -25,22 +25,30 @@ PODSECPROGRAMMS = \
 	podsec-create-podmanusers \
 	podsec-create-policy \
 	podsec-create-services \
-	podsec-load-sign-oci
+	podsec-load-sign-oci \
+	podsec-save-oci
+
+PODSECFUNCTIONS = \
+	podsec-functions
 
 PODSECK8SPROGRAMS= \
-	podsec-k8s-add-context \
-	podsec-k8s-addto-kubeconfig \
-	podsec-k8s-approve-cert \
-	podsec-k8s-check-crt \
-	podsec-k8s-create-csr \
-	podsec-k8s-create-kubeconfig \
-	podsec-k8s-create-master \
-	podsec-k8s-csr-to-cluster
+	podsec-k8s-save-oci
+
+# 	podsec-k8s-add-context \
+# 	podsec-k8s-addto-kubeconfig \
+# 	podsec-k8s-approve-cert \
+# 	podsec-k8s-check-crt \
+# 	podsec-k8s-create-csr \
+# 	podsec-k8s-create-kubeconfig \
+# 	podsec-k8s-create-master \
+# 	podsec-k8s-csr-to-cluster
+
+PODSECK8SMANIFESTS= \
+	kube-flannel.yml
 
 PODSECMAN1PAGES = $(PODSECPROGRAMMS:=.1)
 PODSECK8SMAN1PAGES = $(PODSECK8SPROGRAMS:=.1)
-MANPAGES = $(PODSECMAN1PAGES)
-#MANPAGES = $(PODSECMAN1PAGES) $(PODSECK8SMAN1PAGES)
+MANPAGES = $(PODSECMAN1PAGES) $(PODSECK8SMAN1PAGES)
 
 bindir = /usr/bin
 datadir = /usr/share
@@ -62,11 +70,18 @@ TARGETS = $(PROGRAMS)
 all:
 
 install: all
+	ls -lR
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
-	cd ./podsec/bin;$(CP) $(PODSECPROGRAMMS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s/bin/;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)$(bindir)/
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
-	cd ./podsec/man;$(INSTALL) -p -m644 $(MANPAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec/bin;$(CHMOD) 644 $(PODSECFUNCTIONS)
+	cd ./podsec/bin;$(CP) $(PODSECPROGRAMMS) $(DESTDIR)$(bindir)/;
+	cd ./podsec/bin;$(CP) $(PODSECFUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec/man;$(INSTALL) -p -m644 $(PODSECMAN1PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-k8s/bin;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSECK8SMAN1PAGES) $(DESTDIR)$(man1dir)/
+	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
+	cd ./podsec-k8s/manifets;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)/etc/kubernetes/manifests/
+
 
 clean:
 

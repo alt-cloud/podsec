@@ -9,7 +9,7 @@ createImageMaker() {
   user=$1 regPath=$2
 #   linkedPolicyFile=$linkedPolicyFile
   adduser $user -g podman -G podman_dev,fuse
-  echo "Введите пароль разработчика образов контейнеров"
+  echo "Введите пароль пользователя $user - разработчика  образов контейнеров"
   passwd $user
 
   cd /home/$user
@@ -110,19 +110,29 @@ testRepoPath() {
 }
 
 #MAIN
-users=$(testRepoPath $*)
 
-# Создать каталог sogstore с подкаталогами
-if [ ! -d /var/sigstore/ ]
+. podsec-functions
+
+# Проверка. Является ли текущий сервер сервером, поддерживающий регистратор (registry.local) и сервер подписи образов (sigstore.local)
+echo "Проверка. Является ли текущий сервер сервером, поддерживающий регистратор (registry.local) и сервер подписи образов (sigstore.local)"
+mes=$(isSigstoreServer)
+if [ -n "$mes" ]
 then
-  mkdir -p -m 0775 /var/sigstore/keys/
-  chown root:podman_dev /var/sigstore/keys/
-  mkdir -p -m 0775 /var/sigstore/sigstore/
-  chown root:podman_dev /var/sigstore/sigstore/
-  echo '<html><body><h1>SigStore works!</h1></body></html>' > /var/sigstore/index.html
+  echo $mes >&2
+  echo "Создание пользователей класса 'разработчик образов контейнеров' невозможно" >&2
+  exit 1
 fi
 
-# Запомнить текущу. политику
+users=$(testRepoPath $*)
+
+if [ ! -d "/var/sigstore/" ]
+then
+  echo "Не создан каталог /var/sigstore/ сервера подписей" >&2
+  echo "Вызовите скрипт podsec-create-policy для его инициализации" >&2
+  exit 1
+fi
+
+# Запомнить текущую политику
 yesterday=$(date '+%Y-%m-%d_%H:%M:%S' -d "yesterday")
 if [ ! -L $policyFile ]
 then :;
@@ -133,27 +143,20 @@ export linkedPolicyFile="policy_${now}"
 cd /etc/containers/
 cp -L policy.json $linkedPolicyFile
 
-groupadd -r podman
-groupadd -r podman_dev
 # Сформировать конфигурации для пользователей
 for user in $users
 do
   createImageMaker $user
 done
 
-sysctl -w kernel.unprivileged_userns_clone=1
-# Это надо будет заменить на control
-chown root:podman /usr/bin/newuidmap /usr/bin/newgidmap
-chmod 6750 /usr/bin/newuidmap /usr/bin/newgidmap
-# setcap cap_setgid,cap_setuid=ep  /usr/bin/newuidmap
-# setcap cap_setgid,cap_setuid=ep  /usr/bin/newgidmap
-
 cd /etc/containers/
+# Привязать policy.json
 if jq . $linkedPolicyFile >/dev/null 2>&1
 then
   ln -sf $linkedPolicyFile policy.json
 fi
 
+# Скопировать в policy.json системный, заменив в default[0].type с reject  на insecureAcceptAnything
 for policyFile in /home/*/.config/containers/policy.json
 do
   jq '.default[0].type="insecureAcceptAnything"' /etc/containers/policy.json > $policyFile
