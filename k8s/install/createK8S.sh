@@ -44,6 +44,7 @@ su -c "kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml"
 # Настройка $user на роль администратора кластера
 echo "Настройка $user на роль администратора кластера"
 cd /home/$user
-cp -r /root/.kube .
-chmod -R 600 .kube
-chown -R $user:podman .kube
+mkdir .kube
+cp /etc/kubernetes/admin.conf .kube/config
+chown -R $user:$user .kubechown -R $user:$user .kube
+chmod -R 0700 .kube
