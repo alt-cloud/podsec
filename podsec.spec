@@ -53,7 +53,7 @@ Requires: podsec >= 0.1.1
 Summary: Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
 
-%description k8s
+%description k8s-rbac
 This package contains utilities for
 - creating RBAC users
 - generation of certificates and configuration files for users
@@ -78,7 +78,7 @@ This package contains utilities for
 %_mandir/man?/podsec-k8s-*
 %_sysconfdir/kubernetes/manifests/*
 
-%files k8s
+%files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-rbac-*
 
