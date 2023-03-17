@@ -1,0 +1,44 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "PODSEC\-K8S\-CREATE\-MASTER" "1" "March 2023" "" ""
+.
+.SH "NAME"
+\fBpodsec\-k8s\-create\-master\fR \- запуск на мастер\-узла kubernetes
+.
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-create\-master имя_пользователя_с_административными_правами\fR
+.
+.SH "DESCRIPTION"
+Скрипт производит:
+.
+.IP "\[ci]" 4
+Настройку /etc/crio/crio\.conf на использования в качестве образа pause registry\.local/k8s\-p10/pause:3\.7
+.
+.IP "\[ci]" 4
+Запуск серввиса kubelet
+.
+.IP "\[ci]" 4
+Инициализацию master\-узла кластера
+.
+.IP "\[ci]" 4
+Настройку root на роль администратора кластера
+.
+.IP "\[ci]" 4
+Настройка указанного пользователя на роль администратора кластера
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-create\-master securityadmin\fR
+.
+.SH "SECURITY CONSIDERATIONS"
+.
+.IP "\[ci]" 4
+Для работ в качестве \fIадминистратор безопасности средства контейнеризации\fR необходимо на master\-узле создать пользователя (например \fBsecurityadmin\fR) принадлежащег группам \fBpodman\fR, \fBwheel\fR\.
+.
+.IP "\[ci]" 4
+Так как все работа с кластером производится по REST\-интерфейсу, то для обеспечения повышенных мер безопасности следует заводить \fBВСЕХ пользователей\fR, включая \fIадминистратор безопасности средства контейнеризации\fR \fBВНЕ узлов кластера\fR\. Для работы с кластером достаточно команды \fBkubectl\fR, входящую в пакет \fBkubernetes\-client\fR\.
+.
+.IP "" 0
+
