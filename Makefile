@@ -32,7 +32,8 @@ PODSECFUNCTIONS = \
 	podsec-functions
 
 PODSECK8SPROGRAMS= \
-	podsec-k8s-save-oci
+	podsec-k8s-save-oci \
+ 	podsec-k8s-create-master
 
 # 	podsec-k8s-add-context \
 # 	podsec-k8s-addto-kubeconfig \
@@ -40,7 +41,6 @@ PODSECK8SPROGRAMS= \
 # 	podsec-k8s-check-crt \
 # 	podsec-k8s-create-csr \
 # 	podsec-k8s-create-kubeconfig \
-# 	podsec-k8s-create-master \
 # 	podsec-k8s-csr-to-cluster
 
 PODSECK8SMANIFESTS= \
@@ -80,7 +80,7 @@ install: all
 	cd ./podsec-k8s/bin;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSECK8SMAN1PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
-	cd ./podsec-k8s/manifets;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)/etc/kubernetes/manifests/
+	cd ./podsec-k8s/manifests/;$(CP) $(PODSECK8SMANIFESTS) $(DESTDIR)/etc/kubernetes/manifests/
 
 
 clean:
