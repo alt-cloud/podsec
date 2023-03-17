@@ -46,7 +46,18 @@ Requires: kubernetes-client >= 1.24.8
 %description k8s
 This package contains utilities for:
 - cluster node configurations
+Requires: kubernetes-client >= 1.24.8
+Requires: podsec >= 0.1.1
+
+%package k8s-rbac
+Summary: Summary: Set of scripts for Kubernetes RBAC
+Group: Development/Other
+
+%description k8s
+This package contains utilities for
+- creating RBAC users
 - generation of certificates and configuration files for users
+- generating cluster and usual roles and binding them to users
 
 %prep
 %setup
@@ -67,6 +78,9 @@ This package contains utilities for:
 %_mandir/man?/podsec-k8s-*
 %_sysconfdir/kubernetes/manifests/*
 
+%files k8s
+%_bindir/podsec-k8s-rbac-*
+%_mandir/man?/podsec-k8s-rbac-*
 
 %changelog
 * Fri Mar 17 2023 Alexey Kostarev <kaf@altlinux.org> 0.1.6-alt1

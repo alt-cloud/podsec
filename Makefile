@@ -20,7 +20,7 @@
 
 PROJECT = podsec
 VERSION = $(shell sed '/^Version: */!d;s///;q' gear.spec)
-PODSECPROGRAMMS = \
+PODSEC_PROGRAMMS = \
 	podsec-create-imagemakeruser \
 	podsec-create-podmanusers \
 	podsec-create-policy \
@@ -28,10 +28,10 @@ PODSECPROGRAMMS = \
 	podsec-load-sign-oci \
 	podsec-save-oci
 
-PODSECFUNCTIONS = \
+PODSEC_FUNCTIONS = \
 	podsec-functions
 
-PODSECK8SPROGRAMS= \
+PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
  	podsec-k8s-create-master
 
@@ -43,12 +43,18 @@ PODSECK8SPROGRAMS= \
 # 	podsec-k8s-create-kubeconfig \
 # 	podsec-k8s-csr-to-cluster
 
-PODSECK8SMANIFESTS= \
+PODSEC_K8S_RBAC_PROGRAMS= \
+	podsec-k8s-rbac-create-kubeconfig  \
+	podsec-k8s-rbac-create-user
+
+
+PODSEC_K8S_MANIFESTS= \
 	kube-flannel.yml
 
-PODSECMAN1PAGES = $(PODSECPROGRAMMS:=.1)
-PODSECK8SMAN1PAGES = $(PODSECK8SPROGRAMS:=.1)
-MANPAGES = $(PODSECMAN1PAGES) $(PODSECK8SMAN1PAGES)
+PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
+PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS:=.1)
+PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS:=.1)
+MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
 bindir = /usr/bin
 datadir = /usr/share
@@ -73,15 +79,16 @@ install: all
 	ls -lR
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
-	cd ./podsec/bin;$(CHMOD) 644 $(PODSECFUNCTIONS)
-	cd ./podsec/bin;$(CP) $(PODSECPROGRAMMS) $(DESTDIR)$(bindir)/;
-	cd ./podsec/bin;$(CP) $(PODSECFUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec/man;$(INSTALL) -p -m644 $(PODSECMAN1PAGES) $(DESTDIR)$(man1dir)/
-	cd ./podsec-k8s/bin;$(CP) $(PODSECK8SPROGRAMS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSECK8SMAN1PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec/bin;$(CHMOD) 644 $(PODSEC_FUNCTIONS)
+	cd ./podsec/bin;$(CP) $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/;
+	cd ./podsec/bin;$(CP) $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec/man;$(INSTALL) -p -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
-	cd ./podsec-k8s/manifests/;$(CP) $(PODSECK8SMANIFESTS) $(DESTDIR)/etc/kubernetes/manifests/
-
+	cd ./podsec-k8s/manifests/;$(CP) $(PODSEC_K8S_MANIFESTS) $(DESTDIR)/etc/kubernetes/manifests/
+	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 
 clean:
 

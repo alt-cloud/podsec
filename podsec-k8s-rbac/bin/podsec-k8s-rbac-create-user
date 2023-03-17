@@ -1,0 +1,20 @@
+#!/bin/sh
+if [ $# -gt 1 ]
+then
+  echo "Формат вызова: $0 <пользователь>" >&2
+  exit 1
+fi
+user=$1
+
+adddgrop -r k8s 2>/dev/null
+adduser $user -g k8s -G podman
+passwd  $user
+
+export USERDIR=/home/$user
+export KUBECONFIGDIR=$USERDIR/.kube
+sudo chmod 770 $USERDIR
+sudo mkdir $KUBECONFIGDIR
+sudo chmod 770 $KUBECONFIGDIR
+sudo chown -R $user:k8s $USERDIR
+
+
