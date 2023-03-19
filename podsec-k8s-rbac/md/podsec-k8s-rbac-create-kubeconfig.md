@@ -1,4 +1,4 @@
-podsec-k8s-rbac-create-kubeconfig(1) -- создание RBAC пользователя
+podsec-k8s-rbac-create-kubeconfig(1) -- создание ключей, сертификатов и файла конфигурации RBSC-пользователя
 ================================
 
 ## SYNOPSIS
