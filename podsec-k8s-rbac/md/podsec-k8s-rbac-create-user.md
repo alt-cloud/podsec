@@ -17,8 +17,13 @@ podsec-k8s-rbac-create-user(1) -- создание RBAC-пользователя
 
 ## EXAMPLES
 
-`podsec-k8s-rbac-create-user userrbac1`
+`podsec-k8s-rbac-create-user k8s-user1`
 
 ## SECURITY CONSIDERATIONS
 
+## SEE ALSO
+
+- [Генерация сертификатов, создание рабочих мест администратора безопасности средства контейнеризации, администраторов информационной (автоматизированной) системы и назначение им RBAC-ролей](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/README.md);
+
+- [Создание рабочих мест и сертификатов](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md).
 

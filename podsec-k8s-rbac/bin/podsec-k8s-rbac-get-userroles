@@ -25,6 +25,8 @@ then
     roleName=${3:1:-1}
     shift;shift;shift
     clusterRole="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
+    unbindCmd="podsec-k8s-rbac-unbindrole $user clusterrole $roleName $bindName"
+    clusterRole+=",\"unbindCmd\":\"$unbindCmd\""
     if [ "$showRules" == 'showRules' ]
     then
       # echo "Правила роли:"
@@ -37,29 +39,31 @@ then
 fi
 clusterRoles="\"clusterRoles\":[$clusterRoles]"
 
-roles=
-set -- $(kubectl get rolebinding  -o json 2>/dev/null |
-  jq '.items[] | select((.subjects!=null and .subjects[].name=="'$user'")) | .metadata.name,.roleRef.kind,.roleRef.name')
-if [ $# -ge 3 ]
-then
-  while [ $# -gt 0 ]
-  do
-    bindName=${1:1:-1}
-    roleType=${2:1:-1}
-    roleName=${3:1:-1}
-    shift;shift;shift
-    role="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
-    if [ "$showRules" == 'showRules' ]
-    then
-      # echo "Правила роли:"
-      rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
-      role+=",\"rules\":$rules"
-    fi
-    roles+=${roles:+,}
-    roles+="{$role}"
-  done
-fi
-allnamespaceRoles="\"allNamespaces\":[$roles]"
+# roles=
+# set -- $(kubectl get rolebinding  -o json 2>/dev/null |
+#   jq '.items[] | select((.subjects!=null and .subjects[].name=="'$user'")) | .metadata.name,.roleRef.kind,.roleRef.name')
+# if [ $# -ge 3 ]
+# then
+#   while [ $# -gt 0 ]
+#   do
+#     bindName=${1:1:-1}
+#     roleType=${2:1:-1}
+#     roleName=${3:1:-1}
+#     shift;shift;shift
+#     role="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
+#     unbindCmd="podsec-k8s-rbac-unbindrole $user role $roleName $bindName"
+#     role+=",\"unbindCmd\":\"$unbindCmd\""
+#     if [ "$showRules" == 'showRules' ]
+#     then
+#       # echo "Правила роли:"
+#       rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
+#       role+=",\"rules\":$rules"
+#     fi
+#     roles+=${roles:+,}
+#     roles+="{$role}"
+#   done
+# fi
+# allnamespaceRoles="\"allNamespaces\":[$roles]"
 
 namespaceRoles=
 for namespace in $(kubectl get ns -o json | jq '.items[].metadata.name')
@@ -83,6 +87,8 @@ do
       roleName=${3:1:-1}
       shift;shift;shift
       role="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
+      unbindCmd="podsec-k8s-rbac-unbindrole $user role $roleName $bindName $namespace"
+      role+=",\"unbindCmd\":\"$unbindCmd\""
       if [ "$showRules" == 'showRules' ]
       then
         rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
@@ -104,6 +110,6 @@ do
 done
 namespaceRoles="\"namespaces\":[$namespaceRoles]"
 
-ret="{\"$user\":{$clusterRoles, \"roles\":{$allnamespaceRoles, $namespaceRoles}}}"
+ret="{\"$user\":{$clusterRoles, \"roles\":{$namespaceRoles}}}"
 # echo "ret=$ret"
 echo $ret | jq .

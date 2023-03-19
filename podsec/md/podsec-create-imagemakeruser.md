@@ -66,3 +66,9 @@ Cкрипт создает пользователей разработчиков
 - Все открытые ключи пользователей располагаются в каталоге `/var/sigstore/keys/` и должны быть скопированы на каждый сервер кластера к каталог `/var/sigstore/keys/`
 
 - Подписи образов хранятся в каталоге  `/var/sigstore/sigstore/` с отброшенными именами регистраторов. Таким образом, если в системе контролируются подписи образов с разных регистраторов (например: `registry.altlinux.org` и `registry.local`) и образ `registry.local/k8s-p10/pause:3.7` c `@sha256\=347a15493d0a38d9ce74f23ea9f081583728a20dbdc11d7c17ef286d9cade3ec` подписан, то будут считаться подписанными все образы с данным `sha256`: `registry.altlinux.orh/k8s-p10/pause:3.7`, ...
+
+## SEE ALSO
+
+- [Разработчик образов контейнеров (imagemaker)](https://github.com/alt-cloud/podsec/tree/master/SigningImages).
+
+- [Описание периодического контроля целостности образов контейнеров и параметров настройки средства контейнеризации](https://github.com/alt-cloud/podsec/tree/master/ImageSignatureVerification)

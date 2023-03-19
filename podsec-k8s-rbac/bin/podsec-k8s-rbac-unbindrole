@@ -5,14 +5,14 @@ cmdname=$0
 
 if [ $# -lt 4 -o $# -gt 5 ]
 then
-  echo -ne "Формат:\n$0 имя_пользователя role|role=clusterrole|clusterrole связываемая_роль имя_связки_роли [namespace]"
+  echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]"
   exit 1
 fi
 
 user=$1
 bindedRoleType=$2
-bindedRoleName=$3
-rolebindname=$4
+roleName=$3
+bindName=$4
 namespace=
 if [ $# -eq 5 ]
 then
@@ -33,7 +33,7 @@ case $bindedRoleType in
     bindedRoleType='clusterrole'
     break;;
   *) echo "Неверный тип кластерной роли $bindedRoleType";
-    echo -ne "Формат:\n$0 имя_пользователя role|role=clusterrole|clusterrole роль имя_связки_роли [namespace]";
+    echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]";
 esac
 
 if [ -n "$namespace" -a $roleType == 'clusterrole' ]
@@ -42,7 +42,7 @@ then
   exit 1
 fi
 
-if ! kubectl $namespace get ${bindedRoleType} $bindedRoleName >/dev/null 2>&1
+if ! roleNameDesc=$(kubectl $namespace get ${roleType}binding $bindName -o json 2>/dev/null)
 then
   if [ $roleType == 'clusterrole' ]
   then
@@ -50,6 +50,23 @@ then
   else
     roleTxt="Роль"
   fi
-  echo "$roleTxt '$bindedRoleName' отсутствует"
+  echo "$roleTxt '$roleName' отсутствует"
   exit 1
 fi
+
+deletedSubjects=$(echo $roleNameDesc | jq '[.subjects[] | select(.name!="'$user'")]')
+if [ -z "$deletedSubjects" ]
+then
+  echo "Пользователь $user отсутствует в связке роли $bindName"
+  exit 1
+else
+  if [ "$deletedSubjects" == '[]' ]
+  then
+    # roleBinding после удаления пуст -> удалить его
+    kubectl $namespace delete ${roleType}binding $bindName
+  else
+    # Модифицировать роль
+    echo $roleNameDesc | jq ".subjects=$deletedSubjects" | kubectl apply -f -
+  fi
+fi
+exit 0

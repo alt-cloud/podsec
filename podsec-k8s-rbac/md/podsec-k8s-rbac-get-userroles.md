@@ -3,7 +3,7 @@ podsec-k8s-rbac-get-userroles(1) -- получить список кластер
 
 ## SYNOPSIS
 
-`podsec-k8s-rbac-get-userroles пользователь [showRules]`
+`podsec-k8s-rbac-get-userroles имя_пользователя [showRules]`
 
 ## DESCRIPTION
 
@@ -11,7 +11,7 @@ podsec-k8s-rbac-get-userroles(1) -- получить список кластер
 При указании флага `showRules`, для каждой роли указывается список правил ("rules:[...]"), которые принадлежат каждой роли пользователя.
 
 Результат возвращается в виде json-строки формата:
-```
+<pre>
 {
   "<username>": {
     "clusterRoles": [...],
@@ -25,51 +25,63 @@ podsec-k8s-rbac-get-userroles(1) -- получить список кластер
     }
   }
 }
-```
+</pre>
 
-Где `[...]` - массив объетов типа:
-```
+Где `[...]` - массив объектов типа:
+<pre>
 {
   "bindRoleName": "<bindRoleName>",
   "bindedRoleType": "ClusterRole|Role",
-  "bindedRoleName": "<bindedRoleName>"
+  "bindedRoleName": "<bindedRoleName>",
+  "unbindCmd": "podsec-k8s-rbac-unbindrole ..."
 }
+</pre>
 
-```
 
 ## EXAMPLES
 
 `podsec-k8s-rbac-get-userroles k8s-user1 | yq -y`
-
-```
+<pre>
 k8s-user1:
   clusterRoles:
     - bindName: sysadmin
       roleType: ClusterRole
       roleName: edit
+      unbindCmd: podsec-k8s-rbac-unbindrole k8s-user1 clusterrole edit sysadmin
     - bindName: sysview
       roleType: ClusterRole
       roleName: view
+      unbindCmd: podsec-k8s-rbac-unbindrole k8s-user1 clusterrole view sysview
   roles:
-    allNamespaces:
-      - bindName: sysview
-        roleType: ClusterRole
-        roleName: view
     namespaces:
       - default:
-          - bindName: sysadmin
-            roleType: ClusterRole
-            roleName: edit
           - bindName: basic-user
             roleType: ClusterRole
             roleName: system:basic-user
+            unbindCmd: podsec-k8s-rbac-unbindrole k8s-user1 role system:basic-user
+              basic-user default
+          - bindName: sysadmin
+            roleType: ClusterRole
+            roleName: edit
+            unbindCmd: podsec-k8s-rbac-unbindrole k8s-user1 role edit sysadmin default
       - smf:
           - bindName: basic-user
             roleType: ClusterRole
             roleName: system:basic-user
-
-```
+            unbindCmd: podsec-k8s-rbac-unbindrole k8s-user1 role system:basic-user
+              basic-user smf
+</pre>
 
 ## SECURITY CONSIDERATIONS
 
+## SEE ALSO
 
+- [Генерация сертификатов, создание рабочих мест администратора безопасности средства контейнеризации, администраторов информационной (автоматизированной) системы и назначение им RBAC-ролей](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/README.md);
+
+- [Описание основных классов ролей кластера (Roles, ClusterRoles) и механизмов из связываения с субъектами](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/rolesDescribe.md);
+
+- [Настройка рабочих мест администраторов информационной (автоматизированной) системы (ClusterRole)](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md);
+
+- [Настройка рабочих мест администраторов проектов (Role)](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md);
+
+- [Настройка других ролей](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md).

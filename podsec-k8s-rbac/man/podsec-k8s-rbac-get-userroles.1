@@ -7,35 +7,96 @@
 \fBpodsec\-k8s\-rbac\-get\-userroles\fR \- получить список кластерные и обычных ролей пользователя
 .
 .SH "SYNOPSIS"
-\fBpodsec\-k8s\-rbac\-get\-userroles пользователь [showRules]\fR
+\fBpodsec\-k8s\-rbac\-get\-userroles имя_пользователя [showRules]\fR
 .
 .SH "DESCRIPTION"
 Скрипт формирует список кластерные и обычных ролей которые связанв с пользователем\. При указании флага \fBshowRules\fR, для каждой роли указывается список правил ("rules:[\|\.\|\.\|\.]"), которые принадлежат каждой роли пользователя\.
 .
 .P
-Результат возвращается в виде json\-строки формата: \fB{ "<username>": { "clusterRoles": [\|\.\|\.\|\.], "roles": { "allNamespaces": [\|\.\|\.\|\.], "namespaces": [ { "<namespace1>": [\|\.\|\.\|\.], \|\.\|\.\|\. } } } }\fR
-.
-.P
-Где \fB[\|\.\|\.\|\.]\fR \- массив объетов типа: ``` { "bindRoleName": "\fIbindRoleName\fR", "bindedRoleType": "ClusterRole|Role", "bindedRoleName": "\fIbindedRoleName\fR" }
+Результат возвращается в виде json\-строки формата:
 .
 .IP "" 4
 .
 .nf
 
 
-## EXAMPLES
-
-`podsec\-k8s\-rbac\-get\-userroles k8s\-user1 | yq \-y`
+{
+  "\fIusername\fR": {
+    "clusterRoles": [\|\.\|\.\|\.],
+    "roles": {
+      "allNamespaces": [\|\.\|\.\|\.],
+      "namespaces": [
+        {
+          "\fInamespace1\fR": [\|\.\|\.\|\.],
+          \|\.\|\.\|\.
+        }
+    }
+  }
+}
 .
 .fi
 .
 .IP "" 0
 .
 .P
-k8s\-user1: clusterRoles: \- bindName: sysadmin roleType: ClusterRole roleName: edit \- bindName: sysview roleType: ClusterRole roleName: view roles: allNamespaces: \- bindName: sysview roleType: ClusterRole roleName: view namespaces: \- default: \- bindName: sysadmin roleType: ClusterRole roleName: edit \- bindName: basic\-user roleType: ClusterRole roleName: system:basic\-user \- smf: \- bindName: basic\-user roleType: ClusterRole roleName: system:basic\-user
+Где \fB[\|\.\|\.\|\.]\fR \- массив объектов типа:
 .
-.P
-```
+.IP "" 4
+.
+.nf
+
+
+{
+  "bindRoleName": "\fIbindRoleName\fR",
+  "bindedRoleType": "ClusterRole|Role",
+  "bindedRoleName": "\fIbindedRoleName\fR",
+  "unbindCmd": "podsec\-k8s\-rbac\-unbindrole \|\.\|\.\|\."
+}
+.
+.fi
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-rbac\-get\-userroles k8s\-user1 | yq \-y\fR
+.
+.IP "" 4
+.
+.nf
+
+
+k8s\-user1:
+  clusterRoles:
+    \- bindName: sysadmin
+      roleType: ClusterRole
+      roleName: edit
+      unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 clusterrole edit sysadmin
+    \- bindName: sysview
+      roleType: ClusterRole
+      roleName: view
+      unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 clusterrole view sysview
+  roles:
+    namespaces:
+      \- default:
+          \- bindName: basic\-user
+            roleType: ClusterRole
+            roleName: system:basic\-user
+            unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 role system:basic\-user
+              basic\-user default
+          \- bindName: sysadmin
+            roleType: ClusterRole
+            roleName: edit
+            unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 role edit sysadmin default
+      \- smf:
+          \- bindName: basic\-user
+            roleType: ClusterRole
+            roleName: system:basic\-user
+            unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 role system:basic\-user
+              basic\-user smf
+.
+.fi
+.
+.IP "" 0
 .
 .SH "SECURITY CONSIDERATIONS"
 
