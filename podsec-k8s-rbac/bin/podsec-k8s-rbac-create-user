@@ -1,4 +1,15 @@
 #!/bin/sh
+
+if [ $(id -u) -ne 0 ]
+then
+  echo "Скрипт должен запуссаться пользователем с права-ми root"
+  exit 1
+fi
+if ! echo $PATH | grep /usr/sbin >/dev/null 2>&1
+then
+  echo "В тропе PATH нет каталогов запуска привелигированных команд. Используйте 'su - ...' вместо 'su ...'"
+  exit 1
+fi
 if [ $# -gt 1 ]
 then
   echo "Формат вызова: $0 <пользователь>" >&2
@@ -6,15 +17,22 @@ then
 fi
 user=$1
 
+export USERDIR=/home/$user
+
+if [ -d $USERDIR ]
+then
+  echo "Пользователь $user существует" >&2
+  exit 1
+fi
 adddgrop -r k8s 2>/dev/null
-adduser $user -g k8s -G podman
+# adddgrop $user 2>/dev/null
+adduser $user -G podman,k8s
 passwd  $user
 
-export USERDIR=/home/$user
 export KUBECONFIGDIR=$USERDIR/.kube
 sudo chmod 770 $USERDIR
 sudo mkdir $KUBECONFIGDIR
-sudo chmod 770 $KUBECONFIGDIR
+sudo chmod 700 $KUBECONFIGDIR
 sudo chown -R $user:k8s $USERDIR
 
 

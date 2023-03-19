@@ -1,0 +1,109 @@
+#!/bin/sh
+
+if [ $# -lt 1 -a $# -gt 2 ]
+then
+  echo -ne "Неверное число параметров.\nФормат:\n$0 пользователь [showRules]\n"
+  exit 1
+fi
+
+if [ $# -eq 2 -a "$2" != 'showRules' ]
+then
+  echo -ne "Неверный второй параметр.\nФормат:\n$0 пользователь [showRules]\n"
+  exit 1
+fi
+user=$1
+showRules=$2
+
+set -- $(kubectl get clusterrolebinding  -o json 2>/dev/null |
+  jq '.items[] | select((.subjects!=null and .subjects[].name=="'$user'")) | .metadata.name,.roleRef.kind,.roleRef.name')
+if [ $# -ge 3 ]
+then
+  while [ $# -gt 0 ]
+  do
+    bindName=${1:1:-1}
+    roleType=${2:1:-1}
+    roleName=${3:1:-1}
+    shift;shift;shift
+    clusterRole="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
+    if [ "$showRules" == 'showRules' ]
+    then
+      # echo "Правила роли:"
+      rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
+      clusterRole+=",\"rules\":$rules"
+    fi
+    clusterRoles+=${clusterRoles:+,}
+    clusterRoles+="{$clusterRole}"
+  done
+fi
+clusterRoles="\"clusterRoles\":[$clusterRoles]"
+
+roles=
+set -- $(kubectl get rolebinding  -o json 2>/dev/null |
+  jq '.items[] | select((.subjects!=null and .subjects[].name=="'$user'")) | .metadata.name,.roleRef.kind,.roleRef.name')
+if [ $# -ge 3 ]
+then
+  while [ $# -gt 0 ]
+  do
+    bindName=${1:1:-1}
+    roleType=${2:1:-1}
+    roleName=${3:1:-1}
+    shift;shift;shift
+    role="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
+    if [ "$showRules" == 'showRules' ]
+    then
+      # echo "Правила роли:"
+      rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
+      role+=",\"rules\":$rules"
+    fi
+    roles+=${roles:+,}
+    roles+="{$role}"
+  done
+fi
+allnamespaceRoles="\"allNamespaces\":[$roles]"
+
+namespaceRoles=
+for namespace in $(kubectl get ns -o json | jq '.items[].metadata.name')
+do
+  namespace=${namespace:1:-1}
+  set -- $(kubectl -n $namespace get rolebinding  -o json |
+    jq '.items[] | select((.subjects!=null and .subjects[].name=="'$user'")) | .metadata.name,.roleRef.kind,.roleRef.name')
+  roles=
+  if [ $# -ge 3 ]
+  then
+    while [ $# -gt 0 ]
+    do
+      bindName=${1:1:-1}
+      roleType=${2:1:-1}
+      if [ $roleType == 'ClusterRole' ]
+      then
+        bindedRoleTxt='кластерной'
+      else
+        bindedRoleTxt='обычной'
+      fi
+      roleName=${3:1:-1}
+      shift;shift;shift
+      role="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
+      if [ "$showRules" == 'showRules' ]
+      then
+        rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
+        role+=",\"rules\":$rules"
+      fi
+      roles+=${roles:+,}
+      roles+="{$role}"
+    done
+  fi
+  if [ -n "$roles" ]
+  then
+    roles="\"$namespace\":[$roles]"
+  fi
+  if [ -n "$roles" ]
+  then
+    namespaceRoles+=${namespaceRoles:+,}
+    namespaceRoles+="{$roles}"
+  fi
+done
+namespaceRoles="\"namespaces\":[$namespaceRoles]"
+
+ret="{\"$user\":{$clusterRoles, \"roles\":{$allnamespaceRoles, $namespaceRoles}}}"
+# echo "ret=$ret"
+echo $ret | jq .

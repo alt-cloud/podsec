@@ -1,0 +1,73 @@
+#!/bin/sh
+
+cmdname=$0
+. podsec-k8s-rbac-functions
+
+if [ $# -lt 4 -o $# -gt 5 ]
+then
+  echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]"
+  exit 1
+fi
+
+user=$1
+bindedRoleType=$2
+bindedRoleName=$3
+rolebindname=$4
+namespace=
+if [ $# -eq 5 ]
+then
+  namespace="-n $5"
+fi
+
+if [ ! -d /home/$user ]
+then
+  echo "Пользователь $user не существует"
+  exit 1
+fi
+
+case $bindedRoleType in
+  role|clusterrole) roleType=$bindedRoleType;
+    break;;
+  role=clusterrole)
+    roleType="role"
+    bindedRoleType='clusterrole'
+    break;;
+  *) echo "Неверный тип кластерной роли $bindedRoleType";
+    echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]";
+esac
+
+if [ -n "$namespace" -a $roleType == 'clusterrole' ]
+then
+  echo "namespace неприменимо к кластерной роли"
+  exit 1
+fi
+
+if ! kubectl $namespace get ${bindedRoleType} $bindedRoleName >/dev/null 2>&1
+then
+  if [ $roleType == 'clusterrole' ]
+  then
+    roleTxt="Кластерная роль"
+  else
+    roleTxt="Роль"
+  fi
+  echo "$roleTxt '$bindedRoleName' отсутствует"
+  exit 1
+fi
+
+TMPFILE="/tmp/$cmdname.$$"
+# Сформировать шаблон манифеса создания rolebinging
+kubectl $namespace create ${roleType}binding $rolebindname --$bindedRoleType=$bindedRoleName --user=$user --dry-run=client -o json > $TMPFILE
+# Выделить subjects из шаблона
+templateSubject=$(jq '.subjects[]' $TMPFILE)
+# rolebinging уже существует?
+if currentBR=$(kubectl $namespace get ${roleType}binding $rolebindname -o json 2>/dev/null)
+then
+  # Добавить templateSubject к существующему rolebinging
+  subjects=$(echo $currentBR | jq ".subjects | unique | .[length]=$templateSubject | unique")
+  echo $currentBR | jq ".subjects=$subjects" | kubectl $namespace apply -f -
+else
+  # Применить rolebinging из шаблона
+  kubectl $namespace apply -f $TMPFILE
+fi
+rm -f $TMPFILE
+

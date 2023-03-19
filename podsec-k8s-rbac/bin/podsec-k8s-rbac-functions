@@ -1,0 +1,46 @@
+#!/bin/sh
+
+setEnv() {
+  user=$1
+  USERDIR="/home/$user"
+  export KUBECONFIGDIR=$USERDIR/.kube
+  export KUBECONFIGFILE="$KUBECONFIGDIR/config"
+}
+
+setUserKubeconfigAccess() {
+  slist=; n=1; while [ $n -le 64 ]; do slist+=" $n"; let n=$n+1; done
+  trap "while ! su - -c 'chmod 700 $KUBECONFIGDIR'; do :; done" $slist
+  echo "Введите пароль пользователя root"
+  while ! su - -c "chmod 770 $KUBECONFIGDIR"; do :; done
+}
+
+unsetUserKubeconfigAccess() {
+  user=$1
+  echo "Введите пароль пользователя root"
+  while ! su - -c "chown -R $user:k8s $KUBECONFIGDIR;chmod 700 $KUBECONFIGDIR"; do :; done
+}
+
+getClusterIP() {
+  clusterURL=$(kubectl config  view -o json | jq '.clusters[0].cluster.server')
+  if [ -z "$clusterURL" ]
+  then
+    echo "Кластер недоступен (файл конфигурации $KUBECONFIGFILE)"
+    exit 1
+  fi
+  clusterURL=${clusterURL:1:-1}
+  ifs=$IFS IFS=:/
+  set -- $clusterURL
+  IFS=$ifs
+  shift;while [ $# -gt 0 -a -z "$1" ]; do shift; done
+  echo $1
+}
+
+getClusterName() {
+  clusterName=$(kubectl config  view -o json | jq '.clusters[0].name')
+  if [ -z "$clusterName" ]
+  then
+    echo "Кластер недоступен (файл конфигурации $KUBECONFIGFILE)"
+    exit 1
+  fi
+  echo $clusterName
+}
