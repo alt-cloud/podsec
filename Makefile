@@ -35,18 +35,16 @@ PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
  	podsec-k8s-create-master
 
-# 	podsec-k8s-add-context \
-# 	podsec-k8s-addto-kubeconfig \
-# 	podsec-k8s-approve-cert \
-# 	podsec-k8s-check-crt \
-# 	podsec-k8s-create-csr \
-# 	podsec-k8s-create-kubeconfig \
-# 	podsec-k8s-csr-to-cluster
-
 PODSEC_K8S_RBAC_PROGRAMS= \
-	podsec-k8s-rbac-create-kubeconfig  \
-	podsec-k8s-rbac-create-user
+	podsec-k8s-rbac-bindrole \
+	podsec-k8s-rbac-create-kubeconfig \
+	podsec-k8s-rbac-create-remoteplace \
+	podsec-k8s-rbac-create-user \
+	podsec-k8s-rbac-get-userroles \
+	podsec-k8s-rbac-unbindrole
 
+PODSEC_K8S_RBAC_FUNCTIONS = \
+	podsec-k8s-rbac-functions
 
 PODSEC_K8S_MANIFESTS= \
 	kube-flannel.yml
@@ -88,6 +86,7 @@ install: all
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
 	cd ./podsec-k8s/manifests/;$(CP) $(PODSEC_K8S_MANIFESTS) $(DESTDIR)/etc/kubernetes/manifests/
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 
 clean:

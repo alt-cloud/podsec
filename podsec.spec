@@ -5,7 +5,7 @@ Release: alt1
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
-Url: https://github.com/alt-cloud/c10
+Url: https://github.com/alt-cloud/podsec
 BuildArch: noarch
 
 Source: %name-%version.tar
@@ -46,12 +46,15 @@ Requires: kubernetes-client >= 1.24.8
 %description k8s
 This package contains utilities for:
 - cluster node configurations
-Requires: kubernetes-client >= 1.24.8
-Requires: podsec >= 0.1.1
+
 
 %package k8s-rbac
 Summary: Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
+Requires: kubernetes-client >= 1.24.8
+Requires: podsec >= 0.1.1
+Requires: curl >= 7.88.0
+
 
 %description k8s-rbac
 This package contains utilities for
@@ -72,10 +75,14 @@ This package contains utilities for
 %_bindir/podsec*
 %exclude %_bindir/podsec-k8s-*
 %_mandir/man?/podsec*
+%exclude %_mandir/man?/podsec-k8s-*
+
 
 %files k8s
 %_bindir/podsec-k8s-*
+%exclude %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-*
+%exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/kubernetes/manifests/*
 
 %files k8s-rbac
