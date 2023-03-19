@@ -1,5 +1,5 @@
 Name: podsec
-Version: 0.1.6
+Version: 0.2.1
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -90,6 +90,9 @@ This package contains utilities for
 %_mandir/man?/podsec-k8s-rbac-*
 
 %changelog
+* Sun Mar 19 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.1-alt1
+- 0.2.1
+
 * Fri Mar 17 2023 Alexey Kostarev <kaf@altlinux.org> 0.1.6-alt1
 - 0.1.6
 
