@@ -4,13 +4,24 @@
 .TH "PODSEC\-K8S\-RBAC\-CREATE\-USER" "1" "March 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-k8s\-rbac\-create\-user\fR \- создание RBAC пользователя
+\fBpodsec\-k8s\-rbac\-create\-user\fR \- создание RBAC\-пользователя
 .
 .SH "SYNOPSIS"
 \fBpodsec\-k8s\-rbac\-create\-user имя_пользователя\fR
 .
 .SH "DESCRIPTION"
-Скрипт производит:
+Скрипт:
+.
+.IP "\[ci]" 4
+создает RBAC пользователя
+.
+.IP "\[ci]" 4
+создает в домашнем директории каталог \.kube
+.
+.IP "\[ci]" 4
+устанавливаются соответствующие права доступа к каталогам\.
+.
+.IP "" 0
 .
 .SH "EXAMPLES"
 \fBpodsec\-k8s\-rbac\-create\-user userrbac1\fR

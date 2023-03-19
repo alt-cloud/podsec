@@ -3,7 +3,7 @@ podsec-k8s-rbac-create-kubeconfig(1) -- создание RBAC пользоват
 
 ## SYNOPSIS
 
-`podsec-k8s-rbac-create-kubeconfig имя_пользователя группа ...`
+`podsec-k8s-rbac-create-kubeconfig имя_пользователя [группа ...]`
 
 ## DESCRIPTION
 

@@ -1,0 +1,41 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "PODSEC\-K8S\-RBAC\-GET\-USERROLES" "1" "March 2023" "" ""
+.
+.SH "NAME"
+\fBpodsec\-k8s\-rbac\-get\-userroles\fR \- получить список кластерные и обычных ролей пользователя
+.
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-rbac\-get\-userroles пользователь [showRules]\fR
+.
+.SH "DESCRIPTION"
+Скрипт формирует список кластерные и обычных ролей которые связанв с пользователем\. При указании флага \fBshowRules\fR, для каждой роли указывается список правил ("rules:[\|\.\|\.\|\.]"), которые принадлежат каждой роли пользователя\.
+.
+.P
+Результат возвращается в виде json\-строки формата: \fB{ "<username>": { "clusterRoles": [\|\.\|\.\|\.], "roles": { "allNamespaces": [\|\.\|\.\|\.], "namespaces": [ { "<namespace1>": [\|\.\|\.\|\.], \|\.\|\.\|\. } } } }\fR
+.
+.P
+Где \fB[\|\.\|\.\|\.]\fR \- массив объетов типа: ``` { "bindRoleName": "\fIbindRoleName\fR", "bindedRoleType": "ClusterRole|Role", "bindedRoleName": "\fIbindedRoleName\fR" }
+.
+.IP "" 4
+.
+.nf
+
+
+## EXAMPLES
+
+`podsec\-k8s\-rbac\-get\-userroles k8s\-user1 | yq \-y`
+.
+.fi
+.
+.IP "" 0
+.
+.P
+k8s\-user1: clusterRoles: \- bindName: sysadmin roleType: ClusterRole roleName: edit \- bindName: sysview roleType: ClusterRole roleName: view roles: allNamespaces: \- bindName: sysview roleType: ClusterRole roleName: view namespaces: \- default: \- bindName: sysadmin roleType: ClusterRole roleName: edit \- bindName: basic\-user roleType: ClusterRole roleName: system:basic\-user \- smf: \- bindName: basic\-user roleType: ClusterRole roleName: system:basic\-user
+.
+.P
+```
+.
+.SH "SECURITY CONSIDERATIONS"
+
