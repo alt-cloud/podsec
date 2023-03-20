@@ -27,6 +27,9 @@
 .IP "\[ci]" 4
 Настройка \fBуказанного пользователя\fR на роль \fIадминистратора кластера\fR
 .
+.IP "\[ci]" 4
+Настройка аудита API\-сервиса kubernetes\.
+.
 .IP "" 0
 .
 .P
@@ -42,6 +45,16 @@
 .
 .IP "\[ci]" 4
 Так как все работа с кластером производится по REST\-интерфейсу, то для обеспечения повышенных мер безопасности следует заводить \fBВСЕХ пользователей\fR, включая \fIадминистратор безопасности средства контейнеризации\fR \fBВНЕ узлов кластера\fR\. Для работы с кластером достаточно команды \fBkubectl\fR, входящую в пакет \fBkubernetes\-client\fR\.
+.
+.IP "" 0
+.
+.SH "SEE ALSO"
+.
+.IP "\[ci]" 4
+Kubernetes \fIhttps://www\.altlinux\.org/Kubernetes\fR;
+.
+.IP "\[ci]" 4
+Настроика аудита API\-сервиса \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
 .
 .IP "" 0
 
