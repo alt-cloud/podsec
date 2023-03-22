@@ -15,3 +15,83 @@ isSigstoreServer() {
     echo "Запустите скрипт podsec-create-policy."
   fi
 }
+
+################################################
+# Набор функций для работы с nagios плугинами
+
+# metricaInInterval - Возвращает код 0, если метрика попадает в указанный интервал.
+# Формат интервала описан в  https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+metricaInInterval() {
+  local interval=$1
+  local metrica=$(printf "%d" $2 2>/dev/null)
+#   echo "interval=$interval metrica=$metrica"
+  ifs=$IFS
+  local invert=
+  if [ "${interval:0:1}" == '@' ]
+  then
+    invert=yes
+    interval=${interval:1}
+  fi
+  local minusInfinity= infinity=
+  if [ "${interval:0:1}" == '~' ]
+  then
+    minusInfinity=yes
+    interval=${interval:1}
+  fi
+  IFS=:
+  set -- $interval
+  IFS=$ifs
+  case $# in
+    1)
+      if [ ${interval: -1} == ':' ]
+      then
+        start=$(printf "%d" $1 2>/dev/null)
+        ret=$([ $metrica -ge $start ] && echo 0 || echo 1) # start - ∞
+      else
+        start=0
+        end=$(printf "%d" $1 2>/dev/null)
+        ret=$([ $metrica -ge $start -a $metrica -le $end ] && echo 0 || echo 1) # 0 - end
+      fi
+      break;;
+    2)
+      if [ -n "$minusInfinity" ]
+      then
+        end=$(printf "%d" $2 2>/dev/null)
+        ret=$([ $metrica -le $end ] && echo 0 || echo 1) #  ∞ - end
+      else
+        if [ -z "$1" ]
+        then
+          start=0
+        else
+          start=$(printf "%d" $1 2>/dev/null)
+        fi
+        end=$(printf "%d" $2 2>/dev/null)
+        ret=$([ $metrica -ge $start -a $metrica -le $end ] && echo 0 || echo 1) # start - end
+      fi
+      break;;
+    *) # Ошибка но мы ее игнорируем
+      :;
+  esac
+
+  if [ -n "$invert" ]
+  then
+    if [ $ret -eq 0 ]; then ret=1; else ret=0; fi
+  fi
+  return $ret
+}
+
+for interval in  "@10:20"  "10" "10:" "~:10" "10:20"
+do
+  echo "interval=$interval "
+  for metrika in 5 15 25
+  do
+    echo -ne "  metrica=$metrika "
+    if metricaInInterval $interval $metrika
+    then
+      echo "OK"
+    else
+      echo
+    fi
+  done
+#   exit 0
+done
