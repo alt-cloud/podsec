@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ./functions.sh
+. podsec-policy-functions
 
 checkUserImages() {
   user=$1

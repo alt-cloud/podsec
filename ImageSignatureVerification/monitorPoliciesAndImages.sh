@@ -3,7 +3,7 @@
 script=$(basename $0)
 
 TMPFILE=/tmp/$script.$$
-./checkImagesSignature.sh > $TMPFILE
+podsec-check-policy-and-images > $TMPFILE
 
 # TMPFILE="/tmp/images.json"
 host=$(jq .host $TMPFILE)
@@ -99,6 +99,6 @@ do
 
 done
 
-rm -f $TMPFILE
+# rm -f $TMPFILE
 
 echo -ne $message
