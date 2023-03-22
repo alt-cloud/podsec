@@ -72,3 +72,8 @@ Cкрипт создает пользователей разработчиков
 - [Разработчик образов контейнеров (imagemaker)](https://github.com/alt-cloud/podsec/tree/master/SigningImages).
 
 - [Описание периодического контроля целостности образов контейнеров и параметров настройки средства контейнеризации](https://github.com/alt-cloud/podsec/tree/master/ImageSignatureVerification)
+
+## AUTHOR
+
+Костарев Алексей, Базальт СПО
+kaf@basealt.ru

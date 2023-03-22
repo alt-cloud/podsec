@@ -50,3 +50,8 @@ podsec-k8s-rbac-bindrole k8s-user1 role=clusterrole system:basic-user basic-user
 - [Настройка рабочих мест администраторов проектов (Role)](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md);
 
 - [Настройка других ролей](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md).
+
+## AUTHOR
+
+Костарев Алексей, Базальт СПО
+kaf@basealt.ru

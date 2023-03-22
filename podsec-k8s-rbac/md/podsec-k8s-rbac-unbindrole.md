@@ -43,3 +43,8 @@ podsec-k8s-rbac-unbindrole(1) -- отвязывание пользователя
 
 - [Настройка других ролей](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md).
 
+
+## AUTHOR
+
+Костарев Алексей, Базальт СПО
+kaf@basealt.ru

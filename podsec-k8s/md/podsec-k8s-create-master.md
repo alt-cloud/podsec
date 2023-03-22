@@ -40,3 +40,8 @@ podsec-k8s-create-master(1) -- запуск на мастер-узла kubernete
 - [Kubernetes](https://www.altlinux.org/Kubernetes);
 
 - [Настроика аудита API-сервиса](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md);
+
+## AUTHOR
+
+Костарев Алексей, Базальт СПО
+kaf@basealt.ru

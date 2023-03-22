@@ -21,3 +21,8 @@ podsec-create-services(1) -- создание сервисов для подде
 ## SEE ALSO
 
 - [Описание периодического контроля целостности образов контейнеров и параметров настройки средства контейнеризации](https://github.com/alt-cloud/podsec/tree/master/ImageSignatureVerification)
+
+## AUTHOR
+
+Костарев Алексей, Базальт СПО
+kaf@basealt.ru

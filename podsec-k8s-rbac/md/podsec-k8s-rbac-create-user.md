@@ -27,3 +27,7 @@ podsec-k8s-rbac-create-user(1) -- создание RBAC-пользователя
 
 - [Создание рабочих мест и сертификатов](https://github.com/alt-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding.md).
 
+## AUTHOR
+
+Костарев Алексей, Базальт СПО
+kaf@basealt.ru
