@@ -20,6 +20,8 @@ Requires:yq >= 2.12.2
 Requires: fuse-overlayfs >= 1.1.2.3.800011b
 Requires: skopeo >= 1.9.1
 Requires: sh >= 4.4.23
+Requires: wget >= 1.21.3
+Requires: coreutils >= 9.1.0.8
 
 %description
 This package contains utilities for:
