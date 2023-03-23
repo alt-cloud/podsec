@@ -62,18 +62,25 @@ metricaInInterval() {
   return $ret
 }
 
-for interval in  "@10:20"  "10" "10:" "~:10" "10:20"
-do
-  echo "interval=$interval "
-  for metrika in 5 15 25
+parseIntervalParameters() {
+  while [ $# -gt 0 ]
   do
-    echo -ne "  metrica=$metrika "
-    if metricaInInterval $interval $metrika
+    if [ ${1:0:1} != '-' ]; then shift; continue; fi
+    par=${1:1:1}
+    if [ "$par" == 'v' ];
     then
-      echo "OK"
-    else
-      echo
+      let VERBOSELEVEL=${#par}
+      if [ "$VERBOSELEVEL" -gt 2 ]; then VERBOSELEVEL=2; fi
+      shift
+      continue
     fi
+    if [[ ( -z "${JOURNALPLUGINPARS[$par]}" ) && ( -z ${NAGIIOSPLUGINPARS[$par]} ) ]]; then shift; shift; continue; fi
+    if [ -n "${JOURNALPLUGINPARS[$par]}" ]; then JOURNALPLUGINPARS[$par]=$2; fi
+    if [ -n "${NAGIIOSPLUGINPARS[$par]}" ]; then NAGIIOSPLUGINPARS[$par]=$2; fi
+    shift; shift
   done
-#   exit 0
-done
+
+}
+
+
+
