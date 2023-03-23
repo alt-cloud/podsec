@@ -35,7 +35,7 @@ This package contains utilities for:
   on the local system, signing and placing them on the registry
 
 %package k8s
-Summary: Summary: Set of scripts for Kubernetes Security
+Summary: Set of scripts for Kubernetes Security
 Group: Development/Other
 Requires: kubernetes-kubeadm >= 1.24.8
 Requires: kubernetes-kubelet >= 1.24.8
@@ -51,7 +51,7 @@ This package contains utilities for:
 
 
 %package k8s-rbac
-Summary: Summary: Set of scripts for Kubernetes RBAC
+Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
 Requires: kubernetes-client >= 1.24.8
 Requires: podsec >= 0.1.1
@@ -63,6 +63,16 @@ This package contains utilities for
 - creating RBAC users
 - generation of certificates and configuration files for users
 - generating cluster and usual roles and binding them to users
+
+%package nagios-plugins
+Summary: Set of scripts for nagios monitoring
+Group: Development/Other
+Requires: nagios-plugins >= 2.2.1
+Requires: podsec >= 0.1.1
+
+%description k8s-rbac
+A set of scripts called from the тnagios server side via check_ssh plugin
+to monitor and identify security threats
 
 %prep
 %setup
@@ -79,7 +89,6 @@ This package contains utilities for
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
 
-
 %files k8s
 %_bindir/podsec-k8s-*
 %exclude %_bindir/podsec-k8s-rbac-*
@@ -90,6 +99,10 @@ This package contains utilities for
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-rbac-*
+
+%package nagios-plugins
+%_libexecdir/nagios/podsec-check-*
+%_mandir/man?/podsec-k8s-podsec-check-*
 
 %changelog
 * Sun Mar 19 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.1-alt1
