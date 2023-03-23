@@ -72,7 +72,7 @@ Requires: podsec >= 0.1.1
 Requires: sudo >= 1.9
 
 %description nagios-plugins
-A set of scripts called from the тnagios server side via check_ssh plugin
+A set of scripts called from the nagios server side via check_ssh plugin
 to monitor and identify security threats
 
 %prep
@@ -101,10 +101,10 @@ to monitor and identify security threats
 %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-rbac-*
 
-%package nagios-plugins
+%files nagios-plugins
 %_libexecdir/nagios/podsec-nagios-plugins-check-*
 %_bindir/podsec-nagios-plugins-*
-%_mandir/man?/podsec-k8s-podsec-check-*
+%_mandir/man?/podsec-nagios-plugins-check-*
 
 %changelog
 * Sun Mar 19 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.1-alt1
