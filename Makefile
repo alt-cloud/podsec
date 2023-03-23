@@ -29,7 +29,8 @@ PODSEC_PROGRAMMS = \
 	podsec-save-oci
 
 PODSEC_FUNCTIONS = \
-	podsec-functions
+	podsec-functions \
+	podsec-policy-functions
 
 PODSEC_K8S_MANIFESTS= \
 	kube-flannel.yml

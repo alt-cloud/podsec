@@ -1,2 +1,11 @@
 #!/bin/sh
 # Плугин проверяет политики настройки контейнеризации на сервере
+
+. podsec-policy-functions
+
+declare -A JOURNALPLUGINPARS=( [a]=- [f]=- [c]=- [h]=- [m]=- [l]=- [d]=- )
+declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
+declare -A LEVELSNAMES=( [a]=CRASH [f]=FATAL [c]=CRITICAL [h]=HEGH [m]=MIDDLE [w]=WARNNING [l]=LOW [d]=DEBUG )
+declare VERBOSELEVEL=0
+checkUsersConfig=$(checkUsersConfig)
+echo $checkUsersConfig

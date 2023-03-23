@@ -1,0 +1,41 @@
+#!/bin/sh
+
+. podsec-nagios-plugins-functions
+
+for interval in  "@10:20"  "10" "10:" "~:10" "10:20"
+do
+  echo "interval=$interval "
+  for metrika in 5 15 25
+  do
+    echo -ne "  metrica=$metrika "
+    if metricaInInterval $interval $metrika
+    then
+      echo "OK"
+    else
+      echo
+    fi
+  done
+#   exit 0
+done
+
+declare -A JOURNALPLUGINPARS=( [a]=- [f]=- [c]=- [h]=- [m]=- [l]=- [d]=- )
+declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
+declare -A LEVELSNAMES=( [a]=CRASH [f]=FATAL [c]=CRITICAL [h]=HEGH [m]=MIDDLE [w]=WARNNING [l]=LOW [d]=DEBUG )
+declare VERBOSELEVEL=0
+
+parseIntervalParameters -vv -a A -f F -c C -h H -m M -l L -d D -w W
+echo "VERBOSELEVEL=$VERBOSELEVEL"
+
+echo "JOURNALPLUGINPARS="
+for key in "${!JOURNALPLUGINPARS[@]}";
+do
+  echo "  $key="${JOURNALPLUGINPARS[$key]};
+done
+
+echo "NAGIIOSPLUGINPARS="
+for key in "${!NAGIIOSPLUGINPARS[@]}";
+do
+  echo "  $key="${NAGIIOSPLUGINPARS[$key]};
+done
+
+
