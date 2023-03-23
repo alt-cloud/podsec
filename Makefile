@@ -51,6 +51,9 @@ PODSEC_K8S_RBAC_FUNCTIONS = \
 
 PODSEC_NAGIOS_PLUGINS = \
 
+PODSEC_NAGIOS_PLUGINS_FUNCTIONS = \
+	podsec-nagios-plugins-functions
+
 
 
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
@@ -96,6 +99,7 @@ install: all
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS) $(DESTDIR)$(libexecdir)/nagios
+	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/nagios
 	cd ./podsec-nagios-plugins/man;$(INSTALL) -p -m644 $(PODSEC_NAGIOS_PLUGINS_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 
 clean:
