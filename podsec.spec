@@ -102,7 +102,8 @@ to monitor and identify security threats
 %_mandir/man?/podsec-k8s-rbac-*
 
 %package nagios-plugins
-%_libexecdir/nagios/podsec-check-*
+%_libexecdir/nagios/podsec-nagios-plugins-check-*
+%_bindir/podsec-nagios-plugins-*
 %_mandir/man?/podsec-k8s-podsec-check-*
 
 %changelog
