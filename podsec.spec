@@ -69,8 +69,9 @@ Summary: Set of scripts for nagios monitoring
 Group: Development/Other
 Requires: nagios-plugins >= 2.2.1
 Requires: podsec >= 0.1.1
+Requires: sudo >= 1.9
 
-%description k8s-rbac
+%description nagios-plugins
 A set of scripts called from the тnagios server side via check_ssh plugin
 to monitor and identify security threats
 
