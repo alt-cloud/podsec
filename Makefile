@@ -31,6 +31,9 @@ PODSEC_PROGRAMMS = \
 PODSEC_FUNCTIONS = \
 	podsec-functions
 
+PODSEC_K8S_MANIFESTS= \
+	kube-flannel.yml
+
 PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
  	podsec-k8s-create-master
@@ -46,15 +49,19 @@ PODSEC_K8S_RBAC_PROGRAMS= \
 PODSEC_K8S_RBAC_FUNCTIONS = \
 	podsec-k8s-rbac-functions
 
-PODSEC_K8S_MANIFESTS= \
-	kube-flannel.yml
+PODSEC_NAGIOS_PLUGINS = \
+
+
 
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
 PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS:=.1)
 PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS:=.1)
+PODSEC_NAGIOS_PLUGINS_MAN1_PAGES = $(PODSEC_NAGIOS_PLUGINS:=.1)
+
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
 bindir = /usr/bin
+libexecdir = /usr/lib
 datadir = /usr/share
 mandir = $(datadir)/man
 man1dir = $(mandir)/man1
@@ -88,6 +95,8 @@ install: all
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS) $(DESTDIR)$(libexecdir)/nagios
+	cd ./podsec-nagios-plugins/man;$(INSTALL) -p -m644 $(PODSEC_NAGIOS_PLUGINS_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 
 clean:
 
