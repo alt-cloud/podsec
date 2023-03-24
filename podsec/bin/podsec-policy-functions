@@ -138,7 +138,6 @@ checkPolicyConfig() {
 
   joinedSigStories=$(joinSigStories $configDir)
   ret+="\n$tab,\"joinedSigStories\":$joinedSigStories\n"
-
   defaultSigStore=$(getDefaultSigStore $configDir)
   if [ -z "$defaultSigStore" ]
   then
