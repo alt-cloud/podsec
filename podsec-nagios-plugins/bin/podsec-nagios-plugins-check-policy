@@ -9,8 +9,8 @@ declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
 declare -A LEVELSNAMES=( [a]=CRASH [f]=FATAL [c]=CRITICAL [h]=HEGH [m]=MIDDLE [w]=WARNNING [l]=LOW [d]=DEBUG )
 declare VERBOSELEVEL=0
 checkUsersConfig=$(checkUsersConfig)
-echo $checkUsersConfig
-
+# echo $checkUsersConfig
+# exit
 # JSON пользователей имеющих образы, но не входящих в группу podman (исключая root)
 notPodmanUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.groups | any(index("podman")) | not) | select(.user!="root")')
 # echo "notPodmanUsersJSON=$notPodmanUsersJSON"
@@ -70,3 +70,35 @@ then
   incorrectDefaultDockerUsers=$(echo $incorrectDefaultDockerUsersJSON | jq .user)
 #    echo "incorrectDefaultDockerUsers=$incorrectDefaultDockerUsers"
 fi
+
+# Определить список пользователей группы podman не имеющих каталога .config/containers/, файла storage.conf  в нем или имеющих незащащенные
+notConfigUsers= editableConfigUsers= podmanWheelUsers=
+for dir in /home/*
+do
+  user=$(basename $dir)
+  if ! group=$(id -g -n $user 2>/dev/null); then continue; fi
+  groups=$(id -G -n $user)
+  if echo " $group $groups " | grep -q ' podman_dev '; then continue; fi
+  if echo " $group $groups " | grep -q ' podman '
+  then
+    if echo " $group $groups " | grep -q ' wheel '
+    then
+      podmanWheelUsers+=" $user"
+    fi
+  else
+    continue;
+  fi
+  # Только группа podman без podman_dev
+  if [ ! -f "/home/$user/.config/containers/storage.conf" ]
+  then
+    notConfigUsers+=" $user"
+    continue
+  fi
+  if echo 2>/dev/null > /home/$user/.config/containers/.test 2>/dev/null
+  then
+    editableConfigUsers+=" $user"
+  fi
+done
+echo "notConfigUsers=$notConfigUsers"
+echo "editableConfigUsers=$editableConfigUsers"
+echo "podmanWheelUsers=$podmanWheelUsers"
