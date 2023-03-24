@@ -79,7 +79,6 @@ parseIntervalParameters() {
     if [ -n "${NAGIIOSPLUGINPARS[$par]}" ]; then NAGIIOSPLUGINPARS[$par]=$2; fi
     shift; shift
   done
-
 }
 
 
