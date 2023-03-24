@@ -136,6 +136,9 @@ checkPolicyConfig() {
     fi
   fi
 
+  joinedSigStories=$(joinSigStories $configDir)
+  ret+="\n$tab,\"joinedSigStories\":$joinedSigStories\n"
+
   defaultSigStore=$(getDefaultSigStore $configDir)
   if [ -z "$defaultSigStore" ]
   then
@@ -235,6 +238,19 @@ getSigStoreURLForImage() {
   echo $url
 }
 
+getGroup() {
+  echo $(id -g -n $1)
+}
+
+
+getGroups() {
+  ret="\"$(id -g -n $1)\""
+  for group in $(id -G -n $1)
+  do
+    ret+=",\"$group\""
+  done
+  echo "[$ret]"
+}
 
 #########################################################
 checkUsersConfig() {
@@ -245,18 +261,26 @@ checkUsersConfig() {
   user="root"
   policyFile="/etc/containers/policy.json"
   checkPolicyResult=$(checkPolicyConfig $policyFile)
-  ret+="\n\"$user\":{$checkPolicyResult}"
+  checkPolicyResult+=",\"group\":\"$(getGroup $user)\""
+  checkPolicyResult+=",\"groups\":$(getGroups $user)"
+  ret+="\n{\"user\":\"$user\",$checkPolicyResult}"
   for userDir in /home/*
   do
     if [ -d "$userDir/.local/share/containers/storage/overlay" ]
     then
       policyFile="$userDir/.config/containers/policy.json"
-      if [ ! -f $policyFile ]; then continue; fi
+      if [ ! -f $policyFile ];
+      then
+        policyFile="/etc/containers/policy.json"
+      fi
       checkPolicyResult=$(checkPolicyConfig $policyFile)
       user=$(basename $userDir)
-      ret+="\n,\"$user\":{$checkPolicyResult}"
+      checkPolicyResult+=",\"group\":\"$(getGroup $user)\""
+      checkPolicyResult+=",\"groups\":$(getGroups $user)"
+      ret+="\n,{\"user\":\"$user\",$checkPolicyResult}"
+#       echo "RET=$ret"
     fi
   done
-  ret="{\"checkUsersConfigResult\":{$ret}}"
+  ret="[$ret]"
   echo -ne "$ret"
 }

@@ -2,6 +2,7 @@
 # Плугин проверяет политики настройки контейнеризации на сервере
 
 . podsec-policy-functions
+. podsec-nagios-plugins-functions
 
 declare -A JOURNALPLUGINPARS=( [a]=- [f]=- [c]=- [h]=- [m]=- [l]=- [d]=- )
 declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
@@ -9,3 +10,63 @@ declare -A LEVELSNAMES=( [a]=CRASH [f]=FATAL [c]=CRITICAL [h]=HEGH [m]=MIDDLE [w
 declare VERBOSELEVEL=0
 checkUsersConfig=$(checkUsersConfig)
 echo $checkUsersConfig
+
+# JSON пользователей имеющих образы, но не входящих в группу podman (исключая root)
+notPodmanUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.groups | any(index("podman")) | not) | select(.user!="root")')
+# echo "notPodmanUsersJSON=$notPodmanUsersJSON"
+if [ -n "$notPodmanUsersJSON" ]
+then
+  # Отработка пользователей не входящих в группу podman
+  notPodmanUsers=$(echo $notPodmanUsersJSON | jq .user)
+#   echo "notPodmanUsers=$notPodmanUsers"
+fi
+
+# JSON пользователей имеющих defaultPolicy !=reject, но не входящих в группу podman_dev
+incorrectPolicyUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.defaultPolicy!="reject") |  select(.groups | any(index("podman_dev")) | not)')
+# echo "incorrectPolicyUsersJSON=$incorrectPolicyUsersJSON"
+if [ -n "$incorrectPolicyUsersJSON" ]
+then
+  # Отработка пользователей не входящих в группу podman
+  incorrectPolicyUsers=$(echo $incorrectPolicyUsersJSON | jq .user)
+#   echo "incorrectPolicyUsers=$incorrectPolicyUsers"
+fi
+
+# JSON пользователей не имеющих в  signedRegistries registry.local
+nonRegistryLocalUsersJSON=$(echo $checkUsersConfig | jq '.[] |  select(.signedRegistries | any(index("registry.local"))|not)')
+# echo "nonRegistryLocalUsersJSON=$nonRegistryLocalUsersJSON"
+if [ -n "$nonRegistryLocalUsersJSON" ]
+then
+  # Отработка пользователей не входящих в группу podman
+  nonRegistryLocalUsers=$(echo $nonRegistryLocalUsersJSON | jq .user)
+#    echo "nonRegistryLocalUsers=$nonRegistryLocalUsers"
+fi
+
+# JSON пользователей имеющих в  notSignedRegistries неподписанные registry
+notSignedRegistriesUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.notSignedRegistries | length >0)')
+# echo "notSignedRegistriesUsersJSON=$notSignedRegistriesUsersJSON"
+if [ -n "$notSignedRegistriesUsersJSON" ]
+then
+  # Отработка пользователей не входящих в группу podman
+  notSignedRegistriesUsers=$(echo $notSignedRegistriesUsersJSON | jq .user)
+#    echo "notSignedRegistriesUsers=$notSignedRegistriesUsers"
+fi
+
+# JSON пользователей имеющих в  .forbiddenTransports запрещенный транспорт
+forbiddenTransportsUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.forbiddenTransports | length >0)')
+# echo "forbiddenTransportsUsersJSON=$forbiddenTransportsUsersJSON"
+if [ -n "$forbiddenTransportsUsersJSON" ]
+then
+  # Отработка пользователей не входящих в группу podman
+  forbiddenTransportsUsers=$(echo $forbiddenTransportsUsersJSON | jq .user)
+#    echo "forbiddenTransportsUsers=$forbiddenTransportsUsers"
+fi
+
+# JSON пользователей не имеющих в  default-docker URL http://sigstore.local:81/sigstore/
+incorrectDefaultDockerUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.joinedSigStories."default-docker".lookaside!="http://sigstore.local:81/sigstore/")')
+# echo "incorrectDefaultDockerUsersJSON=$incorrectDefaultDockerUsersJSON"
+if [ -n "$incorrectDefaultDockerUsersJSON" ]
+then
+  # Отработка пользователей не входящих в группу podman
+  incorrectDefaultDockerUsers=$(echo $incorrectDefaultDockerUsersJSON | jq .user)
+#    echo "incorrectDefaultDockerUsers=$incorrectDefaultDockerUsers"
+fi
