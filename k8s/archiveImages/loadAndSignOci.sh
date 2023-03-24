@@ -10,13 +10,13 @@ then
   exit 1
 fi
 
-if ! id | grep podman_dev
+if ! id | grep -q podman_dev
 then
   echo "Скрипт вызывается пользователем не входящим в группу podman_dev" >&2
   exit 1
 fi
 
-if [ $# -ne 4 && $# -ne 3 ]
+if [ $# -ne 4 -a $# -ne 3 ]
 then
   echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [имя_регистратора]\n"  >&2
   exit 1
