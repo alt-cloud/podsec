@@ -102,9 +102,9 @@ to monitor and identify security threats
 %_mandir/man?/podsec-k8s-rbac-*
 
 %files nagios-plugins
-%_libexecdir/nagios//plugins/podsec-nagios-plugins-check-*
+%_libexecdir/nagios//plugins/podsec-nagios-plugins-*
 %_bindir/podsec-nagios-plugins-*
-%_mandir/man?/podsec-nagios-plugins-check-*
+%_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
 * Fri Mar 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.3-alt1

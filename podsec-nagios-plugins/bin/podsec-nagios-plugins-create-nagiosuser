@@ -1,0 +1,4 @@
+#!/bin/sh
+
+adduser nagios -G wheel
+echo "nagios ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/10-nagios
