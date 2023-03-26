@@ -1,6 +1,14 @@
 #!/bin/sh
 # Плугин проверяет политики настройки контейнеризации на сервере
 
+. ../../exportPath.sh
+
+if [ $EUID -ne 0 ]
+then
+  sudo $0 $*
+  exit
+fi
+
 . podsec-policy-functions
 . podsec-nagios-plugins-functions
 
@@ -239,7 +247,7 @@ then
     users+=$editableConfigUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nспособные изменить конфигурацию\""
+    nagiosHeads+="\nспособные изменить конфигурацию"
     message="$prefix($metricWeight): Пользователи $editableConfigUsers имеют открытым для записи каталог конфигурации .config/containers"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
