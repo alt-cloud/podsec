@@ -3,6 +3,7 @@
 
 # metricaInInterval - Возвращает код 0, если метрика попадает в указанный интервал.
 # Формат интервала описан в  https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+# Формат вызова: metricaInInterval interval metrica
 metricaInInterval() {
   local interval=$1
   local metrica=$(printf "%d" $2 2>/dev/null)
@@ -62,18 +63,40 @@ metricaInInterval() {
   return $ret
 }
 
+# Описание ассоциативных массивов и переменных для анализа параметров определения интервалов уровней опасности
+# Привязка префиксов сообщения к именам параметров
+declare -A LEVELSNAMES=( [a]=Crash [f]=Fatal [c]=Critical [h]=Heigh [m]=Middle [w]=Warningg [l]=Low [d]=Debug )
+# Уровни опасности для логирования в системный журнал отсортированный в порядке уменьшения
+declare -A JOURNALPLUGINPARS=( [a]=- [f]=- [c]=- [h]=- [m]=- [l]=- [d]=- )
+# Номера уровней опасности для логирования JOURNAL
+declare -A JOURNALPRIORITY=( [a]=7 [f]=6 [c]=5 [h]=4 [m]=3 [l]=2 [d]=1 )
+
+# Уровни опасности для логирования nagios отсортированный в порядке уменьшения
+declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
+# Номера уровней опасности для логирования NAGIOS
+declare -A NAGIOSPRIORITY=( [c]=2 [w]=1 )
+
+# Уровень отладки -v -> 0, -vv -> 1, -vvv -> 2
+declare VERBOSELEVEL=0
+
+# Функции передается набор параметров передаваемях плугину
+# Функция извлекает из списка параметры задающие интервалы метрик и привязывает их
+# к соответствующим ключам массивов JOURNALPLUGINPARS и NAGIIOSPLUGINPARS
 parseIntervalParameters() {
+  VERBOSELEVEL=0
   while [ $# -gt 0 ]
   do
     if [ ${1:0:1} != '-' ]; then shift; continue; fi
-    par=${1:1:1}
-    if [ "$par" == 'v' ];
+    par=${1:1}
+    if [ "${par:0:1}" == 'v' ];
     then
       let VERBOSELEVEL=${#par}
-      if [ "$VERBOSELEVEL" -gt 2 ]; then VERBOSELEVEL=2; fi
+      if [ "$VERBOSELEVEL" -gt 3 ]; then VERBOSELEVEL=3; fi
       shift
       continue
     fi
+    par=${par:0:1}
+    # echo "PAR=$par JOURNALPLUGINPARS=${JOURNALPLUGINPARS[$par]}"
     if [[ ( -z "${JOURNALPLUGINPARS[$par]}" ) && ( -z ${NAGIIOSPLUGINPARS[$par]} ) ]]; then shift; shift; continue; fi
     if [ -n "${JOURNALPLUGINPARS[$par]}" ]; then JOURNALPLUGINPARS[$par]=$2; fi
     if [ -n "${NAGIIOSPLUGINPARS[$par]}" ]; then NAGIIOSPLUGINPARS[$par]=$2; fi
@@ -81,5 +104,36 @@ parseIntervalParameters() {
   done
 }
 
+# Вернуть первый встреченный ключ JOURNALPLUGINPARS
+getJournalKeyByMetric() {
+  metrica=$1
+  n=${#JOURNALPLUGINPARS[@]}
+  for key in "${!JOURNALPLUGINPARS[@]}";
+  do
+    interval="${JOURNALPLUGINPARS[$key]}";
+    if [ "$interval" == '-' ]; then continue; fi
+    if ! metricaInInterval $interval $metrica
+    then
+      echo $key
+      return
+    fi
+  done
+  echo ''
+}
 
-
+# Вернуть первый встреченный ключ NAGIIOSPLUGINPARS
+getNagiosKeyByMetric() {
+  metrica=$1
+  n=${#NAGIIOSPLUGINPARS[@]}
+  for key in "${!NAGIIOSPLUGINPARS[@]}";
+  do
+    interval="${NAGIIOSPLUGINPARS[$key]}";
+    if [ "$interval" == '-' ]; then continue; fi
+    if ! metricaInInterval $interval $metrica
+    then
+      echo $key
+      return
+    fi
+  done
+  echo ''
+}

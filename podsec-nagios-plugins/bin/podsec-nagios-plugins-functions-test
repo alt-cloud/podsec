@@ -2,6 +2,7 @@
 
 . podsec-nagios-plugins-functions
 
+# Тестирование функции metricaInInterval
 for interval in  "@10:20"  "10" "10:" "~:10" "10:20"
 do
   echo "interval=$interval "
@@ -18,11 +19,7 @@ do
 #   exit 0
 done
 
-declare -A JOURNALPLUGINPARS=( [a]=- [f]=- [c]=- [h]=- [m]=- [l]=- [d]=- )
-declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
-declare -A LEVELSNAMES=( [a]=CRASH [f]=FATAL [c]=CRITICAL [h]=HEGH [m]=MIDDLE [w]=WARNNING [l]=LOW [d]=DEBUG )
-declare VERBOSELEVEL=0
-
+# Тестировние функции parseIntervalParameters
 parseIntervalParameters -vv -a A -f F -c C -h H -m M -l L -d D -w W
 echo "VERBOSELEVEL=$VERBOSELEVEL"
 
