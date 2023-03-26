@@ -37,7 +37,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nвне группы podman,"
-    message="$prefix: Пользователи $notPodmanUsers имеют образы, но не входят в группу 'podman'"
+    message="$prefix($metricWeight): Пользователи $notPodmanUsers имеют образы, но не входят в группу 'podman'"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -60,7 +60,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nспособные получать любой образ"
-    message="$prefix: Пользователи $incorrectPolicyUsers имеют в policy.json defaultPolicy!=reject, но не входят в группу 'podman_dev'"
+    message="$prefix($metricWeight): Пользователи $incorrectPolicyUsers имеют в policy.json defaultPolicy!=reject, но не входят в группу 'podman_dev'"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -83,7 +83,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nспособные получать локальный образ без подписи"
-    message="$prefix: Пользователи $nonRegistryLocalUsers не имеют registry.local в списке регистраторов для которых проверяется наличие электронной подписи образов"
+    message="$prefix($metricWeight): Пользователи $nonRegistryLocalUsers не имеют registry.local в списке регистраторов для которых проверяется наличие электронной подписи образов"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -106,7 +106,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nспособные получать любой образ без подписи"
-    message="$prefix: Пользователи $notSignedRegistriesUsers имеют в политике регистраторы для которых не проверяется наличие электронной подписи образов"
+    message="$prefix($metricWeight): Пользователи $notSignedRegistriesUsers имеют в политике регистраторы для которых не проверяется наличие электронной подписи образов"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -121,7 +121,7 @@ then
   # Получение списка пользователей
   forbiddenTransportsUsers=$(echo $forbiddenTransportsUsersJSON | jq .user | tr "\n" ' ')
 #    echo "forbiddenTransportsUsers=$forbiddenTransportsUsers"
-  metricWeight=103
+  metricWeight=105
   key=$(getJournalKeyByMetric $metricWeight);
   if [ -n "$key" ]
   then
@@ -129,7 +129,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nспособные получать любой образ через запрещенный транспорт"
-    message="$prefix: Пользователи $forbiddenTransportsUsers имеют в списке поддерживаемых транспорты отличные от docker"
+    message="$prefix($metricWeight): Пользователи $forbiddenTransportsUsers имеют в списке поддерживаемых транспорты отличные от docker"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -152,7 +152,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nне использующие локальный хранитель подписей"
-    message="$prefix: Пользователи $incorrectDefaultDockerUsers не используют хранилище подписей  http://sigstore.local:81/sigstore/ как хранилище подписей по умолчанию"
+    message="$prefix($metricWeight): Пользователи $incorrectDefaultDockerUsers не используют хранилище подписей  http://sigstore.local:81/sigstore/ как хранилище подписей по умолчанию"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -202,7 +202,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nвходящие в группу wheel"
-    message="$prefix: Пользователи $podmanWheelUsers входят в группы 'podman' и 'wheel'"
+    message="$prefix($metricWeight): Пользователи $podmanWheelUsers входят в группы 'podman' и 'wheel'"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -221,7 +221,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nне имеющих конфигурационного файла"
-    message="$prefix: Пользователи $notConfigUsers не имеют конфигурационного файла .config/containers/storage.conf"
+    message="$prefix($metricWeight): Пользователи $notConfigUsers не имеют конфигурационного файла .config/containers/storage.conf"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -240,7 +240,7 @@ then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
     nagiosHeads+="\nспособные изменить конфигурацию\""
-    message="$prefix: Пользователи $editableConfigUsers имеют открытым для записи каталог конфигурации .config/containers"
+    message="$prefix($metricWeight): Пользователи $editableConfigUsers имеют открытым для записи каталог конфигурации .config/containers"
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -254,10 +254,10 @@ then
   prefix=${LEVELSNAMES[$key]}
   priority=${NAGIOSPRIORITY[$key]}
   case $VERBOSELEVEL in
-    0) echo  "POLICY $prefix: Нарушение политик контейнеризации пользователей $users"
+    0) echo  "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users"
       ;;
     1|2|3)
-      echo -ne "POLICY $prefix: Нарушение политик контейнеризации пользователей $users | Есть пользователи:"
+      echo -ne "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users | Есть пользователи:"
       echo -ne "$nagiosHeads"
       if [ $VERBOSELEVEL -gt 1 ]
       then
@@ -268,6 +268,6 @@ then
   echo
   exit $priority
 fi
-echo "POLICY OK: Анализ политик контейнеризации | ${messages[@]} "
+echo "POLICY OK: Политики контейнеризации не нарушены"
 exit 0
 
