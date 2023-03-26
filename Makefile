@@ -54,14 +54,13 @@ PODSEC_NAGIOS_PLUGINS = \
 	podsec-nagios-plugins-check-policy
 
 PODSEC_NAGIOS_PLUGINS_FUNCTIONS = \
-	podsec-nagios-plugins-functions
-
-
+	podsec-nagios-plugins-functions \
+	podsec-nagios-plugins-create-nagiosuser
 
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
 PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS:=.1)
 PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS:=.1)
-PODSEC_NAGIOS_PLUGINS_MAN1_PAGES = $(PODSEC_NAGIOS_PLUGINS:=.1)
+PODSEC_NAGIOS_PLUGINS_MAN1_PAGES = $(PODSEC_NAGIOS_PLUGINS:=.1) podsec-nagios-plugins-create-nagiosuser.1
 
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
