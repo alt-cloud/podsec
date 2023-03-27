@@ -46,7 +46,8 @@ echo "Настройка $user на роль администратора кла
 cd /home/$user
 mkdir .kube
 cp /etc/kubernetes/admin.conf .kube/config
-chown -R $user:$user .kubechown -R $user:$user .kube
+group=$(id -g -n)
+chown -R $user:$group .kubechown -R $user:$user .kube
 chmod -R 0700 .kube
 
 #!/bin/sh

@@ -1,26 +1,24 @@
-podsec-check-trivy(1) --
+podsec-nagios-plugins-check-audit(1) --
 ================================
 
 ## SYNOPSIS
 
-`podsec-check-trivy `
+`podsec-nagios-plugins-check-audit`
 
 ## DESCRIPTION
 
 
-
 ## OPTIONS
-
 
 ## EXAMPLES
 
-`podsec-check-trivy
+`podsec-nagios-plugins-check-audit`
 
 ## SECURITY CONSIDERATIONS
 
 
-
 ## SEE ALSO
+
 
 ## AUTHOR
 

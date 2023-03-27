@@ -1,0 +1,281 @@
+#!/bin/sh
+# Плугин проверяет политики настройки контейнеризации на сервере
+
+. ../../exportPath.sh
+
+if [ $EUID -ne 0 ]
+then
+  sudo $0 $*
+  exit
+fi
+
+. podsec-policy-functions
+. podsec-nagios-plugins-functions
+
+# Проанализировать описание уровня интервалов во входных парамаетрах
+parseIntervalParameters $*
+#  echo "JOURNALPLUGINPARS=${JOURNALPLUGINPARS[@]}"
+#  echo "NAGIIOSPLUGINPARS=${NAGIIOSPLUGINPARS[@]}"
+# exit
+
+checkUsersConfig=$(checkUsersConfig)
+# echo $checkUsersConfig
+
+summaryMetric=0
+messages=
+nagiosHeads=
+users=
+
+# Число пользователей входящий в группу podman но не входящих в группу podman_dev
+nOnlyPodmanUsers=$(echo $checkUsersConfig | jq '[.[] | select(.groups | any(index("podman"))) | select(.groups | any(index("podman_dev")) | not)] | length')
+
+# JSON пользователей имеющих образы, но не входящих в группу podman (исключая root)
+notPodmanUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.groups | any(index("podman")) | not) | select(.user!="root")')
+# echo "notPodmanUsersJSON=$notPodmanUsersJSON"
+if [ -n "$notPodmanUsersJSON" ]
+then
+  # Получение списка пользователей
+  notPodmanUsers=$(echo $notPodmanUsersJSON | jq .user | tr "\n" ' ')
+#   echo "notPodmanUsers=$notPodmanUsers"
+  metricWeight=101
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$notPodmanUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nвне группы podman,"
+    message="$prefix($metricWeight): Пользователи $notPodmanUsers имеют образы, но не входят в группу 'podman'"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# JSON пользователей имеющих defaultPolicy !=reject, но не входящих в группу podman_dev
+incorrectPolicyUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.defaultPolicy!="reject") |  select(.groups | any(index("podman_dev")) | not)')
+# echo "incorrectPolicyUsersJSON=$incorrectPolicyUsersJSON"
+if [ -n "$incorrectPolicyUsersJSON" ]
+then
+  # Получение списка пользователей
+  incorrectPolicyUsers=$(echo $incorrectPolicyUsersJSON | jq .user | tr "\n" ' ')
+#   echo "incorrectPolicyUsers=$incorrectPolicyUsers"
+  metricWeight=102
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$incorrectPolicyUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nспособные получать любой образ"
+    message="$prefix($metricWeight): Пользователи $incorrectPolicyUsers имеют в policy.json defaultPolicy!=reject, но не входят в группу 'podman_dev'"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# JSON пользователей не имеющих не имеющих registry.local в списке регистраторов для которых проверяется наличие электронной подписи образов
+nonRegistryLocalUsersJSON=$(echo $checkUsersConfig | jq '.[] |  select(.signedRegistries | any(index("registry.local"))|not)')
+# echo "nonRegistryLocalUsersJSON=$nonRegistryLocalUsersJSON"
+if [ -n "$nonRegistryLocalUsersJSON" ]
+then
+  # Получение списка пользователей
+  nonRegistryLocalUsers=$(echo $nonRegistryLocalUsersJSON | jq .user | tr "\n" ' ')
+#    echo "nonRegistryLocalUsers=$nonRegistryLocalUsers"
+  metricWeight=103
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$nonRegistryLocalUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nспособные получать локальный образ без подписи"
+    message="$prefix($metricWeight): Пользователи $nonRegistryLocalUsers не имеют registry.local в списке регистраторов для которых проверяется наличие электронной подписи образов"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# JSON пользователей имеющих в политике регистраторы для которых не проверяется наличие электронной подписи образов
+notSignedRegistriesUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.notSignedRegistries | length >0)')
+# echo "notSignedRegistriesUsersJSON=$notSignedRegistriesUsersJSON"
+if [ -n "$notSignedRegistriesUsersJSON" ]
+then
+  # Получение списка пользователей
+  notSignedRegistriesUsers=$(echo $notSignedRegistriesUsersJSON | jq .user | tr "\n" ' ')
+#    echo "notSignedRegistriesUsers=$notSignedRegistriesUsers"
+  metricWeight=104
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$notSignedRegistriesUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nспособные получать любой образ без подписи"
+    message="$prefix($metricWeight): Пользователи $notSignedRegistriesUsers имеют в политике регистраторы для которых не проверяется наличие электронной подписи образов"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# JSON пользователей имеющих в списке поддерживаемых транспортов транспорты отличные от docker (получение образов с регистратора)
+forbiddenTransportsUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.forbiddenTransports | length >0)')
+# echo "forbiddenTransportsUsersJSON=$forbiddenTransportsUsersJSON"
+if [ -n "$forbiddenTransportsUsersJSON" ]
+then
+  # Получение списка пользователей
+  forbiddenTransportsUsers=$(echo $forbiddenTransportsUsersJSON | jq .user | tr "\n" ' ')
+#    echo "forbiddenTransportsUsers=$forbiddenTransportsUsers"
+  metricWeight=105
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$forbiddenTransportsUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nспособные получать любой образ через запрещенный транспорт"
+    message="$prefix($metricWeight): Пользователи $forbiddenTransportsUsers имеют в списке поддерживаемых транспорты отличные от docker"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# JSON пользователей не использующих хранилище подписей  http://sigstore.local:81/sigstore/ как хранилище подписей по умолчанию
+incorrectDefaultDockerUsersJSON=$(echo $checkUsersConfig | jq '.[] | select(.joinedSigStories."default-docker".lookaside!="http://sigstore.local:81/sigstore/")')
+# echo "incorrectDefaultDockerUsersJSON=$incorrectDefaultDockerUsersJSON"
+if [ -n "$incorrectDefaultDockerUsersJSON" ]
+then
+  # Получение списка пользователей
+  incorrectDefaultDockerUsers=$(echo $incorrectDefaultDockerUsersJSON | jq .user | tr "\n" ' ')
+#    echo "incorrectDefaultDockerUsers=$incorrectDefaultDockerUsers"
+  metricWeight=106
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$incorrectDefaultDockerUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nне использующие локальный хранитель подписей"
+    message="$prefix($metricWeight): Пользователи $incorrectDefaultDockerUsers не используют хранилище подписей  http://sigstore.local:81/sigstore/ как хранилище подписей по умолчанию"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# Определить список пользователей группы podman (за исключением входящих в группу podman_dev):
+# имеющих каталог .config/containers/ открытым на запись и изменения
+# не имеющих файла конфигурации .config/containers/storage.conf
+# входящих в группу wheel
+notConfigUsers= editableConfigUsers= podmanWheelUsers=
+for dir in /home/*
+do
+  user=$(basename $dir)
+  if ! group=$(id -g -n $user 2>/dev/null); then continue; fi
+  groups=$(id -G -n $user)
+  if echo " $group $groups " | grep -q ' podman_dev '; then continue; fi
+  if echo " $group $groups " | grep -q ' podman '
+  then
+    if echo " $group $groups " | grep -q ' wheel '
+    then
+      podmanWheelUsers+=" \"$user\""
+    fi
+  else
+    continue;
+  fi
+  # Только группа podman без podman_dev
+  if [ ! -f "/home/$user/.config/containers/storage.conf" ]
+  then
+    notConfigUsers+=" \"$user\""
+    continue
+  fi
+  if echo 2>/dev/null > /home/$user/.config/containers/.test 2>/dev/null
+  then
+    editableConfigUsers+=" \"$user\""
+  fi
+done
+
+# echo "podmanWheelUsers=$podmanWheelUsers"
+if [ -n "$podmanWheelUsers" ]
+then
+  metricWeight=107
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$podmanWheelUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nвходящие в группу wheel"
+    message="$prefix($metricWeight): Пользователи $podmanWheelUsers входят в группы 'podman' и 'wheel'"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# echo "notConfigUsers=$notConfigUsers"
+if [ -n "$notConfigUsers" ]
+then
+  users+=$notConfigUsers
+  set -- $notConfigUsers
+  let metricWeight=(90*$#)/$nOnlyPodmanUsers
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nне имеющих конфигурационного файла"
+    message="$prefix($metricWeight): Пользователи $notConfigUsers не имеют конфигурационного файла .config/containers/storage.conf"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+# echo "editableConfigUsers=$editableConfigUsers"
+if [ -n "$editableConfigUsers" ]
+then
+  set -- $editableConfigUsers
+  let metricWeight=(90*$#)/$nOnlyPodmanUsers
+  key=$(getJournalKeyByMetric $metricWeight);
+  if [ -n "$key" ]
+  then
+    users+=$editableConfigUsers
+    prefix=${LEVELSNAMES[$key]};
+    priority=${JOURNALPRIORITY[$key]}
+    nagiosHeads+="\nспособные изменить конфигурацию"
+    message="$prefix($metricWeight): Пользователи $editableConfigUsers имеют открытым для записи каталог конфигурации .config/containers"
+    logger -p $priority -t $prefix $message
+    messages+="\n$message"
+  fi
+  let summaryMetric+=$metricWeight
+fi
+
+key=$(getNagiosKeyByMetric $summaryMetric)
+if [ -n "$key" ]
+then
+  users=$(echo "$users" | tr ' ' "\n" | sort -u | tr "\n" ' ')
+  prefix=${LEVELSNAMES[$key]}
+  priority=${NAGIOSPRIORITY[$key]}
+  case $VERBOSELEVEL in
+    0) echo  "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users"
+      ;;
+    1|2|3)
+      echo -ne "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users | Есть пользователи:"
+      echo -ne "$nagiosHeads"
+      if [ $VERBOSELEVEL -gt 1 ]
+      then
+        echo -ne " | $messages"
+      fi
+      ;;
+  esac
+  echo
+  exit $priority
+fi
+echo "POLICY OK: Политики контейнеризации не нарушены"
+exit 0
+

@@ -1,5 +1,5 @@
 Name: podsec
-Version: 0.2.1
+Version: 0.2.3
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -21,7 +21,7 @@ Requires: fuse-overlayfs >= 1.1.2.3.800011b
 Requires: skopeo >= 1.9.1
 Requires: sh >= 4.4.23
 Requires: wget >= 1.21.3
-Requires: coreutils >= 9.1.0.8
+Requires: coreutils >= 8.32.0
 
 %description
 This package contains utilities for:
@@ -72,7 +72,7 @@ Requires: podsec >= 0.1.1
 Requires: sudo >= 1.9
 
 %description nagios-plugins
-A set of scripts called from the тnagios server side via check_ssh plugin
+A set of scripts called from the nagios server side via check_ssh plugin
 to monitor and identify security threats
 
 %prep
@@ -101,11 +101,18 @@ to monitor and identify security threats
 %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-rbac-*
 
-%package nagios-plugins
-%_libexecdir/nagios/podsec-check-*
-%_mandir/man?/podsec-k8s-podsec-check-*
+%files nagios-plugins
+%_libexecdir/nagios//plugins/podsec-nagios-plugins-*
+%_bindir/podsec-nagios-plugins-*
+%_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
+* Fri Mar 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.3-alt1
+- 0.2.3
+
+* Fri Mar 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.2-alt1
+- 0.2.2
+
 * Sun Mar 19 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.1-alt1
 - 0.2.1
 
