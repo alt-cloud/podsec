@@ -216,8 +216,9 @@ Critical(106): Пользователи "imagedeveloper" "user"  не испол
 Critical(107): Пользователи  "kaf" "securityadmin" входят в группы 'podman' и 'wheel'
 High(72): Пользователи  "k8s-user1" "kaf" "securityadmin" "user1" не имеют конфигурационного файла .config/containers/storage.conf
 High(18): Пользователи  "user" имеют открытым для записи каталог конфигурации .config/containers
-
 </pre>
+
+Код завершения программы - `2`.
 
 
 ## SECURITY CONSIDERATIONS
