@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cmdname=$0
+cmdname=$(basename $0)
 . podsec-k8s-rbac-functions
 
 if [ $# -lt 4 -o $# -gt 5 ]

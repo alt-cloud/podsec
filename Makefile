@@ -51,11 +51,12 @@ PODSEC_K8S_RBAC_FUNCTIONS = \
 	podsec-k8s-rbac-functions
 
 PODSEC_NAGIOS_PLUGINS = \
-	podsec-nagios-plugins-check-policy \
 	podsec-nagios-plugins-check-audit \
 	podsec-nagios-plugins-check-images \
+	podsec-nagios-plugins-check-k8s \
+	podsec-nagios-plugins-check-policy \
 	podsec-nagios-plugins-check-rbac \
-	podsec-nagios-plugins-check-trivy-k8s
+	podsec-nagios-plugins-check-registry
 
 PODSEC_NAGIOS_PLUGINS_FUNCTIONS = \
 	podsec-nagios-plugins-functions \
