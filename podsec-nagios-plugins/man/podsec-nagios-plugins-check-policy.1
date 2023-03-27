@@ -7,7 +7,7 @@
 \fBpodsec\-nagios\-plugins\-check\-policy\fR \- Плугин проверяет политики настройки контейнеризации на узле
 .
 .SH "SYNOPSIS"
-\fBpodsec\-nagios\-plugins\-check\-policy \-w уровни_реагирования \-c уровни_реагирования\fR
+\fBpodsec\-nagios\-plugins\-check\-policy [\-v[vv]] [\-a интервал] [\-f интервал] \-c интервал \-h интервал [\-m интервал] \-w интервал [\-l интервал] [\-d интервал]\fR
 .
 .SH "DESCRIPTION"
 .
@@ -16,6 +16,10 @@
 .
 .P
 Проверка идет по следующим параметрам:
+.
+.TP
+файл \fBpolicy\.json\fR установки транспортов и политик доступа к регистраторам:
+
 .
 .IP "" 4
 .
@@ -118,13 +122,13 @@
 
     Имя уровня  | Уровень | Префикс    | Флаг | Рекомендуемое значение интервала
     \-\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
-    аварийный   |    7    | Crash      | `\-a` | 10000
-    фатальный   |    6    | Fatal      | `\-f` | 1000
+    аварийный   |    7    | Crash      | `\-a` | не указывать
+    фатальный   |    6    | Fatal      | `\-f` | не указывать
     критический |    5    | Critical   | `\-c` | 100
-    высокий     |    4    | Heigh      | `\-h` | 80
-    средний     |    3    | Middle     | `\-m` | 40
-    низкий      |    2    | Low        | `\-l` | 20
-    отладочный  |    1    | Debug      | `\-d` | 10
+    высокий     |    4    | Heigh      | `\-h` | 0
+    средний     |    3    | Middle     | `\-m` | не указывать
+    низкий      |    2    | Low        | `\-l` | не указывать
+    отладочный  |    1    | Debug      | `\-d` | не указывать
 .
 .fi
 .
@@ -378,7 +382,7 @@ POLICY $prefix: Нарушение политик контейнеризации
 .nf
 
 
-# \./podsec\-nagios\-plugins\-check\-policy \-vvv  \-w 0 \-l 0 \-c 100
+# podsec\-nagios\-plugins\-check\-policy \-vvv  \-w 0 \-h 0 \-c 100
 POLICY Critical(18): Нарушение политик контейнеризации пользователей  "imagedeveloper" "k8s\-user1" "kaf" "kafpodman" "podmanuser" "root" "securityadmin" "user" "user1"  | Есть пользователи:
 вне группы podman,
 способные получать любой образ
@@ -396,8 +400,8 @@ Critical(104): Пользователи "root" "kaf" "kafpodman" "podmanuser" "s
 Critical(105): Пользователи "user"  имеют в списке поддерживаемых транспорты отличные от docker
 Critical(106): Пользователи "imagedeveloper" "user"  не используют хранилище подписей  http://sigstore\.local:81/sigstore/ как хранилище подписей по умолчанию
 Critical(107): Пользователи  "kaf" "securityadmin" входят в группы \'podman\' и \'wheel\'
-Low(72): Пользователи  "k8s\-user1" "kaf" "securityadmin" "user1" не имеют конфигурационного файла \.config/containers/storage\.conf
-Low(18): Пользователи  "user" имеют открытым для записи каталог конфигурации \.config/containers
+High(72): Пользователи  "k8s\-user1" "kaf" "securityadmin" "user1" не имеют конфигурационного файла \.config/containers/storage\.conf
+High(18): Пользователи  "user" имеют открытым для записи каталог конфигурации \.config/containers
 
 .
 .fi
