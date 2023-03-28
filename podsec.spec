@@ -1,5 +1,5 @@
 Name: podsec
-Version: 0.2.3
+Version: 0.2.4
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -107,6 +107,9 @@ to monitor and identify security threats
 %_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
+* Tue Mar 28 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.4-alt1
+- 0.2.4
+
 * Fri Mar 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.3-alt1
 - 0.2.3
 
