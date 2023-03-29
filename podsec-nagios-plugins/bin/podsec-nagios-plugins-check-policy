@@ -1,15 +1,22 @@
 #!/bin/sh
 # Плугин проверяет политики настройки контейнеризации на сервере
+export LANG=C
 
 if [ $EUID -ne 0 ]
 then
-  sudo $0 $*
-  exit
+  if [ "$LANG" == 'ru_RU.UTF-8' ]
+  then
+    echo "POLICY Unknown plugin должен запускаться с првами пользователя root"
+  else
+    echo "POLICY Unknown plugin must be run as root user"
+  fi
+  exit 3
 fi
 
-export LANG=C
 . podsec-policy-functions
 . podsec-nagios-plugins-functions
+
+setTraps
 
 # Проанализировать описание уровня интервалов во входных парамаетрах
 parseIntervalParameters $*
