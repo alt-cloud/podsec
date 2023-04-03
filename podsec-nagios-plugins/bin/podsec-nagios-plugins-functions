@@ -141,9 +141,11 @@ getNagiosKeyByMetric() {
 
 setTraps() {
   i=1
-  while [ $i -le 255 ]
+  list=
+  while [ $i -lt 64 ]
   do
-    trap "exit 3" $i
     let i+=1
+    list+=" $i"
   done
+  trap 'exit 3' $list
 }
