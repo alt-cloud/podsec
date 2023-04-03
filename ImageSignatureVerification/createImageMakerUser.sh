@@ -111,6 +111,12 @@ testRepoPath() {
 
 #MAIN
 
+if [ $(id -u) -ne 0 ]
+then
+  echo "Скрипт должен запускаться пользователем с права-ми root"
+  exit 1
+fi
+
 . podsec-functions
 
 # Проверка. Является ли текущий сервер сервером, поддерживающий регистратор (registry.local) и сервер подписи образов (sigstore.local)

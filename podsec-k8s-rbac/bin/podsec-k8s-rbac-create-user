@@ -30,9 +30,9 @@ adduser $user -G podman,k8s
 passwd  $user
 
 export KUBECONFIGDIR=$USERDIR/.kube
-sudo chmod 770 $USERDIR
-sudo mkdir $KUBECONFIGDIR
-sudo chmod 700 $KUBECONFIGDIR
-sudo chown -R $user:k8s $USERDIR
+chmod 770 $USERDIR
+mkdir $KUBECONFIGDIR
+chmod 700 $KUBECONFIGDIR
+chown -R $user:k8s $USERDIR
 
 

@@ -127,7 +127,7 @@ checkPolicyConfig() {
     echo "defaultPolicy=$defaultPolicy"
   fi
 
-  if [ $defaultPolicy != 'reject' ]
+  if [ "$defaultPolicy" != 'reject' ]
   then
     ret+="\n,$tab\"incorrectDefaultPolicy\":\"$defaultPolicy\"\n"
     if [ -n "$DEBUG" ]
@@ -170,6 +170,141 @@ checkPolicyConfig() {
   ret+="\n,$tab\"forbiddenTransports\":$forbiddenTransports"
   echo -ne "$ret"
 }
+
+checkUserImages() {
+  user=$1
+  configPolicyFile=$2
+  configDir=$(dirname $configPolicyFile)
+#   configDir=$2
+  tab="\\t\\t"
+  policyFile="$configDir/policy.json"
+  ret="\n$tab\"user\": \"$user\"\n"
+  userPolicyConfig=$(checkPolicyConfig $policyFile)
+  ret+=",$userPolicyConfig"
+  registries=$(getRegistries $policyFile)
+  if [ -z "$registries" ]
+  then
+    registries='""'
+  fi
+  n=0
+  for Registry in $registries
+  do
+    registry=${Registry:1:-1}
+    if [ $n -eq 0 ]
+    then
+      in="    (. | startswith(\"$registry/\"))\n"
+      out="    (. | startswith(\"$registry/\") | not)\n"
+    else
+      in="$in    or \n    (. | startswith(\"$registry/\"))\n"
+      out="$out    and \n    (. | startswith(\"$registry/\") | not)\n"
+    fi
+    let n=$n+1$notSigned
+  done
+
+  in="su - -c 'podman images --format json' $user 2>/dev/null |
+  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Names] end | .[]] |
+map(
+  select(
+$in  )
+) | sort| unique | .[]]' | jq .
+"
+
+  out="su - -c 'podman images --format json' $user 2>/dev/null |
+  jq '[[.[] | if  has(\"RepoDigests\") then .RepoDigests else [.Names] end | .[]] |
+map(
+  select(
+$out  )
+) | sort| unique | .[]]' | jq .
+"
+
+  TMPFILE="/tmp/checkImagesSignature.$$"
+  echo -ne "$in" > $TMPFILE
+  in=$(sh $TMPFILE )
+#   cp $TMPFILE "/tmp/in.$user"
+
+  echo -ne "$out" > $TMPFILE
+  out=$(sh $TMPFILE)
+#   cp $TMPFILE "/tmp/out.$user"
+  rm -f $TMPFILE
+
+  if [ -n "$out" ]
+  then
+    outPolicyImages=$(echo -ne "$out")
+    outPolicyImagesTree=$(echo -ne "$out" | imagesTree)
+    if [ -n "$DEBUG" ]
+    then
+      echo "Рабочее место $HOSTNAME, пользователь $user: Образы вне политики файла $policyFile:" >&2
+      echo -ne "$outPolicyImages\n\n" >&2
+    fi
+#     outPolicyImages=$(echo $outPolicyImages | jq .)
+    ret+="\n,\"outPolicyImagesTree\": $outPolicyImagesTree"
+  fi
+
+  if [ -n "$in" ]
+  then
+    inPolicyImages=$(echo -ne "$in")
+    inPolicyImagesTree=$(echo -ne "$in"  | imagesTree)
+    if [ -n "$DEBUG" ]
+    then
+      echo "Рабочее местр $HOSTNAME, пользователь $user: Образы согласно политики файла $policyFile:" >&2
+      echo -ne "$inPolicyImages\n\n" >&2
+    fi
+#     inPolicyImages=$(echo $inPolicyImages | jq .)
+    ret+="\n,\"inPolicyImagesTree\": $inPolicyImagesTree"
+  fi
+
+  inCorrectImages=
+  images=$in
+  if [ -n "$CHECKALLIMAGES" ]
+  then
+    images="$in $out"
+  fi
+
+#   for image in $(echo $images | jq '.[]')
+#   do
+#     Image=${image:1:-1}
+#     if podman pull --tls-verify=false $Image >/dev/null 2>$TMPFILE
+#     then :; # echo "OK";
+#     else
+#       if [ -n "$DEBUG" ]
+#       then
+#         echo "Рабочее место $HOSTNAME, пользователь $user имеет некорректный образ:" >&2
+#         cat $TMPFILE >&2
+#         echo -ne "\n\n" >&2
+#       fi
+#       inCorrectImages+=$(echo ${inCorrectImages:+,})
+#       inCorrectImages+=$(tr "\n" ' '<$TMPFILE | jq --raw-input ". | {$image:.}"  )
+#     fi
+#   done
+#   ret+=",\"inCorrectImages\":[$inCorrectImages]"
+
+  notSignedImages=
+  signedImages=
+  for image in $(echo $images | jq '.[]')
+  do
+    sigStoreURL=$(getSigStoreURLForImage $configDir ${image:1:-1})
+    sigStoreURL="$sigStoreURL/signature-1"
+    if wget -q -O $TMPFILE $sigStoreURL 2>/dev/null
+    then
+      signedImages+=$(echo ${signedImages:+,}$image)
+    else
+      notSignedImages+=$(echo ${notSignedImages:+,}$image)
+    fi
+  done
+  rm -f $TMPFILE
+  signedImages="[$signedImages]"
+  notSignedImages="[$notSignedImages]"
+#   ret+="\n,\"signedImages\": $signedImages"
+#   ret+="\n,\"notSignedImages\": $notSignedImages"
+  signedImagesTree=$(echo $signedImages | imagesTree)
+  notSignedImagesTree=$(echo $notSignedImages | imagesTree)
+  ret+="\n,\"signedImagesTree\": $signedImagesTree"
+  ret+="\n,\"notSignedImagesTree\": $notSignedImagesTree"
+
+  echo -ne "$ret";
+}
+
+
 
 #######################
 # SIGSTORE functions
@@ -254,9 +389,6 @@ getGroups() {
 #########################################################
 checkUsersConfig() {
   ret=
-#   userDir="/home/imagedeveloper/"
-#   checkPolicyResult=$(checkPolicyConfig $userDir)
-#   ret+="\n$checkPolicyResult"
   user="root"
   policyFile="/etc/containers/policy.json"
   checkPolicyResult=$(checkPolicyConfig $policyFile)
@@ -265,20 +397,50 @@ checkUsersConfig() {
   ret+="\n{\"user\":\"$user\",$checkPolicyResult}"
   for userDir in /home/*
   do
-    if [ -d "$userDir/.local/share/containers/storage/overlay" ]
+    if [ ! -d "$userDir/.local/share/containers/storage/overlay" ]
     then
-      policyFile="$userDir/.config/containers/policy.json"
-      if [ ! -f $policyFile ];
-      then
-        policyFile="/etc/containers/policy.json"
-      fi
-      checkPolicyResult=$(checkPolicyConfig $policyFile)
-      user=$(basename $userDir)
-      checkPolicyResult+=",\"group\":\"$(getGroup $user)\""
-      checkPolicyResult+=",\"groups\":$(getGroups $user)"
-      ret+="\n,{\"user\":\"$user\",$checkPolicyResult}"
-#       echo "RET=$ret"
+      continue
     fi
+    policyFile="$userDir/.config/containers/policy.json"
+    if [ ! -f $policyFile ];
+    then
+      policyFile="/etc/containers/policy.json"
+    fi
+    checkPolicyResult=$(checkPolicyConfig $policyFile)
+    user=$(basename $userDir)
+    checkPolicyResult+=",\"group\":\"$(getGroup $user)\""
+    checkPolicyResult+=",\"groups\":$(getGroups $user)"
+    ret+="\n,{\"user\":\"$user\",$checkPolicyResult}"
+#       echo "RET=$ret"
+  done
+  ret="[$ret]"
+  echo -ne "$ret"
+}
+
+checkUsersImages() {
+  ret=
+  user="root"
+  policyFile="/etc/containers/policy.json"
+  userImages=$(checkUserImages $user $policyFile)
+  guserImages+=",\"group\":\"$(getGroup $user)\""
+  userImages+=",\"groups\":$(getGroups $user)"
+  ret+="\n{\"user\":\"$user\",$userImages}"
+  for userDir in /home/*
+  do
+    if [ ! -d "$userDir/.local/share/containers/storage/overlay" ]
+    then
+      continue
+    fi
+    policyFile="$userDir/.config/containers/policy.json"
+    if [ ! -f $policyFile ];
+    then
+      policyFile="/etc/containers/policy.json"
+    fi
+    user=$(basename $userDir)
+    userImages=$(checkUserImages $user $policyFile)
+    userImages+=",\"group\":\"$(getGroup $user)\""
+    userImages+=",\"groups\":$(getGroups $user)"
+    ret+="\n,{\"user\":\"$user\",$userImages}"
   done
   ret="[$ret]"
   echo -ne "$ret"

@@ -1,22 +1,25 @@
 #!/bin/sh
 # Плугин проверяет политики настройки контейнеризации на сервере
-
-. ../../exportPath.sh
+export LANG=C
 
 if [ $EUID -ne 0 ]
 then
-  sudo $0 $*
-  exit
+  if [ "$LANG" == 'ru_RU.UTF-8' ]
+  then
+    echo "POLICY Unknown plugin должен запускаться с правами пользователя root"
+  else
+    echo "POLICY Unknown plugin must be run as root user"
+  fi
+  exit 3
 fi
 
 . podsec-policy-functions
 . podsec-nagios-plugins-functions
 
+setTraps
+
 # Проанализировать описание уровня интервалов во входных парамаетрах
 parseIntervalParameters $*
-#  echo "JOURNALPLUGINPARS=${JOURNALPLUGINPARS[@]}"
-#  echo "NAGIIOSPLUGINPARS=${NAGIIOSPLUGINPARS[@]}"
-# exit
 
 checkUsersConfig=$(checkUsersConfig)
 # echo $checkUsersConfig
@@ -44,8 +47,14 @@ then
     users+=$notPodmanUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nвне группы podman,"
-    message="$prefix($metricWeight): Пользователи $notPodmanUsers имеют образы, но не входят в группу 'podman'"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nвне группы podman,"
+      message="$prefix($metricWeight): Пользователи $notPodmanUsers имеют образы, но не входят в группу 'podman'"
+    else
+      nagiosHeads+="\noutside the podman group,"
+      message="$prefix($metricWeight): Users $notPodmanUsers have images but are not in the 'podman' group"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -67,8 +76,15 @@ then
     users+=$incorrectPolicyUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nспособные получать любой образ"
-    message="$prefix($metricWeight): Пользователи $incorrectPolicyUsers имеют в policy.json defaultPolicy!=reject, но не входят в группу 'podman_dev'"
+
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nспособные получать любой образ"
+      message="$prefix($metricWeight): Пользователи $incorrectPolicyUsers имеют в policy.json defaultPolicy!=reject, но не входят в группу 'podman_dev'"
+    else
+      nagiosHeads+="\ncapable of receiving any image"
+      message="$prefix($metricWeight): users $incorrectPolicyUsers have 'defaultPolicy!=reject' in policy.json but are not in the 'podman_dev' group"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -90,8 +106,14 @@ then
     users+=$nonRegistryLocalUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nспособные получать локальный образ без подписи"
-    message="$prefix($metricWeight): Пользователи $nonRegistryLocalUsers не имеют registry.local в списке регистраторов для которых проверяется наличие электронной подписи образов"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nспособные получать локальный образ без подписи"
+      message="$prefix($metricWeight): Пользователи $nonRegistryLocalUsers не имеют registry.local в списке регистраторов для которых проверяется наличие электронной подписи образов"
+    else
+      nagiosHeads+="\ncapable of getting a local image without a signature"
+      message="$prefix($metricWeight): Users $nonRegistryLocalUsers do not have registry.local in the list of registries for which the presence of digital image signature is checked"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -113,8 +135,14 @@ then
     users+=$notSignedRegistriesUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nспособные получать любой образ без подписи"
-    message="$prefix($metricWeight): Пользователи $notSignedRegistriesUsers имеют в политике регистраторы для которых не проверяется наличие электронной подписи образов"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nспособные получать любой образ без подписи"
+      message="$prefix($metricWeight): Пользователи $notSignedRegistriesUsers имеют в политике регистраторы для которых не проверяется наличие электронной подписи образов"
+    else
+      nagiosHeads+="\ncapable of receiving any image without a signature"
+      message="$prefix($metricWeight): Users $notSignedRegistriesUsers have registries in the policy for which the presence of an electronic image signature is not checked"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -136,8 +164,14 @@ then
     users+=$forbiddenTransportsUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nспособные получать любой образ через запрещенный транспорт"
-    message="$prefix($metricWeight): Пользователи $forbiddenTransportsUsers имеют в списке поддерживаемых транспорты отличные от docker"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nспособные получать любой образ через запрещенный транспорт"
+      message="$prefix($metricWeight): Пользователи $forbiddenTransportsUsers имеют в списке поддерживаемых транспорты отличные от docker"
+    else
+      nagiosHeads+="\ncapable of receiving any image via prohibited transport"
+      message="$prefix($metricWeight): Users $forbiddenTransportsUsers have transports other than docker in the list of supported transports"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -159,8 +193,14 @@ then
     users+=$incorrectDefaultDockerUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nне использующие локальный хранитель подписей"
-    message="$prefix($metricWeight): Пользователи $incorrectDefaultDockerUsers не используют хранилище подписей  http://sigstore.local:81/sigstore/ как хранилище подписей по умолчанию"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nне использующие локальный хранитель подписей"
+      message="$prefix($metricWeight): Пользователи $incorrectDefaultDockerUsers не используют хранилище подписей  http://sigstore.local:81/sigstore/ как хранилище подписей по умолчанию"
+    else
+      nagiosHeads+="\nnot using a local signature store"
+      message="$prefix($metricWeight): Users $incorrectDefaultDockerUsers do not use the signature store http://sigstore.local:81/sigstore/ as the default signature store"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -209,8 +249,14 @@ then
     users+=$podmanWheelUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nвходящие в группу wheel"
-    message="$prefix($metricWeight): Пользователи $podmanWheelUsers входят в группы 'podman' и 'wheel'"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nвходящие в группу wheel"
+      message="$prefix($metricWeight): Пользователи $podmanWheelUsers входят в группы 'podman' и 'wheel'"
+    else
+      nagiosHeads+="\nincluded in the wheel group"
+      message="$prefix($metricWeight): The $podmanWheelUsers users are members of the 'podman' and 'wheel' groups"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -228,8 +274,14 @@ then
   then
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nне имеющих конфигурационного файла"
-    message="$prefix($metricWeight): Пользователи $notConfigUsers не имеют конфигурационного файла .config/containers/storage.conf"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nне имеющих конфигурационного файла"
+      message="$prefix($metricWeight): Пользователи $notConfigUsers не имеют конфигурационного файла .config/containers/storage.conf"
+    else
+      nagiosHeads+="\nwithout a config file"
+      message="$prefix($metricWeight): $notConfigUsers users do not have config file .config/containers/storage.conf"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -247,8 +299,14 @@ then
     users+=$editableConfigUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    nagiosHeads+="\nспособные изменить конфигурацию"
-    message="$prefix($metricWeight): Пользователи $editableConfigUsers имеют открытым для записи каталог конфигурации .config/containers"
+    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    then
+      nagiosHeads+="\nспособные изменить конфигурацию"
+      message="$prefix($metricWeight): Пользователи $editableConfigUsers имеют открытым для записи каталог конфигурации .config/containers"
+    else
+      nagiosHeads+="\nable to change configuration"
+      message="$prefix($metricWeight): $editableConfigUsers users have writable configuration directory .config/containers"
+    fi
     logger -p $priority -t $prefix $message
     messages+="\n$message"
   fi
@@ -262,10 +320,22 @@ then
   prefix=${LEVELSNAMES[$key]}
   priority=${NAGIOSPRIORITY[$key]}
   case $VERBOSELEVEL in
-    0) echo  "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users"
+    0)
+      if [ "$LANG" == 'ru_RU.UTF-8' ]
+      then
+        echo  "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users"
+      else
+        echo  "POLICY $prefix($metricWeight): Violating User Containerization Policies $users"
+      fi
       ;;
     1|2|3)
-      echo -ne "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users | Есть пользователи:"
+      if [ "$LANG" == 'ru_RU.UTF-8' ]
+      then
+        echo -ne "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users | Есть пользователи:"
+      else
+        echo -ne "POLICY $prefix($metricWeight): Violation of user containerization policies $users | There are users:"
+
+      fi
       echo -ne "$nagiosHeads"
       if [ $VERBOSELEVEL -gt 1 ]
       then
@@ -276,6 +346,11 @@ then
   echo
   exit $priority
 fi
-echo "POLICY OK: Политики контейнеризации не нарушены"
+if [ "$LANG" == 'ru_RU.UTF-8' ]
+then
+  echo "POLICY OK: Политики контейнеризации не нарушены"
+else
+  echo "POLICY OK: Containerization policies are not violated"
+fi
 exit 0
 

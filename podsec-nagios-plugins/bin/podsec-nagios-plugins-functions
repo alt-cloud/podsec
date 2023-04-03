@@ -137,3 +137,15 @@ getNagiosKeyByMetric() {
   done
   echo ''
 }
+
+
+setTraps() {
+  i=1
+  list=
+  while [ $i -lt 64 ]
+  do
+    let i+=1
+    list+=" $i"
+  done
+  trap 'exit 3' $list
+}

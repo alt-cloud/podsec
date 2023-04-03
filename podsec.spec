@@ -1,5 +1,5 @@
 Name: podsec
-Version: 0.2.3
+Version: 0.2.4
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -43,6 +43,7 @@ Requires: kubernetes-crio >= 1.24.8
 Requires: cri-tools >= 1.22.0
 Requires: podsec >= 0.1.1
 Requires: kubernetes-client >= 1.24.8
+Requires: openssh-server >= 7.8
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
 %description k8s
@@ -56,6 +57,7 @@ Group: Development/Other
 Requires: kubernetes-client >= 1.24.8
 Requires: podsec >= 0.1.1
 Requires: curl >= 7.88.0
+Requires: openssh-server >= 7.8
 
 
 %description k8s-rbac
@@ -69,7 +71,7 @@ Summary: Set of scripts for nagios monitoring
 Group: Development/Other
 Requires: nagios-plugins >= 2.2.1
 Requires: podsec >= 0.1.1
-Requires: sudo >= 1.9
+Requires: openssh-server >= 7.8
 
 %description nagios-plugins
 A set of scripts called from the nagios server side via check_ssh plugin
@@ -107,6 +109,9 @@ to monitor and identify security threats
 %_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
+* Tue Mar 28 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.4-alt1
+- 0.2.4
+
 * Fri Mar 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.2.3-alt1
 - 0.2.3
 

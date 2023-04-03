@@ -1,5 +1,11 @@
 #!/bin/sh
 
+if [ $(id -u) -ne 0 ]
+then
+  echo "Скрипт должен запускаться пользователем с права-ми root"
+  exit 1
+fi
+
 if [ $# -eq 0 ]
 then
   echo -ne "Формат:\n$0 <username> ...\n"
