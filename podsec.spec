@@ -1,5 +1,5 @@
 Name: podsec
-Version: 0.2.4
+Version: 0.3.1
 Release: alt1
 
 Summary: Set of scripts for Podman Security
