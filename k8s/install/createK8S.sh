@@ -8,16 +8,6 @@ fi
 
 user=$1
 
-# Настройка /etc/crio/crio.conf на использования в качестве образа pause registry.local/k8s-p10/pause:3.7
-echo "Настройка /etc/crio/crio.conf на использования в качестве образа pause registry.local/k8s-p10/pause:3.7"
-if ! grep  '^pause_image' /etc/crio/crio.conf
-then
-  cat <<EOF >>/etc/crio/crio.conf
-[crio.image]
-pause_image = "registry.local/k8s-p10/pause:3.7"
-EOF
-fi
-
 . /etc/kubernetes/kubelet
 if ! (echo $KUBELET_ARGS | grep pod-infra-container-image)
 then

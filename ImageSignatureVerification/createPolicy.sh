@@ -148,9 +148,19 @@ else
   ln -sf $linkedRegistriesConf  $registriesConf
 fi
 
-# Настройка использования образа registry.local/k8s-p10/pause:3.7 при запуска pod'ов в podman (podman pod init)
-echo "Настройка использования образа registry.local/k8s-p10/pause:3.7 при запуска pod'ов в podman (podman pod init)"
-sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-p10/pause:3.7"|' /usr/share/containers/containers.conf
+# Настройка использования образа registry.local/k8s-p10/pause:3.9 при запуска pod'ов в podman (podman pod init)
+echo "Настройка использования образа registry.local/k8s-p10/pause:3.9 при запуска pod'ов в podman (podman pod init)"
+sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-p10/pause:3.9"|' /usr/share/containers/containers.conf
+
+# Настройка /etc/crio/crio.conf на использования в качестве образа pause registry.local/k8s-p10/pause:3.9
+echo "Настройка /etc/crio/crio.conf на использования в качестве образа pause registry.local/k8s-p10/pause:3.9"
+if ! grep  '^pause_image' /etc/crio/crio.conf
+then
+  cat <<EOF >>/etc/crio/crio.conf
+[crio.image]
+pause_image = "registry.local/k8s-p10/pause:3.9"
+EOF
+fi
 
 if [ -z "$localIP" ]
 then
