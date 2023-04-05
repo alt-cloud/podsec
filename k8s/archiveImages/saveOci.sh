@@ -37,7 +37,7 @@ then
   exit 1
 fi
 
-regName='registry.altlinux.org/k8s-p10'
+regName='registry.altlinux.org'
 
 case $archs in
   'all') archs='amd64 arm64 arm ppc64le 386';;

@@ -30,14 +30,14 @@ ociDir=$1
 archs=$2
 
 imagesList='
-k8s-p10/coredns:v1.8.6
-k8s-p10/kube-controller-manager:v1.24.8
-k8s-p10/kube-apiserver:v1.24.8
-k8s-p10/kube-proxy:v1.24.8
-k8s-p10/etcd:3.5.5-0
+k8s-p10/coredns:v1.9.3
+k8s-p10/kube-controller-manager:v1.26.3
+k8s-p10/kube-apiserver:v1.26.3
+k8s-p10/kube-proxy:v1.26.3
+k8s-p10/etcd:3.5.6-0
 k8s-p10/flannel:v0.19.2
-k8s-p10/kube-scheduler:v1.24.8
-k8s-p10/pause:3.7
+k8s-p10/kube-scheduler:v1.26.3
+k8s-p10/pause:3.9
 k8s-p10/flannel-cni-plugin:v1.2.0
 k8s-p10/cert-manager-controller:v1.9.1
 k8s-p10/cert-manager-cainjector:v1.9.1
