@@ -54,7 +54,7 @@
 .
 .IP "" 0
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 контроль групп пользователей
 .
 .TP
@@ -167,22 +167,22 @@
 .P
 Замечания:
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fBstart\fR ≤ \fBend\fR
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fBstart\fR и \fB:\fR не требуется если \fBstart=0\fR
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 если интервал задан в формате \fBstart:\fR и конец не задан, то концом интервала считается бесконечность \fBꝏ\fR
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 для указания отрицательной бесконечности (\fB\-ꝏ\fR) используйте \fB~\fR
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 триггер срабатывает когда значение метрики \fBВНЕ УКАЗАННОГО ИНТЕРВАЛА\fR (\fBначальные и конечные точки включаются в интервал\fR)
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 если интервал начинается с символа \fB@\fR, тогда условие инвертируется \- триггер срабатывает при значении метрики \fBВ УКАЗАННОМ ИНТЕРВАЛЕ\fR (начальные и конечные точки включаются в интервал)
 .
 .IP "" 0
@@ -227,10 +227,10 @@
 .P
 Кроме основного сообщения для \fBnagios\fR формируются:
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 список пользователей нарушителей;
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 укороченные сообщения для уровня детализации \fB1\fR\.
 .
 .IP "" 0
@@ -241,10 +241,10 @@
 .P
 Уровень опасности для логов nagios определяется СУММАРНОЙ метрике\. Суммарная метрика определяется для определения уровня сравнивается с интервалами, задаваемыми флагами
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fB\-c\fR \- \fBCritical\fR
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fB\-w\fR \- \fBWarning\fR
 .
 .IP "" 0
@@ -280,7 +280,7 @@ POLICY OK: Политики контейнеризации не нарушены
 \-v          | 1
 \-vv         | 2
 \-vvv        | 3
-\|\.\|\.\|\.         | 3
+\.\.\.         | 3
 .
 .fi
 .
@@ -303,10 +303,10 @@ POLICY $prefix:
 .P
 Где \fBprefix\fR в зависимости от уровня опасности принимает значения:
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fB\-c\fR \- \fBCritical\fR
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fB\-w\fR \- \fBWarning\fR
 .
 .IP "" 0
@@ -338,7 +338,7 @@ POLICY $prefix: Нарушение политик контейнеризации
 
 POLICY $prefix: Нарушение политик контейнеризации пользователей $users | Есть пользователи:
 укороченное сообщение
-\|\.\|\.\|\.
+\.\.\.
 .
 .fi
 .
@@ -354,10 +354,10 @@ POLICY $prefix: Нарушение политик контейнеризации
 
 POLICY $prefix: Нарушение политик контейнеризации пользователей $users | Есть пользователи:
 укороченное сообщение
-\|\.\|\.\|\.
+\.\.\.
 укороченное сообщение |
 полное сообщение
-\|\.\|\.\|\.
+\.\.\.
 .
 .fi
 .
@@ -366,13 +366,58 @@ POLICY $prefix: Нарушение политик контейнеризации
 .P
 После вывода сообщений плугин завершается кодом завершения:
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fBCritical\fR \- \fB2\fR
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 \fBWarning\fR \- \fB1\fR
 .
 .IP "" 0
+.
+.IP "\(bu" 4
+создайте в \fB/etc/nagios/commands/\fR конфигурационный файл \fBnagios\-plugins\-podsec\.cfg\fR для всех podsec планинов
+.
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+
+define command{
+        command_name    podsec\-nagios\-plugins\-check\-policy
+        command_line    $USER1$/check_by_ssh \-H $HOSTADDRESS$ \-l root \-C \'/usr/lib/nagios/plugins/podsec\-nagios\-plugins\-check\-policy \-vvv \-w $ARG1$ \-l $ARG1$ \-c $ARG2$ \'
+        }
+\.\.\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+В \fBcommand_name\fR надо указать имя плагина которое будет использоваться в секции \fBdefine service\fR файла конфигурации в каталоге \fB/etc/nagios/objects\fR\. В \fBcommand_line\fR не забудьте если в этом есть необходимость указать флаг \fB\-l root\fR для запуска скрипта под пользователем root на удаленной машине\. Если для плагина достаточно прав обыкновенного пользователя \fBnagios\fR, флаг \fB\-l\fR не нужен\.
+.
+.P
+Переменныe \fB$ARG1\fR, \fB$ARG2\fR, \.\.\. берутся из командной строки описания сервиса в каталоге \fB/etc/nagios/objects\fR\.
+.
+.IP "" 4
+.
+.nf
+
+
+define service {
+        use generic\-service
+        host_name       <host>
+        service_description     Check containers policy
+        check_command podsec\-nagios\-plugins\-check\-policy!0!100
+        }
+.
+.fi
+.
+.IP "" 0
+.
+.P
+В строке \fBservice_description\fR укахите иям сервиска которое будет отображаться в WEB\-интерейсе nagios\. В \fBcheck_command\fR имя команды, из вышеописанного файла \fBnagios\-plugins\-podsec\.cfg\fR каталога \fB/etc/nagios/commands/\fR\. Параметры использумые в команде указываются через символ \fB|\fR\.
 .
 .SH "EXAMPLES"
 Проанализировать политики политики с максимальным уровнем детализации\. Критический уровень (\fBnagios\fR, \fBsystem\fR) \fB>100\fR\. Уровень предупреждений (\fBnagios\fR) \fB>0\fR\. Низкий уровень (\fBsystem\fR) \fB>0\fR\.
@@ -414,7 +459,7 @@ High(18): Пользователи  "user" имеют открытым для з
 .
 .SH "SEE ALSO"
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 Nagios Plugins\. Development Guidelines \fIhttps://nagios\-plugins\.org/doc/guidelines\.html#PLUGOUTPUT\fR
 .
 .IP "" 0
