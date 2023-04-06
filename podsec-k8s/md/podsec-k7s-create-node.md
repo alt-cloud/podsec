@@ -1,9 +1,9 @@
-podsec-k7s-create-master(1) -- запуск на мастер-узла rootless-kubernetes (alt usernetes)
+podsec-k7s-create-node(1) -- инициализация master- или worker-узла в rootless-kubernetes (alt usernetes)
 ================================
 
 ## SYNOPSIS
 
-`podsec-k7s-create-master
+`podsec-k7s-create-node master|node `
 
 ## DESCRIPTION
 
@@ -12,7 +12,7 @@ podsec-k7s-create-master(1) -- запуск на мастер-узла rootless-
 
 ## EXAMPLES
 
-`podsec-k7s-create-master`
+`podsec-k7s-create-node master`
 
 ## SECURITY CONSIDERATIONS
 

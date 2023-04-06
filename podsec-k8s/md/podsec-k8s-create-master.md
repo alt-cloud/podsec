@@ -1,4 +1,4 @@
-podsec-k8s-create-master(1) -- запуск на мастер-узла kubernetes
+podsec-k8s-create-master(1) -- инициализация мастер-узла rootfull-kubernetes
 ================================
 
 ## SYNOPSIS
