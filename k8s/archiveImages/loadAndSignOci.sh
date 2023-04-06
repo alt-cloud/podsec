@@ -29,6 +29,7 @@ signBy="${3}"
 if [ $# -eq 3 ]
 then
   regName="registry.local/k8s-p10"
+  base="k8s-p10/"
 else
   dir=$(dirname $4)
   if [ $dir == '.' ]
@@ -37,9 +38,11 @@ else
     echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\n"  >&2
     exit 1
   fi
-  base=$(basename $4)
+  base="$(basename $4)"
   regName="$dir/$base"
+  base+="/"
 fi
+baselen=${#base}
 
 if [ ! -f $archive ]
 then
@@ -103,19 +106,26 @@ then
 fi
 
 imagesList=$(jq '.manifests[].annotations[]' $archIndexFile)
+ImageList=""
 for image in $imagesList
 do
   image=${image:1:-1}
-  echo "Разворачиваение образа $image в локальную систему"
-  Image="$regName/$image"
-  skopeo --override-arch $arch copy oci:$archDir:$image containers-storage:$Image
+  if [ "${image:0:$baselen}" == "$base" ]
+  then
+    echo "Разворачиваение образа $image в локальную систему"
+    image=${image:$baselen}
+    Image="$regName/$image"
+    skopeo --override-arch $arch copy oci:$archDir:$base$image containers-storage:$Image
+    ImageList+=" $Image"
+  else
+    echo "Префикс образа $image не совпадает с тропой $base"
+  fi
+
 done
 
-for image in $imagesList
+for Image in $ImageList
 do
-  image=${image:1:-1}
-  echo "Подпись и передача образа $image в регистратор"
-  Image="$regName/$image"
+  echo "Подпись и передача образа $Image в регистратор"
   podman push --tls-verify=false --sign-by="$signBy" $Image
 done
 

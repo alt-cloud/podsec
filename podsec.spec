@@ -16,12 +16,18 @@ Requires: nginx >= 1.22.1
 Requires: docker-registry >= 2.8.1
 Requires: pinentry-common >= 1.1.0
 Requires: jq >= 1.6
-Requires:yq >= 2.12.2
+Requires: yq >= 2.12.2
 Requires: fuse-overlayfs >= 1.1.2.3.800011b
 Requires: skopeo >= 1.9.1
 Requires: sh >= 4.4.23
 Requires: wget >= 1.21.3
 Requires: coreutils >= 8.32.0
+Requires: conntrack-tools >= 1.4.6
+Requires: findutils >= 4.8.0
+Requires: fuse3 >= 3.10.2
+Requires: iproute2 >= 5.13.0
+Requires: iptables >= 1.8.7
+Requires: openssh-server >= 7.8
 
 %description
 This package contains utilities for:
@@ -37,13 +43,22 @@ This package contains utilities for:
 %package k8s
 Summary: Set of scripts for Kubernetes Security
 Group: Development/Other
-Requires: kubernetes-kubeadm >= 1.24.8
-Requires: kubernetes-kubelet >= 1.24.8
-Requires: kubernetes-crio >= 1.24.8
+Requires: podsec >= 0.3.1
+Requires: kubernetes-kubeadm >= :1.26.3
+Requires: kubernetes-kubelet >= :1.26.3
+Requires: kubernetes-crio >= :1.26.3
+Requires: kubernetes-master >= 1.26.3
+Requires: kubernetes-node >= 1.26.3
+Requires: etcd >= 3.4.15
+Requires: flannel >= 0.19.2
+Requires: cni-plugin-flannel >= 1.2.0
+Requires: rootlesskit >= 1.1.0
+Requires: slirp4netns >= 1.1.12
+Requires: crun >= 1.8.1
+Requires: cri-o >= 1.26.2
 Requires: cri-tools >= 1.22.0
-Requires: podsec >= 0.1.1
-Requires: kubernetes-client >= 1.24.8
-Requires: openssh-server >= 7.8
+Requires: kubernetes-client >= :1.26.3
+Requires: systemd-container >= 249.16
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
 %description k8s
@@ -54,8 +69,8 @@ This package contains utilities for:
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
-Requires: kubernetes-client >= 1.24.8
-Requires: podsec >= 0.1.1
+Requires: kubernetes-client >= :1.26.3
+Requires: podsec >= 0.3.1
 Requires: curl >= 7.88.0
 Requires: openssh-server >= 7.8
 
@@ -70,7 +85,7 @@ This package contains utilities for
 Summary: Set of scripts for nagios monitoring
 Group: Development/Other
 Requires: nagios-plugins >= 2.2.1
-Requires: podsec >= 0.1.1
+Requires: podsec >= 0.3.1
 Requires: openssh-server >= 7.8
 
 %description nagios-plugins

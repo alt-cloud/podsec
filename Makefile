@@ -37,7 +37,8 @@ PODSEC_K8S_MANIFESTS= \
 
 PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
- 	podsec-k8s-create-master
+ 	podsec-k8s-create-master \
+ 	podsec-k7s-create-master
 
 PODSEC_K8S_RBAC_PROGRAMS= \
 	podsec-k8s-rbac-bindrole \
