@@ -2,7 +2,7 @@
 %define u77s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.4.1
+Version: 0.5.1
 Release: alt1
 
 Summary: Set of scripts for Podman Security

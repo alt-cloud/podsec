@@ -95,7 +95,7 @@ TARGETS = $(PROGRAMS)
 all:
 
 install: all
-	ls -lR
+# 	ls -lR
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
 	cd ./podsec/bin;$(CHMOD) 644 $(PODSEC_FUNCTIONS)
