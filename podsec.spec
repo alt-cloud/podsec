@@ -125,7 +125,8 @@ to monitor and identify security threats
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/kubernetes/manifests/*
 /home/u7s-admin/*
-
+%attr(0755,%u77s_admin_usr,%u77s_admin_grp,/home/u7s-admin/usernetes/*.sh)
+%attr(0755,%u77s_admin_usr,%u77s_admin_grp,/home/u7s-admin/usernetes/*/*.sh)
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
