@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -o pipefail
 
-. ./podsec-u7s-functions
+. podsec-u7s-functions
 
 set -x
 ### Detect BASE dir

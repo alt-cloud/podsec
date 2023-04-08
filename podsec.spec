@@ -1,5 +1,5 @@
-%define u77s_admin_usr u7s-admin
-%define u77s_admin_grp u7s-admin
+%define u7s_admin_usr u7s-admin
+%define u7s_admin_grp u7s-admin
 
 Name: podsec
 Version: 0.5.1
@@ -13,7 +13,7 @@ BuildArch: noarch
 
 Source: %name-%version.tar
 
-Requires: podman >= 3.4.4
+Requires: podman >= 4.4.2
 Requires: shadow-submap >= 4.5
 Requires: nginx >= 1.22.1
 Requires: docker-registry >= 2.8.1
@@ -64,6 +64,7 @@ Requires: cri-tools >= 1.22.0
 Requires: kubernetes-client >= :1.26.3
 Requires: systemd-container >= 249.16
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
+# %filter_from_requires /\/usr\/bin\/chown/d
 
 %description k8s
 This package contains utilities for:
@@ -105,10 +106,16 @@ to monitor and identify security threats
 %install
 %makeinstall_std
 
+%pre
+%_sbindir/groupadd -r -f podman &>/dev/null
+%_sbindir/groupadd -r -f podman_dev &>/dev/null
+
+
 %pre k8s
-%_sbindir/groupadd -r -f %u77s_admin_grp &>/dev/null
-%_sbindir/useradd -r -n -g %u77s_admin_grp -G systemd-journal,podman,fuse \
-    -c 'usernet user account' %u77s_admin_usr &>/dev/null ||:
+%_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
+%_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
+    -c 'usernet user account' %u7s_admin_usr # >/dev/null 2>&1 || :
+/bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
 
 %files
 %_bindir/podsec*
@@ -124,9 +131,10 @@ to monitor and identify security threats
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/kubernetes/manifests/*
-/home/u7s-admin/*
-%attr(0755,%u77s_admin_usr,%u77s_admin_grp,/home/u7s-admin/usernetes/*.sh)
-%attr(0755,%u77s_admin_usr,%u77s_admin_grp,/home/u7s-admin/usernetes/*/*.sh)
+%attr(0711,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
+%_localstatedir/%u7s_admin_usr/*
+# %attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/install.sh
+#%attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/*/*.sh
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*

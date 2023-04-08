@@ -8,7 +8,7 @@ export User='u7s-admin'
 
 mkdir -p $XDG_CONFIG_HOME/usernetes/crio $XDG_CONFIG_HOME/usernetes/containers/oci/hooks.d
 
-ls -l /etc
+# ls -l /etc
 if [ -d  /etc/containers ]
 then
 #   cp -r /etc/containers/ /home/${User}/.config/usernetes/

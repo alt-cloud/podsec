@@ -6,10 +6,10 @@ export CNI="flannel"
 export PUBLISH_DEFAULT="0.0.0.0:6443:6443/tcp"
 export PUBLISH=
 export CIDR="10.0.42.0/24"
-export HOMEDIR="/home/${USERNAME}"
+export HOMEDIR="/var/lib/${USERNAME}"
 export CONFIG_DIR="$HOMEDIR/.config"
 export WAIT_INIT_CERTS
-export BASE="/home/${USERNAME}/usernetes"
+export BASE="/var/lib/${USERNAME}/usernetes"
 
 function INFO() {
 	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
