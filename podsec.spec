@@ -1,3 +1,6 @@
+%define u77s_admin_usr u7s-admin
+%define u77s_admin_grp u7s-admin
+
 Name: podsec
 Version: 0.4.1
 Release: alt1
@@ -102,6 +105,11 @@ to monitor and identify security threats
 %install
 %makeinstall_std
 
+%pre k8s
+%_sbindir/groupadd -r -f %u77s_admin_grp &>/dev/null
+%_sbindir/useradd -r -n -g %u77s_admin_grp -G systemd-journal,podman,fuse \
+    -c 'usernet user account' %u77s_admin_usr &>/dev/null ||:
+
 %files
 %_bindir/podsec*
 %exclude %_bindir/podsec-k8s-*
@@ -114,6 +122,8 @@ to monitor and identify security threats
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/kubernetes/manifests/*
+%homedir{u7s-admin}
+
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*

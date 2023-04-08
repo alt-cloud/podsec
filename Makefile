@@ -38,7 +38,11 @@ PODSEC_K8S_MANIFESTS= \
 PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
  	podsec-k8s-create-master \
- 	podsec-k7s-create-node
+ 	podsec-u7s-create-node
+
+PODSEC_K8S_FUNCTIONS = \
+	podsec-u7s-functions
+
 
 PODSEC_K8S_RBAC_PROGRAMS= \
 	podsec-k8s-rbac-bindrole \
@@ -99,9 +103,12 @@ install: all
 	cd ./podsec/bin;$(CP) $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec/man;$(INSTALL) -p -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
 	cd ./podsec-k8s/manifests/;$(CP) $(PODSEC_K8S_MANIFESTS) $(DESTDIR)/etc/kubernetes/manifests/
+	mkdir -p $(DESTDIR)/home/u7s-admin/.local $(DESTDIR)/home/u7s-admin/.config/usernetes
+	cp -r ./usernetes $(DESTDIR)/home/u7s-admin
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/

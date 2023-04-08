@@ -4,22 +4,20 @@ export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 set -x
 export _CRIO_ROOTLESS=1
-export User=''u7s-admin
+export User='u7s-admin'
 
 mkdir -p $XDG_CONFIG_HOME/usernetes/crio $XDG_CONFIG_HOME/usernetes/containers/oci/hooks.d
 
-# pstree
-# set
-# ls -lR /etc/containers
-
+ls -l /etc
 if [ -d  /etc/containers ]
 then
-  cp -r /etc/containers/ /home/${User}/.config/usernetes/
+#   cp -r /etc/containers/ /home/${User}/.config/usernetes/
+  mkdir -p /home/${User}/.config/usernetes/
+  mount --bind /etc/containers/ /home/${User}/.config/usernetes/
   (
   cd /home/${User}/.config/
   ln -sf usernetes/containers .
   )
-  chown -R user:user /home/${User}/
 else
   cat >$XDG_CONFIG_HOME/usernetes/containers/policy.json <<EOF
 {"default": [{"type": "insecureAcceptAnything"}]}

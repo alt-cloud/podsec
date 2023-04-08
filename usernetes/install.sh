@@ -3,18 +3,6 @@ set -e -o pipefail
 
 . ./podsec-u7s-functions
 
-function INFO() {
-	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
-}
-
-function WARNING() {
-	echo >&2 -e "\e[101m\e[97m[WARNING]\e[49m\e[39m $@"
-}
-
-function ERROR() {
-	echo >&2 -e "\e[101m\e[97m[ERROR]\e[49m\e[39m $@"
-}
-
 set -x
 ### Detect BASE dir
 cd $(dirname $0)
@@ -57,9 +45,6 @@ function usage() {
 	echo "  # The default options"
 	echo "  ${arg0}"
 	echo
-	echo "  # Use CRI-O as the CRI runtime"
-	echo "  ${arg0} --cri=crio"
-	echo
 	echo 'Use `uninstall.sh` for uninstallation.'
 	echo 'For an example of multi-node cluster with flannel, see docker-compose.yaml'
 	echo
@@ -88,18 +73,6 @@ while true; do
 		;;
 	--start)
 		StartTarget="$2"
-		shift 2
-		;;
-	--cri)
-		CRI="$2"
-		case "$CRI" in
-		"" | containerd | crio) ;;
-
-		*)
-			ERROR "Unknown CRI runtime \"$CRI\". Supported values: \"containerd\" (default) \"crio\" \"\"."
-			exit 1
-			;;
-		esac
 		shift 2
 		;;
 	--cni)
@@ -143,31 +116,23 @@ if [[ -z "$PUBLISH" ]]; then
 	PUBLISH=$PUBLISH_DEFAULT
 fi
 
+checkSystemEnv
+
 # check cgroup config
-if [[ ! -f /sys/fs/cgroup/cgroup.controllers ]]; then
-	ERROR "Needs cgroup v2, see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
+
+f="/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/cgroup.controllers"
+if [[ ! -f $f ]]; then
+	ERROR "systemd not running? file not found: $f"
 	exit 1
+fi
+if ! grep -q cpu $f; then
+	WARNING "cpu controller might not be enabled, you need to configure /etc/systemd/system/user@.service.d , see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
+elif ! grep -q memory $f; then
+	WARNING "memory controller might not be enabled, you need to configure /etc/systemd/system/user@.service.d , see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
 else
-	f="/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/cgroup.controllers"
-	if [[ ! -f $f ]]; then
-		ERROR "systemd not running? file not found: $f"
-		exit 1
-	fi
-	if ! grep -q cpu $f; then
-		WARNING "cpu controller might not be enabled, you need to configure /etc/systemd/system/user@.service.d , see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
-	elif ! grep -q memory $f; then
-		WARNING "memory controller might not be enabled, you need to configure /etc/systemd/system/user@.service.d , see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
-	else
-		INFO "Rootless cgroup (v2) is supported"
-	fi
+	INFO "Rootless cgroup (v2) is supported"
 fi
 
-# check kernel modules
-for f in $(cat ${BASE}/config/modules-load.d/usernetes.conf); do
-	if ! grep -qw "^$f" /proc/modules; then
-		WARNING "Kernel module $f not loaded"
-	fi
-done
 
 # Delay for debugging
 if [[ -n "$delay" ]]; then
@@ -196,19 +161,15 @@ if systemctl --user -q is-active u7s-master.target; then
 	KUBECONFIG="${CONFIG_DIR}/usernetes/master/admin-localhost.kubeconfig"
 	export PATH KUBECONFIG
 	INFO "Installing CoreDNS"
-# 	set -x
 	# sleep for waiting the node to be available
 	sleep 3
 	kubectl get nodes -o wide
 	kubectl apply -f ${BASE}/manifests/coredns.yaml
-# 	set +x
 	INFO "Waiting for CoreDNS pods to be available"
-# 	set -x
 	# sleep for waiting the pod object to be created
 	sleep 3
 	kubectl -n kube-system wait --for=condition=ready pod -l k8s-app=kube-dns
 	kubectl get pods -A -o wide
-	set +x
 fi
 
 INFO "Installation complete."

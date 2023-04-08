@@ -1,32 +1,7 @@
 #!/bin/sh
 
-USERNAME='u7s-admin'
+. podsec-u7s-functions
 
-home="/home/$USERNAME"
-base="$home/usernetes"
 
-start="u7s.target"
-cri="crio"
-cni="flannel"
-publish="0.0.0.0:6443:6443/tcp"
-cidr="10.0.42.0/24"
 
-# check cgroup config
-if [[ ! -f /sys/fs/cgroup/cgroup.controllers ]]; then
-	ERROR "Needs cgroup v2, see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
-	exit 1
-fi
-
-f="/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/cgroup.controllers"
-if [[ ! -f $f ]]; then
-  ERROR "systemd not running? file not found: $f"
-  exit 1
-fi
-if ! grep -q cpu $f; then
-  WARNING "cpu controller might not be enabled, you need to configure /etc/systemd/system/user@.service.d , see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
-elif ! grep -q memory $f; then
-  WARNING "memory controller might not be enabled, you need to configure /etc/systemd/system/user@.service.d , see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
-else
-  INFO "Rootless cgroup (v2) is supported"
-fi
 

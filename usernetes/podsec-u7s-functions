@@ -1,15 +1,44 @@
 #!/bin/sh
-
+USERNAME='u7s-admin'
 export StartTarget="u7s.target"
 export CRI="crio"
 export CNI="flannel"
 export PUBLISH_DEFAULT="0.0.0.0:6443:6443/tcp"
 export PUBLISH=
 export CIDR="10.0.42.0/24"
-export HOMEDIR="/home/u7s-admin"
+export HOMEDIR="/home/${USERNAME}"
 export CONFIG_DIR="$HOMEDIR/.config"
 export WAIT_INIT_CERTS
-export BASE="/home/u7s-admin/usernetes"
+export BASE="/home/${USERNAME}/usernetes"
+
+function INFO() {
+	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
+}
+
+function WARNING() {
+	echo >&2 -e "\e[101m\e[97m[WARNING]\e[49m\e[39m $@"
+}
+
+function ERROR() {
+	echo >&2 -e "\e[101m\e[97m[ERROR]\e[49m\e[39m $@"
+}
+
+checkSystemEnv() {
+  # check cgroup config
+  if [[ ! -f /sys/fs/cgroup/cgroup.controllers ]]; then
+    ERROR "Needs cgroup v2, see https://rootlesscontaine.rs/getting-started/common/cgroup2/"
+    exit 1
+  fi
+
+  # check kernel modules
+  for f in $(cat ${BASE}/config/modules-load.d/usernetes.conf); do
+    if ! grep -qw "^$f" /proc/modules; then
+      WARNING "Kernel module $f not loaded"
+    fi
+  done
+}
+
+
 
 createU7Environments() {
 
@@ -95,11 +124,11 @@ EOF
   ### RootlessKit
 cat <<EOF | x u7s-rootlesskit.service
 [Unit]
-Description=Usernetes RootlessKit service ($CRI)
+Description=Usernetes RootlessKit service (crio)
 PartOf=u7s.target
 
 [Service]
-ExecStart=${BASE}/boot/rootlesskit.sh ${BASE}/boot/${CRI}.sh
+ExecStart=${BASE}/boot/rootlesskit.sh ${BASE}/boot/crio.sh
 Delegate=yes
 ${service_common}
 EOF
@@ -184,28 +213,28 @@ ${service_common}
 EOF
 
   ### node
-  if [ -n "$CRI" ]; then
+  if [ -n "crio" ]; then
     cat <<EOF | x u7s-node.target
 [Unit]
-Description=Usernetes target for Kubernetes node components (${CRI})
-Requires=u7s-kubelet-${CRI}.service u7s-kube-proxy.service $([ "$CNI" = "flannel" ] && echo u7s-flanneld.service)
-After=u7s-kubelet-${CRI}.service u7s-kube-proxy.service $([ "$CNI" = "flannel" ] && echo u7s-flanneld.service)
+Description=Usernetes target for Kubernetes node components (crio)
+Requires=u7s-kubelet-crio.service u7s-kube-proxy.service $([ "$CNI" = "flannel" ] && echo u7s-flanneld.service)
+After=u7s-kubelet-crio.service u7s-kube-proxy.service $([ "$CNI" = "flannel" ] && echo u7s-flanneld.service)
 PartOf=u7s.target
 
 [Install]
 WantedBy=u7s.target
 EOF
 
-    cat <<EOF | x u7s-kubelet-${CRI}.service
+    cat <<EOF | x u7s-kubelet-crio.service
 [Unit]
-Description=Usernetes kubelet service (${CRI})
+Description=Usernetes kubelet service (crio)
 BindsTo=u7s-rootlesskit.service
 PartOf=u7s-node.target
 
 [Service]
 Type=notify
 NotifyAccess=all
-ExecStart=${BASE}/boot/kubelet-${CRI}.sh
+ExecStart=${BASE}/boot/kubelet-crio.sh
 ${service_common}
 EOF
 
@@ -213,8 +242,8 @@ EOF
 [Unit]
 Description=Usernetes kube-proxy service
 BindsTo=u7s-rootlesskit.service
-Requires=u7s-kubelet-${CRI}.service
-After=u7s-kubelet-${CRI}.service
+Requires=u7s-kubelet-crio.service
+After=u7s-kubelet-crio.service
 PartOf=u7s-node.target
 
 [Service]
