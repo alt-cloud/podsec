@@ -138,6 +138,9 @@ to monitor and identify security threats
 %_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
+* Sun Apr 09 2023 Alexey Kostarev <kaf@altlinux.org> 0.5.1-alt1
+- 0.5.1
+
 * Thu Apr 06 2023 Alexey Kostarev <kaf@altlinux.org> 0.4.1-alt1
 - 0.4.1
 
