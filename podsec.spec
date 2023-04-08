@@ -113,8 +113,10 @@ to monitor and identify security threats
 %files
 %_bindir/podsec*
 %exclude %_bindir/podsec-k8s-*
+%exclude %_bindir/podsec-nagios-*
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
+%exclude %_mandir/man?/podsec-nagios-*
 
 %files k8s
 %_bindir/podsec-k8s-*
@@ -122,7 +124,7 @@ to monitor and identify security threats
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/kubernetes/manifests/*
-%homedir{u7s-admin}
+/home/u7s-admin/*
 
 
 %files k8s-rbac

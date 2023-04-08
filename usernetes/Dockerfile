@@ -78,8 +78,7 @@ RUN ln -sf /home/u7s-admin/usernetes/boot/docker-unsudo.sh /usr/local/bin/unsudo
 
 #
 RUN \
-  mkdir -p /home/u7s-admin/usernetes/bin; \
-  mv /home/u7s-admin/usernetes/cfssl /home/u7s-admin/usernetes/cfssljson /home/u7s-admin/usernetes/bin;
+  cd /home/u7s-admin/usernetes; tar xvzf cfssl.tgz
 
 RUN mkdir -p /var/lib/crio/; chmod 777 /var/lib/crio/
 
