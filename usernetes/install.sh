@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e -o pipefail
 
+. ./podsec-u7s-functions
+
 function INFO() {
 	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
 }
@@ -14,48 +16,42 @@ function ERROR() {
 }
 
 set -x
-### Detect base dir
+### Detect BASE dir
 cd $(dirname $0)
-base=$(realpath $(pwd))
-base=/home/u7s-admin/usernetes
+# BASE=$(realpath $(pwd))
+# BASE=/home/u7s-admin/usernetes
 
 ### Detect bin dir, fail early if not found
-if [ ! -d "$base/bin" ]; then
+if [ ! -d "$BASE/bin" ]; then
 	ERROR "Usernetes binaries not found. Run \`make\` to build binaries. If you are looking for binary distribution of Usernetes, see https://github.com/rootless-containers/usernetes/releases ."
 	exit 1
 fi
 
 ### Detect config dir
 set +u
-if [ -z "$HOME" ]; then
+if [ -z "$HOMEDIR" ]; then
 	ERROR "HOME needs to be set"
 	exit 1
 fi
-config_dir="$HOME/.config"
 if [ -n "$XDG_CONFIG_HOME" ]; then
-	config_dir="$XDG_CONFIG_HOME"
+	CONFIG_DIR="$XDG_CONFIG_HOME"
 fi
 set -u
 
 ### Parse args
 arg0=$0
-start="u7s.target"
-cri="containerd"
-cni=""
-publish=""
-publish_default="0.0.0.0:6443:6443/tcp"
-cidr="10.0.42.0/24"
+
 delay=""
-wait_init_certs=""
+WAIT_INIT_CERTS=""
 function usage() {
 	echo "Usage: ${arg0} [OPTION]..."
-	echo "Install Usernetes systemd units to ${config_dir}/systemd/unit ."
+	echo "Install Usernetes systemd units to ${CONFIG_DIR}/systemd/unit ."
 	echo
-	echo "  --start=UNIT        Enable and start the specified target after the installation, e.g. \"u7s.target\". Set to an empty to disable autostart. (Default: \"$start\")"
-	echo "  --cri=RUNTIME       Specify CRI runtime, \"containerd\" or \"crio\". (Default: \"$cri\")"
+	echo "  --start=UNIT        Enable and start the specified target after the installation, e.g. \"u7s.target\". Set to an empty to disable autostart. (Default: \"$StartTarget\")"
+	echo "  --CRI=RUNTIME       Specify CRI runtime, \"containerd\" or \"crio\". (Default: \"$CRI\")"
 	echo '  --cni=RUNTIME       Specify CNI, an empty string (none) or "flannel". (Default: none)'
 	echo "  -p, --publish=PORT  Publish ports in RootlessKit's network namespace, e.g. \"0.0.0.0:10250:10250/tcp\". Can be specified multiple times. (Default: \"${publish_default}\")"
-	echo "  --cidr=CIDR         Specify CIDR of RootlessKit's network namespace, e.g. \"10.0.100.0/24\". (Default: \"$cidr\")"
+	echo "  --cidr=CIDR         Specify CIDR of RootlessKit's network namespace, e.g. \"10.0.100.0/24\". (Default: \"$CIDR\")"
 	echo
 	echo "Examples:"
 	echo "  # The default options"
@@ -87,20 +83,20 @@ while true; do
 		shift
 		;;
 	-p | --publish)
-		publish="$publish $2"
+		PUBLISH="$PUBLISH $2"
 		shift 2
 		;;
 	--start)
-		start="$2"
+		StartTarget="$2"
 		shift 2
 		;;
 	--cri)
-		cri="$2"
-		case "$cri" in
+		CRI="$2"
+		case "$CRI" in
 		"" | containerd | crio) ;;
 
 		*)
-			ERROR "Unknown CRI runtime \"$cri\". Supported values: \"containerd\" (default) \"crio\" \"\"."
+			ERROR "Unknown CRI runtime \"$CRI\". Supported values: \"containerd\" (default) \"crio\" \"\"."
 			exit 1
 			;;
 		esac
@@ -108,18 +104,18 @@ while true; do
 		;;
 	--cni)
 		cni="$2"
-		case "$cni" in
+		case "$CNI" in
 		"" | "flannel") ;;
 
 		*)
-			ERROR "Unknown CNI \"$cni\". Supported values: \"\" (default) \"flannel\" ."
+			ERROR "Unknown CNI \"$CNI\". Supported values: \"\" (default) \"flannel\" ."
 			exit 1
 			;;
 		esac
 		shift 2
 		;;
 	--cidr)
-		cidr="$2"
+		CIDR="$2"
 		shift 2
 		;;
 	--delay)
@@ -129,7 +125,7 @@ while true; do
 		;;
 	--wait-init-certs)
 		# HIDDEN FLAG FOR DOCKER COMPOSE. DO NO SPECIFY MANUALLY.
-		wait_init_certs=1
+		WAIT_INIT_CERTS=1
 		shift 1
 		;;
 	--)
@@ -143,8 +139,8 @@ while true; do
 done
 
 # set default --publish if none was specified
-if [[ -z "$publish" ]]; then
-	publish=$publish_default
+if [[ -z "$PUBLISH" ]]; then
+	PUBLISH=$PUBLISH_DEFAULT
 fi
 
 # check cgroup config
@@ -167,7 +163,7 @@ else
 fi
 
 # check kernel modules
-for f in $(cat ${base}/config/modules-load.d/usernetes.conf); do
+for f in $(cat ${BASE}/config/modules-load.d/usernetes.conf); do
 	if ! grep -qw "^$f" /proc/modules; then
 		WARNING "Kernel module $f not loaded"
 	fi
@@ -179,282 +175,32 @@ if [[ -n "$delay" ]]; then
 	sleep "$delay"
 fi
 
-### Create EnvironmentFile (~/.config/usernetes/env)
-mkdir -p ${config_dir}/usernetes
-cat /dev/null >${config_dir}/usernetes/env
-cat <<EOF >>${config_dir}/usernetes/env
-U7S_ROOTLESSKIT_PORTS=${publish}
-EOF
-if [ "$cni" = "flannel" ]; then
-	cat <<EOF >>${config_dir}/usernetes/env
-U7S_FLANNEL=1
-EOF
-fi
-if [ -n "$cidr" ]; then
-	cat <<EOF >>${config_dir}/usernetes/env
-U7S_ROOTLESSKIT_FLAGS=--cidr=${cidr}
-EOF
-fi
-
-if [[ -n "$wait_init_certs" ]]; then
-	max_trial=300
-	INFO "Waiting for certs to be created.":
-	for ((i = 0; i < max_trial; i++)); do
-		if [[ -f ${config_dir}/usernetes/node/done || -f ${config_dir}/usernetes/master/done ]]; then
-			echo "OK"
-			break
-		fi
-		echo -n .
-		sleep 5
-	done
-elif [[ ! -d ${config_dir}/usernetes/master ]]; then
-	### If the keys are not generated yet, generate them for the single-node cluster
-	INFO "Generating single-node cluster TLS keys (${config_dir}/usernetes/{master,node})"
-	cfssldir=$(mktemp -d /tmp/cfssl.XXXXXXXXX)
-	master=127.0.0.1
-	node=$(hostname)
-	${base}/common/cfssl.sh --dir=${cfssldir} --master=$master --node=$node,127.0.0.1
-	rm -rf ${config_dir}/usernetes/{master,node}
-	cp -r "${cfssldir}/master" ${config_dir}/usernetes/master
-	cp -r "${cfssldir}/nodes.$node" ${config_dir}/usernetes/node
-	rm -rf "${cfssldir}"
-fi
-
-### Begin installation
-INFO "Base dir: ${base}"
-mkdir -p ${config_dir}/systemd/user
-function x() {
-	name=$1
-	path=${config_dir}/systemd/user/${name}
-	INFO "Installing $path"
-	cat >$path
-}
-
-service_common="WorkingDirectory=${base}
-EnvironmentFile=${config_dir}/usernetes/env
-Restart=on-failure
-LimitNOFILE=65536
-"
-
-### u7s
-cat <<EOF | x u7s.target
-[Unit]
-Description=Usernetes target (all components in the single node)
-Requires=u7s-master-with-etcd.target u7s-node.target
-After=u7s-master-with-etcd.target u7s-node.target
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-cat <<EOF | x u7s-master-with-etcd.target
-[Unit]
-Description=Usernetes target for Kubernetes master components (including etcd)
-Requires=u7s-etcd.target u7s-master.target
-After=u7s-etcd.target u7s-master.target
-PartOf=u7s.target
-
-[Install]
-WantedBy=u7s.target
-EOF
-
-### RootlessKit
-if [ -n "$cri" ]; then
-	cat <<EOF | x u7s-rootlesskit.service
-[Unit]
-Description=Usernetes RootlessKit service ($cri)
-PartOf=u7s.target
-
-[Service]
-ExecStart=${base}/boot/rootlesskit.sh ${base}/boot/${cri}.sh
-Delegate=yes
-${service_common}
-EOF
-else
-	cat <<EOF | x u7s-rootlesskit.service
-[Unit]
-Description=Usernetes RootlessKit service
-PartOf=u7s.target
-
-[Service]
-ExecStart=${base}/boot/rootlesskit.sh
-Delegate=yes
-${service_common}
-EOF
-fi
-
-### etcd
-# TODO: support running without RootlessKit
-cat <<EOF | x u7s-etcd.target
-[Unit]
-Description=Usernetes target for etcd
-Requires=u7s-etcd.service
-After=u7s-etcd.service
-PartOf=u7s-master-with-etcd.target
-EOF
-
-cat <<EOF | x u7s-etcd.service
-[Unit]
-Description=Usernetes etcd service
-BindsTo=u7s-rootlesskit.service
-PartOf=u7s-etcd.target
-
-[Service]
-Type=notify
-NotifyAccess=all
-ExecStart=${base}/boot/etcd.sh
-ExecStartPost=${base}/boot/etcd-init-data.sh
-${service_common}
-EOF
-
-### master
-# TODO: support running without RootlessKit
-# TODO: decouple from etcd (for supporting etcd on another node)
-cat <<EOF | x u7s-master.target
-[Unit]
-Description=Usernetes target for Kubernetes master components
-Requires=u7s-kube-apiserver.service u7s-kube-controller-manager.service u7s-kube-scheduler.service
-After=u7s-kube-apiserver.service u7s-kube-controller-manager.service u7s-kube-scheduler.service
-PartOf=u7s-master-with-etcd.target
-
-[Install]
-WantedBy=u7s-master-with-etcd.target
-EOF
-
-cat <<EOF | x u7s-kube-apiserver.service
-[Unit]
-Description=Usernetes kube-apiserver service
-BindsTo=u7s-rootlesskit.service
-Requires=u7s-etcd.service
-After=u7s-etcd.service
-PartOf=u7s-master.target
-
-[Service]
-Type=notify
-NotifyAccess=all
-ExecStart=${base}/boot/kube-apiserver.sh
-${service_common}
-EOF
-
-cat <<EOF | x u7s-kube-controller-manager.service
-[Unit]
-Description=Usernetes kube-controller-manager service
-BindsTo=u7s-rootlesskit.service
-Requires=u7s-kube-apiserver.service
-After=u7s-kube-apiserver.service
-PartOf=u7s-master.target
-
-[Service]
-ExecStart=${base}/boot/kube-controller-manager.sh
-${service_common}
-EOF
-
-cat <<EOF | x u7s-kube-scheduler.service
-[Unit]
-Description=Usernetes kube-scheduler service
-BindsTo=u7s-rootlesskit.service
-Requires=u7s-kube-apiserver.service
-After=u7s-kube-apiserver.service
-PartOf=u7s-master.target
-
-[Service]
-ExecStart=${base}/boot/kube-scheduler.sh
-${service_common}
-EOF
-
-### node
-if [ -n "$cri" ]; then
-	cat <<EOF | x u7s-node.target
-[Unit]
-Description=Usernetes target for Kubernetes node components (${cri})
-Requires=$([ "$cri" = "containerd" ] && echo u7s-containerd-fuse-overlayfs-grpc.service) u7s-kubelet-${cri}.service u7s-kube-proxy.service $([ "$cni" = "flannel" ] && echo u7s-flanneld.service)
-After=u7s-kubelet-${cri}.service $([ "$cri" = "containerd" ] && echo u7s-containerd-fuse-overlayfs-grpc.service) u7s-kube-proxy.service $([ "$cni" = "flannel" ] && echo u7s-flanneld.service)
-PartOf=u7s.target
-
-[Install]
-WantedBy=u7s.target
-EOF
-
-	if [ "$cri" = "containerd" ]; then
-		cat <<EOF | x u7s-containerd-fuse-overlayfs-grpc.service
-[Unit]
-Description=Usernetes containerd-fuse-overlayfs-grpc service
-BindsTo=u7s-rootlesskit.service
-PartOf=u7s-node.target
-
-[Service]
-Type=notify
-NotifyAccess=all
-ExecStart=${base}/boot/containerd-fuse-overlayfs-grpc.sh
-${service_common}
-EOF
-
-	fi
-
-	cat <<EOF | x u7s-kubelet-${cri}.service
-[Unit]
-Description=Usernetes kubelet service (${cri})
-BindsTo=u7s-rootlesskit.service
-PartOf=u7s-node.target
-
-[Service]
-Type=notify
-NotifyAccess=all
-ExecStart=${base}/boot/kubelet-${cri}.sh
-${service_common}
-EOF
-
-	cat <<EOF | x u7s-kube-proxy.service
-[Unit]
-Description=Usernetes kube-proxy service
-BindsTo=u7s-rootlesskit.service
-Requires=u7s-kubelet-${cri}.service
-After=u7s-kubelet-${cri}.service
-PartOf=u7s-node.target
-
-[Service]
-ExecStart=${base}/boot/kube-proxy.sh
-${service_common}
-EOF
-
-	if [ "$cni" = "flannel" ]; then
-		cat <<EOF | x u7s-flanneld.service
-[Unit]
-Description=Usernetes flanneld service
-BindsTo=u7s-rootlesskit.service
-PartOf=u7s-node.target
-
-[Service]
-ExecStart=${base}/boot/flanneld.sh
-${service_common}
-EOF
-	fi
-fi
+createU7Environments
 
 ### Finish installation
 systemctl --user daemon-reload
-if [ -z $start ]; then
+if [ -z $StartTarget ]; then
 	INFO 'Run `systemctl --user -T start u7s.target` to start Usernetes.'
 	exit 0
 fi
-INFO "Starting $start"
+INFO "Starting $StartTarget"
 # set -x
-systemctl --user -T enable $start
-time systemctl --user -T start $start
+systemctl --user -T enable $StartTarget
+time systemctl --user -T start $StartTarget
 systemctl --user --all --no-pager list-units 'u7s-*'
 # set +x
 
 KUBECONFIG=
 if systemctl --user -q is-active u7s-master.target; then
-	PATH="${base}/bin:$PATH"
-	KUBECONFIG="${config_dir}/usernetes/master/admin-localhost.kubeconfig"
+	PATH="${BASE}/bin:$PATH"
+	KUBECONFIG="${CONFIG_DIR}/usernetes/master/admin-localhost.kubeconfig"
 	export PATH KUBECONFIG
 	INFO "Installing CoreDNS"
 # 	set -x
 	# sleep for waiting the node to be available
 	sleep 3
 	kubectl get nodes -o wide
-	kubectl apply -f ${base}/manifests/coredns.yaml
+	kubectl apply -f ${BASE}/manifests/coredns.yaml
 # 	set +x
 	INFO "Waiting for CoreDNS pods to be available"
 # 	set -x
