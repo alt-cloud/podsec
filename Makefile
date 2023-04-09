@@ -60,6 +60,7 @@ USERNETES_PROGRAMMS = \
 	uninstall.sh \
 	rootlessctl.sh \
 	boot/*.sh \
+	services/* \
 	config/*
 
 USERNETES_FUNCTIONS = \

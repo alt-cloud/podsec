@@ -131,6 +131,7 @@ mkdir -p ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
 cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
 /bin/ln -sf ../u7s.target  .
 /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
+/bin/cp ~%u7s_admin_usr/usernetes/services/kubelet.service /lib/systemd/system/kubelet.service
 
 %files
 %_bindir/podsec*
