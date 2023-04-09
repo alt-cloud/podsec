@@ -1,0 +1,8 @@
+[Unit]
+Description=Usernetes target for Kubernetes node components (crio)
+Requires=u7s-kubelet-crio.service u7s-kube-proxy.service u7s-flanneld.service
+After=u7s-kubelet-crio.service u7s-kube-proxy.service u7s-flanneld.service
+PartOf=u7s.target
+
+[Install]
+WantedBy=u7s.target

@@ -57,6 +57,7 @@ PODSEC_K8S_RBAC_FUNCTIONS = \
 
 USERNETES_PROGRAMMS = \
 	install.sh \
+	uninstall.sh \
 	rootlessctl.sh \
 	boot/*.sh \
 	config/*
@@ -110,28 +111,29 @@ install: all
 	# 	ls -lR
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
-	#
+	# PODSEC
 	cd ./podsec/bin;$(CHMOD) 644 $(PODSEC_FUNCTIONS)
 	cd ./podsec/bin;$(CP) $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/;
 	cd ./podsec/bin;$(CP) $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec/man;$(INSTALL) -p -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-	#
+	# PODSEC-K8S
 	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
 	cd ./podsec-k8s/manifests/;$(CP) $(PODSEC_K8S_MANIFESTS) $(DESTDIR)/etc/kubernetes/manifests/
-	#
-	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/.config/usernetes $(DESTDIR)/var/lib/u7s-admin/usernetes
+	# PODSEC-K8S USERNETES
+	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/usernetes
 	cd usernetes;$(CHMOD) 644 $(USERNETES_FUNCTIONS);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_FUNCTIONS) ;cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE)
+	cd usernetes; $(CP) -r Config  $(DESTDIR)/var/lib/u7s-admin/config
 	rm -f $(TMPFILE)
-	#
+	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-	#
+	# PODSEC-NAGIOS
 	$(MKDIR_P) -m755 $(DESTDIR)$(libexecdir)/nagios/plugins/
 	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS) $(DESTDIR)$(libexecdir)/nagios/plugins/
 	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS_FUNCTIONS) $(DESTDIR)$(bindir)/

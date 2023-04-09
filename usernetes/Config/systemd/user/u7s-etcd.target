@@ -1,0 +1,5 @@
+[Unit]
+Description=Usernetes target for etcd
+Requires=u7s-etcd.service
+After=u7s-etcd.service
+PartOf=u7s-master-with-etcd.target

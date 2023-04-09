@@ -115,6 +115,13 @@ to monitor and identify security threats
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr # >/dev/null 2>&1 || :
+
+%post k8s
+/bin/rm -rf ~%u7s_admin_usr/.config
+/bin/mv ~%u7s_admin_usr/config  ~%u7s_admin_usr/.config
+mkdir -p ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
+cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
+/bin/ln -sf ../u7s.target  .
 /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
 
 %files
@@ -133,6 +140,7 @@ to monitor and identify security threats
 %_sysconfdir/kubernetes/manifests/*
 %attr(0711,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
 %_localstatedir/%u7s_admin_usr/*
+# %_localstatedir/%u7s_admin_usr/config/*
 # %attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/install.sh
 #%attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/*/*.sh
 

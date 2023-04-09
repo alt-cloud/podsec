@@ -1,0 +1,14 @@
+[Unit]
+Description=Usernetes kube-controller-manager service
+BindsTo=u7s-rootlesskit.service
+Requires=u7s-kube-apiserver.service
+After=u7s-kube-apiserver.service
+PartOf=u7s-master.target
+
+[Service]
+ExecStart=/var/lib/u7s-admin/usernetes/boot/kube-controller-manager.sh
+WorkingDirectory=/var/lib/u7s-admin/usernetes
+  EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
+  Restart=on-failure
+  LimitNOFILE=65536
+  
