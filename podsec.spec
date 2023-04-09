@@ -1,4 +1,5 @@
 %define u7s_admin_usr u7s-admin
+%define u7s_admin_usr_temp u7sadmin
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
@@ -114,7 +115,14 @@ to monitor and identify security threats
 %pre k8s
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
-    -c 'usernet user account' %u7s_admin_usr # >/dev/null 2>&1 || :
+    -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
+set -x
+if ! /bin/grep %u7s_admin_usr /etc/subuid
+then
+  %_sbindir/useradd -M %u7s_admin_usr_temp
+  /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_usr/' -i /etc/subuid
+  /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_grp/' -i /etc/subgid
+fi
 
 %post k8s
 /bin/rm -rf ~%u7s_admin_usr/.config
