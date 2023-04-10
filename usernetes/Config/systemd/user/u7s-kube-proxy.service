@@ -1,0 +1,14 @@
+[Unit]
+Description=Usernetes kube-proxy service
+BindsTo=u7s-rootlesskit.service
+Requires=u7s-kubelet-crio.service
+After=u7s-kubelet-crio.service
+PartOf=u7s-node.target
+
+[Service]
+ExecStart=/var/lib/u7s-admin/usernetes/boot/kube-proxy.sh
+WorkingDirectory=/var/lib/u7s-admin/usernetes
+  EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
+  Restart=on-failure
+  LimitNOFILE=65536
+  

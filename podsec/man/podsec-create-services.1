@@ -12,10 +12,10 @@
 .SH "DESCRIPTION"
 Скрипт поднимает сервисы \fBdocker\-registry\fR и \fBnginx\fR для поддержки регистратора докер образов и сервера подписей образов\.
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 регистратор образов принимает запросы по адресу \fBhttp://registry\.local\fR и хранит образы в каталоге \fB/var/lib/containers/storage/volumes/registry/_data/\fR;
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 сервис подписей образов принимает запросы по адресу \fBhttp://sigstore\.local:81\fR, хранит подписи образов в каталоге \fB/var/sigstore/sigstore/\fR, открытые ключи в каталоге \fB/var/sigstore/keys/\fR
 .
 .IP "" 0
@@ -25,7 +25,7 @@
 .
 .SH "SEE ALSO"
 .
-.IP "\[ci]" 4
+.IP "\(bu" 4
 Описание периодического контроля целостности образов контейнеров и параметров настройки средства контейнеризации \fIhttps://github\.com/alt\-cloud/podsec/tree/master/ImageSignatureVerification\fR
 .
 .IP "" 0

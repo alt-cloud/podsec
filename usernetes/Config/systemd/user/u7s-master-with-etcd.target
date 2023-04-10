@@ -1,0 +1,8 @@
+[Unit]
+Description=Usernetes target for Kubernetes master components (including etcd)### node
+Requires=u7s-etcd.target u7s-master.target
+After=u7s-etcd.target u7s-master.target
+PartOf=u7s.target
+
+[Install]
+WantedBy=u7s.target
