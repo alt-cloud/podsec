@@ -4,3 +4,5 @@
 
 * Замена service-файлов, обеспечивающих запуск user rootless-сервисов через системные сервисы
   - [kubelet](https://github.com/alt-cloud/podsec/blob/master/usernetes/services/kubelet.service)
+
+*  Модификация кода kubelet
