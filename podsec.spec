@@ -116,12 +116,13 @@ to monitor and identify security threats
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
-set -x
 if ! /bin/grep %u7s_admin_usr /etc/subuid
 then
+  # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
   %_sbindir/useradd -M %u7s_admin_usr_temp
   /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_usr/' -i /etc/subuid
   /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_grp/' -i /etc/subgid
+  %_sbindir/userdel %u7s_admin_usr_temp
 fi
 
 %post k8s
@@ -132,6 +133,7 @@ cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
 /bin/ln -sf ../u7s.target  .
 /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
 /bin/cp ~%u7s_admin_usr/usernetes/services/kubelet.service /lib/systemd/system/kubelet.service
+rm -rf /etc/systemd/system/kubelet.service.d
 
 %files
 %_bindir/podsec*
