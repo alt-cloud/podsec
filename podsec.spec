@@ -134,6 +134,9 @@ cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
 /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
 /bin/cp ~%u7s_admin_usr/usernetes/services/kubelet.service /lib/systemd/system/kubelet.service
 rm -rf /etc/systemd/system/kubelet.service.d
+mkdir -p /var/run/containetd
+uid=$(id -u %u7s_admin_usr)
+ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
 
 %files
 %_bindir/podsec*
