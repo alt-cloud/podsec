@@ -1,0 +1,12 @@
+[Unit]
+Description=Usernet (rootless kubernetes) U7S Service
+#After=docker.service crio.service
+
+[Service]
+WorkingDirectory=/var/lib/u7s-admin
+ExecStart=machinectl shell u7s-admin@ /sbin/systemctl --user -T --wait start u7s.target
+Restart=on-failure
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

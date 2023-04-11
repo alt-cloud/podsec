@@ -6,3 +6,8 @@
   - [kubelet](https://github.com/alt-cloud/podsec/blob/master/usernetes/services/kubelet.service)
 
 *  Модификация кода kubelet
+
+
+## Модификация кода kubeadm
+
+- исключение загрузки ненужных для rootless-решения образов - нужны лишь coredns- и pause-образы

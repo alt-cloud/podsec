@@ -78,7 +78,6 @@ Group: Development/Other
 Requires: kubernetes-client >= :1.26.3
 Requires: podsec >= 0.3.1
 Requires: curl >= 7.88.0
-Requires: openssh-server >= 7.8
 
 
 %description k8s-rbac
@@ -132,8 +131,15 @@ mkdir -p ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
 cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
 /bin/ln -sf ../u7s.target  .
 /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
-/bin/cp ~%u7s_admin_usr/usernetes/services/kubelet.service /lib/systemd/system/kubelet.service
-rm -rf /etc/systemd/system/kubelet.service.d
+# Create u7s service
+/bin/cp ~%u7s_admin_usr/usernetes/services/u7s.service /lib/systemd/system/u7s.service
+mkdir -p /var/run/containerd
+uid=$(id -u %u7s_admin_usr)
+mkdir -p /var/run/user/$uid/usernetes/crio/
+mksock /var/run/user/$uid/usernetes/crio/crio.sock;
+chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
+/bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid
+ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
 
 %files
 %_bindir/podsec*
