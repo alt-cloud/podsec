@@ -10,7 +10,7 @@ then
   echo "В тропе PATH нет каталогов запуска привелигированных команд. Используйте 'su - ...' вместо 'su ...'"
   exit 1
 fi
-if [ $# -gt 1 ]
+if [ $# -eq 0 -o $# -gt 1 ]
 then
   echo "Формат вызова: $0 <пользователь>" >&2
   exit 1
@@ -24,8 +24,7 @@ then
   echo "Пользователь $user существует" >&2
   exit 1
 fi
-adddgrop -r k8s 2>/dev/null
-# adddgrop $user 2>/dev/null
+groupadd -r k8s 2>/dev/null
 adduser $user -G podman,k8s
 passwd  $user
 
