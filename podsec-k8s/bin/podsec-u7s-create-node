@@ -17,7 +17,10 @@ cp ~u7s-admin/.config/usernetes/master/admin-localhost.kubeconfig ~u7s-admin/.ku
 chmod 600 ~u7s-admin/.kube/config
 chown -R u7s-admin:u7s-admin ~u7s-admin/.kube/
 
-kubectl apply -f ~u7s-admin/usernetes/manifests/coredns.yaml
-
+sleep 1
+until kubectl apply -f ~u7s-admin/usernetes/manifests/coredns.yaml >/dev/null 2>&1
+do
+  sleep 3
+done
 
 
