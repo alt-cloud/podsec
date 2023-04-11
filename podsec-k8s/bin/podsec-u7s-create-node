@@ -2,6 +2,18 @@
 
 . podsec-u7s-functions
 
+systemctl enable --now u7s
+
+mkdir -p /root/.kube/
+chmod 600 /root/.kube/
+cp ~u7s-admin/.config/usernetes/master/admin-localhost.kubeconfig /root/.kube/config
+
+mkdir -p ~u7s-admin/.kube/
+chmod 600 ~u7s-admin/.kube/
+cp ~u7s-admin/.config/usernetes/master/admin-localhost.kubeconfig ~u7s-admin/.kube/.kube/config
+chown -R u7s-admin:u7s-admin ~u7s-admin/.kube/
+
+kubectl apply -f ~u7s-admin/usernetes/manifests/coredns.yaml
 
 
 
