@@ -130,6 +130,9 @@ install: all
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE)
 	cd usernetes; $(CP) -r Config  $(DESTDIR)/var/lib/u7s-admin/config
 	rm -f $(TMPFILE)
+	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
+	$(CP) usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
+	$(CP) usernetes/services/u7s.service $(DESTDIR)/etc/systemd/system/u7s.service
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/

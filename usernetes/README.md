@@ -8,7 +8,7 @@
 
 2 Скачайте tar-архив `flannel_0.19.tgz`
   <pre>
-  https://github.com/alt-cloud/podsec/blob/github/usernetes/flannel_0.19.tgz
+  https://raw.githubusercontent.com/alt-cloud/podsec/master/usernetes/flannel_0.19.tgz
   </pre>
 
   Разархивируйте его в  корневой каталог:
