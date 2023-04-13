@@ -61,6 +61,7 @@ USERNETES_PROGRAMMS = \
 	rootlessctl.sh \
 	boot/*.sh \
 	services/* \
+	common/ \
 	config/*
 
 USERNETES_FUNCTIONS = \

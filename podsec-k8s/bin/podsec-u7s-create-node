@@ -2,8 +2,29 @@
 
 . podsec-u7s-functions
 
+set -x
+cd /tmp
+wget https://raw.githubusercontent.com/alt-cloud/podsec/master/usernetes/flannel_0.19.tgz
+tar xvzCf /  flannel_0.19.tgz
+
+wget https://raw.githubusercontent.com/alt-cloud/podsec/master/usernetes/cfssl.tgz
+tar xvzCf ~u7s-admin/usernetes/ cfssl.tgz
+cd ~u7s-admin/usernetes/
+cfssldir=$(mktemp -d /tmp/cfssl.XXXXXXXXX)
+master=127.0.0.1
+node=$(hostname)
+config_dir=/var/lib/u7s-admin/.config
+su - -c "/var/lib/u7s-admin/usernetes/common/cfssl.sh --dir=${cfssldir} --master=$master --node=$node,127.0.0.1" u7s-admin
+rm -rf ${config_dir}/usernetes/{master,node}
+cp -r "${cfssldir}/master" ${config_dir}/usernetes/master
+cp -r "${cfssldir}/nodes.$node" ${config_dir}/usernetes/node
+rm -rf "${cfssldir}"
+chown $u7s-admin:$u7s-admin -R ~u7s-admin
+
 echo "Введите пароль пользователя u7s-admin:"
 passwd u7s-admin
+
+hostname=$(hostname)
 
 systemctl enable --now u7s
 
@@ -23,4 +44,12 @@ do
   sleep 3
 done
 
+kubectl create clusterrolebinding system_node_leases \
+  --clusterrole=system:node \
+  --user=system:node:${hostname}
+
+# hostname="host-75"
+# kubectl create clusterrolebinding system_node_leases_${hostname} \
+#   --clusterrole=system:node \
+#   --user=system:node:${hostname}
 

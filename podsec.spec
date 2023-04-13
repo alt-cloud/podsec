@@ -145,6 +145,27 @@ chmod 777 /usr/libexec/kubernetes
 mkdir -p /var/lib/crio/;
 chmod 777 /var/lib/crio/
 ln -sf ~u7s-admin/usernetes/boot/docker-unsudo.sh /usr/local/bin/unsudo
+echo -ne    "tun
+tap
+bridge
+br_netfilter
+veth
+ip6_tables
+iptable_nat
+ip6table_nat
+iptable_filter
+ip6table_filter
+nf_tables
+xt_MASQUERADE
+xt_addrtype
+xt_comment
+xt_conntrack
+xt_mark
+xt_multiport
+xt_nat
+xt_tcpudp
+" > /etc/modules-load.d/u7s.conf
+modprobe -a $(cat /etc/modules-load.d/u7s.conf)
 
 
 %files
