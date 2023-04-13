@@ -2,7 +2,6 @@
 # CFSSL tool (called only via install.sh)
 #
 # ref: https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/1.15.3/docs/04-certificate-authority.md
-set -x
 
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 id=$(id -u u7s-admin)

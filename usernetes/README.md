@@ -15,18 +15,7 @@ apt-get update
   # apt-get install -y podsec-0.5.1-alt1.noarch.rpm      podsec-k8s-rbac-0.5.1-alt1.noarch.rpm podsec-k8s-0.5.1-alt1.noarch.rpm  podsec-nagios-plugins-0.5.1-alt1.noarch.rpm
   ```
 
-3 Скачайте tar-архив `flannel_0.19.tgz`
-  <pre>
-  https://raw.githubusercontent.com/alt-cloud/podsec/master/usernetes/flannel_0.19.tgz
-  </pre>
-
-  Разархивируйте его в  корневой каталог:
-
-  <pre>
-  # tar xvzCf /  flannel_0.19.tgz
-  </pre>
-
-4 Запустите команду:
+3 Запустите команду:
 
   <pre>
   # podsec-u7s-create-node
@@ -38,6 +27,7 @@ apt-get update
 5 После завершения скрипта проверьте работу `usernetes` (`rootless kuber`)
 
   <pre>
+  # kubectl get nodes
   # kubectl get all -A
   </pre>
 
@@ -48,3 +38,15 @@ apt-get update
   <pre>
   # kubectl get all -A
   </pre>
+
+5 Проверьте загрузку образа
+<pre>
+kubectl run -it --image=registry.local/alt/alt -- bash
+</pre>
+
+
+
+> Пока сервис не стартует после перезагрузки. Для запуска сервиса наберите:
+<pre>
+systemctl  start u7s
+</pre>
