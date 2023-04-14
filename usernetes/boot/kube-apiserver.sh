@@ -3,7 +3,7 @@ export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
 exec $(dirname $0)/nsenter.sh kube-apiserver \
-	--authorization-mode=Node,RBAC \
+	--authorization-mode=RBAC \
 	--etcd-cafile=$XDG_CONFIG_HOME/usernetes/master/ca.pem \
 	--etcd-certfile=$XDG_CONFIG_HOME/usernetes/master/kubernetes.pem \
 	--etcd-keyfile=$XDG_CONFIG_HOME/usernetes/master/kubernetes-key.pem \

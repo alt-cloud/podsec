@@ -92,7 +92,6 @@ function nsenter::_nsenter() {
 # entrypoint begins
 if debug::enabled; then
 	log::warning "Running in debug mode (\$U7S_DEBUG)"
-# 	set -x
 fi
 
 # verify necessary environment variables

@@ -19,10 +19,17 @@ then
   namespace="-n $5"
 fi
 
-if [ ! -d /home/$user ]
+isSystem=
+if [ ${user:0:7} = 'system:' ]
+then
+  user=${user:7}
+  isSystem=1
+fi
+
+if [ -z "$isSystem" -a ! -d /home/$user  ]
 then
   echo "Пользователь $user не существует"
-  exit 1
+#   exit 1
 fi
 
 case $bindedRoleType in

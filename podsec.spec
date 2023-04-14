@@ -56,7 +56,8 @@ Requires: kubernetes-node >= 1.26.3
 Requires: etcd >= 3.4.15
 Requires: flannel >= 0.13.0
 # Requires: flannel >= 0.19.2
-Requires: cni-plugin-flannel >= 1.2.0
+Requires: cni-plugin-flannel >= 1.1.2
+#Requires: cni-plugin-flannel >= 1.2.0
 Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
@@ -132,17 +133,44 @@ cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
 /bin/ln -sf ../u7s.target  .
 /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
 # Create u7s service
-/bin/cp ~%u7s_admin_usr/usernetes/services/u7s.service /lib/systemd/system/u7s.service
 mkdir -p /var/run/containerd
 uid=$(id -u %u7s_admin_usr)
 mkdir -p /var/run/user/$uid/usernetes/crio/
-mksock /var/run/user/$uid/usernetes/crio/crio.sock;
+mksock /var/run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
 chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
 /bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid
 ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
+mkdir -p /usr/libexec/kubernetes;
+chmod 777 /usr/libexec/kubernetes
+mkdir -p /var/lib/crio/;
+chmod 777 /var/lib/crio/
+ln -sf ~u7s-admin/usernetes/boot/docker-unsudo.sh /usr/local/bin/unsudo
+echo -ne    "tun
+tap
+bridge
+br_netfilter
+veth
+ip6_tables
+iptable_nat
+ip6table_nat
+iptable_filter
+ip6table_filter
+nf_tables
+xt_MASQUERADE
+xt_addrtype
+xt_comment
+xt_conntrack
+xt_mark
+xt_multiport
+xt_nat
+xt_tcpudp
+" > /etc/modules-load.d/u7s.conf
+modprobe -a $(cat /etc/modules-load.d/u7s.conf)
+
 
 %files
 %_bindir/podsec*
+%exclude %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-*
 %exclude %_bindir/podsec-nagios-*
 %_mandir/man?/podsec*
@@ -151,12 +179,14 @@ ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/container
 
 %files k8s
 %_bindir/podsec-k8s-*
+%_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/kubernetes/manifests/*
 %attr(0711,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
 %_localstatedir/%u7s_admin_usr/*
+/etc/systemd/system/*
 # %_localstatedir/%u7s_admin_usr/config/*
 # %attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/install.sh
 #%attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/*/*.sh
