@@ -12,7 +12,7 @@ apt-get update
 2 Установите podsec-пакеты:
 
   ```
-  # apt-get install -y podsec-0.5.1-alt1.noarch.rpm      podsec-k8s-rbac-0.5.1-alt1.noarch.rpm podsec-k8s-0.5.1-alt1.noarch.rpm  podsec-nagios-plugins-0.5.1-alt1.noarch.rpm
+  # apt-get install -y podsec-0.6.1-alt1.noarch.rpm      podsec-k8s-rbac-0.6.1-alt1.noarch.rpm podsec-k8s-0.6.1-alt1.noarch.rpm  podsec-nagios-plugins-0.6.1-alt1.noarch.rpm
   ```
 
 3 Запустите команду:
