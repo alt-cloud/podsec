@@ -6,6 +6,8 @@
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 id=$(id -u u7s-admin)
 export XDG_RUNTIME_DIR="/run/user/$id/"
+mkdir -p $XDG_RUNTIME_DIR
+chown u7s-admin:u7s-admin $XDG_RUNTIME_DIR
 source $U7S_BASE_DIR/common/common.inc.sh
 # global vars
 arg0="$0"

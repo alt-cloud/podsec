@@ -2,7 +2,7 @@
 
 . podsec-u7s-functions
 
-set -x
+# set -x
 cd /tmp
 wget -O flannel_0.19.tgz https://raw.githubusercontent.com/alt-cloud/podsec/master/usernetes/flannel_0.19.tgz
 tar xvzCf / flannel_0.19.tgz

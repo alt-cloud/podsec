@@ -2,7 +2,6 @@
 # needs to be called inside the namespaces
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
-set -x
 export _CRIO_ROOTLESS=1
 export User='u7s-admin'
 
