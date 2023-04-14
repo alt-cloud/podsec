@@ -35,8 +35,8 @@ do
 done
 
 # Создание групп
-groupadd -r podman
-groupadd -r podman_dev
+groupadd -r podman >/dev/null 2>&1
+groupadd -r podman_dev >/dev/null 2>&1
 
 # Поддержка возможности работа в rootless режиме
 echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf
@@ -76,7 +76,7 @@ fi
 
 # Создание группы podman
 echo "Создание группы podman"
-groupadd -r podman
+groupadd -r podman >/dev/null 2>&1
 echo "Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов"
 # Создание каталога и подкаталогов  /var/sigstore/ если IP-адрес узла совпадает с IP-адресом сервера подписей storage.local
 echo "Создание каталога и подкаталогов  /var/sigstore/"
@@ -85,7 +85,7 @@ if [ -n "$localIP" ]
 then
   #IP-адрес узла совпадает с IP-адресом сервера подписей storage.local
   echo "Создание группы podman_dev"
-  groupadd -r podman_dev
+  groupadd -r podman_dev >/dev/null 2>&1
   # Создать каталог sogstore с подкаталогами
   chown root:podman_dev /var/sigstore/keys/
   mkdir -p -m 0775 /var/sigstore/sigstore/
