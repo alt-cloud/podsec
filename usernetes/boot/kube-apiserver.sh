@@ -1,14 +1,21 @@
 #!/bin/bash
+set -x
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
+
+rk_state_dir=$XDG_RUNTIME_DIR/usernetes/rootlesskit
+if [[ -n $U7S_ROOTLESSKIT_PORTS ]]
+then
+  rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
+fi
+
+cmd=$(basename $0)
+exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$cmd $@
 
 # cmd=$(yq '.spec.containers[0].command | join(" ")' /etc/kubernetes/manifests/kube-apiserver.yaml)
 #
 # eval  $(setEnvsByYaml /etc/kubernetes/manifests/kube-apiserver.yaml)
 # cmd+=" --kubelet-certificate-authority=$lient_ca_file "
-
-exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$0 $@
-
 
 # exec $(dirname $0)/nsenter.sh kube-apiserver \
 # 	--authorization-mode=RBAC \

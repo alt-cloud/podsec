@@ -1,3 +1,26 @@
 #!/bin/sh
+set -x
+exec 2>>/tmp/systemctl.log
 
-/usr/bin/systemctl --user $*
+echo "
+
+------------------ $(date)
+CMD=$*
+" >&2
+userMode=
+if [ $1 == '--user' ]
+then
+  userMode=1
+  shift
+fi
+
+cmd=$1
+target=$2
+if [ "${target:0:7}" = 'kubelet' ]
+then
+  target="u7s-master-with-etcd.target"
+fi
+shift; shift
+
+/sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+

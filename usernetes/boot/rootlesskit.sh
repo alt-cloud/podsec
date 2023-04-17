@@ -93,9 +93,9 @@ else
 	echo $rk_pid >$rk_state_dir/_child_pid.u7s-ready
 	log::info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
 	log::info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
-	if [[ -n $U7S_ROOTLESSKIT_PORTS ]]; then
-		rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
-	fi
+# 	if [[ -n $U7S_ROOTLESSKIT_PORTS ]]; then
+# 		rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
+# 	fi
 	rc=0
 	if [[ $# -eq 0 ]]; then
 		sleep infinity || rc=$?

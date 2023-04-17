@@ -2,7 +2,7 @@
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 nsenter::main $0 $@
-
+set -x
 : ${U7S_FLANNEL=}
 if [[ $U7S_FLANNEL != 1 ]]; then
 	log::error "U7S_FLANNEL needs to be 1"

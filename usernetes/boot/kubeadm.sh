@@ -20,7 +20,7 @@ $(dirname $0)/nsenter.sh rm -rf /var/lib/etcd
 $(dirname $0)/nsenter.sh mkdir /var/lib/etcd
 
 exec $(dirname $0)/nsenter.sh \
-  /bin/kubeadm init \
+  /usr/bin/kubeadm init \
   -v 9 \
   --cert-dir=/var/lib/u7s-admin/.config/usernetes/pki \
   --pod-network-cidr=10.0.42.0/24 \

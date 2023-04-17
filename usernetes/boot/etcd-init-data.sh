@@ -1,11 +1,13 @@
 #!/bin/bash
+set -x
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 nsenter::main $0 $@
 
 if [[ $U7S_FLANNEL == 1 ]];
 then
-	exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$0 $@
+  cmd=$(basename $0)
+	exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$cmd $@
 fi
 
 # : ${U7S_FLANNEL=}
