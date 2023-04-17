@@ -2,11 +2,13 @@
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
-cmd=$(yq '.spec.containers[0].command | join(" ")' /etc/kubernetes/manifests/etcd.yaml)
-cmd+=" --enable-v2=true "
+exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$0 $@
+
+# cmd=$(yq '.spec.containers[0].command | join(" ")' /etc/kubernetes/manifests/etcd.yaml)
+# cmd+=" --enable-v2=true "
 
 # FIXME: no need to nsenter?
-exec $(dirname $0)/nsenter.sh $cmd $@
+# exec $(dirname $0)/nsenter.sh $cmd $@
 # 	etcd \
 # 	--data-dir $XDG_DATA_HOME/usernetes/etcd \
 # 	--enable-v2=true \

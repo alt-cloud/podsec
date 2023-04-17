@@ -2,12 +2,13 @@
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
-cmd=$(yq '.spec.containers[0].command | join(" ")' /etc/kubernetes/manifests/kube-apiserver.yaml)
+# cmd=$(yq '.spec.containers[0].command | join(" ")' /etc/kubernetes/manifests/kube-apiserver.yaml)
+#
+# eval  $(setEnvsByYaml /etc/kubernetes/manifests/kube-apiserver.yaml)
+# cmd+=" --kubelet-certificate-authority=$lient_ca_file "
 
-eval  $(setEnvsByYaml /etc/kubernetes/manifests/kube-apiserver.yaml)
-cmd+=" --kubelet-certificate-authority=$lient_ca_file "
+exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$0 $@
 
-exec $(dirname $0)/nsenter.sh kube-apiserver $@
 
 # exec $(dirname $0)/nsenter.sh kube-apiserver \
 # 	--authorization-mode=RBAC \

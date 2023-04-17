@@ -3,12 +3,6 @@ export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
 mkdir -p $XDG_RUNTIME_DIR/usernetes
-TMPFILE=$(mktemp "/tmp/kubeconf.XXXXXX")
-kubelet_config="/var/lib/kubelet/config.yaml"
-if yq -y ".+{volumePluginDir: \"$XDG_DATA_HOME/usernetes/kubelet-plugins-exec\"}"  $kubelet_config >$TMPFILE
-then
-  mv $TMPFILE $kubelet_config
-fi
 
 # cat >$XDG_RUNTIME_DIR/usernetes/kubelet-config.yaml <<EOF
 # kind: KubeletConfiguration
@@ -38,12 +32,14 @@ fi
 #   DevicePlugins: false
 
 
-exec $(dirname $0)/nsenter.sh kubelet \
-	--cert-dir $XDG_CONFIG_HOME/usernetes/pki \
-	--root-dir $XDG_DATA_HOME/usernetes/kubelet \
-	--kubeconfig "/etc/kubernetes/kubelet.conf" \
-	--config $kubelet_config \
-	$@
+exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$0 $@
+
+# kubelet \
+# 	--cert-dir $XDG_CONFIG_HOME/usernetes/pki \
+# 	--root-dir $XDG_DATA_HOME/usernetes/kubelet \
+# 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
+# 	--config $kubelet_config \
+# 	$@
 # 	--kubeconfig $XDG_CONFIG_HOME/usernetes/node/node.kubeconfig \
 # 	--config $XDG_RUNTIME_DIR/usernetes/kubelet-config.yaml \
 # 	--log-dir $XDG_DATA_HOME/usernetes/kubelet-log \
