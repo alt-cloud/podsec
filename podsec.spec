@@ -166,6 +166,8 @@ xt_nat
 xt_tcpudp
 " > /etc/modules-load.d/u7s.conf
 modprobe -a $(cat /etc/modules-load.d/u7s.conf)
+chown %u7s_admin_usr:%u7s_admin_grp /var/lib/etcd/
+rm -rf /var/lib/etcd/*
 
 
 %files
