@@ -11,14 +11,16 @@ fi
 
 parent_ip=$(cat $XDG_RUNTIME_DIR/usernetes/parent_ip)
 
+eval  $(setEnvsByYaml /etc/kubernetes/manifests/etcd.yaml)
+
 exec flanneld \
 	--iface "tap0" \
 	--ip-masq \
 	--public-ip "$parent_ip" \
-	--etcd-endpoints https://$(cat $XDG_CONFIG_HOME/usernetes/node/master):2379 \
-	--etcd-cafile "$XDG_CONFIG_HOME/usernetes/master/ca.pem" \
-	--etcd-certfile "$XDG_CONFIG_HOME/usernetes/master/kubernetes.pem" \
-	--etcd-keyfile "$XDG_CONFIG_HOME/usernetes/master/kubernetes-key.pem" \
+	--etcd-endpoints $advertise_client_urls \
+	--etcd-cafile $trusted_ca_file \
+	--etcd-certfile $cert_file \
+	--etcd-keyfile $key_file \
 	$@
 
 # FIXME: nodes should not require the master key.

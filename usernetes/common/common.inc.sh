@@ -89,6 +89,36 @@ function nsenter::_nsenter() {
 	nsenter --user --preserve-credential --mount --net --cgroup --pid --ipc --uts -t $(cat $pidfile) --wd=$PWD -- $@
 }
 
+function setEnvsByYaml() {
+	yamlFile=$1
+	ifs=$IFS
+	for assign in $(yq '.spec.containers[0].command' $yamlFile | grep -- '"--')
+	do
+	  if [ "${assign:0-1}" = ',' ]
+	  then
+			assign=${assign:3:-2}
+		else
+			assign=${assign:3:-1}
+		fi
+		IFS==
+		set -- $assign
+		IFS=$ifs
+		var=$1
+		value=$2
+		IFS=-
+		set -- $var
+		IFS=$ifs
+		varsh=$1
+		shift
+		for p
+		do
+		  varsh+="_$p"
+		done
+		echo "export $varsh=$value"
+	done
+}
+
+
 # entrypoint begins
 if debug::enabled; then
 	log::warning "Running in debug mode (\$U7S_DEBUG)"
@@ -124,3 +154,6 @@ export PATH
 : ${XDG_CONFIG_HOME=$HOME/.config}
 : ${XDG_CACHE_HOME=$HOME/.cache}
 export XDG_DATA_HOME XDG_CONFIG_HOME XDG_CACHE_HOME
+
+
+

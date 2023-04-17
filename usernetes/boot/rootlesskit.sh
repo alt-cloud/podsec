@@ -41,6 +41,7 @@ if [[ $_U7S_CHILD == 0 ]]; then
 		--net=slirp4netns --mtu=65520 --disable-host-loopback --slirp4netns-sandbox=true --slirp4netns-seccomp=true \
 		--port-driver=builtin \
 		--copy-up=/etc --copy-up=/etc/sysconfig/ --copy-up=/run --copy-up=/var/lib --copy-up=/opt \
+		--copy-up=/var/lib/kubelet/ --copy-up=/var/lib/etcd/ \
 		--cgroupns \
 		--pidns \
 		--ipcns \
