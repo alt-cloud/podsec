@@ -62,6 +62,7 @@ USERNETES_PROGRAMMS = \
 	boot/*.sh \
 	services/* \
 	common/ \
+	Bin/ \
 	config/*
 
 USERNETES_FUNCTIONS = \
@@ -130,6 +131,7 @@ install: all
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_FUNCTIONS) ;cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE)
 	cd usernetes; $(CP) -r Config  $(DESTDIR)/var/lib/u7s-admin/config
+	mv $(DESTDIR)/var/lib/u7s-admin/usernetes/Bin $(DESTDIR)/var/lib/u7s-admin/bin
 	rm -f $(TMPFILE)
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
 	$(CP) usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
