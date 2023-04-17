@@ -3,7 +3,7 @@
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.6.1
+Version: 0.6.2
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -14,6 +14,7 @@ BuildArch: noarch
 
 Source: %name-%version.tar
 
+BuildRequires(pre): rpm-macros-systemd
 Requires: podman >= 4.4.2
 Requires: shadow-submap >= 4.5
 Requires: nginx >= 1.22.1
@@ -125,6 +126,9 @@ then
   %_sbindir/userdel %u7s_admin_usr_temp
 fi
 
+%post
+%post_systemd_postponed inotify-overlays.service
+
 %post k8s
 /bin/rm -rf ~%u7s_admin_usr/.config
 /bin/mv ~%u7s_admin_usr/config  ~%u7s_admin_usr/.config
@@ -167,6 +171,8 @@ xt_tcpudp
 " > /etc/modules-load.d/u7s.conf
 modprobe -a $(cat /etc/modules-load.d/u7s.conf)
 
+%preun
+%preun_systemd inotify-overlays.service
 
 %files
 %_bindir/podsec*
@@ -176,6 +182,7 @@ modprobe -a $(cat /etc/modules-load.d/u7s.conf)
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-nagios-*
+%_unitdir/inotify-overlays.service
 
 %files k8s
 %_bindir/podsec-k8s-*
@@ -201,6 +208,9 @@ modprobe -a $(cat /etc/modules-load.d/u7s.conf)
 %_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
+* Wed Apr 19 2023 Nikolay Burykin <bne@altlinux.org> 0.6.2-alt1
+- 0.6.2
+
 * Fri Apr 14 2023 Alexey Kostarev <kaf@altlinux.org> 0.6.1-alt1
 - 0.6.1
 

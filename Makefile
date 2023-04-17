@@ -26,7 +26,8 @@ PODSEC_PROGRAMMS = \
 	podsec-create-policy \
 	podsec-create-services \
 	podsec-load-sign-oci \
-	podsec-save-oci
+	podsec-save-oci \
+	podsec-inotify-overlays
 
 PODSEC_FUNCTIONS = \
 	podsec-functions \
@@ -118,6 +119,8 @@ install: all
 	cd ./podsec/bin;$(CP) $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/;
 	cd ./podsec/bin;$(CP) $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec/man;$(INSTALL) -p -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
+	$(CP) ./.gear/inotify-overlays.service $(DESTDIR)/lib/systemd/system/inotify-overlays.service
 	# PODSEC-K8S
 	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/

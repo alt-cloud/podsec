@@ -1,0 +1,12 @@
+[Unit]
+Description=Run inotifywatch for podman overlays
+
+[Service]
+ExecStart=/usr/bin/podsec-inotify-overlays
+Restart=always
+RestartSec=3s
+RuntimeMaxSec=100
+SyslogIdentifier=inotify-overlays
+
+[Install]
+WantedBy=multi-user.target
