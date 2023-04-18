@@ -7,6 +7,7 @@ echo "
 ------------------ $(date)
 CMD=$*
 " >&2
+(
 userMode=
 if [ $1 == '--user' ]
 then
@@ -20,13 +21,22 @@ shift; shift
 
 if [ "${target:0:7}" = 'kubelet' ]
 then
-  target="u7s.target"
+  Target="u7s.target"
   case $cmd in
     start | restart )
+      ls -l /etc/kubernetes/
+      while [ ! -d /etc/kubernetes/manifests/ ]; 
+      do 
+        echo "Wait /etc/kubernetes/manifests/" >&2 
+	ls -l /etc/kubernetes/ >&2
+	sleep 1
+      done
       cd /etc/kubernetes/manifests/
       ok=
       while [ -z "$ok" ]
       do
+	echo "Content of /etc/kubernetes/manifests/:" >&2
+	ls -l /etc/kubernetes/manifests/ >&2
         for yml in etcd.yaml kube-apiserver.yaml kube-controller-manager.yaml kube-scheduler.yaml
         do
           if [ ! -s $yml ]
@@ -42,11 +52,13 @@ then
       done
       echo "START $target"
       /sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+      /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
       exit 0
     ;;
+stop) exit 0:;
   esac
 
 fi
-
+)&
 /sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
 

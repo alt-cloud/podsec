@@ -1,0 +1,14 @@
+[Unit]
+Description=Usernetes kubelet service (crio)
+BindsTo=rootlesskit.service
+PartOf=u7s-node.target
+
+[Service]
+Type=notify
+NotifyAccess=all
+ExecStart=/var/lib/u7s-admin/usernetes/bin/_kubelet.sh
+WorkingDirectory=/var/lib/u7s-admin/usernetes
+  EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
+  Restart=on-failure
+  LimitNOFILE=65536
+

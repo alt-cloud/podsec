@@ -1,12 +1,14 @@
 [Unit]
-Description=Usernetes flanneld service
-BindsTo=u7s-rootlesskit.service
+Description=Usernetes kube-proxy service
+BindsTo=rootlesskit.service
+Requires=kubelet.service
+After=kubelet.service
 PartOf=u7s-node.target
 
 [Service]
-ExecStart=/var/lib/u7s-admin/usernetes/boot/flanneld.sh
+ExecStart=/var/lib/u7s-admin/usernetes/bin/_kube-proxy.sh
 WorkingDirectory=/var/lib/u7s-admin/usernetes
   EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
   Restart=on-failure
   LimitNOFILE=65536
-  
+
