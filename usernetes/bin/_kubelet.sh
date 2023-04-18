@@ -3,6 +3,7 @@ export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
 set -x
+mkdir -p $XDG_RUNTIME_DIR/usernetes
 TMPFILE=$(mktemp "/tmp/kubeconf.XXXXXX")
 kubelet_config="/var/lib/kubelet/config.yaml"
 if yq -y ".+{volumePluginDir: \"$XDG_DATA_HOME/usernetes/kubelet-plugins-exec\"}"  $kubelet_config >$TMPFILE

@@ -2,7 +2,6 @@
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
-mkdir -p $XDG_RUNTIME_DIR/usernetes
 
 # cat >$XDG_RUNTIME_DIR/usernetes/kubelet-config.yaml <<EOF
 # kind: KubeletConfiguration

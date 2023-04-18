@@ -1,13 +1,13 @@
 #!/bin/bash
 
-if ! /sbin/systemctl --no-pager --user status u7s-rootlesskit.service >/dev/null 2>&1
+if ! /sbin/systemctl --no-pager --user status rootlesskit.service >/dev/null 2>&1
 then
-  /sbin/systemctl --user -T start u7s-rootlesskit.service
+  /sbin/systemctl --user -T start rootlesskit.service
 fi
-if /sbin/systemctl --no-pager --user status u7s-kubelet-crio.service >/dev/null 2>&1
-then
-  /sbin/systemctl --user -T start  u7s-kubelet-crio.service
-fi
+# if /sbin/systemctl --no-pager --user status kubelet-crio.service >/dev/null 2>&1
+# then
+#   /sbin/systemctl --user -T start  kubelet-crio.service
+# fi
 rm -rf /var/lib/u7s-admin/.config/usernetes/pki
 mkdir /var/lib/u7s-admin/.config/usernetes/pki
 

@@ -3,7 +3,7 @@
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.7.5
+Version: 0.7.6
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -203,6 +203,9 @@ rm -rf /var/lib/etcd/*
 %_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
+* Tue Apr 18 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.6-alt1
+- 0.7.6
+
 * Tue Apr 18 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.5-alt1
 - 0.7.5
 
