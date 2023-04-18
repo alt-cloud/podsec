@@ -3,6 +3,7 @@ export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 : ${U7S_FLANNEL=}
 set -x
+echo "UID=$UID"
 
 eval  $(setEnvsByYaml /etc/kubernetes/manifests/etcd.yaml)
 config=$U7S_BASE_DIR/config/flannel/etcd/coreos.com_network_config

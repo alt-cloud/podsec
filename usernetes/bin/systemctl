@@ -24,10 +24,17 @@ then
   Target="u7s.target"
   case $cmd in
     start | restart )
+      confFiles="
+/etc/kubernetes/manifests/etcd.yaml
+/etc/kubernetes/manifests/kube-apiserver.yaml
+/etc/kubernetes/manifests/kube-controller-manager.yaml
+/etc/kubernetes/manifests/kube-scheduler.yaml
+/var/lib/kubelet/config.yaml
+      "
       ls -l /etc/kubernetes/
-      while [ ! -d /etc/kubernetes/manifests/ ]; 
-      do 
-        echo "Wait /etc/kubernetes/manifests/" >&2 
+      while [ ! -d /etc/kubernetes/manifests/ ];
+      do
+        echo "Wait /etc/kubernetes/manifests/" >&2
 	ls -l /etc/kubernetes/ >&2
 	sleep 1
       done
@@ -37,11 +44,11 @@ then
       do
 	echo "Content of /etc/kubernetes/manifests/:" >&2
 	ls -l /etc/kubernetes/manifests/ >&2
-        for yml in etcd.yaml kube-apiserver.yaml kube-controller-manager.yaml kube-scheduler.yaml
+        for confFile in $confFiles
         do
-          if [ ! -s $yml ]
+          if [ ! -s $confFile ]
           then
-            echo "Manifest $yml is missing or empty!!! Waiting 1 second..."
+            echo "Conffile $confFile is missing or empty!!! Waiting 1 second..."
             sleep 1
             ok=''
             break
@@ -55,7 +62,6 @@ then
       /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
       exit 0
     ;;
-stop) exit 0:;
   esac
 
 fi
