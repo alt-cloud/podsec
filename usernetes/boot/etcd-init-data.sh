@@ -6,8 +6,7 @@ nsenter::main $0 $@
 
 if [[ $U7S_FLANNEL == 1 ]];
 then
-  cmd=$(basename $0)
-	exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$cmd $@
+	exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_etcd-init-data.sh $@
 fi
 
 # : ${U7S_FLANNEL=}

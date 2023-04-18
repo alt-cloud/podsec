@@ -63,6 +63,7 @@ else
 		/etc/containerd /etc/containers /etc/crio \
 		/etc/kubernetes
 
+	mkdir -p /etc/kubernetes
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d
 	cp -f $U7S_BASE_DIR/config/cni_net.d/* /etc/cni/net.d

@@ -6,11 +6,10 @@ source $U7S_BASE_DIR/common/common.inc.sh
 rk_state_dir=$XDG_RUNTIME_DIR/usernetes/rootlesskit
 if [[ -n $U7S_ROOTLESSKIT_PORTS ]]
 then
-  rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
+  rootlessctl --socket unix://$rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
 fi
 
-cmd=$(basename $0)
-exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$cmd $@
+exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kube-apiserver.sh $@
 
 # cmd=$(yq '.spec.containers[0].command | join(" ")' /etc/kubernetes/manifests/kube-apiserver.yaml)
 #

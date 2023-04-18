@@ -16,11 +16,37 @@ fi
 
 cmd=$1
 target=$2
+shift; shift
+
 if [ "${target:0:7}" = 'kubelet' ]
 then
-  target="u7s-master-with-etcd.target"
+  target="u7s.target"
+  case $cmd in
+    start | restart )
+      cd /etc/kubernetes/manifests/
+      ok=
+      while [ -z "$ok" ]
+      do
+        for yml in etcd.yaml kube-apiserver.yaml kube-controller-manager.yaml kube-scheduler.yaml
+        do
+          if [ ! -s $yml ]
+          then
+            echo "Manifest $yml is missing or empty!!! Waiting 1 second..."
+            sleep 1
+            ok=''
+            break
+          else
+            ok='yes'
+          fi
+        done
+      done
+      echo "START $target"
+      /sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+      exit 0
+    ;;
+  esac
+
 fi
-shift; shift
 
 /sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
 

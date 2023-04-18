@@ -32,7 +32,7 @@ mkdir -p $XDG_RUNTIME_DIR/usernetes
 #   DevicePlugins: false
 
 
-exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/$0 $@
+exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubelet.sh $@
 
 # kubelet \
 # 	--cert-dir $XDG_CONFIG_HOME/usernetes/pki \
