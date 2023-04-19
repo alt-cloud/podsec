@@ -41,7 +41,6 @@ if [[ $_U7S_CHILD == 0 ]]; then
 		--net=slirp4netns --mtu=65520 --disable-host-loopback --slirp4netns-sandbox=true --slirp4netns-seccomp=true \
 		--port-driver=builtin \
 		--copy-up=/etc --copy-up=/etc/sysconfig/ --copy-up=/run --copy-up=/var/lib --copy-up=/opt \
-		--copy-up=/var/lib/etcd/ \
 		--cgroupns \
 		--pidns \
 		--ipcns \
@@ -50,6 +49,7 @@ if [[ $_U7S_CHILD == 0 ]]; then
 		--evacuate-cgroup2="rootlesskit_evac" \
 		$U7S_ROOTLESSKIT_FLAGS \
 		$0 $@
+#	                --copy-up=/etc/kubernetes --copy-up=/var/lib/etcd/ \
 else
 	# save IP address
 	echo $U7S_PARENT_IP >$XDG_RUNTIME_DIR/usernetes/parent_ip
@@ -60,10 +60,8 @@ else
 		/run/runc /run/crun \
 		/run/containerd /run/containers /run/crio \
 		/etc/cni \
-		/etc/containerd /etc/containers /etc/crio \
-		/etc/kubernetes
+		/etc/containerd /etc/containers /etc/crio
 
-	mkdir -p /etc/kubernetes
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d
 	cp -f $U7S_BASE_DIR/config/cni_net.d/* /etc/cni/net.d

@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes flanneld service
-BindsTo=rootlesskit.service
+#BindsTo=rootlesskit.service
 PartOf=u7s-node.target
 
 [Service]

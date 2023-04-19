@@ -23,6 +23,7 @@ socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
   --kubernetes-version=1.26.3 \
   --cri-socket $socket \
   --image-repository=registry.local/k8s-p10 \
-  --ignore-preflight-errors all
+  --ignore-preflight-errors all \
+  --apiserver-cert-extra-sans=127.0.0.1 
 #  --config kubeadm_config.yaml
 #  --feature-gates RootlessControlPlane=true \

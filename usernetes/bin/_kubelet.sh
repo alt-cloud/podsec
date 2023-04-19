@@ -18,5 +18,6 @@ kubelet \
 	--cert-dir $XDG_CONFIG_HOME/usernetes/pki \
 	--root-dir $XDG_DATA_HOME/usernetes/kubelet \
 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
+	--feature-gates=KubeletInUserNamespace=true \
 	--config $kubelet_config \
 	$@

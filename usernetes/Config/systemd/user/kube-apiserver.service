@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes kube-apiserver service
-BindsTo=rootlesskit.service
+#BindsTo=rootlesskit.service
 Requires=etcd.service
 After=etcd.service
 PartOf=u7s-master.target

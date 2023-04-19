@@ -31,7 +31,7 @@ passwd u7s-admin
 
 hostname=$(hostname)
 
-systemctl enable --now u7s
+# systemctl enable --now u7s
 
 mkdir -p /root/.kube/
 chmod 600 /root/.kube/
@@ -41,18 +41,18 @@ mkdir -p ~u7s-admin/.kube/
 chmod 700 ~u7s-admin/.kube/
 cp ~u7s-admin/.config/usernetes/master/admin-localhost.kubeconfig ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
-chown -R u7s-admin:u7s-admin ~u7s-admin/.kube/
+chown -R u7s-admin:u7s-admin /etc/kubernetes /var/lib/etcd/
 
-sleep 1
-until kubectl apply -f ~u7s-admin/usernetes/manifests/coredns.yaml >/dev/null 2>&1
-do
-  sleep 3
-done
-
-kubectl create clusterrolebinding system_node_leases \
-  --clusterrole=system:node \
-  --user=system:node:${hostname}
-
-/usr/bin/podsec-k8s-rbac-bindrole system:kubernetes clusterrole cluster-admin  kubernetes_cluster-admin
+# sleep 1
+# until kubectl apply -f ~u7s-admin/usernetes/manifests/coredns.yaml >/dev/null 2>&1
+# do
+#   sleep 3
+# done
+#
+# kubectl create clusterrolebinding system_node_leases \
+#   --clusterrole=system:node \
+#   --user=system:node:${hostname}
+#
+# /usr/bin/podsec-k8s-rbac-bindrole system:kubernetes clusterrole cluster-admin  kubernetes_cluster-admin
 
 

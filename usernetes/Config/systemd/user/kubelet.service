@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes kubelet service (crio)
-BindsTo=rootlesskit.service
+#BindsTo=rootlesskit.service
 PartOf=u7s-node.target
 
 [Service]

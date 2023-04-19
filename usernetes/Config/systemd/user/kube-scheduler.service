@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes kube-scheduler service
-BindsTo=rootlesskit.service
+#BindsTo=rootlesskit.service
 Requires=kube-apiserver.service
 After=kube-apiserver.service
 PartOf=u7s-master.target

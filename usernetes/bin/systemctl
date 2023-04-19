@@ -35,13 +35,20 @@ then
 /var/lib/kubelet/config.yaml
       "
       ls -l /etc/kubernetes/
+      n=0
       while [ ! -d /etc/kubernetes/manifests/ ];
       do
         echo "Wait /etc/kubernetes/manifests/" >&2
         ls -l /etc/kubernetes/ >&2
         sleep 1
+        let n+=1
+        if [ $n -gt $retry ]
+        then
+          exit 1;
+        fi
       done
       ok=
+      n=0
       while [ -z "$ok" ]
       do
         echo "Content of /etc/kubernetes/manifests/:" >&2
@@ -53,6 +60,11 @@ then
             echo "Conffile $confFile is missing or empty!!! Waiting 1 second..."
             sleep 1
             ok=''
+            let n+=1
+            if [ $n -gt $retry ]
+            then
+              exit 1;
+            fi
             break
           else
             ok='yes'
@@ -69,6 +81,6 @@ then
   esac
 
 fi
-)&
 /sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+)&
 
