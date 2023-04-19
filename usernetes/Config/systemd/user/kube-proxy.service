@@ -6,7 +6,7 @@ After=kubelet.service
 PartOf=u7s-node.target
 
 [Service]
-ExecStart=/var/lib/u7s-admin/usernetes/bin/_kube-proxy.sh
+ExecStart=/var/lib/u7s-admin/usernetes/boot/kube-proxy.sh
 WorkingDirectory=/var/lib/u7s-admin/usernetes
   EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
   Restart=on-failure

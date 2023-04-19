@@ -14,6 +14,13 @@ fi
 #   /sbin/systemctl --user -T start  kubelet-crio.service
 # fi
 
-exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $@
+uid=$(id -u)
+echo "$0: uid=$uid"
 
+if [ $uid -eq 0 ]
+then
+  exec $U7S_BASE_DIR/bin/_kubeadm.sh $@
+else
+  exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $@
+fi
 

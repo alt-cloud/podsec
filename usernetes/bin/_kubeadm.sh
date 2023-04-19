@@ -13,11 +13,9 @@ mkdir /var/lib/etcd
 
 uid=$(id -u u7s-admin)
 socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
-echo KUBELET_KUBEADM_ARGS="--container-runtime-endpoint=$socket --pod-infra-container-image=registry.local/k8s-p10/pause:3.9" > /var/lib/kubelet/kubeadm-flags.env
+# echo KUBELET_KUBEADM_ARGS="--container-runtime-endpoint=$socket --pod-infra-container-image=registry.local/k8s-p10/pause:3.9" > /var/lib/kubelet/kubeadm-flags.env
 
-
-exec $(dirname $0)/nsenter.sh \
-  /usr/bin/kubeadm init \
+/usr/bin/kubeadm init \
   -v 9 \
   --cert-dir=/var/lib/u7s-admin/.config/usernetes/pki \
   --pod-network-cidr=10.0.42.0/24 \

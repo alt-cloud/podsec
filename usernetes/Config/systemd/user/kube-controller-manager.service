@@ -6,7 +6,7 @@ After=kube-apiserver.service
 PartOf=u7s-master.target
 
 [Service]
-ExecStart=/var/lib/u7s-admin/usernetes/bin/_kube-controller-manager.sh
+ExecStart=/var/lib/u7s-admin/usernetes/boot/kube-controller-manager.sh
 WorkingDirectory=/var/lib/u7s-admin/usernetes
   EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
   Restart=on-failure
