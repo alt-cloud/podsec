@@ -22,10 +22,14 @@ if cat $kubelet_config |
 then
   mv $TMPFILE $kubelet_config
 fi
+uid=$(id -u u7s-admin)
+socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
 
 kubelet \
 	--cert-dir $XDG_CONFIG_HOME/usernetes/pki \
 	--root-dir $XDG_DATA_HOME/usernetes/kubelet \
 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
 	--config $kubelet_config \
+	--container-runtime-endpoint=$socket \
+	--pod-infra-container-image=registry.local/k8s-p10/pause:3.9 \
 	$@
