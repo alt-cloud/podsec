@@ -9,7 +9,16 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 mkdir -p $XDG_RUNTIME_DIR/usernetes
 TMPFILE=$(mktemp "/tmp/kubeconf.XXXXXX")
 kubelet_config="/var/lib/kubelet/config.yaml"
-if yq -y ".+{volumePluginDir: \"$XDG_DATA_HOME/usernetes/kubelet-plugins-exec\"}"  $kubelet_config >$TMPFILE
+if cat $kubelet_config |
+	yq -y  '.+{'"volumePluginDir: \"$XDG_DATA_HOME/usernetes/kubelet-plugins-exec\""',
+		"cgroupDriver":"cgroupfs",
+		"failSwapOn": false,
+		"featureGates":{"KubeletInUserNamespace": true},
+		"evictionHard":{"nodefs.available": "3%"},
+		"localStorageCapacityIsolation": false,
+		"cgroupsPerQOS": true,
+		"enforceNodeAllocatable": []
+		}'  >$TMPFILE
 then
   mv $TMPFILE $kubelet_config
 fi
@@ -18,6 +27,5 @@ kubelet \
 	--cert-dir $XDG_CONFIG_HOME/usernetes/pki \
 	--root-dir $XDG_DATA_HOME/usernetes/kubelet \
 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
-	--feature-gates=KubeletInUserNamespace=true \
 	--config $kubelet_config \
 	$@

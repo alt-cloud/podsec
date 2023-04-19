@@ -8,7 +8,6 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 
 rm -rf /var/lib/u7s-admin/.config/usernetes/pki
 mkdir /var/lib/u7s-admin/.config/usernetes/pki
-rm -rf /etc/kubernetes/*
 rm -rf /var/lib/etcd
 mkdir /var/lib/etcd
 
@@ -23,7 +22,7 @@ socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
   --kubernetes-version=1.26.3 \
   --cri-socket $socket \
   --image-repository=registry.local/k8s-p10 \
-  --ignore-preflight-errors all \
-  --apiserver-cert-extra-sans=127.0.0.1 
+  --apiserver-cert-extra-sans=127.0.0.1 \
+  --ignore-preflight-errors all
 #  --config kubeadm_config.yaml
 #  --feature-gates RootlessControlPlane=true \

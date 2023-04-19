@@ -21,7 +21,7 @@ fi
 cmd=$1
 target=$2
 shift; shift
-
+retry=60
 if [ "${target:0:7}" = 'kubelet' ]
 then
   Target="u7s.target"
@@ -41,11 +41,11 @@ then
         echo "Wait /etc/kubernetes/manifests/" >&2
         ls -l /etc/kubernetes/ >&2
         sleep 1
-        let n+=1
-        if [ $n -gt $retry ]
-        then
-          exit 1;
-        fi
+	let n+=1
+	if [ $n -gt $retry ]
+	then
+	  exit 1;
+	fi
       done
       ok=
       n=0
@@ -60,7 +60,7 @@ then
             echo "Conffile $confFile is missing or empty!!! Waiting 1 second..."
             sleep 1
             ok=''
-            let n+=1
+	    let n+=1
             if [ $n -gt $retry ]
             then
               exit 1;
@@ -74,7 +74,7 @@ then
       echo "START $target $Target"
       echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N
       (echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N) >&2
-      /sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+      #/sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
       /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
       exit 0
     ;;
