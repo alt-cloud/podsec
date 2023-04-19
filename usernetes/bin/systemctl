@@ -2,6 +2,9 @@
 set -x
 exec 2>>/tmp/systemctl.log
 
+logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
+echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
+
 echo "
 
 ------------------ $(date)
@@ -35,15 +38,14 @@ then
       while [ ! -d /etc/kubernetes/manifests/ ];
       do
         echo "Wait /etc/kubernetes/manifests/" >&2
-	ls -l /etc/kubernetes/ >&2
-	sleep 1
+        ls -l /etc/kubernetes/ >&2
+        sleep 1
       done
-      cd /etc/kubernetes/manifests/
       ok=
       while [ -z "$ok" ]
       do
-	echo "Content of /etc/kubernetes/manifests/:" >&2
-	ls -l /etc/kubernetes/manifests/ >&2
+        echo "Content of /etc/kubernetes/manifests/:" >&2
+        ls -l /etc/kubernetes/manifests/ >&2
         for confFile in $confFiles
         do
           if [ ! -s $confFile ]
@@ -57,7 +59,9 @@ then
           fi
         done
       done
-      echo "START $target"
+      echo "START $target $Target"
+      echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N
+      (echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N) >&2
       /sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
       /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
       exit 0
