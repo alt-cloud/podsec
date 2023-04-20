@@ -69,24 +69,24 @@ USERNETES_FUNCTIONS = \
 	common/common.inc.sh \
 	manifests/coredns.yaml
 
-PODSEC_NAGIOS_PLUGINS = \
-	podsec-nagios-plugins-check-audit \
-	podsec-nagios-plugins-check-images \
-	podsec-nagios-plugins-check-k8s \
-	podsec-nagios-plugins-check-policy \
-	podsec-nagios-plugins-check-rbac \
-	podsec-nagios-plugins-check-registry
+PODSEC_INOTIFY = \
+	podsec-inotify-check-audit \
+	podsec-inotify-check-images \
+	podsec-inotify-check-k8s \
+	podsec-inotify-check-policy \
+	podsec-inotify-check-rbac \
+	podsec-inotify-check-registry
 
-PODSEC_NAGIOS_PLUGINS_FUNCTIONS = \
-	podsec-nagios-plugins-functions \
-	podsec-nagios-plugins-create-nagiosuser
+PODSEC_INOTIFY_FUNCTIONS = \
+	podsec-inotify-functions \
+	podsec-inotify-create-nagiosuser
 
 TMPFILE  := $(shell mktemp)
 
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
 PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS:=.1)
 PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS:=.1)
-PODSEC_NAGIOS_PLUGINS_MAN1_PAGES = $(PODSEC_NAGIOS_PLUGINS:=.1) podsec-nagios-plugins-create-nagiosuser.1
+PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY:=.1) podsec-inotify-create-nagiosuser.1
 
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
@@ -141,9 +141,9 @@ install: all
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	# PODSEC-NAGIOS
 	$(MKDIR_P) -m755 $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS) $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-nagios-plugins/man;$(INSTALL) -p -m644 $(PODSEC_NAGIOS_PLUGINS_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY) $(DESTDIR)$(libexecdir)/nagios/plugins/
+	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec-inotify/man;$(INSTALL) -p -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 
 clean:
 

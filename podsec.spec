@@ -87,14 +87,14 @@ This package contains utilities for
 - generation of certificates and configuration files for users
 - generating cluster and usual roles and binding them to users
 
-%package nagios-plugins
+%package inotify
 Summary: Set of scripts for nagios monitoring
 Group: Development/Other
-Requires: nagios-plugins >= 2.2.1
+Requires: inotify >= 2.2.1
 Requires: podsec >= 0.3.1
 Requires: openssh-server >= 7.8
 
-%description nagios-plugins
+%description inotify
 A set of scripts called from the nagios server side via check_ssh plugin
 to monitor and identify security threats
 
@@ -197,10 +197,10 @@ rm -rf /var/lib/etcd/*
 %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-rbac-*
 
-%files nagios-plugins
-%_libexecdir/nagios//plugins/podsec-nagios-plugins-*
-%_bindir/podsec-nagios-plugins-*
-%_mandir/man?/podsec-nagios-plugins-*
+%files inotify
+%_libexecdir/nagios/plugins/podsec-inotify-*
+%_bindir/podsec-inotify-*
+%_mandir/man?/podsec-inotify-*
 
 %changelog
 * Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.8.1-alt1
