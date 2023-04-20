@@ -186,9 +186,33 @@ rm -rf /var/lib/etcd/*
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/kubernetes/manifests/*
-%attr(0711,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
+%exclude /etc/subuid-
+%exclude /etc/subgid-
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) /var/run/*
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir /usr/libexec/kubernetes
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/crio
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
+%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/systemd
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/systemd/user
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/%u7s_admin_usr/.config/systemd/user/*
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes/crio
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/%u7s_admin_usr/.config/usernetes/crio/*
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes
+%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/usernetes/*
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/bin
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/boot
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/common
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/config
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/manifests
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/services
 %_localstatedir/%u7s_admin_usr/*
 /etc/systemd/system/*
+%attr(-, root, root) /etc/modules-load.d/*
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
@@ -198,6 +222,9 @@ rm -rf /var/lib/etcd/*
 %_libexecdir/nagios/plugins/podsec-inotify-*
 %_bindir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*
+%attr(-,root,root) %_libexecdir/nagios/
+%attr(-,root,root) %_libexecdir/nagios/*
+
 
 %changelog
 * Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.2-alt1
