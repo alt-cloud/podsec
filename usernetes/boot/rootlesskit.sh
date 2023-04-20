@@ -49,6 +49,7 @@ if [[ $_U7S_CHILD == 0 ]]; then
 		--evacuate-cgroup2="rootlesskit_evac" \
 		$U7S_ROOTLESSKIT_FLAGS \
 		$0 $@
+#	                --copy-up=/etc/kubernetes --copy-up=/var/lib/etcd/ \
 else
 	# save IP address
 	echo $U7S_PARENT_IP >$XDG_RUNTIME_DIR/usernetes/parent_ip
@@ -59,8 +60,7 @@ else
 		/run/runc /run/crun \
 		/run/containerd /run/containers /run/crio \
 		/etc/cni \
-		/etc/containerd /etc/containers /etc/crio \
-		/etc/kubernetes
+		/etc/containerd /etc/containers /etc/crio
 
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d
@@ -92,9 +92,9 @@ else
 	echo $rk_pid >$rk_state_dir/_child_pid.u7s-ready
 	log::info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
 	log::info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
-	if [[ -n $U7S_ROOTLESSKIT_PORTS ]]; then
-		rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
-	fi
+# 	if [[ -n $U7S_ROOTLESSKIT_PORTS ]]; then
+# 		rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
+# 	fi
 	rc=0
 	if [[ $# -eq 0 ]]; then
 		sleep infinity || rc=$?

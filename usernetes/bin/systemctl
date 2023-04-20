@@ -1,0 +1,86 @@
+#!/bin/sh
+set -x
+exec 2>>/tmp/systemctl.log
+
+logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
+echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
+
+echo "
+
+------------------ $(date)
+CMD=$*
+" >&2
+(
+userMode=
+if [ $1 == '--user' ]
+then
+  userMode=1
+  shift
+fi
+
+cmd=$1
+target=$2
+shift; shift
+retry=60
+if [ "${target:0:7}" = 'kubelet' ]
+then
+  Target="u7s.target"
+  case $cmd in
+    start | restart )
+      confFiles="
+/etc/kubernetes/manifests/etcd.yaml
+/etc/kubernetes/manifests/kube-apiserver.yaml
+/etc/kubernetes/manifests/kube-controller-manager.yaml
+/etc/kubernetes/manifests/kube-scheduler.yaml
+/var/lib/kubelet/config.yaml
+      "
+      ls -l /etc/kubernetes/
+      n=0
+      while [ ! -d /etc/kubernetes/manifests/ ];
+      do
+        echo "Wait /etc/kubernetes/manifests/" >&2
+        ls -l /etc/kubernetes/ >&2
+        sleep 1
+	let n+=1
+	if [ $n -gt $retry ]
+	then
+	  exit 1;
+	fi
+      done
+      ok=
+      n=0
+      while [ -z "$ok" ]
+      do
+        echo "Content of /etc/kubernetes/manifests/:" >&2
+        ls -l /etc/kubernetes/manifests/ >&2
+        for confFile in $confFiles
+        do
+          if [ ! -s $confFile ]
+          then
+            echo "Conffile $confFile is missing or empty!!! Waiting 1 second..."
+            sleep 1
+            ok=''
+	    let n+=1
+            if [ $n -gt $retry ]
+            then
+              exit 1;
+            fi
+            break
+          else
+            ok='yes'
+          fi
+        done
+      done
+      echo "START $target $Target"
+      echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N
+      (echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N) >&2
+      #/sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+      /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
+      exit 0
+    ;;
+  esac
+
+fi
+/sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+)&
+

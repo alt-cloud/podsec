@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes flanneld service
-BindsTo=u7s-rootlesskit.service
+#BindsTo=rootlesskit.service
 PartOf=u7s-node.target
 
 [Service]
@@ -9,4 +9,4 @@ WorkingDirectory=/var/lib/u7s-admin/usernetes
   EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
   Restart=on-failure
   LimitNOFILE=65536
-  
+

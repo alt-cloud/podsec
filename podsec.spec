@@ -3,7 +3,7 @@
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.6.1
+Version: 0.8.1
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -138,7 +138,7 @@ uid=$(id -u %u7s_admin_usr)
 mkdir -p /var/run/user/$uid/usernetes/crio/
 mksock /var/run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
 chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
-/bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid
+/bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid /etc/kubernetes /run/flannel/ /var/lib/etcd/
 ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
 mkdir -p /usr/libexec/kubernetes;
 chmod 777 /usr/libexec/kubernetes
@@ -166,6 +166,8 @@ xt_nat
 xt_tcpudp
 " > /etc/modules-load.d/u7s.conf
 modprobe -a $(cat /etc/modules-load.d/u7s.conf)
+chown %u7s_admin_usr:%u7s_admin_grp /var/lib/etcd/
+rm -rf /var/lib/etcd/*
 
 
 %files
@@ -201,6 +203,27 @@ modprobe -a $(cat /etc/modules-load.d/u7s.conf)
 %_mandir/man?/podsec-nagios-plugins-*
 
 %changelog
+* Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.8.1-alt1
+- 0.8.1
+
+* Tue Apr 18 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.6-alt1
+- 0.7.6
+
+* Tue Apr 18 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.5-alt1
+- 0.7.5
+
+* Tue Apr 18 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.4-alt1
+- 0.7.4
+
+* Mon Apr 17 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.3-alt1
+- 0.7.3
+
+* Mon Apr 17 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.2-alt1
+- 0.7.2
+
+* Mon Apr 17 2023 Alexey Kostarev <kaf@altlinux.org> 0.7.1-alt1
+- 0.7.1
+
 * Fri Apr 14 2023 Alexey Kostarev <kaf@altlinux.org> 0.6.1-alt1
 - 0.6.1
 

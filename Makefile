@@ -62,6 +62,7 @@ USERNETES_PROGRAMMS = \
 	boot/*.sh \
 	services/* \
 	common/ \
+	bin/ \
 	config/*
 
 USERNETES_FUNCTIONS = \
