@@ -3,7 +3,7 @@
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.8.1
+Version: 0.9.1
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -66,7 +66,6 @@ Requires: cri-tools >= 1.22.0
 Requires: kubernetes-client >= :1.26.3
 Requires: systemd-container >= 249.16
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
-# %filter_from_requires /\/usr\/bin\/chown/d
 
 %description k8s
 This package contains utilities for:
@@ -88,14 +87,15 @@ This package contains utilities for
 - generating cluster and usual roles and binding them to users
 
 %package inotify
-Summary: Set of scripts for nagios monitoring
+Summary: Set of scripts for security monitoring
 Group: Development/Other
 Requires: inotify >= 2.2.1
 Requires: podsec >= 0.3.1
 Requires: openssh-server >= 7.8
 
 %description inotify
-A set of scripts called from the nagios server side via check_ssh plugin
+A set of scripts for  security monitoring by crontabs or
+called from the nagios server side via check_ssh plugin
 to monitor and identify security threats
 
 %prep
@@ -174,10 +174,10 @@ rm -rf /var/lib/etcd/*
 %_bindir/podsec*
 %exclude %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-*
-%exclude %_bindir/podsec-nagios-*
+%exclude %_bindir/podsec-inotify-*
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
-%exclude %_mandir/man?/podsec-nagios-*
+%exclude %_mandir/man?/podsec-inotify-*
 
 %files k8s
 %_bindir/podsec-k8s-*
@@ -189,9 +189,6 @@ rm -rf /var/lib/etcd/*
 %attr(0711,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
 %_localstatedir/%u7s_admin_usr/*
 /etc/systemd/system/*
-# %_localstatedir/%u7s_admin_usr/config/*
-# %attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/install.sh
-#%attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/*/*.sh
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
@@ -203,6 +200,9 @@ rm -rf /var/lib/etcd/*
 %_mandir/man?/podsec-inotify-*
 
 %changelog
+* Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.1-alt1
+- 0.9.1
+
 * Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.8.1-alt1
 - 0.8.1
 
