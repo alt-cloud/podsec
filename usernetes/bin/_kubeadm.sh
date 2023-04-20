@@ -8,8 +8,11 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 
 rm -rf /var/lib/u7s-admin/.config/usernetes/pki
 mkdir /var/lib/u7s-admin/.config/usernetes/pki
-rm -rf /var/lib/etcd
-mkdir /var/lib/etcd
+# rm -rf /var/lib/etcd
+# mkdir /var/lib/etcd
+rm -f /etc/kubernetes/* /etc/kubernetes/manifests/*
+cp /var/lib/u7s-admin/usernetes/manifests/* /etc/kubernetes/manifests/
+
 
 uid=$(id -u u7s-admin)
 socket="unix:///run/user/$uid/usernetes/crio/crio.sock"

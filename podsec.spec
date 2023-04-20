@@ -116,58 +116,38 @@ to monitor and identify security threats
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
-if ! /bin/grep %u7s_admin_usr /etc/subuid
-then
-  # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
-  %_sbindir/useradd -M %u7s_admin_usr_temp
-  /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_usr/' -i /etc/subuid
-  /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_grp/' -i /etc/subgid
-  %_sbindir/userdel %u7s_admin_usr_temp
-fi
+# if ! /bin/grep %u7s_admin_usr /etc/subuid
+# then
+#   # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
+#   %_sbindir/useradd -M %u7s_admin_usr_temp
+#   /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_usr/' -i /etc/subuid
+#   /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_grp/' -i /etc/subgid
+#   %_sbindir/userdel %u7s_admin_usr_temp
+# fi
 
 %post k8s
-/bin/rm -rf ~%u7s_admin_usr/.config
-/bin/mv ~%u7s_admin_usr/config  ~%u7s_admin_usr/.config
-mkdir -p ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
-cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
-/bin/ln -sf ../u7s.target  .
-/bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
+# /bin/rm -rf ~%u7s_admin_usr/.config
+# /bin/mv ~%u7s_admin_usr/config  ~%u7s_admin_usr/.config
+# mkdir -p ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
+# cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
+# /bin/ln -sf ../u7s.target  .
+# /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
 # Create u7s service
-mkdir -p /var/run/containerd
-uid=$(id -u %u7s_admin_usr)
-mkdir -p /var/run/user/$uid/usernetes/crio/
-mksock /var/run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
-chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
-/bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid /etc/kubernetes /run/flannel/ /var/lib/etcd/
-ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
-mkdir -p /usr/libexec/kubernetes;
-chmod 777 /usr/libexec/kubernetes
-mkdir -p /var/lib/crio/;
-chmod 777 /var/lib/crio/
-ln -sf ~u7s-admin/usernetes/boot/docker-unsudo.sh /usr/local/bin/unsudo
-echo -ne    "tun
-tap
-bridge
-br_netfilter
-veth
-ip6_tables
-iptable_nat
-ip6table_nat
-iptable_filter
-ip6table_filter
-nf_tables
-xt_MASQUERADE
-xt_addrtype
-xt_comment
-xt_conntrack
-xt_mark
-xt_multiport
-xt_nat
-xt_tcpudp
-" > /etc/modules-load.d/u7s.conf
-modprobe -a $(cat /etc/modules-load.d/u7s.conf)
-chown %u7s_admin_usr:%u7s_admin_grp /var/lib/etcd/
-rm -rf /var/lib/etcd/*
+# mkdir -p /var/run/containerd
+# uid=$(id -u %u7s_admin_usr)
+# mkdir -p /var/run/user/$uid/usernetes/crio/
+# mksock /var/run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
+# chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
+# /bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid /etc/kubernetes /run/flannel/ /var/lib/etcd/
+# ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
+# mkdir -p /usr/libexec/kubernetes;
+# chmod 777 /usr/libexec/kubernetes
+# mkdir -p /var/lib/crio/;
+# chmod 777 /var/lib/crio/
+# ln -sf ~u7s-admin/usernetes/boot/docker-unsudo.sh /usr/local/bin/unsudo
+
+# chown %u7s_admin_usr:%u7s_admin_grp /var/lib/etcd/
+# rm -rf /var/lib/etcd/*
 
 
 %files
@@ -185,35 +165,13 @@ rm -rf /var/lib/etcd/*
 %exclude %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
-%_sysconfdir/kubernetes/manifests/*
-# %exclude /etc/subuid-
-# %exclude /etc/subgid-
+# %_sysconfdir/kubernetes/manifests/*
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
-
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) /var/run/*
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir /usr/libexec/kubernetes
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/crio
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/systemd
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/systemd/user
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/%u7s_admin_usr/.config/systemd/user/*
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes/crio
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/%u7s_admin_usr/.config/usernetes/crio/*
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config/usernetes
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/usernetes/*
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/bin
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/boot
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/common
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/config
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/manifests
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes/services
-%_localstatedir/%u7s_admin_usr/*
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
+%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes
+%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/usernetes/*
 /etc/systemd/system/*
-# %attr(-, root, root) /etc/modules-load.d/*
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*

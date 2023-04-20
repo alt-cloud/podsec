@@ -2,6 +2,49 @@
 
 . podsec-u7s-functions
 
+
+echo -ne    "tun
+tap
+bridge
+br_netfilter
+veth
+ip6_tables
+iptable_nat
+ip6table_nat
+iptable_filter
+ip6table_filter
+nf_tables
+xt_MASQUERADE
+xt_addrtype
+xt_comment
+xt_conntrack
+xt_mark
+xt_multiport
+xt_nat
+xt_tcpudp
+" > /etc/modules-load.d/u7s.conf
+modprobe -a $(cat /etc/modules-load.d/u7s.conf)
+
+uid=`id -u u7s-admin`
+if ! /bin/grep u7s_admin /etc/subuid
+then
+  # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
+  %_sbindir/useradd -M u7s_admin_temp
+  /bin/sed -e 's/u7s_admin_temp/u7s_admin/' -i /etc/subuid
+  /bin/sed -e 's/u7s_admin_temp/%u7s_admin_grp/' -i /etc/subgid
+  %_sbindir/userdel u7s_admin_temp
+fi
+# mkdir -p /run/user/$uid/usernetes/crio/
+# mksock /run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
+# chmod 660 /run/user/$uid/usernetes/crio/crio.sock
+# /bin/chown -R u7s_admin:%u7s_admin_grp /run/user/$uid /run/flannel/
+mkdir -p /var/lib/crio/
+chown u7s-admin:u7s-admin /var/lib/crio/
+mkdir -p /usr/libexec/kubernetes;
+chown u7s-admin:u7s-admin /usr/libexec/kubernetes
+# mkdir -p /run/containerd
+# ln -sf /run/user/$uid/usernetes/crio/crio.sock /run/containerd/containerd.sock
+
 config_dir=/var/lib/u7s-admin/.config
 mkdir -p $config_dir
 chown u7s-admin:u7s-admin -R ~u7s-admin
