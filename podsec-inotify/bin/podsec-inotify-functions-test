@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. podsec-nagios-plugins-functions
+. podsec-inotify-functions
 
 # Тестирование функции metricaInInterval
 for interval in  "@10:20"  "10" "10:" "~:10" "10:20"

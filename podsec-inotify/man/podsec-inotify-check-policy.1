@@ -1,13 +1,13 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-NAGIOS\-PLUGINS\-CHECK\-POLICY" "1" "March 2023" "" ""
+.TH "PODSEC\-INOTIFY\-CHECK\-POLICY" "1" "April 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-nagios\-plugins\-check\-policy\fR \- Плугин проверяет политики настройки контейнеризации на узле
+\fBpodsec\-inotify\-check\-policy\fR \- Плугин проверяет политики настройки контейнеризации на узле
 .
 .SH "SYNOPSIS"
-\fBpodsec\-nagios\-plugins\-check\-policy [\-v[vv]] [\-a интервал] [\-f интервал] \-c интервал \-h интервал [\-m интервал] \-w интервал [\-l интервал] [\-d интервал]\fR
+\fBpodsec\-inotify\-check\-policy [\-v[vv]] [\-a интервал] [\-f интервал] \-c интервал \-h интервал [\-m интервал] \-w интервал [\-l интервал] [\-d интервал]\fR
 .
 .SH "DESCRIPTION"
 .
@@ -385,8 +385,8 @@ POLICY $prefix: Нарушение политик контейнеризации
 
 
 define command{
-        command_name    podsec\-nagios\-plugins\-check\-policy
-        command_line    $USER1$/check_by_ssh \-H $HOSTADDRESS$ \-l root \-C \'/usr/lib/nagios/plugins/podsec\-nagios\-plugins\-check\-policy \-vvv \-w $ARG1$ \-l $ARG1$ \-c $ARG2$ \'
+        command_name    podsec\-inotify\-check\-policy
+        command_line    $USER1$/check_by_ssh \-H $HOSTADDRESS$ \-l root \-C \'/usr/lib/nagios/plugins/podsec\-inotify\-check\-policy \-vvv \-w $ARG1$ \-l $ARG1$ \-c $ARG2$ \'
         }
 \.\.\.
 .
@@ -409,7 +409,7 @@ define service {
         use generic\-service
         host_name       <host>
         service_description     Check containers policy
-        check_command podsec\-nagios\-plugins\-check\-policy!0!100
+        check_command podsec\-inotify\-check\-policy!0!100
         }
 .
 .fi
@@ -427,7 +427,7 @@ define service {
 .nf
 
 
-# podsec\-nagios\-plugins\-check\-policy \-vvv  \-w 0 \-h 0 \-c 100
+# podsec\-inotify\-check\-policy \-vvv  \-w 0 \-h 0 \-c 100
 POLICY Critical(18): Нарушение политик контейнеризации пользователей  "imagedeveloper" "k8s\-user1" "kaf" "kafpodman" "podmanuser" "root" "securityadmin" "user" "user1"  | Есть пользователи:
 вне группы podman,
 способные получать любой образ
