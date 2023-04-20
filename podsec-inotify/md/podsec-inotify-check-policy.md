@@ -1,9 +1,9 @@
-podsec-nagios-plugins-check-policy(1) -- Плугин проверяет политики настройки контейнеризации на узле
+podsec-inotify-check-policy(1) -- Плугин проверяет политики настройки контейнеризации на узле
 ================================
 
 ## SYNOPSIS
 
-`podsec-nagios-plugins-check-policy [-v[vv]] [-a интервал] [-f интервал] -c интервал -h интервал [-m  интервал] -w интервал [-l интервал] [-d интервал]`
+`podsec-inotify-check-policy [-v[vv]] [-a интервал] [-f интервал] -c интервал -h интервал [-m  интервал] -w интервал [-l интервал] [-d интервал]`
 
 ## DESCRIPTION
 
@@ -198,8 +198,8 @@ POLICY $prefix: Нарушение политик контейнеризации
 - создайте в `/etc/nagios/commands/` конфигурационный файл  `nagios-plugins-podsec.cfg` для всех podsec планинов
 <pre>
 define command{
-        command_name    podsec-nagios-plugins-check-policy
-        command_line    $USER1$/check_by_ssh -H $HOSTADDRESS$ -l root -C '/usr/lib/nagios/plugins/podsec-nagios-plugins-check-policy -vvv -w $ARG1$ -l $ARG1$ -c $ARG2$ '
+        command_name    podsec-inotify-check-policy
+        command_line    $USER1$/check_by_ssh -H $HOSTADDRESS$ -l root -C '/usr/lib/nagios/plugins/podsec-inotify-check-policy -vvv -w $ARG1$ -l $ARG1$ -c $ARG2$ '
         }
 ...
 </pre>
@@ -217,7 +217,7 @@ define service {
         use generic-service
         host_name       &lt;host&gt;
         service_description     Check containers policy
-        check_command podsec-nagios-plugins-check-policy!0!100
+        check_command podsec-inotify-check-policy!0!100
         }
 </pre>
 В строке `service_description` укахите  иям сервиска которое будет отображаться в WEB-интерейсе nagios.
@@ -229,7 +229,7 @@ define service {
 Проанализировать политики политики с максимальным уровнем детализации.
 Критический уровень (`nagios`, `system`) `>100`. Уровень предупреждений (`nagios`) `>0`. Низкий уровень (`system`) `>0`.
 <pre>
-# podsec-nagios-plugins-check-policy -vvv  -w 0 -h 0 -c 100
+# podsec-inotify-check-policy -vvv  -w 0 -h 0 -c 100
 POLICY Critical(18): Нарушение политик контейнеризации пользователей  "imagedeveloper" "k8s-user1" "kaf" "kafpodman" "podmanuser" "root" "securityadmin" "user" "user1"  | Есть пользователи:
 вне группы podman,
 способные получать любой образ

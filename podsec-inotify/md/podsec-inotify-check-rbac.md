@@ -1,9 +1,9 @@
-podsec-nagios-plugins-check-audit(1) --
+podsec-inotify-check-rbac(1) --
 ================================
 
 ## SYNOPSIS
 
-`podsec-nagios-plugins-check-audit`
+`podsec-inotify-check-rbac`
 
 ## DESCRIPTION
 
@@ -12,7 +12,7 @@ podsec-nagios-plugins-check-audit(1) --
 
 ## EXAMPLES
 
-`podsec-nagios-plugins-check-audit`
+`podsec-inotify-check-rbac`
 
 ## SECURITY CONSIDERATIONS
 

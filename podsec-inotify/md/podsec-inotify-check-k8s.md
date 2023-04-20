@@ -1,9 +1,9 @@
-podsec-nagios-plugins-check-images(1) --
+podsec-inotify-check-trivy-k8s(1) --
 ================================
 
 ## SYNOPSIS
 
-`podsec-nagios-plugins-check-images`
+`podsec-inotify-check-trivy-k8s`
 
 ## DESCRIPTION
 
@@ -12,7 +12,7 @@ podsec-nagios-plugins-check-images(1) --
 
 ## EXAMPLES
 
-`podsec-nagios-plugins-check-images`
+`podsec-inotify-check-trivy-k8s`
 
 ## SECURITY CONSIDERATIONS
 

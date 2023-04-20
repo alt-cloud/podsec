@@ -1,9 +1,9 @@
-podsec-nagios-plugins-create-nagiosuser(1) -- создание пользователя nagios от имени которого запускаются nagios плугины
+podsec-inotify-create-nagiosuser(1) -- создание пользователя nagios от имени которого запускаются nagios плугины
 ================================
 
 ## SYNOPSIS
 
-`podsec-nagios-plugins-create-nagiosuser`
+`podsec-inotify-create-nagiosuser`
 
 ## DESCRIPTION
 
@@ -13,7 +13,7 @@ podsec-nagios-plugins-create-nagiosuser(1) -- создание пользова�
 
 ## EXAMPLES
 
-`podsec-nagios-plugins-create-nagiosuse`
+`podsec-inotify-create-nagiosuse`
 
 ## SECURITY CONSIDERATIONS
 

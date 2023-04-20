@@ -14,7 +14,7 @@ then
 fi
 
 . podsec-policy-functions
-. podsec-nagios-plugins-functions
+. podsec-inotify-functions
 
 setTraps
 
