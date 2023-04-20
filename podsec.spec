@@ -3,7 +3,7 @@
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.9.1
+Version: 0.9.2
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -200,6 +200,9 @@ rm -rf /var/lib/etcd/*
 %_mandir/man?/podsec-inotify-*
 
 %changelog
+* Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.2-alt1
+- 0.9.2
+
 * Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.1-alt1
 - 0.9.1
 
