@@ -89,7 +89,7 @@ This package contains utilities for
 %package inotify
 Summary: Set of scripts for security monitoring
 Group: Development/Other
-Requires: inotify >= 2.2.1
+Requires: inotify-tools >= 3.20
 Requires: podsec >= 0.3.1
 Requires: openssh-server >= 7.8
 
