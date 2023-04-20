@@ -41,8 +41,7 @@ mkdir -p ~u7s-admin/.kube/
 chmod 700 ~u7s-admin/.kube/
 cp ~u7s-admin/.config/usernetes/master/admin-localhost.kubeconfig ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
-chown -R u7s-admin:u7s-admin /etc/kubernetes /var/lib/etcd/
-
+chown -R u7s-admin:u7s-admin /etc/kubernetes /var/lib/etcd/ /run/flannel/
 # sleep 1
 # until kubectl apply -f ~u7s-admin/usernetes/manifests/coredns.yaml >/dev/null 2>&1
 # do

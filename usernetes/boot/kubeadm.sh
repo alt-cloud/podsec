@@ -1,5 +1,24 @@
 #!/bin/bash
 
+getExtIP() {
+  set -- $(ip r | grep default)
+  router=$3
+  ifs=$IFS
+  IFS=.
+  set -- $router
+  IFS=$ifs
+  prefixIP=$1
+  shift
+  while [ $# -gt 1 ]; do prefixIP+=".$1"; shift; done
+  set -- $(ip a | grep $prefixIP | grep inet)
+  IFS=/
+  set -- $2
+  IFS=$ifs
+  extIP=$1
+  echo $extIP
+}
+
+
 logger  "=============================================== KUBEADM ====================================="
 
 set -x
@@ -14,13 +33,15 @@ fi
 #   /sbin/systemctl --user -T start  kubelet-crio.service
 # fi
 
+extIP=$(getExtIP)
+
 uid=$(id -u)
 echo "$0: uid=$uid"
 
 if [ $uid -eq 0 ]
 then
-  exec $U7S_BASE_DIR/bin/_kubeadm.sh $@
+  exec $U7S_BASE_DIR/bin/_kubeadm.sh --control-plane-endpoint=$extIP
 else
-  exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $@
+  exec $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh --control-plane-endpoint=$extIP
 fi
 

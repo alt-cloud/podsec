@@ -138,7 +138,7 @@ uid=$(id -u %u7s_admin_usr)
 mkdir -p /var/run/user/$uid/usernetes/crio/
 mksock /var/run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
 chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
-/bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid
+/bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid /etc/kubernetes /run/flannel/ /var/lib/etcd/
 ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
 mkdir -p /usr/libexec/kubernetes;
 chmod 777 /usr/libexec/kubernetes

@@ -6,7 +6,8 @@ logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RU
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
 
 rk_state_dir=$XDG_RUNTIME_DIR/usernetes/rootlesskit
-if [[ -n $U7S_ROOTLESSKIT_PORTS ]]
+port=$(rootlessctl --socket $rk_state_dir/api.sock list-ports --json | jq '.spec.parentPort')
+if [ -z "$port" ]
 then
   rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
 fi

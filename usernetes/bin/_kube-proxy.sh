@@ -22,6 +22,6 @@ conntrack:
   tcpCloseWaitTimeout: 0s
 EOF
 
-exec $(dirname $0)/nsenter.sh kube-proxy \
+kube-proxy \
 	--config $XDG_RUNTIME_DIR/usernetes/kube-proxy-config.yaml \
 	$@
