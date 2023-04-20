@@ -9,4 +9,4 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 cmd=$(yq '.spec.containers[0].command | join(" ")' /etc/kubernetes/manifests/kube-scheduler.yaml)
 cmd=${cmd:1:-1}
 
-$cmd --port=0 $@
+$cmd  $@

@@ -21,7 +21,16 @@ getExtIP() {
 
 logger  "=============================================== KUBEADM ====================================="
 
+
+
 set -x
+
+uid=$(id -u)
+echo "$0: uid=$uid"
+export XDG_RUNTIME_DIR="/run/user/$uid/"
+mkdir -p $XDG_RUNTIME_DIR
+chown -R u7s-admin:u7s-admin $XDG_RUNTIME_DIR
+
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 if ! /sbin/systemctl --no-pager --user status rootlesskit.service >/dev/null 2>&1
@@ -35,8 +44,6 @@ fi
 
 extIP=$(getExtIP)
 
-uid=$(id -u)
-echo "$0: uid=$uid"
 
 if [ $uid -eq 0 ]
 then

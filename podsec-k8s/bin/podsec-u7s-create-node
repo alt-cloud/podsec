@@ -2,56 +2,26 @@
 
 . podsec-u7s-functions
 
-# set -x
-cd /tmp
-wget -O flannel_0.19.tgz https://raw.githubusercontent.com/alt-cloud/podsec/master/usernetes/flannel_0.19.tgz
-tar xvzCf / flannel_0.19.tgz
-
-wget -O cfssl.tgz https://raw.githubusercontent.com/alt-cloud/podsec/master/usernetes/cfssl.tgz
-tar xvzCf ~u7s-admin/usernetes/ cfssl.tgz
-
-cd ~u7s-admin/usernetes/
-# cfssldir=$(mktemp -d /tmp/cfssl.XXXXXXXXX)
-cfssldir="/var/lib/u7s-admin/tmp"
-master=127.0.0.1
-node=$(hostname)
-mkdir $cfssldir
-chown u7s-admin:u7s-admin -R ~u7s-admin
 config_dir=/var/lib/u7s-admin/.config
-su - -c "/var/lib/u7s-admin/usernetes/common/cfssl.sh --dir=${cfssldir} --master=$master --node=$node,127.0.0.1" u7s-admin
-rm -rf ${config_dir}/usernetes/{master,node}
-cp -r "${cfssldir}/master" ${config_dir}/usernetes/master
-cp -r "${cfssldir}/nodes.$node" ${config_dir}/usernetes/node
-rm -rf "${cfssldir}"
-
+mkdir -p $config_dir
 chown u7s-admin:u7s-admin -R ~u7s-admin
+chown u7s-admin:u7s-admin -R ~u7s-admin
+rm -f /etc/kubernetes/*
+chown -R u7s-admin:u7s-admin /etc/kubernetes /var/lib/etcd/ /run/flannel/
 
 echo "Введите пароль пользователя u7s-admin:"
 passwd u7s-admin
 
-hostname=$(hostname)
-
-# systemctl enable --now u7s
+cd ~u7s-admin/usernetes/boot
+rm -f /tmp/kubeadm.log;
+su - -c 'bash -x ~u7s-admin/usernetes/boot/kubeadm.sh 2>&1' u7s-admin  | tee /tmp/kubeadm.log
 
 mkdir -p /root/.kube/
 chmod 600 /root/.kube/
-cp ~u7s-admin/.config/usernetes/master/admin-localhost.kubeconfig /root/.kube/config
+cp -f /etc/kubernetes/admin.conf /root/.kube/config
 
 mkdir -p ~u7s-admin/.kube/
 chmod 700 ~u7s-admin/.kube/
-cp ~u7s-admin/.config/usernetes/master/admin-localhost.kubeconfig ~u7s-admin/.kube/config
+cp -f /etc/kubernetes/admin.conf ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
-chown -R u7s-admin:u7s-admin /etc/kubernetes /var/lib/etcd/ /run/flannel/
-# sleep 1
-# until kubectl apply -f ~u7s-admin/usernetes/manifests/coredns.yaml >/dev/null 2>&1
-# do
-#   sleep 3
-# done
-#
-# kubectl create clusterrolebinding system_node_leases \
-#   --clusterrole=system:node \
-#   --user=system:node:${hostname}
-#
-# /usr/bin/podsec-k8s-rbac-bindrole system:kubernetes clusterrole cluster-admin  kubernetes_cluster-admin
-
-
+chown u7s-admin:u7s-admin ~u7s-admin/.kube/config
