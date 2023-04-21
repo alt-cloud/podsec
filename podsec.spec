@@ -114,39 +114,6 @@ to monitor and identify security threats
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
-# if ! /bin/grep %u7s_admin_usr /etc/subuid
-# then
-#   # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
-#   %_sbindir/useradd -M %u7s_admin_usr_temp
-#   /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_usr/' -i /etc/subuid
-#   /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_grp/' -i /etc/subgid
-#   %_sbindir/userdel %u7s_admin_usr_temp
-# fi
-
-%post k8s
-# /bin/rm -rf ~%u7s_admin_usr/.config
-# /bin/mv ~%u7s_admin_usr/config  ~%u7s_admin_usr/.config
-# mkdir -p ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
-# cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
-# /bin/ln -sf ../u7s.target  .
-# /bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
-# Create u7s service
-# mkdir -p /var/run/containerd
-# uid=$(id -u %u7s_admin_usr)
-# mkdir -p /var/run/user/$uid/usernetes/crio/
-# mksock /var/run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
-# chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
-# /bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid /etc/kubernetes /run/flannel/ /var/lib/etcd/
-# ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
-# mkdir -p /usr/libexec/kubernetes;
-# chmod 777 /usr/libexec/kubernetes
-# mkdir -p /var/lib/crio/;
-# chmod 777 /var/lib/crio/
-# ln -sf ~u7s-admin/usernetes/boot/docker-unsudo.sh /usr/local/bin/unsudo
-
-# chown %u7s_admin_usr:%u7s_admin_grp /var/lib/etcd/
-# rm -rf /var/lib/etcd/*
-
 
 %files
 %_bindir/podsec*
@@ -163,7 +130,6 @@ to monitor and identify security threats
 %exclude %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
-# %_sysconfdir/kubernetes/manifests/*
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
 %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
@@ -181,7 +147,6 @@ to monitor and identify security threats
 %_mandir/man?/podsec-inotify-*
 %attr(-,root,root) %_libexecdir/nagios/
 %attr(-,root,root) %_libexecdir/nagios/*
-
 
 %changelog
 * Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.3-alt1

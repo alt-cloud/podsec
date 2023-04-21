@@ -32,13 +32,10 @@ cat >$XDG_CONFIG_HOME/usernetes/crio/crio.conf <<EOF
   root = "$XDG_DATA_HOME/usernetes/containers/storage"
   version_file = "$XDG_RUNTIME_DIR/usernetes/crio/version"
   storage_driver = "overlay"
-  storage_option = [
-    "overlay.mount_program=/usr/bin/fuse-overlayfs"
-  ]
   [crio.api]
     listen = "$XDG_RUNTIME_DIR/usernetes/crio/crio.sock"
   [crio.image]
-    signature_policy = "$XDG_CONFIG_HOME/usernetes/containers/policy.json"
+    signature_policy = "/etc/containers/policy.json"
     pause_image = "registry.local/k8s-p10/pause:3.9"
     insecure_registries = [
       "registry.local"
