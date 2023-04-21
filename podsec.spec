@@ -3,7 +3,7 @@
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.9.3
+Version: 0.9.4
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -149,6 +149,9 @@ to monitor and identify security threats
 %attr(-,root,root) %_libexecdir/nagios/*
 
 %changelog
+* Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.4-alt1
+- 0.9.4
+
 * Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.3-alt1
 - 0.9.3
 
