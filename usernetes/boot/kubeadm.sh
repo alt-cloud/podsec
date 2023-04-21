@@ -28,8 +28,8 @@ set -x
 uid=$(id -u)
 echo "$0: uid=$uid"
 export XDG_RUNTIME_DIR="/run/user/$uid/"
-mkdir -p $XDG_RUNTIME_DIR
-chown -R u7s-admin:u7s-admin $XDG_RUNTIME_DIR
+# mkdir -p $XDG_RUNTIME_DIR
+# chown -R u7s-admin:u7s-admin $XDG_RUNTIME_DIR
 
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
@@ -43,8 +43,6 @@ fi
 # fi
 
 extIP=$(getExtIP)
-
-
 if [ $uid -eq 0 ]
 then
   exec $U7S_BASE_DIR/bin/_kubeadm.sh --control-plane-endpoint=$extIP

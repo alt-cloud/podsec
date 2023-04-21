@@ -2,7 +2,6 @@
 
 . podsec-u7s-functions
 
-
 echo -ne    "tun
 tap
 bridge
@@ -29,15 +28,15 @@ uid=`id -u u7s-admin`
 if ! /bin/grep u7s_admin /etc/subuid
 then
   # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
-  %_sbindir/useradd -M u7s_admin_temp
+  /usr/sbin/useradd -M u7s_admin_temp
   /bin/sed -e 's/u7s_admin_temp/u7s_admin/' -i /etc/subuid
-  /bin/sed -e 's/u7s_admin_temp/%u7s_admin_grp/' -i /etc/subgid
-  %_sbindir/userdel u7s_admin_temp
+  /bin/sed -e 's/u7s_admin_temp/u7s-admin/' -i /etc/subgid
+  /usr/sbin/userdel u7s_admin_temp
 fi
 # mkdir -p /run/user/$uid/usernetes/crio/
 # mksock /run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
 # chmod 660 /run/user/$uid/usernetes/crio/crio.sock
-# /bin/chown -R u7s_admin:%u7s_admin_grp /run/user/$uid /run/flannel/
+# /bin/chown -R u7s_admin:u7s-admin /run/user/$uid /run/flannel/
 mkdir -p /var/lib/crio/
 chown u7s-admin:u7s-admin /var/lib/crio/
 mkdir -p /usr/libexec/kubernetes;
@@ -57,7 +56,8 @@ passwd u7s-admin
 
 cd ~u7s-admin/usernetes/boot
 rm -f /tmp/kubeadm.log;
-su - -c 'bash -x ~u7s-admin/usernetes/boot/kubeadm.sh 2>&1' u7s-admin  | tee /tmp/kubeadm.log
+
+machinectl shell u7s-admin@ sh -x ~u7s-admin/usernetes/boot/kubeadm.sh 2>&1 | tee /tmp/kubeadm.log
 
 mkdir -p /root/.kube/
 chmod 600 /root/.kube/
