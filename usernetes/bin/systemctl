@@ -1,6 +1,6 @@
 #!/bin/sh
 set -x
-exec 2>>/tmp/systemctl.log
+# exec 2>>/tmp/systemctl.log
 
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
@@ -33,8 +33,11 @@ then
 /etc/kubernetes/manifests/kube-controller-manager.yaml
 /etc/kubernetes/manifests/kube-scheduler.yaml
 /var/lib/kubelet/config.yaml
+/etc/kubernetes/admin.conf
+/etc/kubernetes/controller-manager.conf
+/etc/kubernetes/kubelet.conf
+/etc/kubernetes/scheduler.conf
       "
-      ls -l /etc/kubernetes/
       n=0
       while [ ! -d /etc/kubernetes/manifests/ ];
       do
@@ -71,9 +74,12 @@ then
           fi
         done
       done
-      echo "START $target $Target"
-      echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N
-      (echo " SYSTEMCTL: TIME=";date  +%H:%M:%S.%N) >&2
+      logger "$(ls -l /etc/kubernetes/)"
+      logger "$ls -l  /var/lib/u7s-admin/.config/usernetes/pki)"
+      echo "START $Target"
+      echo "SYSTEMCTL: START $Target TIME=";date  +%H:%M:%S.%N >&2
+      logger "$(echo "SYSTEMCTL: START $Target TIME=";date  +%H:%M:%S.%N)"
+
       #/sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
       /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
       exit 0

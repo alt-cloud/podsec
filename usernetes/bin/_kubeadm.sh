@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
@@ -6,10 +6,21 @@ set -x
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
 
+# Вытаскиваем из .ro каталог containers. Уго почемуто-rootless не хочат автоматически линклвать :-(
+pushd /etc
+ro=$(echo .ro*)
+ln -sf $ro/containers .
+popd
+
+# Чистим старые сертифиаты
 rm -rf /var/lib/u7s-admin/.config/usernetes/pki
 mkdir /var/lib/u7s-admin/.config/usernetes/pki
-rm -rf /var/lib/etcd
-mkdir /var/lib/etcd
+# rm -rf /var/lib/etcd
+# mkdir /var/lib/etcd
+# rm -f /etc/kubernetes/* /etc/kubernetes/manifests/*
+# Копирекм coredns.yaml  kube-flannel.yml
+cp /var/lib/u7s-admin/usernetes/manifests/* /etc/kubernetes/manifests/
+
 
 uid=$(id -u u7s-admin)
 socket="unix:///run/user/$uid/usernetes/crio/crio.sock"

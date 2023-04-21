@@ -32,9 +32,6 @@ PODSEC_FUNCTIONS = \
 	podsec-functions \
 	podsec-policy-functions
 
-PODSEC_K8S_MANIFESTS= \
-	kube-flannel.yml
-
 PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
  	podsec-k8s-create-master \
@@ -63,30 +60,32 @@ USERNETES_PROGRAMMS = \
 	services/* \
 	common/ \
 	bin/ \
-	config/*
+	config/* \
+	.config
 
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh \
+	manifests/kube-flannel.yml \
 	manifests/coredns.yaml
 
-PODSEC_NAGIOS_PLUGINS = \
-	podsec-nagios-plugins-check-audit \
-	podsec-nagios-plugins-check-images \
-	podsec-nagios-plugins-check-k8s \
-	podsec-nagios-plugins-check-policy \
-	podsec-nagios-plugins-check-rbac \
-	podsec-nagios-plugins-check-registry
+PODSEC_INOTIFY = \
+	podsec-inotify-check-audit \
+	podsec-inotify-check-images \
+	podsec-inotify-check-k8s \
+	podsec-inotify-check-policy \
+	podsec-inotify-check-rbac \
+	podsec-inotify-check-registry
 
-PODSEC_NAGIOS_PLUGINS_FUNCTIONS = \
-	podsec-nagios-plugins-functions \
-	podsec-nagios-plugins-create-nagiosuser
+PODSEC_INOTIFY_FUNCTIONS = \
+	podsec-inotify-functions \
+	podsec-inotify-create-nagiosuser
 
 TMPFILE  := $(shell mktemp)
 
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
 PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS:=.1)
 PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS:=.1)
-PODSEC_NAGIOS_PLUGINS_MAN1_PAGES = $(PODSEC_NAGIOS_PLUGINS:=.1) podsec-nagios-plugins-create-nagiosuser.1
+PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY:=.1) podsec-inotify-create-nagiosuser.1
 
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
@@ -124,13 +123,11 @@ install: all
 	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
-	cd ./podsec-k8s/manifests/;$(CP) $(PODSEC_K8S_MANIFESTS) $(DESTDIR)/etc/kubernetes/manifests/
 	# PODSEC-K8S USERNETES
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/usernetes
 	cd usernetes;$(CHMOD) 644 $(USERNETES_FUNCTIONS);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_FUNCTIONS) ;cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);
-	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE)
-	cd usernetes; $(CP) -r Config  $(DESTDIR)/var/lib/u7s-admin/config
+	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);mv .config $(DESTDIR)/var/lib/u7s-admin/.config
 	rm -f $(TMPFILE)
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
 	$(CP) usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
@@ -141,9 +138,9 @@ install: all
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	# PODSEC-NAGIOS
 	$(MKDIR_P) -m755 $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS) $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-nagios-plugins/bin;$(CP) $(PODSEC_NAGIOS_PLUGINS_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-nagios-plugins/man;$(INSTALL) -p -m644 $(PODSEC_NAGIOS_PLUGINS_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY) $(DESTDIR)$(libexecdir)/nagios/plugins/
+	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec-inotify/man;$(INSTALL) -p -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 
 clean:
 

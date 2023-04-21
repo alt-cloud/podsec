@@ -1,0 +1,16 @@
+[Unit]
+Description=Usernetes kube-apiserver service
+BindsTo=rootlesskit.service
+Requires=etcd.service
+After=etcd.service
+PartOf=u7s-master.target
+
+[Service]
+Type=notify
+NotifyAccess=all
+ExecStart=/var/lib/u7s-admin/usernetes/boot/kube-apiserver.sh
+WorkingDirectory=/var/lib/u7s-admin/usernetes
+  EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
+  Restart=on-failure
+  LimitNOFILE=65536
+

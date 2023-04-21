@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -eux
 car=$1
 shift

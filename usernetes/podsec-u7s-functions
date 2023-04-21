@@ -11,15 +11,15 @@ export CONFIG_DIR="$HOMEDIR/.config"
 export WAIT_INIT_CERTS
 export BASE="/var/lib/${USERNAME}/usernetes"
 
-function INFO() {
+INFO() {
 	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
 }
 
-function WARNING() {
+WARNING() {
 	echo >&2 -e "\e[101m\e[97m[WARNING]\e[49m\e[39m $@"
 }
 
-function ERROR() {
+ERROR() {
 	echo >&2 -e "\e[101m\e[97m[ERROR]\e[49m\e[39m $@"
 }
 
@@ -86,7 +86,7 @@ EOF
   ### Begin installation
   INFO "Base dir: ${BASE}"
   mkdir -p ${CONFIG_DIR}/systemd/user
-  function x() {
+  x() {
     name=$1
     path=${CONFIG_DIR}/systemd/user/${name}
     INFO "Installing $path"

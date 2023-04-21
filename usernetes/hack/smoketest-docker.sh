@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -eu -o pipefail
 source $(realpath $(dirname $0))/smoketest-common.inc.sh
 if [[ $# -lt 3 ]]; then

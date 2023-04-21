@@ -3,7 +3,7 @@
 %define u7s_admin_grp u7s-admin
 
 Name: podsec
-Version: 0.8.1
+Version: 0.9.4
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -21,14 +21,12 @@ Requires: docker-registry >= 2.8.1
 Requires: pinentry-common >= 1.1.0
 Requires: jq >= 1.6
 Requires: yq >= 2.12.2
-Requires: fuse-overlayfs >= 1.1.2.3.800011b
 Requires: skopeo >= 1.9.1
 Requires: sh >= 4.4.23
 Requires: wget >= 1.21.3
 Requires: coreutils >= 8.32.0
 Requires: conntrack-tools >= 1.4.6
 Requires: findutils >= 4.8.0
-Requires: fuse3 >= 3.10.2
 Requires: iproute2 >= 5.13.0
 Requires: iptables >= 1.8.7
 Requires: openssh-server >= 7.8
@@ -66,12 +64,10 @@ Requires: cri-tools >= 1.22.0
 Requires: kubernetes-client >= :1.26.3
 Requires: systemd-container >= 249.16
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
-# %filter_from_requires /\/usr\/bin\/chown/d
 
 %description k8s
 This package contains utilities for:
 - cluster node configurations
-
 
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
@@ -87,15 +83,16 @@ This package contains utilities for
 - generation of certificates and configuration files for users
 - generating cluster and usual roles and binding them to users
 
-%package nagios-plugins
-Summary: Set of scripts for nagios monitoring
+%package inotify
+Summary: Set of scripts for security monitoring
 Group: Development/Other
-Requires: nagios-plugins >= 2.2.1
+Requires: inotify-tools >= 3.20
 Requires: podsec >= 0.3.1
 Requires: openssh-server >= 7.8
 
-%description nagios-plugins
-A set of scripts called from the nagios server side via check_ssh plugin
+%description inotify
+A set of scripts for  security monitoring by crontabs or
+called from the nagios server side via check_ssh plugin
 to monitor and identify security threats
 
 %prep
@@ -116,68 +113,16 @@ to monitor and identify security threats
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
-if ! /bin/grep %u7s_admin_usr /etc/subuid
-then
-  # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
-  %_sbindir/useradd -M %u7s_admin_usr_temp
-  /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_usr/' -i /etc/subuid
-  /bin/sed -e 's/%u7s_admin_usr_temp/%u7s_admin_grp/' -i /etc/subgid
-  %_sbindir/userdel %u7s_admin_usr_temp
-fi
-
-%post k8s
-/bin/rm -rf ~%u7s_admin_usr/.config
-/bin/mv ~%u7s_admin_usr/config  ~%u7s_admin_usr/.config
-mkdir -p ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
-cd ~%u7s_admin_usr/.config/systemd/user/multi-user.target.wants
-/bin/ln -sf ../u7s.target  .
-/bin/chown -R %u7s_admin_usr:%u7s_admin_grp ~%u7s_admin_usr
-# Create u7s service
-mkdir -p /var/run/containerd
-uid=$(id -u %u7s_admin_usr)
-mkdir -p /var/run/user/$uid/usernetes/crio/
-mksock /var/run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
-chmod 660 /var/run/user/$uid/usernetes/crio/crio.sock
-/bin/chown -R %u7s_admin_usr:%u7s_admin_grp /var/run/user/$uid /etc/kubernetes /run/flannel/ /var/lib/etcd/
-ln -sf /var/run/user/$uid/usernetes/crio/crio.sock /var/run/containerd/containerd.sock
-mkdir -p /usr/libexec/kubernetes;
-chmod 777 /usr/libexec/kubernetes
-mkdir -p /var/lib/crio/;
-chmod 777 /var/lib/crio/
-ln -sf ~u7s-admin/usernetes/boot/docker-unsudo.sh /usr/local/bin/unsudo
-echo -ne    "tun
-tap
-bridge
-br_netfilter
-veth
-ip6_tables
-iptable_nat
-ip6table_nat
-iptable_filter
-ip6table_filter
-nf_tables
-xt_MASQUERADE
-xt_addrtype
-xt_comment
-xt_conntrack
-xt_mark
-xt_multiport
-xt_nat
-xt_tcpudp
-" > /etc/modules-load.d/u7s.conf
-modprobe -a $(cat /etc/modules-load.d/u7s.conf)
-chown %u7s_admin_usr:%u7s_admin_grp /var/lib/etcd/
-rm -rf /var/lib/etcd/*
-
 
 %files
 %_bindir/podsec*
 %exclude %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-*
-%exclude %_bindir/podsec-nagios-*
+%exclude %_bindir/podsec-inotify-*
+%exclude %_libexecdir/nagios/plugins/podsec-inotify-*
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
-%exclude %_mandir/man?/podsec-nagios-*
+%exclude %_mandir/man?/podsec-inotify-*
 
 %files k8s
 %_bindir/podsec-k8s-*
@@ -185,24 +130,43 @@ rm -rf /var/lib/etcd/*
 %exclude %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
-%_sysconfdir/kubernetes/manifests/*
-%attr(0711,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
-%_localstatedir/%u7s_admin_usr/*
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
+%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes
+%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/usernetes/*
 /etc/systemd/system/*
-# %_localstatedir/%u7s_admin_usr/config/*
-# %attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/install.sh
-#%attr(0755,%u7s_admin_usr,%u7s_admin_grp) /home/u7s-admin/usernetes/*/*.sh
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-rbac-*
 
-%files nagios-plugins
-%_libexecdir/nagios//plugins/podsec-nagios-plugins-*
-%_bindir/podsec-nagios-plugins-*
-%_mandir/man?/podsec-nagios-plugins-*
+%files inotify
+%_libexecdir/nagios/plugins/podsec-inotify-*
+%_bindir/podsec-inotify-*
+%_mandir/man?/podsec-inotify-*
+%attr(-,root,root) %_libexecdir/nagios/
+%attr(-,root,root) %_libexecdir/nagios/*
 
 %changelog
+* Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.4-alt1
+- 0.9.4
+
+* Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.3-alt1
+- 0.9.3
+
+* Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.2-alt1
+- 0.9.2
+
+* Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.3-alt1
+- 0.9.3
+
+* Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.2-alt1
+- 0.9.2
+
+* Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.1-alt1
+- 0.9.1
+
 * Thu Apr 20 2023 Alexey Kostarev <kaf@altlinux.org> 0.8.1-alt1
 - 0.8.1
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Customizable environment variables:
 # * $U7S_ROOTLESSKIT_FLAGS
 # * $U7S_ROOTLESSKIT_PORTS
@@ -41,6 +41,7 @@ if [[ $_U7S_CHILD == 0 ]]; then
 		--net=slirp4netns --mtu=65520 --disable-host-loopback --slirp4netns-sandbox=true --slirp4netns-seccomp=true \
 		--port-driver=builtin \
 		--copy-up=/etc --copy-up=/etc/sysconfig/ --copy-up=/run --copy-up=/var/lib --copy-up=/opt \
+		--copy-up=/etc/kubernetes --copy-up=/var/lib/crio \
 		--cgroupns \
 		--pidns \
 		--ipcns \
@@ -90,8 +91,8 @@ else
 	# workaround for https://github.com/rootless-containers/rootlesskit/issues/37
 	# child_pid might be created before the child is ready
 	echo $rk_pid >$rk_state_dir/_child_pid.u7s-ready
-	log::info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
-	log::info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
+	log_info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
+	log_info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
 # 	if [[ -n $U7S_ROOTLESSKIT_PORTS ]]; then
 # 		rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
 # 	fi
@@ -101,6 +102,6 @@ else
 	else
 		$@ || rc=$?
 	fi
-	log::info "RootlessKit exiting (status=$rc)"
+	log_info "RootlessKit exiting (status=$rc)"
 	exit $rc
 fi
