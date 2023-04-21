@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes RootlessKit service (crio)
-PartOf=u7s.target
+#PartOf=u7s.target
 
 [Service]
 ExecStart=/var/lib/u7s-admin/usernetes/boot/rootlesskit.sh /var/lib/u7s-admin/usernetes/boot/crio.sh
@@ -9,4 +9,4 @@ WorkingDirectory=/var/lib/u7s-admin/usernetes
   EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
   Restart=on-failure
   LimitNOFILE=65536
-  
+

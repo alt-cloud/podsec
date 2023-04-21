@@ -48,8 +48,11 @@ config_dir=/var/lib/u7s-admin/.config
 mkdir -p $config_dir
 chown u7s-admin:u7s-admin -R ~u7s-admin
 chown u7s-admin:u7s-admin -R ~u7s-admin
+chown u7s-admin:u7s-admin -R /etc/kubernetes/
+
 rm -f /etc/kubernetes/*.conf
-chown -R u7s-admin:u7s-admin /etc/kubernetes /var/lib/etcd/ /run/flannel/
+
+# chown -R u7s-admin:u7s-admin /etc/kubernetes /var/lib/etcd/ /run/flannel/
 
 echo "Введите пароль пользователя u7s-admin:"
 passwd u7s-admin
@@ -69,16 +72,16 @@ adminConf="/etc/kubernetes/admin.conf"
 if [ ! -f $adminConf ]
 then
   echo "Конфигурацонный файл администаратора кластера не сформирован!"
-  patree -pal
+  pstree -pal
   exit 2
 fi
 
 mkdir -p /root/.kube/
 chmod 600 /root/.kube/
-cp -f $adminConf /root/.kube/config
+~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf /root/.kube/config
 
 mkdir -p ~u7s-admin/.kube/
 chmod 700 ~u7s-admin/.kube/
-cp -f $adminConf ~u7s-admin/.kube/config
+~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
 chown u7s-admin:u7s-admin ~u7s-admin/.kube/config

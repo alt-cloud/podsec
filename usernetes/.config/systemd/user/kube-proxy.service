@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes kube-proxy service
-#BindsTo=rootlesskit.service
+BindsTo=rootlesskit.service
 Requires=kubelet.service
 After=kubelet.service
 PartOf=u7s-node.target

@@ -69,7 +69,6 @@ Requires: systemd-container >= 249.16
 This package contains utilities for:
 - cluster node configurations
 
-
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other

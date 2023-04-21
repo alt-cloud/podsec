@@ -8,12 +8,12 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 TMPFILE=$(mktemp "/tmp/etcd.XXXXXX")
 etcd_config="/etc/kubernetes/manifests/etcd.yaml"
 
-etcDataDir="~u7s-admin/usernetes/var/lib/etcd"
+etcDataDir="/var/lib/u7s-admin/usernetes/var/lib/etcd"
 mkdir -p $etcDataDir
-if cat $kubelet_config |
+if cat $etcd_config |
   yq '.spec.containers[0].command|= .+["--enable-v2=true", "--data-dir='$etcDataDir'"]' >$TMPFILE
 then
-  mv $TMPFILE $kubelet_config
+  mv $TMPFILE $etcd_config
 fi
 
 cmd=$(yq '.spec.containers[0].command | join(" ")' $etcd_config)

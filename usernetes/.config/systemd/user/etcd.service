@@ -1,6 +1,6 @@
 [Unit]
 Description=Usernetes etcd service
-#BindsTo=rootlesskit.service
+BindsTo=rootlesskit.service
 PartOf=u7s-etcd.target
 
 [Service]
