@@ -68,20 +68,29 @@ then
   exit 1
 fi
 
+# if [ ! -f $adminConf ]
+# then
+#   echo "Конфигурацонный файл администаратора кластера не сформирован!"
+#   pstree -pal
+#   exit 2
+# fi
+
+
+for conf in admin.conf  controller-manager.conf  kubelet.conf  scheduler.conf
+do
+  echo "Copying $conf"
+  su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f /etc/kubernetes/$conf /tmp" u7s-admin
+  mv /tmp/$conf /etc/kubernetes
+done
+
 adminConf="/etc/kubernetes/admin.conf"
-if [ ! -f $adminConf ]
-then
-  echo "Конфигурацонный файл администаратора кластера не сформирован!"
-  pstree -pal
-  exit 2
-fi
 
 mkdir -p /root/.kube/
 chmod 600 /root/.kube/
-~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf /root/.kube/config
+su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf /root/.kube/config" u7s-admin
 
 mkdir -p ~u7s-admin/.kube/
 chmod 700 ~u7s-admin/.kube/
-~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf ~u7s-admin/.kube/config
+su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf ~u7s-admin/.kube/config" u7s-admin
 chmod 600 ~u7s-admin/.kube/config
 chown u7s-admin:u7s-admin ~u7s-admin/.kube/config

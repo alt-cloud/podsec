@@ -119,6 +119,7 @@ to monitor and identify security threats
 %exclude %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-*
 %exclude %_bindir/podsec-inotify-*
+%exclude %_libexecdir/nagios/plugins/podsec-inotify-*
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-inotify-*
