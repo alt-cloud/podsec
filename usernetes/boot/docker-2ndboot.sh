@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 cd $(realpath $(dirname $0)/..)
 set -eux
 if ! ./install.sh $@; then

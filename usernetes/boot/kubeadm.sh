@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 getExtIP() {
   set -- $(ip r | grep default)

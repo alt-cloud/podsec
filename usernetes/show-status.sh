@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 set -e -o pipefail
 # set -x
 systemctl --user --no-pager status

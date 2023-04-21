@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # needs to be called inside the namespaces
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 source $(realpath $(dirname $0))/smoketest-common.inc.sh
 cd $(realpath $(dirname $0)/..)
 function cleanup() {

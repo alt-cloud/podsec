@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
@@ -8,7 +8,7 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 
 : ${U7S_FLANNEL=}
 if [[ $U7S_FLANNEL != 1 ]]; then
-	log::error "U7S_FLANNEL needs to be 1"
+	log_error "U7S_FLANNEL needs to be 1"
 	exit 1
 fi
 
