@@ -60,6 +60,7 @@ passwd u7s-admin
 cd ~u7s-admin/usernetes/boot
 rm -f /tmp/kubeadm.log;
 
+sed -i -e 's/^PartOf=u7s.target/# PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
 if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh 2>&1 | tee /tmp/kubeadm.log
 then
   echo "Разворачивание кластера закончилось неудачно.
@@ -68,13 +69,7 @@ then
   exit 1
 fi
 
-# if [ ! -f $adminConf ]
-# then
-#   echo "Конфигурацонный файл администаратора кластера не сформирован!"
-#   pstree -pal
-#   exit 2
-# fi
-
+sed -i -e 's/.*PartOf=u7s.target/PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
 
 for conf in admin.conf  controller-manager.conf  kubelet.conf  scheduler.conf
 do
@@ -85,6 +80,16 @@ done
 
 adminConf="/etc/kubernetes/admin.conf"
 
+<<<<<<< HEAD
+=======
+if [ ! -f $adminConf ]
+then
+  echo "Конфигурацонный файл администратора кластера не сформирован!"
+  pstree -pal
+  exit 2
+fi
+
+>>>>>>> 50cbb4f (Запуск сервисоа после установки и перезагрузки)
 mkdir -p /root/.kube/
 chmod 600 /root/.kube/
 su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf /root/.kube/config" u7s-admin
@@ -93,4 +98,9 @@ mkdir -p ~u7s-admin/.kube/
 chmod 700 ~u7s-admin/.kube/
 su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf ~u7s-admin/.kube/config" u7s-admin
 chmod 600 ~u7s-admin/.kube/config
-chown u7s-admin:u7s-admin ~u7s-admin/.kube/config
+chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
+
+machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
+machinectl shell u7s-admin@ /sbin/systemctl --user enable rootlesskit.service
+machinectl shell u7s-admin@ /sbin/systemctl --user start rootlesskit.service
+systemctl enable u7s.service
