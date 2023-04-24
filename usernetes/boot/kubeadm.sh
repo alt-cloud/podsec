@@ -44,8 +44,10 @@ fi
 extIP=$(getExtIP)
 if [ $uid -eq 0 ]
 then
-  $U7S_BASE_DIR/bin/_kubeadm.sh $extIP
+  $U7S_BASE_DIR/bin/_kubeadm.sh \
+    --control-plane-endpoint=$extIP
 else
-  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $extIP
+  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh \
+    --control-plane-endpoint=$extIP
 fi
 

@@ -8,10 +8,10 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 
 extIP=$1
 # Вытаскиваем из .ro каталог containers. Уго почемуто-rootless не хочат автоматически линклвать :-(
-pushd /etc
-ro=$(echo .ro*)
-ln -sf $ro/containers .
-popd
+# pushd /etc
+# ro=$(echo .ro*)
+# ln -sf $ro/containers .
+# popd
 
 # Чистим старые сертифиаты
 rm -rf /var/lib/u7s-admin/.config/usernetes/pki
@@ -35,8 +35,6 @@ socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
   --cri-socket $socket \
   --image-repository=registry.local/k8s-p10 \
   --apiserver-cert-extra-sans=127.0.0.1 \
-  --control-plane-endpoint=$extIP \
-  --apiserver-advertise-address=$extIP \
   --ignore-preflight-errors all \
   $@
 #  --config kubeadm_config.yaml
