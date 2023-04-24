@@ -3,9 +3,13 @@
 . podsec-u7s-functions
 
 chmod 775 /etc/kubernetes
+<<<<<<< HEAD
 chgrp kubernetes /etc/kubernetes
 chmod 775 /etc/kubernetes/manifests/
 chgrp kubernetes /etc/kubernetes/manifests/
+=======
+chown root:kubernetes /etc/kubernetes
+>>>>>>> 4296c47 (Добавление группы kubernetes и правка прав и группы у каталога /etc/kubernetes)
 
 echo -ne    "tun
 tap
