@@ -3,7 +3,9 @@
 . podsec-u7s-functions
 
 chmod 775 /etc/kubernetes
-chown root:kubernetes /etc/kubernetes
+chgrp kubernetes /etc/kubernetes
+chmod 775 /etc/kubernetes/manifests/
+chgrp kubernetes /etc/kubernetes/manifests/
 
 echo -ne    "tun
 tap
