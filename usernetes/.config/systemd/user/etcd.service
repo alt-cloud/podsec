@@ -1,7 +1,7 @@
 [Unit]
 Description=Usernetes etcd service
-BindsTo=rootlesskit.service
-PartOf=u7s-etcd.target
+# BindsTo=rootlesskit.service
+# PartOf=u7s-etcd.target
 
 [Service]
 Type=notify

@@ -1,9 +1,9 @@
 [Unit]
 Description=Usernetes kube-proxy service
-BindsTo=rootlesskit.service
-Requires=kubelet.service
-After=kubelet.service
-PartOf=u7s-node.target
+# BindsTo=rootlesskit.service
+# Requires=kubelet.service
+# After=kubelet.service
+# PartOf=u7s-node.target
 
 [Service]
 ExecStart=/var/lib/u7s-admin/usernetes/boot/kube-proxy.sh
