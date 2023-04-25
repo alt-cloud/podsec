@@ -80,8 +80,10 @@ then
       echo "SYSTEMCTL: START $Target TIME=";date  +%H:%M:%S.%N >&2
       logger "$(echo "SYSTEMCTL: START $Target TIME=";date  +%H:%M:%S.%N)"
 
-      #/sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
-      /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
+      /sbin/systemctl --user -M u7s-admin@ -T $cmd kubelet $@
+      /sbin/systemctl --user -M u7s-admin@ -T $cmd etcd $@
+      /sbin/systemctl --user -M u7s-admin@ -T $cmd flanneld $@
+#       /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
       exit 0
     ;;
   esac
