@@ -115,7 +115,11 @@ to monitor and identify security threats
 
 
 %pre k8s
+<<<<<<< HEAD
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
+=======
+%_sbindir/groupadd -r -f % &>/dev/null
+>>>>>>> 4296c47 (Добавление группы kubernetes и правка прав и группы у каталога /etc/kubernetes)
 %_sbindir/groupadd -r -f %kubernetes_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G %kubernetes_grp,systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
