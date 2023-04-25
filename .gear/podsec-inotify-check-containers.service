@@ -1,0 +1,12 @@
+[Unit]
+Description=Run inotifywatch for podman containers
+
+[Service]
+ExecStart=/usr/bin/podsec-inotify-check-containers
+Restart=always
+RestartSec=1s
+RuntimeMaxSec=100
+SyslogIdentifier=podsec-inotify-check-containers
+
+[Install]
+WantedBy=multi-user.target
