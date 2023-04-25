@@ -86,16 +86,12 @@ done
 
 adminConf="/etc/kubernetes/admin.conf"
 
-<<<<<<< HEAD
-=======
 if [ ! -f $adminConf ]
 then
   echo "Конфигурацонный файл администратора кластера не сформирован!"
-  pstree -pal
   exit 2
 fi
 
->>>>>>> 50cbb4f (Запуск сервисоа после установки и перезагрузки)
 mkdir -p /root/.kube/
 chmod 600 /root/.kube/
 su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf /root/.kube/config" u7s-admin
@@ -108,7 +104,7 @@ chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
 mkdir /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
-machinectl shell u7s-admin@ /bin/ln -sf  /run/${uid}/462/usernetes/crio/crio.sock  /var/run/crio/crio.sock
+machinectl shell u7s-admin@ /bin/ln -sf  /run/user/${uid}/usernetes/crio/crio.sock  /var/run/crio/crio.sock
 
 machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
 machinectl shell u7s-admin@ /sbin/systemctl --user enable rootlesskit.service
