@@ -1,9 +1,10 @@
 %define u7s_admin_usr u7s-admin
 %define u7s_admin_usr_temp u7sadmin
 %define u7s_admin_grp u7s-admin
+%define kubernetes_grp kubernetes
 
 Name: podsec
-Version: 0.9.4
+Version: 0.9.5
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -111,7 +112,8 @@ to monitor and identify security threats
 
 %pre k8s
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
-%_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G systemd-journal,podman,fuse \
+%_sbindir/groupadd -r -f %kubernetes_grp &>/dev/null
+%_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G %kubernetes_grp,systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
 
 %files
@@ -149,6 +151,12 @@ to monitor and identify security threats
 %attr(-,root,root) %_libexecdir/nagios/*
 
 %changelog
+* Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.5-alt1
+- 0.9.5
+
+* Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.6-alt1
+- 0.9.6
+
 * Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.4-alt1
 - 0.9.4
 

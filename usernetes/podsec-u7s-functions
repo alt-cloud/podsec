@@ -5,7 +5,7 @@ export CRI="crio"
 export CNI="flannel"
 export PUBLISH_DEFAULT="0.0.0.0:6443:6443/tcp"
 export PUBLISH=
-export CIDR="10.0.42.0/24"
+export CIDR="10.96.0.0/12"
 export HOMEDIR="/var/lib/${USERNAME}"
 export CONFIG_DIR="$HOMEDIR/.config"
 export WAIT_INIT_CERTS

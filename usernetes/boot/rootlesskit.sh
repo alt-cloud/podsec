@@ -61,7 +61,7 @@ else
 		/run/runc /run/crun \
 		/run/containerd /run/containers /run/crio \
 		/etc/cni \
-		/etc/containerd /etc/containers /etc/crio
+		/etc/containerd /etc/crio
 
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d

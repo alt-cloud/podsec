@@ -6,11 +6,12 @@ set -x
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
 
+extIP=$1
 # Вытаскиваем из .ro каталог containers. Уго почемуто-rootless не хочат автоматически линклвать :-(
-pushd /etc
-ro=$(echo .ro*)
-ln -sf $ro/containers .
-popd
+# pushd /etc
+# ro=$(echo .ro*)
+# ln -sf $ro/containers .
+# popd
 
 # Чистим старые сертифиаты
 rm -rf /var/lib/u7s-admin/.config/usernetes/pki
@@ -29,12 +30,11 @@ socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
 /usr/bin/kubeadm init \
   -v 9 \
   --cert-dir=/var/lib/u7s-admin/.config/usernetes/pki \
-  --pod-network-cidr=10.0.42.0/24 \
+  --pod-network-cidr=10.96.0.0/12 \
   --kubernetes-version=1.26.3 \
   --cri-socket $socket \
   --image-repository=registry.local/k8s-p10 \
   --apiserver-cert-extra-sans=127.0.0.1 \
-  --control-plane-endpoint=192.168.122.83 \
   --ignore-preflight-errors all \
   $@
 #  --config kubeadm_config.yaml
