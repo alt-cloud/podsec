@@ -93,16 +93,19 @@ then
 fi
 
 mkdir -p /root/.kube/
-chmod 600 /root/.kube/
-su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf /root/.kube/config" u7s-admin
+chmod 700 /root/.kube/
+cp -f $adminConf /root/.kube/config
+chmod 600 /root/.kube/config
+# su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf /root/.kube/config" u7s-admin
 
 mkdir -p ~u7s-admin/.kube/
-chmod 700 ~u7s-admin/.kube/
-su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf ~u7s-admin/.kube/config" u7s-admin
+cp -f $adminConf ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
+chmod 700 ~u7s-admin/.kube/
+# su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f $adminConf ~u7s-admin/.kube/config" u7s-admin
 chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
-mkdir /run/crio/
+mkdir -p /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
 machinectl shell u7s-admin@ /bin/ln -sf  /run/user/${uid}/usernetes/crio/crio.sock  /var/run/crio/crio.sock
 
