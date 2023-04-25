@@ -4,11 +4,7 @@
 %define kubernetes_grp kubernetes
 
 Name: podsec
-<<<<<<< HEAD
 Version: 0.9.5
-=======
-Version: 0.9.4
->>>>>>> be9b1e1 (new tag 0.9.4 Первая рабочая версия. kubeadm доходит до конца  поднмает полноценный сервер)
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -115,11 +111,7 @@ to monitor and identify security threats
 
 
 %pre k8s
-<<<<<<< HEAD
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
-=======
-%_sbindir/groupadd -r -f % &>/dev/null
->>>>>>> 4296c47 (Добавление группы kubernetes и правка прав и группы у каталога /etc/kubernetes)
 %_sbindir/groupadd -r -f %kubernetes_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G %kubernetes_grp,systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
@@ -161,6 +153,9 @@ to monitor and identify security threats
 %changelog
 * Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.5-alt1
 - 0.9.5
+
+* Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.6-alt1
+- 0.9.6
 
 * Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.4-alt1
 - 0.9.4
