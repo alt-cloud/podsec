@@ -30,7 +30,7 @@ socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
 /usr/bin/kubeadm init \
   -v 9 \
   --cert-dir=/var/lib/u7s-admin/.config/usernetes/pki \
-  --pod-network-cidr=10.0.42.0/24 \
+  --pod-network-cidr=10.96.0.0/12 \
   --kubernetes-version=1.26.3 \
   --cri-socket $socket \
   --image-repository=registry.local/k8s-p10 \
