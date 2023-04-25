@@ -4,7 +4,11 @@
 %define kubernetes_grp kubernetes
 
 Name: podsec
+<<<<<<< HEAD
 Version: 0.9.5
+=======
+Version: 0.9.4
+>>>>>>> be9b1e1 (new tag 0.9.4 Первая рабочая версия. kubeadm доходит до конца  поднмает полноценный сервер)
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -153,9 +157,6 @@ to monitor and identify security threats
 %changelog
 * Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.5-alt1
 - 0.9.5
-
-* Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.6-alt1
-- 0.9.6
 
 * Fri Apr 21 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.4-alt1
 - 0.9.4
