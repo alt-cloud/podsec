@@ -15,6 +15,7 @@ BuildArch: noarch
 
 Source: %name-%version.tar
 
+BuildRequires(pre): rpm-macros-systemd
 Requires: podman >= 4.4.2
 Requires: shadow-submap >= 4.5
 Requires: nginx >= 1.22.1
@@ -116,6 +117,9 @@ to monitor and identify security threats
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G %kubernetes_grp,systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
 
+%preun
+%preun_systemd podsec-inotify-check-containers.service
+
 %files
 %_bindir/podsec*
 %exclude %_bindir/podsec-u7s-*
@@ -149,6 +153,7 @@ to monitor and identify security threats
 %_mandir/man?/podsec-inotify-*
 %attr(-,root,root) %_libexecdir/nagios/
 %attr(-,root,root) %_libexecdir/nagios/*
+%_unitdir/podsec-inotify-check-containers.service
 
 %changelog
 * Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.5-alt1

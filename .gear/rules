@@ -1,1 +1,2 @@
  tar: .
+ copy: .gear/*.service

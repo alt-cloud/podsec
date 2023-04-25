@@ -78,7 +78,8 @@ PODSEC_INOTIFY = \
 
 PODSEC_INOTIFY_FUNCTIONS = \
 	podsec-inotify-functions \
-	podsec-inotify-create-nagiosuser
+	podsec-inotify-create-nagiosuser \
+	podsec-inotify-check-containers
 
 TMPFILE  := $(shell mktemp)
 
@@ -141,6 +142,8 @@ install: all
 	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY) $(DESTDIR)$(libexecdir)/nagios/plugins/
 	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -p -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
+	$(CP) ./.gear/podsec-inotify-check-containers.service $(DESTDIR)/lib/systemd/system/podsec-inotify-check-containers.service
 
 clean:
 
