@@ -4,12 +4,18 @@
 
 chmod 775 /etc/kubernetes
 <<<<<<< HEAD
+<<<<<<< HEAD
 chgrp kubernetes /etc/kubernetes
 chmod 775 /etc/kubernetes/manifests/
 chgrp kubernetes /etc/kubernetes/manifests/
 =======
 chown root:kubernetes /etc/kubernetes
 >>>>>>> 4296c47 (Добавление группы kubernetes и правка прав и группы у каталога /etc/kubernetes)
+=======
+chgrp kubernetes /etc/kubernetes
+chmod 775 /etc/kubernetes/manifests/
+chgrp kubernetes /etc/kubernetes/manifests/
+>>>>>>> 8d1bef5 (Добавление группы kubernetes и правка прав и группы у каталогов /etc/kubernetes, /etc/kubernetes/manifests/)
 
 echo -ne    "tun
 tap
