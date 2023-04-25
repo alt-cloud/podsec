@@ -35,6 +35,8 @@ socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
   --cri-socket $socket \
   --image-repository=registry.local/k8s-p10 \
   --apiserver-cert-extra-sans=127.0.0.1 \
+  --control-plane-endpoint=$extIP \
+  --apiserver-advertise-address=$extIP \
   --ignore-preflight-errors all \
   $@
 #  --config kubeadm_config.yaml

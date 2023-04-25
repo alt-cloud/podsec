@@ -3,19 +3,9 @@
 . podsec-u7s-functions
 
 chmod 775 /etc/kubernetes
-<<<<<<< HEAD
-<<<<<<< HEAD
 chgrp kubernetes /etc/kubernetes
 chmod 775 /etc/kubernetes/manifests/
 chgrp kubernetes /etc/kubernetes/manifests/
-=======
-chown root:kubernetes /etc/kubernetes
->>>>>>> 4296c47 (Добавление группы kubernetes и правка прав и группы у каталога /etc/kubernetes)
-=======
-chgrp kubernetes /etc/kubernetes
-chmod 775 /etc/kubernetes/manifests/
-chgrp kubernetes /etc/kubernetes/manifests/
->>>>>>> 8d1bef5 (Добавление группы kubernetes и правка прав и группы у каталогов /etc/kubernetes, /etc/kubernetes/manifests/)
 
 echo -ne    "tun
 tap
@@ -114,7 +104,7 @@ chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
 mkdir /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
-machinectl shell u7s-admin@ /bin/ln -sf  /run/${uid}/462/usernetes/crio/crio.sock  /var/run/crio/crio.sock
+machinectl shell u7s-admin@ /bin/ln -sf  /run/user/${uid}/usernetes/crio/crio.sock  /var/run/crio/crio.sock
 
 machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
 machinectl shell u7s-admin@ /sbin/systemctl --user enable rootlesskit.service
