@@ -1,62 +1,57 @@
 kind: InitConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
-kubernetesVersion: 1.26.3
-#bootstrapTokens:
-#- groups:
-  #- system:bootstrappers:kubeadm:default-node-token
-  #token: abcdef.0123456789abcdef
-  #ttl: 24h0m0s
-  #usages:
-  #- signing
-  #- authentication
 localAPIEndpoint:
-  advertiseAddress: 10.96.0.1
-  bindPort: 6443
+  advertiseAddress: 192.168.122.57
 nodeRegistration:
   criSocket: unix:///run/crio/crio.sock
   imagePullPolicy: IfNotPresent
-  #name: node
-  IgnorePreflightErrors:
-    - all
   taints: null
-  kubeletExtraArgs:
-    v: 9
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
-certificatesDir: /var/lib/u7s-admin/.config/usernetes/pki
+kubernetesVersion: 1.26.3
 clusterName: kubernetes
-apiServer:
-  timeoutForControlPlane: 4m0s
-controllerManager: {}
+imageRepository: registry.local/k8s-p10
 dns: {}
 etcd:
   local:
     dataDir: /var/lib/u7s-admin/usernetes/var/lib/etcd
-    serverCertSANs:
-    - 127.0.0.1
     imageRepository: registry.local/k8s-p10
+    serverCertSANs:
+    - 10.96.0.1
+    - 127.0.0.1
+    peerCertSANs:
+    - 10.96.0.1
+    extraArgs:
+      name: host-57
+      initial-cluster: host-57=https://10.96.0.1:2380
+      initial-cluster-state: new
+      listen-client-urls: http://10.96.0.1:2379
+      advertise-client-urls: https://10.96.0.1:2379
+      initial-advertise-peer-urls: https://10.96.0.1:2380
+      listen-peer-urls: https://10.96.0.1:2380
+      enable-v2: "true"
+
+apiServer:
+  certSANs:
+  - "127.0.0.1"
+  timeoutForControlPlane: 4m0s
+controllerManager: {}
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
-controlPlaneEndpoint: "10.96.0.1:6443"
+controlPlaneEndpoint: 10.96.0.1:6443
 scheduler: {}
-
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
-# kubelet specific options here
-
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
-mode: "iptables"
+mode: iptables
 clientConnection:
-  kubeconfig: "/var/lib/kube-proxy/config.conf"
+  kubeconfig: /var/lib/kube-proxy/kubeconfig.conf
 conntrack:
-# Skip setting sysctl value "net.netfilter.nf_conntrack_max"
   maxPerCore: 0
-# Skip setting "net.netfilter.nf_conntrack_tcp_timeout_established"
   tcpEstablishedTimeout: 0s
-# Skip setting "net.netfilter.nf_conntrack_tcp_timeout_close"
   tcpCloseWaitTimeout: 0s

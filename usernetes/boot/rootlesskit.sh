@@ -50,7 +50,6 @@ if [[ $_U7S_CHILD == 0 ]]; then
 		--evacuate-cgroup2="rootlesskit_evac" \
 		$U7S_ROOTLESSKIT_FLAGS \
 		$0 $@
-#	                --copy-up=/etc/kubernetes --copy-up=/var/lib/etcd/ \
 else
 	# save IP address
 	echo $U7S_PARENT_IP >$XDG_RUNTIME_DIR/usernetes/parent_ip
@@ -94,7 +93,7 @@ else
 	log_info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
 	log_info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
 # 	if [[ -n $U7S_ROOTLESSKIT_PORTS ]]; then
-		rootlessctl --socket $rk_state_dir/api.sock add-ports $U7S_ROOTLESSKIT_PORTS
+		rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6443:6443/tcp
 # 	fi
 	rc=0
 	if [[ $# -eq 0 ]]; then

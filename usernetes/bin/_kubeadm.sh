@@ -14,8 +14,10 @@ extIP=$1
 # popd
 
 # Чистим старые сертифиаты
-rm -rf /var/lib/u7s-admin/.config/usernetes/pki
-mkdir /var/lib/u7s-admin/.config/usernetes/pki
+rm -rf /etc/kubernetes/pki/
+mkdir /etc/kubernetes/pki/
+rm -rf /var/lib/u7s-admin/usernetes/var/lib/etcd
+mkdir -p /var/lib/u7s-admin/usernetes/var/lib/etcd
 # rm -rf /var/lib/etcd
 # mkdir /var/lib/etcd
 # rm -f /etc/kubernetes/* /etc/kubernetes/manifests/*
@@ -27,8 +29,13 @@ uid=$(id -u u7s-admin)
 
 configFile="$U7S_BASE_DIR/kubeadm-configs/init.yaml"
 TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
+host=$(hostname)
 
-if cat $configFile | yq -y  '.localAPIEndpoint.advertiseAddress="'$extIP'"' > $TMPFILE
+if cat $configFile |
+  yq -y 'select(.kind == "ClusterConfiguration").etcd.local.extraArgs."initial-cluster" |="'${host}=https://10.96.0.1:2380'"' |
+  yq -y 'select(.kind == "ClusterConfiguration").etcd.local.extraArgs.name |= "'$host'"' \
+  > $TMPFILE
+#   yq -y 'select(.kind == "InitConfiguration").localAPIEndpoint.advertiseAddress |="'$extIP'"' |
 then
   mv $TMPFILE $configFile
 else
@@ -37,9 +44,13 @@ fi
 # socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
 # echo KUBELET_KUBEADM_ARGS="--container-runtime-endpoint=$socket --pod-infra-container-image=registry.local/k8s-p10/pause:3.9" > /var/lib/kubelet/kubeadm-flags.env
 
+mkdir -p /run/crio/
+chown u7s-admin:u7s-admin /run/crio/
+/bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
+
 /usr/bin/kubeadm init \
+   -v 9 \
   --config $configFile
-#   -v 9 \
 #   --cert-dir=/var/lib/u7s-admin/.config/usernetes/pki \
 #   --pod-network-cidr=10.96.0.0/12 \
 #   --kubernetes-version=1.26.3 \

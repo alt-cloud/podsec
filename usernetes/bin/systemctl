@@ -75,7 +75,7 @@ then
         done
       done
       logger "$(ls -l /etc/kubernetes/)"
-      logger "$ls -l  /var/lib/u7s-admin/.config/usernetes/pki)"
+      logger "$ls -l  /etc/kubernetes/pki)"
       echo "START $Target"
       echo "SYSTEMCTL: START $Target TIME=";date  +%H:%M:%S.%N >&2
       logger "$(echo "SYSTEMCTL: START $Target TIME=";date  +%H:%M:%S.%N)"
