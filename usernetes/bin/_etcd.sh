@@ -11,9 +11,12 @@ etcd_config="/etc/kubernetes/manifests/etcd.yaml"
 etcDataDir="/var/lib/u7s-admin/usernetes/var/lib/etcd"
 mkdir -p $etcDataDir
 if cat $etcd_config |
-  yq '.spec.containers[0].command|= .+["--enable-v2=true", "--data-dir='$etcDataDir'"]' >$TMPFILE
+#   yq '.spec.containers[0].command|= .+["--enable-v2=true", "--data-dir='$etcDataDir'"]' >$TMPFILE
+  yq '.spec.containers[0].command|= .+["--enable-v2=true"]' >$TMPFILE
 then
   mv $TMPFILE $etcd_config
+else
+  echo "Не удалось установить datadir в файл конфигурации etcd" >&2
 fi
 
 cmd=$(yq '.spec.containers[0].command | join(" ")' $etcd_config)

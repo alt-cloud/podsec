@@ -53,14 +53,12 @@ PODSEC_K8S_RBAC_FUNCTIONS = \
 	podsec-k8s-rbac-functions
 
 USERNETES_PROGRAMMS = \
-	install.sh \
-	uninstall.sh \
-	rootlessctl.sh \
 	boot/*.sh \
 	services/* \
 	common/ \
 	bin/ \
 	config/* \
+	kubeadm-configs/ \
 	.config
 
 USERNETES_FUNCTIONS = \

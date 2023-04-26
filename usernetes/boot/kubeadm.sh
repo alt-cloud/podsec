@@ -52,13 +52,12 @@ $U7S_BASE_DIR/boot/nsenter.sh /sbin/iptables -A PREROUTING -t nat -p tcp --dport
 
 if [ $uid -eq 0 ]
 then
-  $U7S_BASE_DIR/bin/_kubeadm.sh \
-    --control-plane-endpoint=$extIP \
-    --apiserver-advertise-address=10.96.0.1
+  $U7S_BASE_DIR/bin/_kubeadm.sh  $extIP
+#     --control-plane-endpoint=$extIP \
+#     --apiserver-advertise-address=10.96.0.1
 else
-  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh \
-    --control-plane-endpoint=$extIP \
-    --apiserver-advertise-address=10.96.0.1
-
+  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $extIP
+#     --control-plane-endpoint=$extIP \
+#     --apiserver-advertise-address=10.96.0.1
 fi
 
