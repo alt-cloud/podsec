@@ -4,7 +4,7 @@
 %define kubernetes_grp kubernetes
 
 Name: podsec
-Version: 0.9.5
+Version: 0.9.6
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -151,6 +151,9 @@ to monitor and identify security threats
 %attr(-,root,root) %_libexecdir/nagios/*
 
 %changelog
+* Wed Apr 26 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.6-alt1
+- 0.9.6
+
 * Mon Apr 24 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.5-alt1
 - 0.9.5
 

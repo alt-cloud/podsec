@@ -18,25 +18,31 @@ etcd:
     dataDir: /var/lib/u7s-admin/usernetes/var/lib/etcd
     imageRepository: registry.local/k8s-p10
     serverCertSANs:
-    - 10.96.0.1
-    - 127.0.0.1
+      - 10.96.0.1
+      - 127.0.0.1
     peerCertSANs:
-    - 10.96.0.1
+      - 10.96.0.1
     extraArgs:
-      name: host-57
-      initial-cluster: host-57=https://10.96.0.1:2380
+      name: resign5stern
+      initial-cluster: resign5stern=https://10.96.0.1:2380
       initial-cluster-state: new
-      listen-client-urls: http://10.96.0.1:2379
+      listen-client-urls: https://127.0.0.1:2379,https://10.96.0.1:2379
       advertise-client-urls: https://10.96.0.1:2379
       initial-advertise-peer-urls: https://10.96.0.1:2380
       listen-peer-urls: https://10.96.0.1:2380
-      enable-v2: "true"
-
+      enable-v2: 'true'
 apiServer:
   certSANs:
-  - "127.0.0.1"
+    - 127.0.0.1
+  extraArgs:
+    advertise-address: 10.96.0.1
+    etcd-servers: https://127.0.0.1:2379
   timeoutForControlPlane: 4m0s
-controllerManager: {}
+controllerManager:
+  extraArgs:
+    allocate-node-cidrs: 'true'
+    cluster-cidr: 10.96.0.0/12
+    service-cluster-ip-range: 10.96.0.0/12
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
