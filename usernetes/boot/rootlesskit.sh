@@ -56,8 +56,8 @@ else
 
 	# Remove symlinks so that the child won't be confused by the parent configuration
 	rm -f \
-		/run/xtables.lock /run/flannel/* /run/netns \
-		/run/runc /run/crun \
+		/run/xtables.lock /run/netns \
+		/run/runc /run/crun  /run/flannel \
 		/run/containerd /run/containers /run/crio \
 		/etc/cni \
 		/etc/containerd /etc/crio

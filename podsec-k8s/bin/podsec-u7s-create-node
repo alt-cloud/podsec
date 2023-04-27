@@ -2,10 +2,21 @@
 
 . podsec-u7s-functions
 
+# Данные команды будут удалены после установки соответсвующих прав в пакетах
+## flannel
+# echo "d /run/flannel 0775 root kubernetes -" > /lib/tmpfiles.d/flannel.conf
+# mkdir -p /run/flannel
+# chmod 775 /run/flannel
+# chgrp kubernetes /run/flannel
+
+# kubernetes-common
 chmod 775 /etc/kubernetes
 chgrp kubernetes /etc/kubernetes
+
+# kubernetes-kubelet
 chmod 775 /etc/kubernetes/manifests/
 chgrp kubernetes /etc/kubernetes/manifests/
+###############################
 
 echo -ne    "tun
 tap
