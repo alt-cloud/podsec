@@ -66,13 +66,17 @@ USERNETES_FUNCTIONS = \
 	manifests/kube-flannel.yml \
 	manifests/coredns.yaml
 
-PODSEC_INOTIFY = \
+PODSEC_INOTIFY_PLUGINS = \
 	podsec-inotify-check-audit \
 	podsec-inotify-check-images \
 	podsec-inotify-check-k8s \
 	podsec-inotify-check-policy \
 	podsec-inotify-check-rbac \
 	podsec-inotify-check-registry
+
+PODSEC_INOTIFY_PROGRAMMS = \
+	podsec-inotify-create-nagiosuser \
+	podsec-inotify-check-containers
 
 PODSEC_INOTIFY_FUNCTIONS = \
 	podsec-inotify-functions \
@@ -83,7 +87,7 @@ TMPFILE  := $(shell mktemp)
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
 PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS:=.1)
 PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS:=.1)
-PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY:=.1) podsec-inotify-create-nagiosuser.1
+PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY_PLUGINS:=.1) $(PODSEC_INOTIFY:=.1)
 
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
@@ -113,13 +117,13 @@ install: all
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
 	# PODSEC
 	cd ./podsec/bin;$(CHMOD) 644 $(PODSEC_FUNCTIONS)
-	cd ./podsec/bin;$(CP) $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/;
-	cd ./podsec/bin;$(CP) $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec/man;$(INSTALL) -p -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec/bin;$(INSTALL) -m755 $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/;
+	cd ./podsec/bin;$(INSTALL) -m644 $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec/man;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	# PODSEC-K8S
-	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s/bin;$(CP) $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s/man;$(INSTALL) -p -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-k8s/bin;$(INSTALL) -m755 $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s/bin;$(INSTALL) -m644 $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
 	# PODSEC-K8S USERNETES
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/usernetes
@@ -128,17 +132,19 @@ install: all
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);mv .config $(DESTDIR)/var/lib/u7s-admin/.config
 	rm -f $(TMPFILE)
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
-	$(CP) usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
-	$(CP) usernetes/services/u7s.service $(DESTDIR)/etc/systemd/system/u7s.service
+	$(INSTALL) -m644 usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
+	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/etc/systemd/system/u7s.service
 	# PODSEC-K8S-RBAC
-	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s-rbac/bin;$(CP) $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s-rbac/man;$(INSTALL) -p -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec-k8s-rbac/man;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	# PODSEC-NAGIOS
 	$(MKDIR_P) -m755 $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY) $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-inotify/bin;$(CP) $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-inotify/man;$(INSTALL) -p -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-
+	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(libexecdir)/nagios/plugins/
+	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
+	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
+	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
+	$(INSTALL) -m644 ./.gear/podsec-inotify-check-containers.service $(DESTDIR)/lib/systemd/system/podsec-inotify-check-containers.service
 clean:
 
