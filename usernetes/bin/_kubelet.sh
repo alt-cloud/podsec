@@ -2,9 +2,9 @@
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
-set -x
-logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
-echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n"  >&2
+# set -x
+# logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
+# echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n"  >&2
 
 mkdir -p $XDG_RUNTIME_DIR/usernetes
 TMPFILE=$(mktemp "/tmp/kubeconf.XXXXXX")
@@ -30,7 +30,6 @@ FLANNEL_SUBNET=10.240.0.1/24
 FLANNEL_MTU=1450
 FLANNEL_IPMASQ=true
 EOF
-
 
 uid=$(id -u u7s-admin)
 socket="unix:///run/user/$uid/usernetes/crio/crio.sock"

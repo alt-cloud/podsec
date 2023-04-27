@@ -1,10 +1,9 @@
 #!/bin/sh
-set -x
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
+# set -x
 
 uid=$(id -u)
-echo "$0: uid=$uid"
 
 if [ $uid -eq 0 ]
 then

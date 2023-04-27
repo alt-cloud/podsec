@@ -22,13 +22,11 @@ getExtIP() {
 logger  "=============================================== KUBEADM ====================================="
 
 
-set -x
+# set -x
 
 uid=$(id -u)
 echo "$0: uid=$uid"
 export XDG_RUNTIME_DIR="/run/user/$uid/"
-# mkdir -p $XDG_RUNTIME_DIR
-# chown -R u7s-admin:u7s-admin $XDG_RUNTIME_DIR
 
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
@@ -36,28 +34,19 @@ if ! /sbin/systemctl --no-pager --user status rootlesskit.service >/dev/null 2>&
 then
   /sbin/systemctl --user -T start rootlesskit.service
 fi
-# if /sbin/systemctl --no-pager --user status kubelet-crio.service >/dev/null 2>&1
-# then
-#   /sbin/systemctl --user -T start  kubelet-crio.service
-# fi
 
 extIP=$(getExtIP)
 
 until $U7S_BASE_DIR/boot/nsenter.sh /sbin/ip a add 10.96.0.1/12 dev tap0; do sleep 1; done
 $U7S_BASE_DIR/boot/nsenter.sh /sbin/ip a del 10.96.0.100/12 dev tap0;
-# $U7S_BASE_DIR/boot/nsenter.sh /sbin/ip a
-# $U7S_BASE_DIR/boot/nsenter.sh /sbin/ip r
 
 $U7S_BASE_DIR/boot/nsenter.sh /sbin/iptables -A PREROUTING -t nat -p tcp --dport 443 -j DNAT --to 10.96.0.1:6443
 
 if [ $uid -eq 0 ]
 then
   $U7S_BASE_DIR/bin/_kubeadm.sh  $extIP
-#     --control-plane-endpoint=$extIP \
-#     --apiserver-advertise-address=10.96.0.1
+
 else
   $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $extIP
-#     --control-plane-endpoint=$extIP \
-#     --apiserver-advertise-address=10.96.0.1
 fi
 

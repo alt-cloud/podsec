@@ -7,25 +7,6 @@ export User='u7s-admin'
 
 mkdir -p $XDG_CONFIG_HOME/usernetes/crio $XDG_CONFIG_HOME/usernetes/containers/oci/hooks.d
 
-# # ls -l /etc
-# if [ -d  /etc/containers ]
-# then
-# #   cp -r /etc/containers/ /home/${User}/.config/usernetes/
-#   mkdir -p /home/${User}/.config/usernetes/
-#   mount --bind /etc/containers/ /home/${User}/.config/usernetes/
-#   (
-#   cd /home/${User}/.config/
-#   ln -sf usernetes/containers .
-#   )
-# else
-#   cat >$XDG_CONFIG_HOME/usernetes/containers/policy.json <<EOF
-# {"default": [{"type": "insecureAcceptAnything"}]}
-# EOF
-#   cat >$XDG_CONFIG_HOME/usernetes/containers/registries.conf <<EOF
-# unqualified-search-registries=["docker.io"]
-# EOF
-# fi
-
 cat >$XDG_CONFIG_HOME/usernetes/crio/crio.conf <<EOF
 [crio]
   runroot = "$XDG_RUNTIME_DIR/usernetes/containers/storage"

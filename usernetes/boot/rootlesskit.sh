@@ -3,7 +3,7 @@
 # * $U7S_ROOTLESSKIT_FLAGS
 # * $U7S_ROOTLESSKIT_PORTS
 # * $U7S_FLANNEL
-set -x
+# set -x
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
@@ -65,14 +65,11 @@ else
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d
 	cp -f $U7S_BASE_DIR/config/cni_net.d/* /etc/cni/net.d
-# 	if [[ $U7S_FLANNEL == 1 ]]; then
 	cp -f $U7S_BASE_DIR/config/flannel/cni_net.d/* /etc/cni/net.d
 	mkdir -p /run/flannel
-# 	fi
 	# Bind-mount /opt/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /opt/cni/bin
 	mount --bind /usr/libexec/cni /opt/cni/bin
-# 	mount --bind $U7S_BASE_DIR/bin/cni /opt/cni/bin
 
 	# These bind-mounts are needed at the moment because the paths are hard-coded in Kube and CRI-O.
 	binds=(/var/lib/kubelet /var/lib/cni /var/log /var/lib/containers /var/cache)
@@ -92,9 +89,7 @@ else
 	echo $rk_pid >$rk_state_dir/_child_pid.u7s-ready
 	log_info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
 	log_info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
-# 	if [[ -n $U7S_ROOTLESSKIT_PORTS ]]; then
-		rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6443:6443/tcp
-# 	fi
+	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6443:6443/tcp
 	rc=0
 	if [[ $# -eq 0 ]]; then
 		sleep infinity || rc=$?

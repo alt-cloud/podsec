@@ -1,15 +1,9 @@
 #!/bin/sh
-set -x
-# exec 2>>/tmp/systemctl.log
+# set -x
 
-logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
-echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
+# logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
+# echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
 
-echo "
-
------------------- $(date)
-CMD=$*
-" >&2
 (
 userMode=
 if [ $1 == '--user' ]
@@ -63,7 +57,7 @@ then
             echo "Conffile $confFile is missing or empty!!! Waiting 1 second..."
             sleep 1
             ok=''
-	    let n+=1
+            let n+=1
             if [ $n -gt $retry ]
             then
               exit 1;
@@ -81,9 +75,7 @@ then
       logger "$(echo "SYSTEMCTL: START $Target TIME=";date  +%H:%M:%S.%N)"
 
       /sbin/systemctl --user -M u7s-admin@ -T $cmd kubelet $@
-#       /sbin/systemctl --user -M u7s-admin@ -T $cmd etcd $@
       /sbin/systemctl --user -M u7s-admin@ -T $cmd flanneld $@
-#       /sbin/systemctl --user -M u7s-admin@ -T $cmd $Target
       exit 0
     ;;
   esac
