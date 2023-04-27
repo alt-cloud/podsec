@@ -120,6 +120,7 @@ to monitor and identify security threats
 
 %preun
 %preun_systemd podsec-inotify-check-containers.service
+%preun_systemd u7s.service
 
 %files
 %_bindir/podsec*

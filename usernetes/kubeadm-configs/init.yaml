@@ -24,12 +24,12 @@ etcd:
       - 10.96.0.1
     extraArgs:
       name: resign5stern
-      initial-cluster: resign5stern=https://10.96.0.1:2380
+      initial-cluster: resign5stern=https://0.0.0.0:2380
       initial-cluster-state: new
-      listen-client-urls: https://127.0.0.1:2379,https://10.96.0.1:2379
-      advertise-client-urls: https://10.96.0.1:2379
-      initial-advertise-peer-urls: https://10.96.0.1:2380
-      listen-peer-urls: https://10.96.0.1:2380
+      listen-client-urls: https://0.0.0.0:2379
+      #advertise-client-urls: https://10.96.0.1:2379
+      initial-advertise-peer-urls: https://0.0.0.0:2380
+      listen-peer-urls: https://0.0.0.0:2380
       enable-v2: 'true'
 apiServer:
   certSANs:

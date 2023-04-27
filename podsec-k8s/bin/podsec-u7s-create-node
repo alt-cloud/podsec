@@ -38,17 +38,12 @@ then
   /bin/sed -e 's/u7s_admin_temp/u7s-admin/' -i /etc/subgid
   /usr/sbin/userdel u7s_admin_temp
 fi
-# mkdir -p /run/user/$uid/usernetes/crio/
-# mksock /run/user/$uid/usernetes/crio/crio.sock 2>/dev/null
-# chmod 660 /run/user/$uid/usernetes/crio/crio.sock
-# /bin/chown -R u7s_admin:u7s-admin /run/user/$uid /run/flannel/
 
 mkdir -p /var/lib/crio/
 chown u7s-admin:u7s-admin /var/lib/crio/
 mkdir -p /usr/libexec/kubernetes;
 chown u7s-admin:u7s-admin /usr/libexec/kubernetes
-# mkdir -p /run/containerd
-# ln -sf /run/user/$uid/usernetes/crio/crio.sock /run/containerd/containerd.sock
+
 
 rm -rf /etc/kubernetes/pki/* 2>/dev/null
 mkdir /etc/kubernetes/pki/
@@ -71,9 +66,12 @@ passwd u7s-admin
 cd ~u7s-admin/usernetes/boot
 rm -f /tmp/kubeadm.log;
 
-# mkdir -p /run/crio/
-# chown u7s-admin:u7s-admin /run/crio/
-# machinectl shell u7s-admin@ /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
+mkdir -p /run/crio/
+/bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
+chown u7s-admin:u7s-admin /run/crio/
+
+# mkdir -p /run/flannel
+# chown u7s-admin:u7s-admin /run/flannel
 
 sed -i -e 's/^PartOf=u7s.target/# PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
 if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh 2>&1 | tee /tmp/kubeadm.log
@@ -115,6 +113,5 @@ chmod 700 ~u7s-admin/.kube/
 chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
 machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
-machinectl shell u7s-admin@ /sbin/systemctl --user enable rootlesskit.service
-machinectl shell u7s-admin@ /sbin/systemctl --user start rootlesskit.service
-systemctl enable u7s.service
+machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target
+/sbin/systemctl enable --now u7s.service

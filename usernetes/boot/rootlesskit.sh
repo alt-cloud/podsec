@@ -56,7 +56,7 @@ else
 
 	# Remove symlinks so that the child won't be confused by the parent configuration
 	rm -f \
-		/run/xtables.lock /run/flannel /run/netns \
+		/run/xtables.lock /run/flannel/* /run/netns \
 		/run/runc /run/crun \
 		/run/containerd /run/containers /run/crio \
 		/etc/cni \
@@ -65,10 +65,10 @@ else
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d
 	cp -f $U7S_BASE_DIR/config/cni_net.d/* /etc/cni/net.d
-	if [[ $U7S_FLANNEL == 1 ]]; then
-		cp -f $U7S_BASE_DIR/config/flannel/cni_net.d/* /etc/cni/net.d
-		mkdir -p /run/flannel
-	fi
+# 	if [[ $U7S_FLANNEL == 1 ]]; then
+	cp -f $U7S_BASE_DIR/config/flannel/cni_net.d/* /etc/cni/net.d
+	mkdir -p /run/flannel
+# 	fi
 	# Bind-mount /opt/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /opt/cni/bin
 	mount --bind /usr/libexec/cni /opt/cni/bin

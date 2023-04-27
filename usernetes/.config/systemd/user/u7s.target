@@ -1,7 +1,7 @@
 [Unit]
 Description=Usernetes target (all components in the single node)
-Requires=u7s-master-with-etcd.target u7s-node.target
-After=u7s-master-with-etcd.target u7s-node.target
+Requires=u7s-node.target
+After=u7s-node.target
 
 [Install]
 WantedBy=multi-user.target
