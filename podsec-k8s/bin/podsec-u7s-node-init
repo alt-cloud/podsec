@@ -73,7 +73,7 @@ mkdir -p /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
 
 sed -i -e 's/^PartOf=u7s.target/# PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
-if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh 2>&1 | tee /tmp/kubeadm.log
+if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh 2>&1
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"

@@ -1,9 +1,9 @@
-podsec-k7s-create-node(1) -- инициализация master- или worker-узла в rootless-kubernetes (alt usernetes)
+podsec-u7s-node-join(1) -- инициализация master- или worker-узла в rootless-kubernetes (alt usernetes)
 ================================
 
 ## SYNOPSIS
 
-`podsec-k7s-create-node master|node `
+`podsec-u7s-node-join <ApiServer>:6443 --token ... --discovery-token-ca-cert-hash ...`
 
 ## DESCRIPTION
 
@@ -12,7 +12,7 @@ podsec-k7s-create-node(1) -- инициализация master- или worker-у
 
 ## EXAMPLES
 
-`podsec-k7s-create-node master`
+`podsec-u7s-node-join <ApiServer>:6443 --token ... --discovery-token-ca-cert-hash ...`
 
 ## SECURITY CONSIDERATIONS
 

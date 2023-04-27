@@ -35,7 +35,8 @@ PODSEC_FUNCTIONS = \
 PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
  	podsec-k8s-create-master \
- 	podsec-u7s-create-node
+ 	podsec-u7s-node-init \
+ 	podsec-u7s-node-join
 
 PODSEC_K8S_FUNCTIONS = \
 	podsec-u7s-functions

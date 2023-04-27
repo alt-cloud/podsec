@@ -130,6 +130,7 @@ to monitor and identify security threats
 %exclude %_libexecdir/nagios/plugins/podsec-inotify-*
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
+%exclude %_mandir/man?/podsec-u7s-*
 %exclude %_mandir/man?/podsec-inotify-*
 
 %files k8s
@@ -137,6 +138,7 @@ to monitor and identify security threats
 %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*
 %_mandir/man?/podsec-k8s-*
+%_mandir/man?/podsec-u7s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
