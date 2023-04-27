@@ -14,8 +14,7 @@ extIP=$1
 # popd
 
 # Чистим старые сертифиаты
-rm -rf /etc/kubernetes/pki/
-mkdir /etc/kubernetes/pki/
+
 rm -rf /var/lib/u7s-admin/usernetes/var/lib/etcd
 mkdir -p /var/lib/u7s-admin/usernetes/var/lib/etcd
 # rm -rf /var/lib/etcd

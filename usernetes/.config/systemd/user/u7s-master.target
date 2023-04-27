@@ -1,8 +1,0 @@
-[Unit]
-Description=Usernetes target for Kubernetes master components
-Requires=kube-apiserver.service kube-controller-manager.service kube-scheduler.service
-After=kube-apiserver.service kube-controller-manager.service kube-scheduler.service
-PartOf=u7s-master-with-etcd.target
-
-[Install]
-WantedBy=u7s-master-with-etcd.target
