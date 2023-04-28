@@ -1,6 +1,21 @@
 #!/bin/sh
 
-params=$*
+cmd=$1
+shift
+case $cmd in
+  init)
+    if [ "$#" -gt ]
+    then
+      echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
+    fi
+    ;;
+  join)
+    pars=$*
+  ;;
+  *)
+    echo -ne "Формат вызова: \n$0 init|join <параметры>\n";
+    exit 1;
+esac
 
 . podsec-u7s-functions
 
@@ -8,11 +23,11 @@ params=$*
 
 # kubernetes-common
 chmod 775 /etc/kubernetes
-chgrp kubernetes /etc/kubernetes
+chgrp kube /etc/kubernetes
 
 # kubernetes-kubelet
 chmod 775 /etc/kubernetes/manifests/
-chgrp kubernetes /etc/kubernetes/manifests/
+chgrp kube /etc/kubernetes/manifests/
 ###############################
 
 echo -ne    "tun
@@ -71,7 +86,7 @@ mkdir -p /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
 
 sed -i -e 's/^PartOf=u7s.target/# PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
-if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm_join.sh $params
+if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd $pars
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"
@@ -81,7 +96,7 @@ fi
 
 sed -i -e 's/.*PartOf=u7s.target/PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
 
-for conf in admin.conf kubelet.conf
+for conf in admin.conf  controller-manager.conf  kubelet.conf  scheduler.conf
 do
   echo "Copying $conf"
   su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f /etc/kubernetes/$conf /tmp" u7s-admin

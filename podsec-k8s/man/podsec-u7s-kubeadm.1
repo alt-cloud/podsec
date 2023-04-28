@@ -1,19 +1,19 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-U7S\-NODE\-JOIN" "1" "April 2023" "" ""
+.TH "PODSEC\-U7S\-KUBEADM" "1" "April 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-u7s\-node\-join\fR \- инициализация master\- или worker\-узла в rootless\-kubernetes (alt usernetes)
+\fBpodsec\-u7s\-kubeadm\fR \- инициализация master\- или worker\-узла в rootless\-kubernetes (alt usernetes)
 .
 .SH "SYNOPSIS"
-\fBpodsec\-u7s\-node\-join <ApiServer>:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash \.\.\.\fR
+\fBpodsec\-u7s\-kubeadm init| join <ApiServer>:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash \.\.\.\fR
 .
 .SH "DESCRIPTION"
 Скрипт производит:
 .
 .SH "EXAMPLES"
-\fBpodsec\-u7s\-node\-join <ApiServer>:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash \.\.\.\fR
+\fBpodsec\-u7s\-kubeadm init\fR \fBpodsec\-u7s\-kubeadm join 102\.168\.122\.32:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash \.\.\.\fR
 .
 .SH "SECURITY CONSIDERATIONS"
 .

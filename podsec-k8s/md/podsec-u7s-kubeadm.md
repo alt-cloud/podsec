@@ -1,9 +1,9 @@
-podsec-u7s-node-join(1) -- инициализация master- или worker-узла в rootless-kubernetes (alt usernetes)
+podsec-u7s-kubeadm(1) -- инициализация master- или worker-узла в rootless-kubernetes (alt usernetes)
 ================================
 
 ## SYNOPSIS
 
-`podsec-u7s-node-join <ApiServer>:6443 --token ... --discovery-token-ca-cert-hash ...`
+`podsec-u7s-kubeadm init| join <ApiServer>:6443 --token ... --discovery-token-ca-cert-hash ...`
 
 ## DESCRIPTION
 
@@ -12,7 +12,8 @@ podsec-u7s-node-join(1) -- инициализация master- или worker-уз
 
 ## EXAMPLES
 
-`podsec-u7s-node-join <ApiServer>:6443 --token ... --discovery-token-ca-cert-hash ...`
+`podsec-u7s-kubeadm init`
+`podsec-u7s-kubeadm join 102.168.122.32:6443 --token ... --discovery-token-ca-cert-hash ...`
 
 ## SECURITY CONSIDERATIONS
 

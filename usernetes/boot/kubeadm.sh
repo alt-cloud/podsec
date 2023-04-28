@@ -23,6 +23,24 @@ logger  "=============================================== KUBEADM ===============
 
 
 # set -x
+cmd=$1
+shift
+pars=$*
+
+case $cmd in
+  init)
+    if [ "$#" -gt ]
+    then
+      echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
+    fi
+    ;;
+  join)
+    pars=$*
+  ;;
+  *)
+    echo -ne "Формат вызова: \n$0 init|join <параметры>\n";
+    exit 1;
+esac
 
 uid=$(id -u)
 echo "$0: uid=$uid"
@@ -44,9 +62,9 @@ $U7S_BASE_DIR/boot/nsenter.sh /sbin/iptables -A PREROUTING -t nat -p tcp --dport
 
 if [ $uid -eq 0 ]
 then
-  $U7S_BASE_DIR/bin/_kubeadm.sh  $extIP
+  $U7S_BASE_DIR/bin/_kubeadm.sh $extIP $cmd $pars
 
 else
-  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $extIP
+  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $extIP $cmd $pars
 fi
 
