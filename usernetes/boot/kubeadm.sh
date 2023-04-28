@@ -25,23 +25,29 @@ logger  "=============================================== KUBEADM ===============
 # set -x
 cmd=$1
 shift
-pars=$*
 
 case $cmd in
   init)
-    if [ "$#" -gt ]
+    if [ "$#" -gt 0 ]
     then
       echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
+      exit
     fi
     ;;
   join)
-    pars=$*
+    apiServer=$1
+    if [ $# -eq 0 ]
+    then
+      echo -ne "Отсутствуют параметры\nФормат вызова: \n$0 init|join <параметры>\n";
+      exit 1
+    fi
   ;;
   *)
     echo -ne "Формат вызова: \n$0 init|join <параметры>\n";
     exit 1;
 esac
 
+pars=$*
 uid=$(id -u)
 echo "$0: uid=$uid"
 export XDG_RUNTIME_DIR="/run/user/$uid/"

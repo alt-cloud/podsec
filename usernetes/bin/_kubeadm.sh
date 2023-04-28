@@ -10,16 +10,21 @@ extIP=$1
 cmd=$2
 shift;shift
 pars=$*
-
 case $cmd in
   init)
-    if [ "$#" -gt ]
+    if [ "$#" -gt 0 ]
     then
       echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
+      exit
     fi
     ;;
   join)
-    pars=$*
+    apiServer=$1
+    if [ $# -eq 0 ]
+    then
+      echo -ne "Отсутствуют параметры\nФормат вызова: \n$0 init|join <параметры>\n";
+      exit 1
+    fi
   ;;
   *)
     echo -ne "Формат вызова: \n$0 init|join <параметры>\n";
@@ -40,10 +45,11 @@ chown u7s-admin:u7s-admin /run/crio/
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
 
 configFile="$U7S_BASE_DIR/kubeadm-configs/$cmd.yaml"
+host=$(hostname)
+TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
+
 if [ "$cmd" = 'init' ]
 then
-  TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
-  host=$(hostname)
   if cat $configFile |
     yq -y 'select(.kind == "InitConfiguration").localAPIEndpoint.advertiseAddress |="'$extIP'"' |
     yq -y 'select(.kind == "ClusterConfiguration").controlPlaneEndpoint |="'$extIP'"' |
@@ -55,12 +61,20 @@ then
   else
     echo "Не удалось установить внешний API-адрес $extIP в файл конфигурации kubeadm" >&2
   fi
-  /usr/bin/kubeadm init \
-    -v 9 \
-    --config $configFile
+
 else
-  /usr/bin/kubeadm join \
-    -v 9 \
-    --config $configFile
+  if cat $configFile |
+    yq -y  'select(.kind == "JoinConfiguration").discovery.bootstrapToken.apiServerEndpoint |= "'$apiServer'"' | \
+    yq -y  'select(.kind == "JoinConfiguration").nodeRegistration.name |= "'$host'"'
+      > $TMPFILE
+  then
+    mv $TMPFILE $configFile
+  else
+    echo "Не удалось установить внешний API-адрес $extIP в файл конфигурации kubeadm" >&2
+  fi
 fi
 
+/usr/bin/kubeadm $cmd \
+  -v 9 \
+  $parss \
+  --config $configFile

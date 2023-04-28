@@ -1,6 +1,6 @@
 kind: JoinConfiguration
 apiVersion: kubeadm.k8s.io/v1beta3
-caCertPath: /etc/kubernetes/pki/ca.crt
+#caCertPath: /etc/kubernetes/pki/ca.crt
 discovery:
   bootstrapToken:
     apiServerEndpoint: kube-apiserver:6443
