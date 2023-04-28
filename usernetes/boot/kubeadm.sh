@@ -24,30 +24,11 @@ logger  "=============================================== KUBEADM ===============
 
 # set -x
 cmd=$1
-shift
+apiServer=$2
+token=$3
+caCertHash=$4
+controlPlane=$5
 
-case $cmd in
-  init)
-    if [ "$#" -gt 0 ]
-    then
-      echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
-      exit
-    fi
-    ;;
-  join)
-    apiServer=$1
-    if [ $# -eq 0 ]
-    then
-      echo -ne "Отсутствуют параметры\nФормат вызова: \n$0 init|join <параметры>\n";
-      exit 1
-    fi
-  ;;
-  *)
-    echo -ne "Формат вызова: \n$0 init|join <параметры>\n";
-    exit 1;
-esac
-
-pars=$*
 uid=$(id -u)
 echo "$0: uid=$uid"
 export XDG_RUNTIME_DIR="/run/user/$uid/"
@@ -68,9 +49,8 @@ $U7S_BASE_DIR/boot/nsenter.sh /sbin/iptables -A PREROUTING -t nat -p tcp --dport
 
 if [ $uid -eq 0 ]
 then
-  $U7S_BASE_DIR/bin/_kubeadm.sh $extIP $cmd $pars
-
+  $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" "$apiServer" "$token" "$caCertHash" "$controlPlane"
 else
-  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh $extIP $cmd $pars
+  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" "$apiServer" "$token" "$caCertHash" "$controlPlane"
 fi
 

@@ -2,7 +2,9 @@
 
 cmd=$1
 shift
-pars=$*
+controlPlane=
+token=
+caCertHash=
 case $cmd in
   init)
     if [ "$#" -gt 0 ]
@@ -10,15 +12,55 @@ case $cmd in
       echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
       exit
     fi
+    controlPlane=="initMaster"
     ;;
   join)
-    apiServer=$1
     if [ $# -eq 0 ]
     then
       echo -ne "Отсутствуют параметры\nФормат вызова: \n$0 init|join <параметры>\n";
       exit 1
     fi
-  ;;
+    apiServer=$1
+    shift
+    while [ $# -gt 0 ]
+    do
+      par=$1
+      if [ "${par:0:2}" != '--' ]
+      then
+        echo "Отсутствуют '--' у параметра $par в параметрах $**"
+        exit 1
+      fi
+      par=${par:2}
+      case $par in
+        'control-plane')
+          controlPlane="master"
+          shift
+          ;;
+        'token')
+          token=$2
+          shift;shift
+          ;;
+        'discovery-token-ca-cert-hash')
+          caCertHash=$2
+          shift;shift
+          ;;
+        *)
+          echo "Неизвестный параметр $par";
+          exit 1
+          ;;
+      esac
+    done
+    if [ -z "$token" ]
+    then
+      echo "В операции join отсутствуют флаг token";
+      exit 1
+    fi
+    if [ -z "$caCertHash" ]
+    then
+      echo "В операции join отсутствуют флаг discovery-token-ca-cert-hash";
+      exit 1
+    fi
+    ;;
   *)
     echo -ne "Формат вызова: \n$0 init|join <параметры>\n";
     exit 1;
@@ -92,8 +134,8 @@ mkdir -p /run/crio/
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
 chown u7s-admin:u7s-admin /run/crio/
 
-sed -i -e 's/^PartOf=u7s.target/# PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
-if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd $pars
+# sed -i -e 's/^PartOf=u7s.target/# PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
+if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd $apiServer "$token" "$caCertHash" $controlPlane
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"
@@ -103,12 +145,10 @@ fi
 
 sed -i -e 's/.*PartOf=u7s.target/PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
 
-for conf in admin.conf  controller-manager.conf  kubelet.conf  scheduler.conf
-do
-  echo "Copying $conf"
-  su - -c "export XDG_RUNTIME_DIR=/run/user/$uid;~u7s-admin/usernetes/boot/nsenter.sh cp -f /etc/kubernetes/$conf /tmp" u7s-admin
-  mv /tmp/$conf /etc/kubernetes
-done
+if [ -z "$controlPlane" ] # WORKER node
+then
+  exit 0
+fi
 
 adminConf="/etc/kubernetes/admin.conf"
 

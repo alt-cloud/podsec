@@ -4,8 +4,8 @@ apiVersion: kubeadm.k8s.io/v1beta3
 discovery:
   bootstrapToken:
     apiServerEndpoint: kube-apiserver:6443
-    #token: abcdef.0123456789abcdef
-    #unsafeSkipCAVerification: true
+    token: ${KUBEADM_TOKEN}
+    caCertHashes:
   timeout: 5m0s
   #tlsBootstrapToken: abcdef.0123456789abcdef
 nodeRegistration:
@@ -13,7 +13,6 @@ nodeRegistration:
   imagePullPolicy: IfNotPresent
   name: host-92
   taints: null
-
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
