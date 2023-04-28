@@ -116,8 +116,7 @@ install: all
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
 	# PODSEC
-	cd ./podsec/bin;$(CHMOD) 644 $(PODSEC_FUNCTIONS)
-	cd ./podsec/bin;$(INSTALL) -m755 $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/;
+	cd ./podsec/bin;$(INSTALL) -m755 $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec/bin;$(INSTALL) -m644 $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec/man;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	# PODSEC-K8S
@@ -127,7 +126,6 @@ install: all
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
 	# PODSEC-K8S USERNETES
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/usernetes
-	cd usernetes;$(CHMOD) 644 $(USERNETES_FUNCTIONS);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_FUNCTIONS) ;cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);mv .config $(DESTDIR)/var/lib/u7s-admin/.config
 	rm -f $(TMPFILE)
