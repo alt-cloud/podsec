@@ -1,8 +1,9 @@
 #!/bin/sh
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
-
 set -x
+source ~u7s-admin/.config/usernetes/env
+
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
 
@@ -17,9 +18,12 @@ cmd=$2
 #   controlPlane=$6
 # fi
 
-# Чистим старые сертификаты
-rm -rf /var/lib/u7s-admin/usernetes/var/lib/etcd
-mkdir -p /var/lib/u7s-admin/usernetes/var/lib/etcd
+if [ $U7S_CONTROLPLANE = 'initMaster' ]
+then
+  # Создаем каталог базы etcd
+  rm -rf /var/lib/u7s-admin/usernetes/var/lib/etcd
+  mkdir -p /var/lib/u7s-admin/usernetes/var/lib/etcd
+fi
 
 # Копируем coredns.yaml  kube-flannel.yml
 cp /var/lib/u7s-admin/usernetes/manifests/* /etc/kubernetes/manifests/

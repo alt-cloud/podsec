@@ -21,15 +21,20 @@ fi
 
 cmd=$1
 target=$2
+if [ "$target" != 'kubelet' -o $# -lt 2 ]
+then
+  /sbin/systemctl --user -M u7s-admin@ -T $@
+  exit 0
+fi
+
 shift; shift
 retry=60
-if [ "${target:0:7}" = 'kubelet' ]
-then
-  case $cmd in
-    start | restart )
-      case $U7S_CONTROLPLANE in
-        initMaster)
-          confFiles="
+
+case $cmd in
+  start | restart )
+    case $U7S_CONTROLPLANE in
+      initMaster)
+        confFiles="
 /etc/kubernetes/manifests/etcd.yaml
 /etc/kubernetes/manifests/kube-apiserver.yaml
 /etc/kubernetes/manifests/kube-controller-manager.yaml
@@ -40,9 +45,9 @@ then
 /etc/kubernetes/kubelet.conf
 /etc/kubernetes/scheduler.conf
 "
-          ;;
-        master)
-          confFiles="
+        ;;
+      master)
+        confFiles="
 /etc/kubernetes/manifests/kube-apiserver.yaml
 /etc/kubernetes/manifests/kube-controller-manager.yaml
 /etc/kubernetes/manifests/kube-scheduler.yaml
@@ -52,13 +57,13 @@ then
 /etc/kubernetes/kubelet.conf
 /etc/kubernetes/scheduler.conf
 "
-          ;;
-        *)
-          confFiles="
-/etc/kubernetes/kubelet.conf
-"
-      esac
-      n=0
+        ;;
+      *)
+        confFiles=''
+    esac
+    n=0
+    if [ -n "$confFiles" ]
+    then
       while [ ! -d /etc/kubernetes/manifests/ ];
       do
         echo "Wait /etc/kubernetes/manifests/" >&2
@@ -94,19 +99,20 @@ then
           fi
         done
       done
+    fi
 #       logger "$(ls -l /etc/kubernetes/)"
 #       logger "$ls -l  /etc/kubernetes/pki)"
-      echo "$cmd $target"
-      echo "SYSTEMCTL: $cmd $target TIME=";date  +%H:%M:%S.%N >&2
-      logger "$(echo "SYSTEMCTL: START kubelet & flannel TIME=";date  +%H:%M:%S.%N)"
+    echo "$cmd $target"
+    echo "SYSTEMCTL: $cmd $target TIME=";date  +%H:%M:%S.%N >&2
+    logger "$(echo "SYSTEMCTL: START kubelet TIME=";date  +%H:%M:%S.%N)"
 
-      /sbin/systemctl --user -M u7s-admin@ -T $cmd kubelet $@
-      /sbin/systemctl --user -M u7s-admin@ -T $cmd flanneld $@
-      exit 0
+    /sbin/systemctl --user -M u7s-admin@ -T $cmd kubelet $@
+#     /sbin/systemctl --user -M u7s-admin@ -T $cmd flanneld $@
+    exit 0
+  ;;
+  *)
+    /sbin/systemctl --user -M u7s-admin@ -T $cmd kubelet $@
     ;;
-  esac
-
-fi
-/sbin/systemctl --user -M u7s-admin@ -T $cmd $target $@
+esac
 )&
 
