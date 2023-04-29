@@ -1,7 +1,7 @@
 [Unit]
 Description=Usernetes target for Kubernetes node components (crio)
-Requires=kubelet.service flanneld.service
-After=kubelet.service flanneld.service
+Requires=kubelet.service
+After=kubelet.service
 PartOf=u7s.target
 
 [Install]
