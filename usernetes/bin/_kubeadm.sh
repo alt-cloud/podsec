@@ -8,14 +8,14 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 
 extIP=$1
 cmd=$2
-apiServer=$3
-token=$4
-caCertHash=$5
-controlPlane=''
-if [ $# -gt 5 ]
-then
-  controlPlane=$6
-fi
+# apiServer=$3
+# token=$4
+# caCertHash=$5
+# controlPlane=''
+# if [ $# -gt 5 ]
+# then
+#   controlPlane=$6
+# fi
 
 # Чистим старые сертификаты
 rm -rf /var/lib/u7s-admin/usernetes/var/lib/etcd
@@ -51,9 +51,9 @@ then
 else
   if cat $srcConfigFile |
     yq -y '
-      select(.kind == "JoinConfiguration").discovery.bootstrapToken.token |= "'$token'" |
-      select(.kind == "JoinConfiguration").discovery.bootstrapToken.caCertHashes |= ["'$caCertHash'"]' |
-    yq -y  'select(.kind == "JoinConfiguration").discovery.bootstrapToken.apiServerEndpoint |= "'$apiServer'"' |
+      select(.kind == "JoinConfiguration").discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
+      select(.kind == "JoinConfiguration").discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"]' |
+    yq -y  'select(.kind == "JoinConfiguration").discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'"' |
     yq -y  'select(.kind == "JoinConfiguration").nodeRegistration.name |= "'$host'"' > $configFile
   then
     :;

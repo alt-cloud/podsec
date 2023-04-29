@@ -24,10 +24,10 @@ logger  "=============================================== KUBEADM ===============
 
 # set -x
 cmd=$1
-apiServer=$2
-token=$3
-caCertHash=$4
-controlPlane=$5
+# apiServer=$2
+# token=$3
+# caCertHash=$4
+# controlPlane=$5
 
 uid=$(id -u)
 echo "$0: uid=$uid"
@@ -49,7 +49,7 @@ $U7S_BASE_DIR/boot/nsenter.sh /sbin/iptables -A PREROUTING -t nat -p tcp --dport
 
 if [ $uid -eq 0 ]
 then
-  $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" "$apiServer" "$token" "$caCertHash" "$controlPlane"
+  $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" # "$apiServer" "$token" "$caCertHash" "$controlPlane"
 else
   $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" "$apiServer" "$token" "$caCertHash" "$controlPlane"
 fi
