@@ -106,5 +106,8 @@ data-dir=/var/lib/etcd --initial-advertise-peer-urls=https://10.150.0.161:2380 -
 
 --logtostderr=true --v=0 --master=http://127.0.0.1:8080
 
+### kubelet
 
+--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --pod-manifest-path=/etc/kubernetes/manifests --network-plugin=cni --cni-conf-dir=/etc/cni/net.d --cni-bin-dir=/usr/libexec/cni --cluster-dns=10.96.0.10 --cluster-domain=cluster.local --authorization-mode=Webhook --client-ca-file=/etc/kubernetes/pki/ca.crt --cgroup-driver=systemd --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock
 
+### 
