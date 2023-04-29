@@ -11,7 +11,7 @@
 # * $XDG_CONFIG_HOME: $HOME/.config if not set
 # * $XDG_CACHE_HOME: $HOME/.cache if not set
 
-set -euo pipefail
+set -eo pipefail
 
 # logging utilities
 debug_enabled() {

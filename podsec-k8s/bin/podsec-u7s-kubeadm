@@ -12,7 +12,7 @@ case $cmd in
       echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
       exit
     fi
-    controlPlane=="initMaster"
+    controlPlane="initMaster"
     ;;
   join)
     if [ $# -eq 0 ]
@@ -158,23 +158,30 @@ then
 fi
 
 adminConf="/etc/kubernetes/admin.conf"
+tmpConf="/tmp/admin.conf"
 
-if [ ! -f $adminConf ]
+machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh cp $adminConf $tmpConf
+
+if [ ! -s $tmpConf ]
 then
   echo "Конфигурацонный файл администратора кластера не сформирован!"
   exit 2
 fi
 
+cp $tmpConf $adminConf
+
 mkdir -p /root/.kube/
 chmod 700 /root/.kube/
-cp -f $adminConf /root/.kube/config
+cp -f $tmpConf /root/.kube/config
 chmod 600 /root/.kube/config
 
 mkdir -p ~u7s-admin/.kube/
-cp -f $adminConf ~u7s-admin/.kube/config
+cp -f $tmpConf ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
 chmod 700 ~u7s-admin/.kube/
 chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
+
+rm -f $tmpConf
 
 machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
 machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target

@@ -8,6 +8,10 @@ set -x
  echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
 
 (
+exec 2>>/tmp/systemctl.log
+echo -ne "\n\n___________________________\n"
+set -x
+
 userMode=
 if [ $1 == '--user' ]
 then
