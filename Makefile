@@ -131,7 +131,7 @@ install: all
 	rm -f $(TMPFILE)
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
 	$(INSTALL) -m644 usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
-	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/etc/systemd/system/u7s.service
+# 	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/etc/systemd/system/u7s.service
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/

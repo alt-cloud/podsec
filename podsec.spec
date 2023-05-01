@@ -12,6 +12,8 @@ License: GPLv2+
 Group: Development/Other
 Url: https://github.com/alt-cloud/podsec
 BuildArch: noarch
+Source: %name-%version.tar
+Source1: usernetes/services/u7s.service
 
 Source: %name-%version.tar
 
@@ -105,6 +107,9 @@ to monitor and identify security threats
 
 %install
 %makeinstall_std
+
+%install k8s
+install -D -p -m 644 %SOURCE1 %buildroot%_unitdir/u7s.service
 
 %pre
 %_sbindir/groupadd -r -f podman &>/dev/null
