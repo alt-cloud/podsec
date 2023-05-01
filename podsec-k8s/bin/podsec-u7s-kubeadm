@@ -180,9 +180,9 @@ chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
 # rm -f $tmpConf
 
-machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh kubectl apply -f ~u7s-admin/usernetes/manifests/kube-flannel.yml
+# machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh kubectl apply -f ~u7s-admin/usernetes/manifests/kube-flannel.yml
 
 machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
 machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target
-/sbin/systemctl enable start u7s.service
-/sbin/systemctl enable start u7s.service
+/sbin/systemctl enable  u7s.service
+/sbin/systemctl start u7s.service

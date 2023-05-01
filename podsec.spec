@@ -160,6 +160,9 @@ to monitor and identify security threats
 %_unitdir/podsec-inotify-check-containers.service
 
 %changelog
+* Mon May 01 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.9-alt1
+- 0.9.9
+
 * Fri Apr 28 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.8-alt1
 - 0.9.8
 

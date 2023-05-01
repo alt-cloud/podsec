@@ -41,11 +41,12 @@ apiServer:
 controllerManager:
   extraArgs:
     allocate-node-cidrs: 'true'
-    cluster-cidr: 10.96.0.0/12
+    cluster-cidr: 10.244.0.0/16
     service-cluster-ip-range: 10.96.0.0/12
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
+  podSubnet: "10.244.0.0/16" # --pod-network-cidr
 controlPlaneEndpoint: 10.96.0.1:6443
 scheduler: {}
 ---
