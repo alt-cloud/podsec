@@ -13,21 +13,23 @@ apt-get update
 
 2 Установите podsec-пакеты:
 
-  ```
-  # apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
-  ```
+```
+# apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
+```
 
 3 Запустите команду:
 
-  <pre>
-  # podsec-u7s-kubelet init
-  </pre>
+<pre>
+# podsec-u7s-kubelet init
+</pre>
 
 После:
+
 - генерации сертификатов в каталоге `/etc/kuarnetes/pki`, 
 - загрузки образов, -генерации conf-файлов в каталоге `/etc/kubernetes/manifests/`, `/etc/kubernetes/manifests/etcd/`
-- запуска сервиса `kubelet` и `Pod`'ов системных `kubernetes-образов` 
-инициализируется kubernet-кластер из одного узла.
+- запуска сервиса `kubelet` и `Pod`'ов системных `kubernetes-образов`
+
+инициализируется `kubernet-кластер` из одного узла.
 
 По окончании скрипт выводит строки подключения `master`(`Control Plane`) и `worker-узлов`:
 <pre>
@@ -44,10 +46,6 @@ kubeadm join 192.168.122.212:6443 --token ... \
         --discovery-token-ca-cert-hash sha256:...
 </pre>
 
-
-
-
-
 5 После завершения скрипта проверьте работу `usernetes` (`rootless kuber`)
 
 <pre>
@@ -55,12 +53,6 @@ kubeadm join 192.168.122.212:6443 --token ... \
 NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE           KERNEL-VERSION         CONTAINER-RUNTIME
 &lt;host>     Ready    control-plane   16m   v1.26.3   10.96.0.1     <none>        ALT SP Server 11100-01   5.15.105-un-def-alt1   cri-o://1.26.2
 </pre>
-
-
-</pre>
-# kubectl get all -A
-</pre>
-
 
 Проверьте работу `usernetes` (`rootless kuber`)
 
@@ -89,10 +81,12 @@ NAMESPACE     NAME                                DESIRED   CURRENT   READY   AG
 kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19m
 </pre>
 
-Состояние всх Pod'ов должны быть в `1/1`.
+Состояние всех Pod'ов должны быть в `1/1`.
 
 Проверьте состояние дерева процессов:
 <pre>
+# pstree
+...
 ├─systemd─┬─(sd-pam)
 │         ├─dbus-daemon
 │         ├─nsenter.sh───nsenter───_kubelet.sh───kubelet───11*[{kubelet}]
@@ -106,6 +100,7 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 │                                        │     └─7*[{exe}]
 │                                        ├─slirp4netns
 │                                        └─8*[{rootlesskit}]
+...
 </pre>
 Процесс `kubelet`  запускается как сервис в `user namespace` процесса `rootlesskit`.
 
@@ -114,13 +109,13 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 6. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
 ```
 # kubectl taint nodes &lt;host> node-role.kubernetes.io/control-plane:NoSchedule-
-node/&lt;host> untainted
+node/<host> untainted
 ```
 
 6. Проверьте загрузку deployment nginx:
 
 ```
-kubectl apply -f https://k8s.io/examples/application/deployment.yaml
+# kubectl apply -f https://k8s.io/examples/application/deployment.yaml
 ```
 
 После загрузки образов `nginx` проверьте состояние `deployment` и `Pod`ов:
@@ -167,7 +162,7 @@ $ cd ~/usernetes/boot
 ```
 $ ./nsenter.sh
 [INFO] Entering RootlessKit namespaces: OK
-[root@&kt;host> boot]# 
+[root@<host> boot]# 
 ```
 
 В `user namespace`:
