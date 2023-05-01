@@ -43,11 +43,6 @@ fi
 
 extIP=$(getExtIP)
 
-until $U7S_BASE_DIR/boot/nsenter.sh /sbin/ip a add 10.96.0.1/12 dev tap0; do sleep 1; done
-$U7S_BASE_DIR/boot/nsenter.sh /sbin/ip a del 10.96.0.100/12 dev tap0;
-
-$U7S_BASE_DIR/boot/nsenter.sh /sbin/iptables -A PREROUTING -t nat -p tcp --dport 443 -j DNAT --to 10.96.0.1:6443
-
 if [ $uid -eq 0 ]
 then
   $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" # "$apiServer" "$token" "$caCertHash" "$controlPlane"
