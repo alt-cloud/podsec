@@ -37,6 +37,7 @@ socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
 kubelet \
 	--cert-dir /etc/kubernetes/pki \
 	--root-dir $XDG_DATA_HOME/usernetes/kubelet \
+	--bootstrap-kubeconfig "/etc/kubernetes/bootstrap-kubelet.conf" \
 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
 	--config $kubelet_config \
 	--container-runtime-endpoint=$socket \
