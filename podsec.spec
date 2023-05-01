@@ -4,7 +4,7 @@
 %define kubernetes_grp kube
 
 Name: podsec
-Version: 0.9.8
+Version: 0.9.9
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -12,8 +12,6 @@ License: GPLv2+
 Group: Development/Other
 Url: https://github.com/alt-cloud/podsec
 BuildArch: noarch
-Source: %name-%version.tar
-Source1: usernetes/services/u7s.service
 
 Source: %name-%version.tar
 
@@ -108,9 +106,6 @@ to monitor and identify security threats
 %install
 %makeinstall_std
 
-%install k8s
-install -D -p -m 644 %SOURCE1 %buildroot%_unitdir/u7s.service
-
 %pre
 %_sbindir/groupadd -r -f podman &>/dev/null
 %_sbindir/groupadd -r -f podman_dev &>/dev/null
@@ -141,6 +136,7 @@ install -D -p -m 644 %SOURCE1 %buildroot%_unitdir/u7s.service
 %_bindir/podsec-k8s-*
 %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*
+%_unitdir/u7s.service
 %_mandir/man?/podsec-k8s-*
 %_mandir/man?/podsec-u7s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*

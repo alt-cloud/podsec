@@ -131,7 +131,8 @@ install: all
 	rm -f $(TMPFILE)
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
 	$(INSTALL) -m644 usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
-# 	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/etc/systemd/system/u7s.service
+	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
+	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/lib/systemd/system/u7s.service
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
@@ -142,7 +143,6 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
 	$(INSTALL) -m644 ./.gear/podsec-inotify-check-containers.service $(DESTDIR)/lib/systemd/system/podsec-inotify-check-containers.service
 clean:
 
