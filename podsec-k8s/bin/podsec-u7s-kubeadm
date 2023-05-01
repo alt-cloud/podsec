@@ -1,6 +1,41 @@
 #!/bin/sh
 
+format() {
+  echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<join-параметр> ...]" >&2
+}
+
+debugLevel=0
+if [ ${1} = '-v' ]
+then
+  if [ $# -lt 2 ]
+  then
+    echo "Неверное число параметров"
+    format
+  fi
+  debugLevel=$2
+  if [ $n -ge 0 -a $n -lt 10 ] 2>/dev/null
+  then
+    echo "Неверный уровень отладки"
+    format
+  fi
+  shift;shift
+fi
+
+if [ $# -eq 0 ]
+then
+  echo "Неверное число параметров"
+  format
+fi
+
 cmd=$1
+
+if [ "$cmd" != 'init' -a "$cmd" != 'join' ]
+then
+  echo -ne "Неверная команда $cmd" >&2
+  format
+  exit 1
+fi
+
 shift
 controlPlane=
 token=
@@ -70,6 +105,7 @@ uid=`id -u u7s-admin`
 cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
 echo  "
 export U7S_UID=$uid
+export U7S_DEBUGLEVEL=$debugLevel
 export U7S_CONTROLPLANE=$controlPlane
 export U7S_APISERVER=$apiServer
 export U7S_TOKEN=$token
@@ -120,25 +156,10 @@ then
 fi
 
 mkdir -p /var/lib/crio/
-# chown u7s-admin:u7s-admin /var/lib/crio/
-# mkdir -p /usr/libexec/kubernetes;
-# chown u7s-admin:u7s-admin /usr/libexec/kubernetes
-
-# config_dir=/var/lib/u7s-admin/.config
-# mkdir -p $config_dir
-# chown u7s-admin:u7s-admin -R ~u7s-admin
-# chown u7s-admin:u7s-admin -R ~u7s-admin
 
 # Чистим предыдещий конфиг kuber
 rm -f /etc/kubernetes/*
 
-# cd ~u7s-admin/usernetes/boot
-
-# mkdir -p /run/crio/
-# /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
-# chown u7s-admin:u7s-admin /run/crio/
-
-# sed -i -e 's/^PartOf=u7s.target/# PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
 if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd #$apiServer "$token" "$caCertHash" $controlPlane
 then
   echo "Разворачивание кластера закончилось неудачно.
@@ -147,7 +168,10 @@ then
   exit 1
 fi
 
-# sed -i -e 's/.*PartOf=u7s.target/PartOf=u7s.target/' ~u7s-admin/.config/systemd/user/rootlesskit.service
+machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
+machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target
+/sbin/systemctl enable  u7s.service
+/sbin/systemctl start u7s.service
 
 if [ -z "$controlPlane" ] # WORKER node
 then
@@ -182,7 +206,4 @@ chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
 # machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh kubectl apply -f ~u7s-admin/usernetes/manifests/kube-flannel.yml
 
-machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
-machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target
-/sbin/systemctl enable  u7s.service
-/sbin/systemctl start u7s.service
+

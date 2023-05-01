@@ -78,5 +78,5 @@ fi
 echo "CONFIGFILE="; cat $configFile
 
 /usr/bin/kubeadm $cmd \
-  -v 9 \
+  -v $U7S_DEBUGLEVEL \
   --config $configFile
