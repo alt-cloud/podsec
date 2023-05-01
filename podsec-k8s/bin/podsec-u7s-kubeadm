@@ -155,9 +155,9 @@ then
 fi
 
 adminConf="/etc/kubernetes/admin.conf"
-tmpConf="/tmp/admin.conf"
-
-machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh cp $adminConf $tmpConf
+# tmpConf="/tmp/admin.conf"
+#
+# machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh cp $adminConf $tmpConf
 
 if [ ! -s $tmpConf ]
 then
@@ -165,20 +165,20 @@ then
   exit 2
 fi
 
-cp $tmpConf $adminConf
+# cp $tmpConf $adminConf
 
 mkdir -p /root/.kube/
-chmod 700 /root/.kube/
-cp -f $tmpConf /root/.kube/config
+cp -f $adminConf /root/.kube/config
 chmod 600 /root/.kube/config
+chmod 700 /root/.kube/
 
 mkdir -p ~u7s-admin/.kube/
-cp -f $tmpConf ~u7s-admin/.kube/config
+cp -f $adminConf ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
 chmod 700 ~u7s-admin/.kube/
 chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
-rm -f $tmpConf
+# rm -f $tmpConf
 
 machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
 machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target

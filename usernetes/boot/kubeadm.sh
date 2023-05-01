@@ -22,6 +22,7 @@ getExtIP() {
 logger  "=============================================== KUBEADM ====================================="
 
 
+source ~u7s-admin/.config/usernetes/env
 # set -x
 cmd=$1
 # apiServer=$2

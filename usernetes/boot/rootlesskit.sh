@@ -3,7 +3,7 @@
 # * $U7S_ROOTLESSKIT_FLAGS
 # * $U7S_ROOTLESSKIT_PORTS
 # * $U7S_FLANNEL
-# set -x
+set -x
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
 
@@ -41,7 +41,8 @@ if [[ $_U7S_CHILD == 0 ]]; then
 		--net=slirp4netns --mtu=65520 --disable-host-loopback --slirp4netns-sandbox=true --slirp4netns-seccomp=true \
 		--port-driver=builtin \
 		--copy-up=/etc --copy-up=/etc/sysconfig/ --copy-up=/run --copy-up=/var/lib --copy-up=/opt \
-		--copy-up=/etc/kubernetes --copy-up=/var/lib/crio \
+		--copy-up=/var/lib/crio \
+		-copy-up=/usr/libexec/ \
 		--cgroupns \
 		--pidns \
 		--ipcns \
@@ -60,10 +61,9 @@ else
 		/run/runc /run/crun  /run/flannel \
 		/run/containerd /run/containers /run/crio \
 		/etc/cni \
-		/etc/containerd /etc/crio \
-		/etc/kubernetes/*
+		/etc/containerd /etc/crio
 
-	mkdir -p /etc/kubernetes/manifests /etc/kubernetes/pki
+	mkdir -p /etc/kubernetes/pki
 	mkdir -p /usr/libexec/kubernetes
 
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
