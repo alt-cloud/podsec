@@ -1,7 +1,7 @@
 #!/bin/sh
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
-set -x
+# set -x
 source ~u7s-admin/.config/usernetes/env
 
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
@@ -9,14 +9,6 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 
 extIP=$1
 cmd=$2
-# apiServer=$3
-# token=$4
-# caCertHash=$5
-# controlPlane=''
-# if [ $# -gt 5 ]
-# then
-#   controlPlane=$6
-# fi
 
 if [ $U7S_CONTROLPLANE = 'initMaster' ]
 then
@@ -75,7 +67,7 @@ else
     fi
   fi
 fi
-echo "CONFIGFILE="; cat $configFile
+# echo "CONFIGFILE="; cat $configFile
 
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \

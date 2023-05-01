@@ -25,10 +25,6 @@ logger  "=============================================== KUBEADM ===============
 source ~u7s-admin/.config/usernetes/env
 # set -x
 cmd=$1
-# apiServer=$2
-# token=$3
-# caCertHash=$4
-# controlPlane=$5
 
 uid=$(id -u)
 echo "$0: uid=$uid"
