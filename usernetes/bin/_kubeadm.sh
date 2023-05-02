@@ -56,7 +56,7 @@ else
   else
     echo "Не удалось установить внешний API-адрес $extIP в файл конфигурации kubeadm" >&2
   fi
-  if [ -n "$controlPlane" ]
+  if [ "$U7S_CONTROLPLANE" = "master" ]
   then
     if cat $configFile |
       yq -y 'select(.kind == "JoinConfiguration").controlPlane.localAPIEndpoint.advertiseAddress |= "'$extIP'"' > $TMPFILE

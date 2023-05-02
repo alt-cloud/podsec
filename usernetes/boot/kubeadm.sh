@@ -41,8 +41,8 @@ extIP=$(getExtIP)
 
 if [ $uid -eq 0 ]
 then
-  $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" # "$apiServer" "$token" "$caCertHash" "$controlPlane"
+  $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd"
 else
-  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd" #"$apiServer" "$token" "$caCertHash" "$controlPlane"
+  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd"
 fi
 
