@@ -149,37 +149,37 @@ getStaticClusterIP() {
 	then
 		if [ "$minor" -eq 1 -o "$minor" -eq 2 -o "$minor" -eq 10 ] # service kubernetes, default router for slirp4net, service kubedns,
 		then
-			let minor+=1
+			let minor+=2
 		fi
 	fi
-	echo "10.96.$major.$minir"
+	echo "10.96.$major.$minor"
 }
 
 # entrypoint begins
-if debug_enabled; then
-	log_warning "Running in debug mode (\$U7S_DEBUG)"
-fi
-
-# verify necessary environment variables
-if ! [[ -w $XDG_RUNTIME_DIR ]]; then
-	log_error "XDG_RUNTIME_DIR needs to be set and writable"
-	return 1
-fi
-if ! [[ -w $HOME ]]; then
-	log_error "HOME needs to be set and writable"
-	return 1
-fi
-
-: ${U7S_BASE_DIR=}
-if [[ -z $U7S_BASE_DIR ]]; then
-	log_error "Usernetes base directory (\$U7S_BASE_DIR) not set"
-	return 1
-fi
-log_debug "Usernetes base directory (\$U7S_BASE_DIR) = $U7S_BASE_DIR"
-if ! [[ -d $U7S_BASE_DIR ]]; then
-	log_error "Usernetes base directory ($U7S_BASE_DIR) not found"
-	return 1
-fi
+# if debug_enabled; then
+# 	log_warning "Running in debug mode (\$U7S_DEBUG)"
+# fi
+#
+# # verify necessary environment variables
+# if ! [[ -w $XDG_RUNTIME_DIR ]]; then
+# 	log_error "XDG_RUNTIME_DIR needs to be set and writable"
+# 	return 1
+# fi
+# if ! [[ -w $HOME ]]; then
+# 	log_error "HOME needs to be set and writable"
+# 	return 1
+# fi
+#
+# : ${U7S_BASE_DIR=}
+# if [[ -z $U7S_BASE_DIR ]]; then
+# 	log_error "Usernetes base directory (\$U7S_BASE_DIR) not set"
+# 	return 1
+# fi
+# log_debug "Usernetes base directory (\$U7S_BASE_DIR) = $U7S_BASE_DIR"
+# if ! [[ -d $U7S_BASE_DIR ]]; then
+# 	log_error "Usernetes base directory ($U7S_BASE_DIR) not found"
+# 	return 1
+# fi
 
 # export PATH
 PATH=$U7S_BASE_DIR/bin:/sbin:/usr/sbin:$PATH

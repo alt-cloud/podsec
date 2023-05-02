@@ -98,12 +98,15 @@ else
 	log_info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
 	log_info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6443:6443/tcp
-	until /sbin/ip a add 10.96.0.1/12 dev tap0; do sleep 1; done
-	if [ ]
+
+	# Обеспечить выделение статичесикх IP-адресов для tap0 интерфейсов и роутнг пакетов до них
+	until /sbin/ip a add ${U7S_TAPIP}/12 dev tap0; do sleep 1; done
+	/sbin/ip a del 10.96.0.100/12 dev tap0;
+	if [ -n "$U7S_CONTROLPLANE" ]
 	then
-		/sbin/ip a del 10.96.0.100/12 dev tap0;
-		/sbin/iptables -A PREROUTING -t nat -p tcp --dport 443 -j DNAT --to 10.96.0.1:6443
+		/sbin/iptables -A PREROUTING -t nat -p tcp --dport 443 -j DNAT --to ${U7S_TAPIP}:6443
 	fi
+
 	rc=0
 	if [[ $# -eq 0 ]]; then
 		sleep infinity || rc=$?

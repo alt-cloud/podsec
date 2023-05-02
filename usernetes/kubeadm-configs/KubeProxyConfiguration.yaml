@@ -1,0 +1,9 @@
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: iptables
+clientConnection:
+  kubeconfig: /var/lib/kube-proxy/kubeconfig.conf
+conntrack:
+  maxPerCore: 0
+  tcpEstablishedTimeout: 0s
+  tcpCloseWaitTimeout: 0s

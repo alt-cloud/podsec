@@ -1,4 +1,6 @@
 #!/bin/sh
+U7S_BASE_DIR=~u7s-admin/usernetes
+source $U7S_BASE_DIR/common/common.inc.sh
 
 format() {
   echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<join-параметр> ...]" >&2
@@ -102,9 +104,19 @@ case $cmd in
 esac
 
 uid=`id -u u7s-admin`
+extIP=$(getExtIP)
+if [ "$controlPlane" = 'initMaster' ]
+then
+  tapIP=10.96.0.1
+else
+  tapIP=$(getStaticClusterIP $extIP)
+fi
+
 cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
 echo  "
 export U7S_UID=$uid
+export U7S_EXTIP=$extIP
+export U7S_TAPIP=$tapIP
 export U7S_DEBUGLEVEL=$debugLevel
 export U7S_CONTROLPLANE=$controlPlane
 export U7S_APISERVER=$apiServer
@@ -159,7 +171,10 @@ fi
 mkdir -p /var/lib/crio/
 
 # Чистим предыдещий конфиг kuber
-rm -f /etc/kubernetes/*
+rm -f /etc/kubernetes/*.conf \
+  /etc/kubernetes/manifests/*.yaml \
+  /etc/kubernetes/pki/*.??? \
+  /etc/kubernetes/pki/etcd/*.??? 2>/dev/null
 
 if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd #$apiServer "$token" "$caCertHash" $controlPlane
 then

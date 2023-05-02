@@ -1,24 +1,5 @@
 #!/bin/sh
 
-getExtIP() {
-  set -- $(ip r | grep default)
-  router=$3
-  ifs=$IFS
-  IFS=.
-  set -- $router
-  IFS=$ifs
-  prefixIP=$1
-  shift
-  while [ $# -gt 1 ]; do prefixIP+=".$1"; shift; done
-  set -- $(ip a | grep $prefixIP | grep inet)
-  IFS=/
-  set -- $2
-  IFS=$ifs
-  extIP=$1
-  echo $extIP
-}
-
-
 logger  "=============================================== KUBEADM ====================================="
 
 
@@ -37,12 +18,12 @@ then
   /sbin/systemctl --user -T start rootlesskit.service
 fi
 
-extIP=$(getExtIP)
+# extIP=$(getExtIP)
 
 if [ $uid -eq 0 ]
 then
-  $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd"
+  $U7S_BASE_DIR/bin/_kubeadm.sh "$cmd"
 else
-  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh "$extIP" "$cmd"
+  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh "$cmd"
 fi
 
