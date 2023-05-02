@@ -3,9 +3,10 @@
 # * $U7S_ROOTLESSKIT_FLAGS
 # * $U7S_ROOTLESSKIT_PORTS
 # * $U7S_FLANNEL
-set -x
+# set -x
 export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
 source $U7S_BASE_DIR/common/common.inc.sh
+source ~u7s-admin/.config/usernetes/env
 
 rk_state_dir=$XDG_RUNTIME_DIR/usernetes/rootlesskit
 

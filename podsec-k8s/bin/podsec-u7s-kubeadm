@@ -113,6 +113,7 @@ export U7S_CACERTHASH=$caCertHash" >> ~u7s-admin/.config/usernetes/env
 
 . podsec-u7s-functions
 
+###############################
 # Данные команды будут удалены после установки соответсвующих прав в пакетах
 
 # kubernetes-common
@@ -179,17 +180,12 @@ then
 fi
 
 adminConf="/etc/kubernetes/admin.conf"
-# tmpConf="/tmp/admin.conf"
-#
-# machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh cp $adminConf $tmpConf
 
 if [ ! -s $tmpConf ]
 then
   echo "Конфигурацонный файл администратора кластера не сформирован!"
   exit 2
 fi
-
-# cp $tmpConf $adminConf
 
 mkdir -p /root/.kube/
 cp -f $adminConf /root/.kube/config
@@ -202,8 +198,5 @@ chmod 600 ~u7s-admin/.kube/config
 chmod 700 ~u7s-admin/.kube/
 chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
 
-# rm -f $tmpConf
-
-# machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh kubectl apply -f ~u7s-admin/usernetes/manifests/kube-flannel.yml
 
 
