@@ -118,6 +118,42 @@ setEnvsByYaml() {
 	done
 }
 
+getExtIP() {
+  set -- $(ip r | grep default)
+  router=$3
+  ifs=$IFS
+  IFS=.
+  set -- $router
+  IFS=$ifs
+  prefixIP=$1
+  shift
+  while [ $# -gt 1 ]; do prefixIP+=".$1"; shift; done
+  set -- $(ip a | grep $prefixIP | grep inet)
+  IFS=/
+  set -- $2
+  IFS=$ifs
+  extIP=$1
+  echo $extIP
+}
+
+# Обеспечить выделение статического кластерного адреса из диапазоны 10.96.0.1 - 10.96.255.254
+# См. https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/ для Cidr 10.96.0.0/12
+getStaticClusterIP() {
+	extIP=$1
+	ifs=$IFS
+	IFS=.
+	set -- $extIP
+	IFS=$ifs
+	major=$3 minor=$4
+	if [ "$major" -eq 0 ]
+	then
+		if [ "$minor" -eq 1 -o "$minor" -eq 2 -o "$minor" -eq 10 ] # service kubernetes, default router for slirp4net, service kubedns,
+		then
+			let minor+=1
+		fi
+	fi
+	echo "10.96.$major.$minir"
+}
 
 # entrypoint begins
 if debug_enabled; then
