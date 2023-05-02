@@ -40,7 +40,6 @@ PODSEC_K8S_PROGRAMS= \
 PODSEC_K8S_FUNCTIONS = \
 	podsec-u7s-functions
 
-
 PODSEC_K8S_RBAC_PROGRAMS= \
 	podsec-k8s-rbac-bindrole \
 	podsec-k8s-rbac-create-kubeconfig \
@@ -130,7 +129,7 @@ install: all
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);mv .config $(DESTDIR)/var/lib/u7s-admin/.config
 	rm -f $(TMPFILE)
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
-	$(INSTALL) -m644 usernetes/hack/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
+	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
 	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
 	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/lib/systemd/system/u7s.service
 	# PODSEC-K8S-RBAC
