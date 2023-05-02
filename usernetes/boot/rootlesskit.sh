@@ -76,7 +76,7 @@ else
 	mkdir -p /opt/cni/bin
 	mount --bind /usr/libexec/cni /opt/cni/bin
 
-	mkdir -p /var/run/crio/
+	mkdir -p /run/crio/
 	ln -sf /run/user/$U7S_UID/usernetes/crio/crio.sock /run/crio/crio.sock
 
 	# These bind-mounts are needed at the moment because the paths are hard-coded in Kube and CRI-O.
