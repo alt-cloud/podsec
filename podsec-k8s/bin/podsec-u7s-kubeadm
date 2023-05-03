@@ -126,7 +126,7 @@ export U7S_CACERTHASH=$caCertHash" >> ~u7s-admin/.config/usernetes/env
 . podsec-u7s-functions
 
 ###############################
-# Данные команды будут удалены после установки соответсвующих прав в пакетах
+# Данные команды будут удалены после установки соответсвующих прав в пакетах в пакете kubernetes-common-1.26.3-alt2
 
 # kubernetes-common
 chmod 775 /etc/kubernetes

@@ -21,8 +21,8 @@ fi
 cp /var/lib/u7s-admin/usernetes/manifests/* /etc/kubernetes/manifests/
 
 uid=$(id -u u7s-admin)
-mkdir -p /run/crio/
 
+mkdir -p /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
 

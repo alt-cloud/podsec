@@ -9,4 +9,4 @@ fi
 clusterIP=$1
 mkdir .kube
 scp clusterIP:~/.kube/config ~/.kube
-chmod 700 ~/kube
+chmod 700 ~/.kube
