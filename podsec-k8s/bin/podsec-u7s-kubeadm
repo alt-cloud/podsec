@@ -176,7 +176,7 @@ rm -f /etc/kubernetes/*.conf \
   /etc/kubernetes/pki/*.??? \
   /etc/kubernetes/pki/etcd/*.??? 2>/dev/null
 
-if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd #$apiServer "$token" "$caCertHash" $controlPlane
+if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"

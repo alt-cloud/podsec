@@ -10,7 +10,7 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 # extIP=$1
 cmd=$1
 
-if [ $U7S_CONTROLPLANE = 'initMaster' ]
+if [ "$U7S_CONTROLPLANE" = 'initMaster' ]
 then
   # Создаем каталог базы etcd
   rm -rf /var/lib/u7s-admin/usernetes/var/lib/etcd
@@ -32,6 +32,7 @@ host=$(hostname)
 TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
 
 (
+ALLIFACES="0.0.0.0/0"
 if [ "$cmd" = 'init' ]
 then
   yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' < $U7S_BASE_DIR/kubeadm-configs/InitConfiguration.yaml
@@ -48,57 +49,17 @@ then
   yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
          .etcd.local.extraArgs."initial-cluster" |="'${host}=https://0.0.0.0:2380'" |
          .etcd.local.extraArgs.name |= "'$host'" |
-         .etcd.local.serverCertSANs |= ["'$U7S_TAPIP'", "127.0.0.1"] |
-         .etcd.local.peerCertSANs |= ["'$U7S_TAPIP'"] |
-         .apiServer.extraArgs."advertise-address"="'$U7S_TAPIP'" |
+         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
+         .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
+         .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
          .controlPlaneEndpoint = "'${U7S_EXTIP}':6443"
         ' < $U7S_BASE_DIR/kubeadm-configs/ClusterConfigurationWithEtcd.yaml
   echo "---"
 fi
-cat $U7S_BASE_DIR/kubeadm-configs/KubeletConfiguration.yaml
+yq -y '.address="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeletConfiguration.yaml
 echo "---"
-cat $U7S_BASE_DIR/kubeadm-configs/KubeProxyConfiguration.yaml
+yq -y '.bindAddress="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeProxyConfiguration.yaml
 ) > $configFile
-
-# if [ "$cmd" = 'init' ]
-# then
-#   if cat $U7S_BASE_DIR/kubeadm-configs/init.yaml |
-#     yq -y 'select(.kind == "InitConfiguration").localAPIEndpoint.advertiseAddress |="'$extIP'"' |
-#     yq -y 'select(.kind == "ClusterConfiguration").controlPlaneEndpoint |="'$extIP'"' |
-#     yq -y 'select(.kind == "ClusterConfiguration").etcd.local.extraArgs."initial-cluster" |="'${host}=https://0.0.0.0:2380'"' |
-#     yq -y 'select(.kind == "ClusterConfiguration").etcd.local.extraArgs.name |= "'$host'"' \
-#     > $configFile
-#   then
-#     :;
-#   else
-#     echo "Не удалось установить внешний API-адрес $extIP в файл конфигурации kubeadm" >&2
-#     exit 1
-#   fi
-# else
-#   if [ "$cmd" != 'join' ]
-#   then
-#     echo "Незвестная kubeadm подкоманда $cmd" >&2
-#     exit 1
-#   fi
-#   if [ $U7S_CONTROLPLANE = 'master' ] # JOIN CONTROLPLANE
-#   then
-#     if cat $U7S_BASE_DIR/kubeadm-configs/joinControlPlane.yaml |
-#     yq -y '.' > $configFile
-#   else  # JOIN WORKER
-#     if cat $U7S_BASE_DIR/kubeadm-configs/join.yaml |
-#       yq -y '
-#         select(.kind == "JoinConfiguration").discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
-#         select(.kind == "JoinConfiguration").discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"]' |
-#       yq -y  'select(.kind == "JoinConfiguration").discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'"' |
-#       yq -y  'select(.kind == "JoinConfiguration").nodeRegistration.name |= "'$host'"' > $configFile
-#     then
-#       :;
-#     else
-#       echo "Не удалось установить внешний API-адрес $extIP в файл конфигурации kubeadm" >&2
-#     fi
-#   fi
-# fi
-echo "CONFIGFILE="; cat $configFile
 
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \

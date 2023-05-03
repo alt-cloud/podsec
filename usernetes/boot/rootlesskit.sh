@@ -24,6 +24,9 @@ if [[ $_U7S_CHILD == 0 ]]; then
 	fi
 	export _U7S_CHILD U7S_PARENT_IP
 
+	# To route ping packets - see https://github.com/rootless-containers/usernetes
+	echo "0 2147483647"  > /proc/sys/net/ipv4/ping_group_range
+
 	# Re-exec the script via RootlessKit, so as to create unprivileged {user,mount,network} namespaces.
 	#
 	# --net specifies the network stack. slirp4netns and VPNKit are supported.
@@ -97,7 +100,18 @@ else
 	echo $rk_pid >$rk_state_dir/_child_pid.u7s-ready
 	log_info "RootlessKit ready, PID=${rk_pid}, state directory=$rk_state_dir ."
 	log_info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
-	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6443:6443/tcp
+	if [ -n "$U7S_CONTROLPLANE" ]
+	then
+		ports="2379 2380 6443 10250 10255 10256"
+	else
+		ports="10250 10255 10256"
+	fi
+	for port in $ports
+	do
+		rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/tcp"
+	done
+	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:30080:30080/tcp
+	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:8472:8472/udp
 
 	# Обеспечить выделение статичесикх IP-адресов для tap0 интерфейсов и роутнг пакетов до них
 	until /sbin/ip a add ${U7S_TAPIP}/12 dev tap0; do sleep 1; done
