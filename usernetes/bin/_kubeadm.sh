@@ -56,9 +56,11 @@ then
         ' < $U7S_BASE_DIR/kubeadm-configs/ClusterConfigurationWithEtcd.yaml
   echo "---"
 fi
-yq -y '.address="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeletConfiguration.yaml
+cat $U7S_BASE_DIR/kubeadm-configs/KubeletConfiguration.yaml
+# yq -y '.address="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeletConfiguration.yaml
 echo "---"
-yq -y '.bindAddress="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeProxyConfiguration.yaml
+cat $U7S_BASE_DIR/kubeadm-configs/KubeProxyConfiguration.yaml
+# yq -y '.bindAddress="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeProxyConfiguration.yaml
 ) > $configFile
 
 /usr/bin/kubeadm $cmd \

@@ -105,6 +105,8 @@ esac
 
 uid=`id -u u7s-admin`
 extIP=$(getExtIP)
+extDev=$(getExtDev $extIP)
+
 if [ "$controlPlane" = 'initMaster' ]
 then
   tapIP=10.96.0.1
@@ -112,16 +114,18 @@ else
   tapIP=$(getStaticClusterIP $extIP)
 fi
 
+
 cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
 echo  "
-export U7S_UID=$uid
-export U7S_EXTIP=$extIP
-export U7S_TAPIP=$tapIP
-export U7S_DEBUGLEVEL=$debugLevel
-export U7S_CONTROLPLANE=$controlPlane
-export U7S_APISERVER=$apiServer
-export U7S_TOKEN=$token
-export U7S_CACERTHASH=$caCertHash" >> ~u7s-admin/.config/usernetes/env
+U7S_UID=$uid
+U7S_EXTIP=$extIP
+U7S_EXTDEV=$extDev
+U7S_TAPIP=$tapIP
+U7S_DEBUGLEVEL=$debugLevel
+U7S_CONTROLPLANE=$controlPlane
+U7S_APISERVER=$apiServer
+U7S_TOKEN=$token
+U7S_CACERTHASH=$caCertHash" >> ~u7s-admin/.config/usernetes/env
 
 . podsec-u7s-functions
 

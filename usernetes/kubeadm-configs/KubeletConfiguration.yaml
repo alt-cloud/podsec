@@ -1,7 +1,7 @@
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
-address: "192.168.0.8"
-port: 10150
+#address: "192.168.0.8"
+#port: 10150
 #serializeImagePulls: false
 #evictionHard:
     #memory.available:  "200Mi"

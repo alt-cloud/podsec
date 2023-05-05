@@ -118,6 +118,7 @@ setEnvsByYaml() {
 	done
 }
 
+# Получение внешнего IP (пока для маски сети /24)
 getExtIP() {
   set -- $(ip r | grep default)
   router=$3
@@ -134,6 +135,14 @@ getExtIP() {
   IFS=$ifs
   extIP=$1
   echo $extIP
+}
+
+# Получение имени внешнего устройства
+getExtDev() {
+	extIP=$1
+	set -- $(ip a | grep $extIP)
+	while [ $# -gt 1 ]; do shift; done
+	echo $1
 }
 
 # Обеспечить выделение статического кластерного адреса из диапазоны 10.96.0.1 - 10.96.255.254

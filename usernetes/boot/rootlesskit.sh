@@ -25,7 +25,7 @@ if [[ $_U7S_CHILD == 0 ]]; then
 	export _U7S_CHILD U7S_PARENT_IP
 
 	# To route ping packets - see https://github.com/rootless-containers/usernetes
-	echo "0 2147483647"  > /proc/sys/net/ipv4/ping_group_range
+# 	echo "0 2147483647"  > /proc/sys/net/ipv4/ping_group_range
 
 	# Re-exec the script via RootlessKit, so as to create unprivileged {user,mount,network} namespaces.
 	#
