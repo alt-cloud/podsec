@@ -114,7 +114,7 @@ else
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:8472:8472/udp
 
 	# Обеспечить выделение статичесикх IP-адресов для tap0 интерфейсов и роутнг пакетов до них
-	until /sbin/ip a add ${U7S_TAPIP}/12 dev tap0; do sleep 1; done
+	until /sbin/ip a add ${U7S_TAPIP}/32 dev tap0; do sleep 1; done
 	/sbin/ip a del 10.96.0.100/12 dev tap0;
 	if [ -n "$U7S_CONTROLPLANE" ]
 	then
