@@ -102,7 +102,7 @@ else
 	log_info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
 	if [ -n "$U7S_CONTROLPLANE" ]
 	then
-		ports="2379 2380 6443 10250 10255 10256"
+		ports="2379 2380 6443 10250 10255 10256 53"
 	else
 		ports="10250 10255 10256"
 	fi
@@ -112,6 +112,7 @@ else
 	done
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:30080:30080/tcp
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:8472:8472/udp
+	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6053:53/udp
 
 	# Обеспечить выделение статичесикх IP-адресов для tap0 интерфейсов и роутнг пакетов до них
 	until /sbin/ip a add ${U7S_TAPIP}/32 dev tap0; do sleep 1; done
