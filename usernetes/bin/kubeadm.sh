@@ -3,7 +3,7 @@
 logger  "=============================================== KUBEADM ====================================="
 
 
-source /etc/podsec/u7s/env
+source ~u7s-admin/.config/usernetes/env
 # set -x
 cmd=$1
 
@@ -18,12 +18,7 @@ then
   /sbin/systemctl --user -T start rootlesskit.service
 fi
 
-# extIP=$(getExtIP)
 
-if [ $uid -eq 0 ]
-then
-  $U7S_BASE_DIR/bin/_kubeadm.sh "$cmd"
-else
-  $(dirname $0)/nsenter.sh $U7S_BASE_DIR/bin/_kubeadm.sh "$cmd"
-fi
+/usr/libexec/podsec/u7s/bin/_kubeadm.sh "$cmd"
+
 

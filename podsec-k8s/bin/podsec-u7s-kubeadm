@@ -1,6 +1,5 @@
 #!/bin/sh
-U7S_BASE_DIR=~u7s-admin/usernetes
-source $U7S_BASE_DIR/common/common.inc.sh
+source u7s_finctions
 
 format() {
   echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<join-параметр> ...]" >&2
@@ -182,7 +181,7 @@ rm -f /etc/kubernetes/*.conf \
   /etc/kubernetes/pki/*.??? \
   /etc/kubernetes/pki/etcd/*.??? 2>/dev/null
 
-if ! machinectl shell u7s-admin@ /bin/sh -x ~u7s-admin/usernetes/boot/kubeadm.sh $cmd
+if ! machinectl shell u7s-admin@ /bin/sh -x /usr/libexec/podsec/u7s/bin/kubeadm.sh $cmd
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"

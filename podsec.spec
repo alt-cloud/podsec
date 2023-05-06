@@ -1,5 +1,4 @@
 %define u7s_admin_usr u7s-admin
-%define u7s_admin_usr_temp u7sadmin
 %define u7s_admin_grp u7s-admin
 %define kubernetes_grp kube
 
@@ -142,12 +141,8 @@ to monitor and identify security threats
 %_mandir/man?/podsec-u7s-*
 %_userunitdir/*
 %_sysconfdir/podsec/u7s/*
+/usr/libexec/podsec/u7s/*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
-%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
-# %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
-%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes
-%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/usernetes/*
 %_sysconfdir/systemd/system/*
 %_unitdir/*
 

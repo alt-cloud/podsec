@@ -1,7 +1,6 @@
 #!/bin/sh
 
-export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
-source $U7S_BASE_DIR/common/common.inc.sh
+source u7s_finctions
 set -x
 
  logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
@@ -32,77 +31,6 @@ retry=60
 
 case $cmd in
   start | restart )
-    confFiles=''
-#     case $U7S_CONTROLPLANE in
-#       initMaster)
-#         confFiles="
-# /etc/kubernetes/manifests/etcd.yaml
-# /etc/kubernetes/manifests/kube-apiserver.yaml
-# /etc/kubernetes/manifests/kube-controller-manager.yaml
-# /etc/kubernetes/manifests/kube-scheduler.yaml
-# /var/lib/kubelet/config.yaml
-# /etc/kubernetes/admin.conf
-# /etc/kubernetes/controller-manager.conf
-# /etc/kubernetes/kubelet.conf
-# /etc/kubernetes/scheduler.conf
-# "
-#         ;;
-#       master)
-#         confFiles="
-# /etc/kubernetes/manifests/kube-apiserver.yaml
-# /etc/kubernetes/manifests/kube-controller-manager.yaml
-# /etc/kubernetes/manifests/kube-scheduler.yaml
-# /var/lib/kubelet/config.yaml
-# /etc/kubernetes/admin.conf
-# /etc/kubernetes/controller-manager.conf
-# /etc/kubernetes/kubelet.conf
-# /etc/kubernetes/scheduler.conf
-# "
-#         ;;
-#       *)
-#         confFiles=''
-#     esac
-#     n=0
-#     if [ -n "$confFiles" ]
-#     then
-#       while [ ! -d /etc/kubernetes/manifests/ ];
-#       do
-#         echo "Wait /etc/kubernetes/manifests/" >&2
-#         ls -l /etc/kubernetes/ >&2
-#         sleep 1
-#         let n+=1
-#         if [ $n -gt $retry ]
-#         then
-#           exit 1;
-#         fi
-#       done
-#       ok=
-#       n=0
-#       while [ -z "$ok" ]
-#       do
-#         echo "Content of /etc/kubernetes/manifests/:" >&2
-#         ls -l /etc/kubernetes/manifests/ >&2
-#         for confFile in $confFiles
-#         do
-#           if [ ! -s $confFile ]
-#           then
-#             echo "Conffile $confFile is missing or empty!!! Waiting 1 second..."
-#             sleep 1
-#             ok=''
-#             let n+=1
-#             if [ $n -gt $retry ]
-#             then
-#               exit 1;
-#             fi
-#             break
-#           else
-#             ok='yes'
-#           fi
-#         done
-#       done
-#     fi
-#       logger "$(ls -l /etc/kubernetes/)"
-#       logger "$ls -l  /etc/kubernetes/pki)"
     echo "$cmd $target"
     echo "SYSTEMCTL: $cmd $target TIME=";date  +%H:%M:%S.%N >&2
     logger "$(echo "SYSTEMCTL: START kubelet TIME=";date  +%H:%M:%S.%N)"

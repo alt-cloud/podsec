@@ -1,6 +1,5 @@
 #!/bin/sh
-export U7S_BASE_DIR=$(realpath $(dirname $0)/..)
-source $U7S_BASE_DIR/common/common.inc.sh
+source u7s_finctions
 
 set -x
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"

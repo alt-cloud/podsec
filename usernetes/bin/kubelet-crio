@@ -1,0 +1,4 @@
+#!/bin/sh
+source u7s_finctions
+
+exec kubelet --container-runtime remote --container-runtime-endpoint unix://$XDG_RUNTIME_DIR/usernetes/crio/crio.sock $@
