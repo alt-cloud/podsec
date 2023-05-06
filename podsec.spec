@@ -145,6 +145,7 @@ to monitor and identify security threats
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/systemd/system/*
 %_unitdir/*
+/usr/lib/systemd/user/*
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
