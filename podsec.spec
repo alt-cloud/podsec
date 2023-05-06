@@ -140,13 +140,15 @@ to monitor and identify security threats
 %_mandir/man?/podsec-k8s-*
 %_mandir/man?/podsec-u7s-*
 %_userunitdir/*
+%_sysconfdir/podsec/u7s/*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
 %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes
 %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/usernetes/*
-/etc/systemd/system/*
+%_sysconfdir/systemd/system/*
+%_unitdir/*
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*

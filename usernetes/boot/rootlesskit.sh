@@ -72,8 +72,8 @@ else
 
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d
-	cp -f $U7S_BASE_DIR/config/cni_net.d/* /etc/cni/net.d
-	cp -f $U7S_BASE_DIR/config/flannel/cni_net.d/* /etc/cni/net.d
+	cp -f /etc/podsec/u7s/config/cni_net.d/* /etc/cni/net.d
+	cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
 	mkdir -p /run/flannel
 	# Bind-mount /opt/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /opt/cni/bin

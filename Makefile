@@ -53,11 +53,8 @@ PODSEC_K8S_RBAC_FUNCTIONS = \
 
 USERNETES_PROGRAMMS = \
 	boot/*.sh \
-	services/* \
 	common/ \
 	bin/ \
-	config/* \
-	kubeadm-configs/ \
 	.config
 
 USERNETES_UNITS= \
@@ -65,11 +62,25 @@ USERNETES_UNITS= \
 	kubelet.service \
 	u7s.target
 
+USERNETES_CONFIGS= \
+	cni_net.d\
+	flannel  \
+	modules-load.d
+
 
 USERNETES_FUNCTIONS = \
-	common/common.inc.sh \
-	manifests/kube-flannel.yml \
-	manifests/coredns.yaml
+	common/common.inc.sh
+
+USERNETES_MANIFESTS = \
+	kube-flannel.yml \
+	coredns.yaml
+
+USERNETES_KUBEADM_CONFIGS= \
+	ClusterConfigurationWithEtcd.yaml \
+	InitConfiguration.yaml \
+	JoinConfiguration.yaml \
+	KubeletConfiguration.yaml \
+	KubeProxyConfiguration.yaml
 
 PODSEC_INOTIFY_PLUGINS = \
 	podsec-inotify-check-audit \
@@ -133,8 +144,17 @@ install: all
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/usernetes
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_FUNCTIONS) ;cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);mv .config $(DESTDIR)/var/lib/u7s-admin/.config
-	# USER SYSTEMD
 	rm -f $(TMPFILE)
+	# /etc/podsec/u7s
+	mkdir -p $(DESTDIR)/etc/podsec/u7s/config;
+	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)/etc/podsec/u7s/config;tar xvzf $(TMPFILE);
+	# USERNETES_MANIFESTS
+	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/manifests
+	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)/etc/podsec/u7s/config/manifests
+	# USERNETES_KUBEADM_CONFIGS
+	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
+	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
+	# USER SYSTEMD
 	mkdir -p $(DESTDIR)/usr/lib/systemd/user
 	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)/usr/lib/systemd/user
 	# SYSTEMD

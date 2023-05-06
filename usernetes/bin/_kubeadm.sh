@@ -18,7 +18,7 @@ then
 fi
 
 # Копируем coredns.yaml  kube-flannel.yml
-cp /var/lib/u7s-admin/usernetes/manifests/* /etc/kubernetes/manifests/
+cp /etc/podsec/u7s/config/manifests/* /etc/kubernetes/manifests/
 
 uid=$(id -u u7s-admin)
 
@@ -26,8 +26,9 @@ mkdir -p /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
 
-# srcConfigFile="$U7S_BASE_DIR/kubeadm-configs/$cmd.yaml"
-configFile="$U7S_BASE_DIR/kubeadm-configs/$cmd.yaml"
+KUBEADM_CONFIGS_DKUBEADM_CONFIGS_DIRIR=/etc/podsec/u7s/config/kubeadm-configs
+# srcConfigFile="$KUBEADM_CONFIGS_DIR/$cmd.yaml"
+configFile="$KUBEADM_CONFIGS_DIR/$cmd.yaml"
 host=$(hostname)
 TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
 
@@ -35,13 +36,13 @@ TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
 ALLIFACES="0.0.0.0/0"
 if [ "$cmd" = 'init' ]
 then
-  yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' < $U7S_BASE_DIR/kubeadm-configs/InitConfiguration.yaml
+  yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' < $KUBEADM_CONFIGS_DIR/InitConfiguration.yaml
 else
    yq -y '.discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
           .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |
           .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'" |
           .nodeRegistration.name |= "'$host'"
-         '  < $U7S_BASE_DIR/kubeadm-configs/JoinConfiguration.yaml
+         '  < $KUBEADM_CONFIGS_DIR/JoinConfiguration.yaml
 fi
 echo "---"
 if [ -n "$U7S_CONTROLPLANE" ]
@@ -53,14 +54,14 @@ then
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
          .controlPlaneEndpoint = "'${U7S_EXTIP}':6443"
-        ' < $U7S_BASE_DIR/kubeadm-configs/ClusterConfigurationWithEtcd.yaml
+        ' < $KUBEADM_CONFIGS_DIR/ClusterConfigurationWithEtcd.yaml
   echo "---"
 fi
-cat $U7S_BASE_DIR/kubeadm-configs/KubeletConfiguration.yaml
-# yq -y '.address="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeletConfiguration.yaml
+cat $KUBEADM_CONFIGS_DIR/KubeletConfiguration.yaml
+# yq -y '.address="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeletConfiguration.yaml
 echo "---"
-cat $U7S_BASE_DIR/kubeadm-configs/KubeProxyConfiguration.yaml
-# yq -y '.bindAddress="'$U7S_TAPIP'"' < $U7S_BASE_DIR/kubeadm-configs/KubeProxyConfiguration.yaml
+cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
+# yq -y '.bindAddress="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 ) > $configFile
 
 /usr/bin/kubeadm $cmd \
