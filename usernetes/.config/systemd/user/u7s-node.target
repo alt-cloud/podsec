@@ -1,8 +1,0 @@
-[Unit]
-Description=Usernetes target for Kubernetes node components (crio)
-Requires=kubelet.service
-After=kubelet.service
-PartOf=u7s.target
-
-[Install]
-WantedBy=u7s.target

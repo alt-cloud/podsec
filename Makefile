@@ -60,6 +60,12 @@ USERNETES_PROGRAMMS = \
 	kubeadm-configs/ \
 	.config
 
+USERNETES_UNITS= \
+	rootlesskit.service \
+	kubelet.service \
+	u7s.target
+
+
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh \
 	manifests/kube-flannel.yml \
@@ -127,7 +133,11 @@ install: all
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/usernetes
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_FUNCTIONS) ;cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);mv .config $(DESTDIR)/var/lib/u7s-admin/.config
+	# USER SYSTEMD
 	rm -f $(TMPFILE)
+	mkdir -p $(DESTDIR)/usr/lib/systemd/user
+	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)/usr/lib/systemd/user
+	# SYSTEMD
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
 	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
 	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
