@@ -51,11 +51,6 @@ PODSEC_K8S_RBAC_PROGRAMS= \
 PODSEC_K8S_RBAC_FUNCTIONS = \
 	podsec-k8s-rbac-functions
 
-USERNETES_PROGRAMMS = \
-	boot/*.sh \
-	common/ \
-	bin/ \
-	.config
 
 USERNETES_UNITS= \
 	rootlesskit.service \
@@ -66,7 +61,6 @@ USERNETES_CONFIGS= \
 	cni_net.d\
 	flannel  \
 	modules-load.d
-
 
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh
@@ -141,12 +135,21 @@ install: all
 	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
 	# PODSEC-K8S USERNETES
+<<<<<<< HEAD
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/.local $(DESTDIR)/var/lib/u7s-admin/usernetes
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_FUNCTIONS) ;cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);
 	cd usernetes;tar cvzf $(TMPFILE) $(USERNETES_PROGRAMMS);cd $(DESTDIR)/var/lib/u7s-admin/usernetes; tar xvzf $(TMPFILE);mv .config $(DESTDIR)/var/lib/u7s-admin/.config
 	rm -f $(TMPFILE)
 	# /etc/podsec/u7s
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config;
+=======
+	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin/
+	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)/usr/libexec/podsec/u7s/bin/; tar xvzf $(TMPFILE);
+	rm -f $(TMPFILE)
+	# /etc/podsec/u7s
+	mkdir -p $(DESTDIR)/etc/podsec/u7s/config;
+	cd ./usernetes/.config/usernetes/; $(INSTALL) -m644 ENV $(DESTDIR)/etc/podsec/u7s/ENV
+>>>>>>> da13c75 (Перенесение config-файлов в  /etc/podsec/u7s)
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)/etc/podsec/u7s/config;tar xvzf $(TMPFILE);
 	# USERNETES_MANIFESTS
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/manifests

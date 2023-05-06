@@ -9,7 +9,7 @@ NotifyAccess=all
 ExecStartPre=/var/lib/u7s-admin/usernetes/boot/nsenter.sh /var/lib/u7s-admin/usernetes/bin/init-crio.sh
 ExecStart=/var/lib/u7s-admin/usernetes/boot/kubelet.sh
 WorkingDirectory=/var/lib/u7s-admin/usernetes
-  EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
+  EnvironmentFile=/etc/podsec/u7s/env
   Restart=on-failure
   LimitNOFILE=65536
 

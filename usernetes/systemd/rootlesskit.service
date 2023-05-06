@@ -6,7 +6,7 @@ PartOf=u7s.target
 ExecStart=/var/lib/u7s-admin/usernetes/boot/rootlesskit.sh /var/lib/u7s-admin/usernetes/boot/crio.sh
 Delegate=yes
 WorkingDirectory=/var/lib/u7s-admin/usernetes
-  EnvironmentFile=/var/lib/u7s-admin/.config/usernetes/env
+  EnvironmentFile=/etc/podsec/u7s/env
   Restart=on-failure
   LimitNOFILE=65536
 

@@ -133,6 +133,7 @@ to monitor and identify security threats
 %exclude %_mandir/man?/podsec-inotify-*
 
 %files k8s
+/usr/libexec/podsec/u7s/*
 %_bindir/podsec-k8s-*
 %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*
@@ -143,8 +144,8 @@ to monitor and identify security threats
 %_sysconfdir/podsec/u7s/*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr
-%attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
-%attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/.config
+# %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/.config/*
 %attr(-,%u7s_admin_usr,%u7s_admin_grp) %dir %_localstatedir/%u7s_admin_usr/usernetes
 %attr(-,%u7s_admin_usr,%u7s_admin_grp)      %_localstatedir/%u7s_admin_usr/usernetes/*
 %_sysconfdir/systemd/system/*

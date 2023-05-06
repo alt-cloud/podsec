@@ -3,7 +3,7 @@
 logger  "=============================================== KUBEADM ====================================="
 
 
-source ~u7s-admin/.config/usernetes/env
+source /etc/podsec/u7s/env
 # set -x
 cmd=$1
 

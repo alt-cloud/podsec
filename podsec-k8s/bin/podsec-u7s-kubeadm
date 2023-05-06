@@ -115,7 +115,8 @@ else
 fi
 
 
-cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
+# cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
+cp /etc/podsec/u7s/ENV /etc/podsec/u7s/env
 echo  "
 U7S_UID=$uid
 U7S_EXTIP=$extIP
@@ -125,7 +126,7 @@ U7S_DEBUGLEVEL=$debugLevel
 U7S_CONTROLPLANE=$controlPlane
 U7S_APISERVER=$apiServer
 U7S_TOKEN=$token
-U7S_CACERTHASH=$caCertHash" >> ~u7s-admin/.config/usernetes/env
+U7S_CACERTHASH=$caCertHash" >> /etc/podsec/u7s/env
 
 . podsec-u7s-functions
 
