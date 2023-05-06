@@ -6,8 +6,8 @@ PartOf=u7s-node.target
 [Service]
 Type=notify
 NotifyAccess=all
-ExecStartPre=/usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/libexec/podsec/u7s/bin/init-crio
-ExecStart=/usr/libexec/podsec/u7s/bin/kubelet
+ExecStartPre=/usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/libexec/podsec/u7s/bin/init-crio.sh
+ExecStart=/usr/libexec/podsec/u7s/bin/kubelet.sh
 WorkingDirectory=/var/lib/u7s-admin/
   EnvironmentFile=/etc/podsec/u7s/env
   Restart=on-failure

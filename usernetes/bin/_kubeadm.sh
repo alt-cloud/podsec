@@ -1,7 +1,7 @@
 #!/bin/sh
 source u7s_finctions
 # set -x
-source ~u7s-admin/.config/usernetes/env
+source /etc/podsec/u7s/env
 
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2

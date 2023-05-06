@@ -1,8 +1,6 @@
 #!/bin/sh
 # Customizable environment variables:
 # * $U7S_ROOTLESSKIT_FLAGS
-# * $U7S_ROOTLESSKIT_PORTS
-# * $U7S_FLANNEL
 # set -x
 source u7s_finctions
 source /etc/podsec/u7s/env
@@ -10,8 +8,6 @@ source /etc/podsec/u7s/env
 rk_state_dir=$XDG_RUNTIME_DIR/usernetes/rootlesskit
 
 : ${U7S_ROOTLESSKIT_FLAGS=}
-: ${U7S_ROOTLESSKIT_PORTS=}
-: ${U7S_FLANNEL=}
 
 : ${_U7S_CHILD=0}
 if [[ $_U7S_CHILD == 0 ]]; then
