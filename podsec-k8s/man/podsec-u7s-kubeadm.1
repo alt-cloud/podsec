@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-U7S\-KUBEADM" "1" "April 2023" "" ""
+.TH "PODSEC\-U7S\-KUBEADM" "1" "May 2023" "" ""
 .
 .SH "NAME"
 \fBpodsec\-u7s\-kubeadm\fR \- инициализация master\- или worker\-узла в rootless\-kubernetes (alt usernetes)
@@ -10,7 +10,375 @@
 \fBpodsec\-u7s\-kubeadm init| join <ApiServer>:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash \.\.\.\fR
 .
 .SH "DESCRIPTION"
-Скрипт производит:
+.
+.SH "Установка master\-узла"
+1 Настройте репозиторий обновления
+.
+.IP "" 4
+.
+.nf
+
+
+apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64 classic\'
+apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64\-i586 classic\'
+apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/noarch classic\'
+rm \-f /etc/apt/sources\.list\.d/sources\.list
+apt\-get update
+.
+.fi
+.
+.IP "" 0
+.
+.P
+2 Установите podsec\-пакеты:
+.
+.IP "" 4
+.
+.nf
+
+# apt\-get install \-y podsec\-0\.9\.9\-alt1\.noarch\.rpm      podsec\-k8s\-rbac\-0\.9\.9\-alt1\.noarch\.rpm podsec\-k8s\-0\.9\.9\-alt1\.noarch\.rpm  podsec\-inotify\-0\.9\.9\-alt1\.noarch\.rpm
+.
+.fi
+.
+.IP "" 0
+.
+.IP "1." 4
+Измените переменную PATH:
+.
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+
+export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
+.
+.fi
+.
+.IP "" 0
+.
+.IP "1." 4
+Запустите команду:
+.
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+
+# kubeadm init
+.
+.fi
+.
+.IP "" 0
+.
+.P
+После:
+.
+.IP "\(bu" 4
+генерации сертификатов в каталоге \fB/etc/kuarnetes/pki\fR,
+.
+.IP "\(bu" 4
+загрузки образов, \-генерации conf\-файлов в каталоге \fB/etc/kubernetes/manifests/\fR, \fB/etc/kubernetes/manifests/etcd/\fR
+.
+.IP "\(bu" 4
+запуска сервиса \fBkubelet\fR и \fBPod\fR\'ов системных \fBkubernetes\-образов\fR
+.
+.IP "" 0
+.
+.P
+инициализируется \fBkubernet\-кластер\fR из одного узла\.
+.
+.P
+По окончании скрипт выводит строки подключения \fBmaster\fR(\fBControl Plane\fR) и \fBworker\-узлов\fR:
+.
+.IP "" 4
+.
+.nf
+
+
+You can now join any number of control\-plane nodes by copying certificate authorities
+and service account keys on each node and then running the following as root:
+
+kubeadm join xxx\.xxx\.xxx\.xxx:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash sha256:\.\. \-\-control\-plane
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join xxx\.xxx\.xxx\.xxx:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash sha256:\.\.\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+5 После завершения скрипта проверьте работу \fBusernetes\fR (\fBrootless kuber\fR)
+.
+.IP "" 4
+.
+.nf
+
+
+# kubectl get nodes \-o wide
+NAME       STATUS   ROLES           AGE   VERSION   INTERNAL\-IP   EXTERNAL\-IP   OS\-IMAGE           KERNEL\-VERSION         CONTAINER\-RUNTIME
+<host>     Ready    control\-plane   16m   v1\.26\.3   10\.96\.0\.1     \fInone\fR        ALT SP Server 11100\-01   5\.15\.105\-un\-def\-alt1   cri\-o://1\.26\.2
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Проверьте работу \fBusernetes\fR (\fBrootless kuber\fR)
+.
+.IP "" 4
+.
+.nf
+
+
+# kubectl get all \-A
+NAMESPACE     NAME                                   READY   STATUS    RESTARTS   AGE
+kube\-system   pod/coredns\-c7df5cd6c\-5pkkm            1/1     Running   0          19m
+kube\-system   pod/coredns\-c7df5cd6c\-cm6vf            1/1     Running   0          19m
+kube\-system   pod/etcd\-host\-212                      1/1     Running   0          19m
+kube\-system   pod/kube\-apiserver\-host\-212            1/1     Running   0          19m
+kube\-system   pod/kube\-controller\-manager\-host\-212   1/1     Running   0          19m
+kube\-system   pod/kube\-proxy\-lqf9c                   1/1     Running   0          19m
+kube\-system   pod/kube\-scheduler\-host\-212            1/1     Running   0          19m
+
+NAMESPACE     NAME                 TYPE        CLUSTER\-IP   EXTERNAL\-IP   PORT(S)                  AGE
+default       service/kubernetes   ClusterIP   10\.96\.0\.1    \fInone\fR        443/TCP                  19m
+kube\-system   service/kube\-dns     ClusterIP   10\.96\.0\.10   \fInone\fR        53/UDP,53/TCP,9153/TCP   19m
+
+NAMESPACE     NAME                        DESIRED   CURRENT   READY   UP\-TO\-DATE   AVAILABLE   NODE SELECTOR            AGE
+kube\-system   daemonset\.apps/kube\-proxy   1         1         1       1            1           kubernetes\.io/os=linux   19m
+
+NAMESPACE     NAME                      READY   UP\-TO\-DATE   AVAILABLE   AGE
+kube\-system   deployment\.apps/coredns   2/2     2            2           19m
+
+NAMESPACE     NAME                                DESIRED   CURRENT   READY   AGE
+kube\-system   replicaset\.apps/coredns\-c7df5cd6c   2         2         2       19m
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Состояние всех Pod\'ов должны быть в \fB1/1\fR\.
+.
+.P
+Проверьте состояние дерева процессов:
+.
+.IP "" 4
+.
+.nf
+
+
+# pstree
+\.\.\.
+├─systemd─┬─(sd\-pam)
+│         ├─dbus\-daemon
+│         ├─nsenter\.sh───nsenter───_kubelet\.sh───kubelet───11*[{kubelet}]
+│         └─rootlesskit\.sh───rootlesskit─┬─exe─┬─conmon───kube\-controller───7*[{kube\-controller}]
+│                                        │     ├─conmon───kube\-apiserver───8*[{kube\-apiserver}]
+│                                        │     ├─conmon───kube\-scheduler───7*[{kube\-scheduler}]
+│                                        │     ├─conmon───etcd───8*[{etcd}]
+│                                        │     ├─conmon───kube\-proxy───4*[{kube\-proxy}]
+│                                        │     ├─2*[conmon───coredns───8*[{coredns}]]
+│                                        │     ├─rootlesskit\.sh───crio───10*[{crio}]
+│                                        │     └─7*[{exe}]
+│                                        ├─slirp4netns
+│                                        └─8*[{rootlesskit}]
+\.\.\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Процесс \fBkubelet\fR запускается как сервис в \fBuser namespace\fR процесса \fBrootlesskit\fR\.
+.
+.P
+Все остальные процессы \fBkube\-controller\fR, \fBkube\-apiserver\fR, \fBkube\-scheduler\fR, \fBkube\-proxy\fR, \fBetcd\fR, \fBcoredns\fR запускаются как контейнеры от соответствующих образов \fBregistry\.local/k8s\-p10/kube\-controller\-manager:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-apiserver:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-scheduler:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-proxy:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/etcd:3\.5\.6\-0\fR, \fBregistry\.local/k8s\-p10/coredns:v1\.9\.3\fR\.
+.
+.IP "1." 4
+По умолчанию на master\-узле пользовательские \fBPod\fRы не запускаются\. Чтобы снять это ограничение наберите команду: ```
+.
+.IP
+node/\fIhost\fR untainted ```
+.
+.IP "2." 4
+Проверьте загрузку deployment nginx:
+.
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+# kubectl apply \-f https://k8s\.io/examples/application/deployment\.yaml
+.
+.fi
+.
+.IP "" 0
+.
+.P
+После загрузки образов \fBnginx\fR проверьте состояние \fBdeployment\fR и \fBPod\fRов: ```NAME READY UP\-TO\-DATE AVAILABLE AGE deployment\.apps/nginx\-deployment 2/2 2 2 5m34s
+.
+.P
+NAME READY STATUS RESTARTS AGE pod/nginx\-deployment\-85996f8dbd\-2dw9h 1/1 Running 0 5m34s pod/nginx\-deployment\-85996f8dbd\-r5dt4 1/1 Running 0 5m34s ```
+.
+.IP "1." 4
+.
+.IP
+If you don\'t see a command prompt, try pressing enter\. [root@bash /]# pwd ```
+.
+.IP "" 0
+.
+.SH "Подключение worker\-узла"
+1 Настройте репозиторий обновления
+.
+.IP "" 4
+.
+.nf
+
+
+apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64 classic\'
+apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64\-i586 classic\'
+apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/noarch classic\'
+rm \-f /etc/apt/sources\.list\.d/sources\.list
+apt\-get update
+.
+.fi
+.
+.IP "" 0
+.
+.P
+2 Установите podsec\-пакеты:
+.
+.IP "" 4
+.
+.nf
+
+# apt\-get install \-y podsec\-0\.9\.9\-alt1\.noarch\.rpm      podsec\-k8s\-rbac\-0\.9\.9\-alt1\.noarch\.rpm podsec\-k8s\-0\.9\.9\-alt1\.noarch\.rpm  podsec\-inotify\-0\.9\.9\-alt1\.noarch\.rpm
+.
+.fi
+.
+.IP "" 0
+.
+.IP "1." 4
+Измените переменную PATH:
+.
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+
+export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
+.
+.fi
+.
+.IP "" 0
+.
+.P
+3 Скопируйте команду подключния \fBworker\-узла\fR, полученную на этапе установки начального \fBmaster\-узла\fR\. Запустите ее:
+.
+.IP "" 4
+.
+.nf
+
+kubeadm join xxx\.xxx\.xxx\.xxx:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash sha256:\.\.\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+По окончании скрипт выводит текст:
+.
+.IP "" 4
+.
+.nf
+
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received\.
+* The Kubelet was informed of the new secure connection details\.
+
+Run \'kubectl get nodes\' on the control\-plane to see this node join the cluster\.
+.
+.fi
+.
+.IP "" 0
+.
+.IP "1." 4
+Проверьте состояние дерева процессов:
+.
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+
+# pstree
+\.\.\.
+├─systemd─┬─(sd\-pam)
+│         ├─dbus\-daemon
+│         ├─nsenter\.sh───nsenter───_kubelet\.sh───kubelet───10*[{kubelet}]
+│         └─rootlesskit\.sh───rootlesskit─┬─exe─┬─conmon───kube\-proxy───4*[{kube\-proxy}]
+│                                        │     ├─rootlesskit\.sh───crio───9*[{crio}]
+│                                        │     └─6*[{exe}]
+│                                        ├─slirp4netns
+│                                        └─8*[{rootlesskit}]
+\.\.\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Процесс \fBkubelet\fR запускается как сервис в \fBuser namespace\fR процесса \fBrootlesskit\fR\.
+.
+.P
+Все остальные процессы \fBkube\-proxy\fR, \fBkube\-flannel\fR запускаются как контейнеры от соответствующих образов \fBregistry\.local/k8s\-p10/kube\-proxy:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/flannel:v0\.19\.2\fR\.
+.
+.P
+4 Зайдите на \fBmaster\-узел\fR и проверьте подключение \fBworker\-узла\fR: ```NAME STATUS ROLES AGE VERSION INTERNAL\-IP EXTERNAL\-IP OS\-IMAGE KERNEL\-VERSION CONTAINER\-RUNTIME host\-212 Ready control\-plane 7h54m v1\.26\.3 10\.96\.0\.1 \fInone\fR ALT SP Server 11100\-01 5\.15\.105\-un\-def\-alt1 cri\-o://1\.26\.2 host\-226 Ready \fInone\fR 8m30s v1\.26\.3 10\.96\.0\.1 \fInone\fR ALT SP Server 11100\-01 5\.15\.105\-un\-def\-alt1 cri\-o://1\.26\.2 ```
+.
+.IP "1." 4
+На \fBmaster\-узле\fR под пользоваталем \fBroot\fR выполните команду:
+.
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+# machinectl shell u7s\-admin@ ~u7s\-admin/usernetes/boot/nsenter\.sh \e
+    kubectl apply \-f ~u7s\-admin/usernetes/manifests/kube\-flannel\.yml
+Connected to the local host\. Press ^] three times within 1s to exit session\.
+[INFO] Entering RootlessKit namespaces: OK
+namespace/kube\-flannel created
+clusterrole\.rbac\.authorization\.k8s\.io/flannel created
+clusterrolebinding\.rbac\.authorization\.k8s\.io/flannel created
+serviceaccount/flannel created
+configmap/kube\-flannel\-cfg created
+daemonset\.apps/kube\-flannel\-ds created
+Connection to the local host terminated\.
+.
+.fi
+.
+.IP "" 0
+.
+.IP "1." 4
+.
+.IP
+NAMESPACE NAME DESIRED CURRENT READY UP\-TO\-DATE AVAILABLE NODE SELECTOR AGE kube\-flannel kube\-flannel\-ds 2 2 2 2 1 \fInone\fR 102s kube\-system kube\-proxy 2 2 2 2 2 kubernetes\.io/os=linux 8h \fB`` Число\fRREADY\fBкаждого\fRdaemonset\fBдолжно быть равно числу\fRDESIRED` и должно быть равно числу узлов кластера\.
+.
+.IP "" 0
 .
 .SH "EXAMPLES"
 \fBpodsec\-u7s\-kubeadm init\fR \fBpodsec\-u7s\-kubeadm join 102\.168\.122\.32:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-cert\-hash \.\.\.\fR
