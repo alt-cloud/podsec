@@ -10,31 +10,6 @@
 # * $XDG_CACHE_HOME: ~u7s-admin/.cache if not set
 
 USERNAME='u7s-admin'
-# export StartTarget="u7s.target"
-# export CRI="crio"
-# export CNI="flannel"
-# export PUBLISH_DEFAULT="0.0.0.0:6443:6443/tcp"
-# export PUBLISH=
-# export CIDR="10.0.42.0/24"
-# export HOMEDIR="/var/lib/${USERNAME}"
-# export CONFIG_DIR="$HOMEDIR/.config"
-# export WAIT_INIT_CERTS
-# export BASE="/var/lib/${USERNAME}/usernetes"
-
-# INFO() {
-# 	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
-# }
-#
-# WARNING() {
-# 	echo >&2 -e "\e[101m\e[97m[WARNING]\e[49m\e[39m $@"
-# }
-#
-# ERROR() {
-# 	echo >&2 -e "\e[101m\e[97m[ERROR]\e[49m\e[39m $@"
-# }
-
-
-
 
 set -eo pipefail
 
