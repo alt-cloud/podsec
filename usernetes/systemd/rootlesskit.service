@@ -2,11 +2,14 @@
 Description=Usernetes RootlessKit service (crio)
 PartOf=u7s.target
 
+[Install]
+WantedBy=u7s.target
+
 [Service]
-ExecStart=/usr/libexec/podsec/u7s/rootlesskit.sh /usr/libexec/podsec/u7s/crio.sh
+ExecStart=/usr/libexec/podsec/u7s/bin/rootlesskit.sh /usr/libexec/podsec/u7s/bin/crio.sh
 Delegate=yes
-WorkingDirectory=/var/lib/u7s-admin/
-  EnvironmentFile=/etc/podsec/u7s/env
+WorkingDirectory=%h
+  EnvironmentFile=/etc/podsec/u7s/config/env
   Restart=on-failure
   LimitNOFILE=65536
 

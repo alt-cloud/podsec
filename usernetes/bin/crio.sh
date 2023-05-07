@@ -1,6 +1,7 @@
 #!/bin/sh
 # needs to be called inside the namespaces
-source u7s_finctions
+
+source podsec-u7s-functions
 export _CRIO_ROOTLESS=1
 export User='u7s-admin'
 
@@ -40,5 +41,5 @@ EOF
 
 exec crio \
 	--config $XDG_CONFIG_HOME/usernetes/crio/crio.conf \
-	--registries-conf $XDG_CONFIG_HOME/usernetes/containers/registries.conf \
+	--registries-conf /etc/containers/registries.conf \
 	$@

@@ -2,8 +2,9 @@
 # Customizable environment variables:
 # * $U7S_ROOTLESSKIT_FLAGS
 # set -x
-source u7s_finctions
-source /etc/podsec/u7s/env
+source podsec-u7s-functions
+
+source $envFile
 
 rk_state_dir=$XDG_RUNTIME_DIR/usernetes/rootlesskit
 
@@ -97,7 +98,7 @@ else
 	log_info "Hint: You can enter RootlessKit namespaces by running \`nsenter -U --preserve-credential -n -m -t ${rk_pid}\`."
 	if [ -n "$U7S_CONTROLPLANE" ]
 	then
-		ports="2379 2380 6443 10250 10255 10256 53"
+		ports="2379 2380 6443 10250 10255 10256"
 	else
 		ports="10250 10255 10256"
 	fi

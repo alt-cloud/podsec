@@ -1,7 +1,7 @@
 #!/bin/sh
-source u7s_finctions
+source podsec-u7s-functions
 # set -x
-source /etc/podsec/u7s/env
+source $envFile
 
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
@@ -25,9 +25,9 @@ mkdir -p /run/crio/
 chown u7s-admin:u7s-admin /run/crio/
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
 
-KUBEADM_CONFIGS_DKUBEADM_CONFIGS_DIRIR=/etc/podsec/u7s/config/kubeadm-configs
+KUBEADM_CONFIGS_DIR=/etc/podsec/u7s/config/kubeadm-configs
 # srcConfigFile="$KUBEADM_CONFIGS_DIR/$cmd.yaml"
-configFile="$KUBEADM_CONFIGS_DIR/$cmd.yaml"
+configFile="$XDG_CONFIG_HOME/usernetes/$cmd.yaml"
 host=$(hostname)
 TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
 

@@ -1,5 +1,6 @@
 #!/bin/sh
-source u7s_finctions
+source podsec-u7s-functions
+
 
 format() {
   echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<join-параметр> ...]" >&2
@@ -115,7 +116,8 @@ fi
 
 
 # cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
-cp /etc/podsec/u7s/ENV /etc/podsec/u7s/env
+envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
+cp /etc/podsec/u7s/config/ENV /etc/podsec/u7s/config/env
 echo  "
 U7S_UID=$uid
 U7S_EXTIP=$extIP
@@ -125,9 +127,8 @@ U7S_DEBUGLEVEL=$debugLevel
 U7S_CONTROLPLANE=$controlPlane
 U7S_APISERVER=$apiServer
 U7S_TOKEN=$token
-U7S_CACERTHASH=$caCertHash" >> /etc/podsec/u7s/env
+U7S_CACERTHASH=$caCertHash" >> /etc/podsec/u7s/config/env
 
-. podsec-u7s-functions
 
 ###############################
 # Данные команды будут удалены после установки соответсвующих прав в пакетах в пакете kubernetes-common-1.26.3-alt2

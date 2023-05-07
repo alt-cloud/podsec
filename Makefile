@@ -60,7 +60,9 @@ USERNETES_UNITS= \
 USERNETES_CONFIGS= \
 	cni_net.d\
 	flannel  \
-	modules-load.d
+	modules-load.d \
+	env \
+	ENV
 
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh
@@ -143,7 +145,6 @@ install: all
 	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)/usr/libexec/podsec/u7s/; tar xvzf $(TMPFILE);
 	# /etc/podsec/u7s
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config;
-	cd ./usernetes/.config/usernetes/; $(INSTALL) -m644 ENV $(DESTDIR)/etc/podsec/u7s/ENV;  $(INSTALL) -m644 env $(DESTDIR)/etc/podsec/u7s/env
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)/etc/podsec/u7s/config;tar xvzf $(TMPFILE);
 	# USERNETES_MANIFESTS
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/manifests

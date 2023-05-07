@@ -1,15 +1,18 @@
 [Unit]
 Description=Usernetes kubelet service (crio)
 BindsTo=rootlesskit.service
-PartOf=u7s-node.target
+PartOf=u7s.target
+
+[Install]
+WantedBy=u7s.target
 
 [Service]
 Type=notify
 NotifyAccess=all
 ExecStartPre=/usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/libexec/podsec/u7s/bin/init-crio.sh
 ExecStart=/usr/libexec/podsec/u7s/bin/kubelet.sh
-WorkingDirectory=/var/lib/u7s-admin/
-  EnvironmentFile=/etc/podsec/u7s/env
+WorkingDirectory=%h
+  EnvironmentFile=/etc/podsec/u7s/config/env
   Restart=on-failure
   LimitNOFILE=65536
 

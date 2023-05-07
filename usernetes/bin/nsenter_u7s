@@ -1,5 +1,5 @@
 #!/bin/sh
-source u7s_finctions
+source podsec-u7s-functions
 nsenter_main $0 $@
 
 if [[ $# -eq 0 ]]; then
