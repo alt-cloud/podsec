@@ -152,8 +152,8 @@ install: all
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config;
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)/etc/podsec/u7s/config;tar xvzf $(TMPFILE);
 	# USERNETES_MANIFESTS
-	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/manifests
-	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)/etc/podsec/u7s/config/manifests
+	mkdir -p $(DESTDIR)/etc/kubernetes/manifests
+	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)/etc/kubernetes/manifests
 	# USERNETES_KUBEADM_CONFIGS
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
 	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
