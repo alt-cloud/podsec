@@ -12,7 +12,7 @@ NotifyAccess=all
 ExecStartPre=/usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/libexec/podsec/u7s/bin/init-crio.sh
 ExecStart=/usr/libexec/podsec/u7s/bin/kubelet.sh
 WorkingDirectory=%h
-  EnvironmentFile=%E/env
+  EnvironmentFile=%E/usernetes/env
   Restart=on-failure
   LimitNOFILE=65536
 
