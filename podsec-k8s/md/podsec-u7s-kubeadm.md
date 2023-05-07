@@ -9,28 +9,13 @@ podsec-u7s-kubeadm(1) -- инициализация master- или worker-узл
 
 ## Установка master-узла
 
-1 Настройте репозиторий обновления
+1. Измените переменную PATH:
+
 <pre>
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic'
-rm -f /etc/apt/sources.list.d/sources.list
-apt-get update
-</pre>
-
-2 Установите podsec-пакеты:
-
-```
-# apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
-```
-
-3. Измените переменную PATH:
-
-<pre> 
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
-4. Запустите команду:
+2. Запустите команду:
 
 <pre>
 # kubeadm init
@@ -40,7 +25,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 
 После:
 
-- генерации сертификатов в каталоге `/etc/kuarnetes/pki`, 
+- генерации сертификатов в каталоге `/etc/kuarnetes/pki`,
 - загрузки образов, -генерации conf-файлов в каталоге `/etc/kubernetes/manifests/`, `/etc/kubernetes/manifests/etcd/`
 - запуска сервиса `kubelet` и `Pod`'ов системных `kubernetes-образов`
 
@@ -51,14 +36,14 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 You can now join any number of control-plane nodes by copying certificate authorities
 and service account keys on each node and then running the following as root:
 
-kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:.. --control-plane 
+kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:.. --control-plane
 
 Then you can join any number of worker nodes by running the following on each as root:
 
 kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
 </pre>
 
-5 После завершения скрипта проверьте работу `usernetes` (`rootless kuber`)
+3. После завершения скрипта проверьте работу `usernetes` (`rootless kuber`)
 
 <pre>
 # kubectl get nodes -o wide
@@ -118,13 +103,15 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 
 Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-controller-manager:v1.26.3`, `registry.local/k8s-p10/kube-apiserver:v1.26.3`, `registry.local/k8s-p10/kube-scheduler:v1.26.3`, `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/etcd:3.5.6-0`,  `registry.local/k8s-p10/coredns:v1.9.3`.
 
-6. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
+
+4. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
+
 ```
 # kubectl taint nodes <host> node-role.kubernetes.io/control-plane:NoSchedule-
 node/<host> untainted
 ```
 
-7. Проверьте загрузку deployment nginx:
+5. Проверьте загрузку deployment nginx:
 
 ```
 # kubectl apply -f https://k8s.io/examples/application/deployment.yaml
@@ -141,8 +128,8 @@ pod/nginx-deployment-85996f8dbd-2dw9h   1/1     Running   0          5m34s
 pod/nginx-deployment-85996f8dbd-r5dt4   1/1     Running   0          5m34s
 ```
 
+6. Проверьте загрузку образа `registry.local/alt/alt`:
 
-8. Проверьте загрузку образа `registry.local/alt/alt`:
 ```
 # kubectl run -it --image=registry.local/alt/alt -- bash
 If you don't see a command prompt, try pressing enter.
@@ -152,29 +139,14 @@ If you don't see a command prompt, try pressing enter.
 
 ## Подключение worker-узла
 
-1 Настройте репозиторий обновления
+1. Измените переменную PATH:
+
 <pre>
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic'
-rm -f /etc/apt/sources.list.d/sources.list
-apt-get update
-</pre>
-
-2 Установите podsec-пакеты:
-
-```
-# apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
-```
-
-3. Измените переменную PATH:
-
-<pre> 
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
 
-3 Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
+2. Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
 
 ```
 kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
@@ -191,7 +163,8 @@ This node has joined the cluster:
 Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 </pre>
 
-4. Проверьте состояние дерева процессов:
+
+3. Проверьте состояние дерева процессов:
 <pre>
 # pstree
 ...
