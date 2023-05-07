@@ -9,7 +9,7 @@ WantedBy=u7s.target
 ExecStart=/usr/libexec/podsec/u7s/bin/rootlesskit.sh /usr/libexec/podsec/u7s/bin/crio.sh
 Delegate=yes
 WorkingDirectory=%h
-  EnvironmentFile=/etc/podsec/u7s/config/env
+  EnvironmentFile=%E/env
   Restart=on-failure
   LimitNOFILE=65536
 

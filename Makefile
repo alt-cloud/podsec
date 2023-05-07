@@ -109,6 +109,9 @@ datadir = /usr/share
 mandir = $(datadir)/man
 man1dir = $(mandir)/man1
 DESTDIR =
+userusnitdir=/usr/lib/systemd/user
+unitdir=/lib/systemd/system
+
 
 CP = cp -L
 INSTALL = install
@@ -116,6 +119,8 @@ LN_S = ln -s
 MKDIR_P = mkdir -p
 TOUCH_R = touch -r
 CHMOD = chmod
+
+
 
 TARGETS = $(PROGRAMS)
 
@@ -153,13 +158,13 @@ install: all
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
 	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
 	# USER SYSTEMD
-	mkdir -p $(DESTDIR)/usr/lib/systemd/user
-	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)/usr/lib/systemd/user
+	mkdir -p $(DESTDIR)$(userusnitdir)
+	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)/$(userusnitdir)
 	# SYSTEMD
 	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
 	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
-	$(MKDIR_P) -m755 $(DESTDIR)/lib/systemd/system
-	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/lib/systemd/system/u7s.service
+	$(MKDIR_P) -m755 $(DESTDIR)$(unitdir)
+	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/$(unitdir)/u7s.service
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
@@ -170,6 +175,6 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-	$(INSTALL) -m644 ./podsec-inotify/services/podsec-inotify-check-containers.service $(DESTDIR)/lib/systemd/system/podsec-inotify-check-containers.service
+	$(INSTALL) -m644 ./podsec-inotify/services/podsec-inotify-check-containers.service $(DESTDIR)/$(unitdir)/podsec-inotify-check-containers.service
 clean:
 
