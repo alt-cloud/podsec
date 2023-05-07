@@ -17,10 +17,16 @@ apt-get update
 # apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
 ```
 
-3. Запустите команду:
+3. Измените переменную PATH:
+
+<pre> 
+export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
+</pre>
+
+4. Запустите команду:
 
 <pre>
-# podsec-u7s-kubelet init
+# kubeadm init
 </pre>
 
 > По умолчанию уровень отладки устанавливается в `0`. Если необходимо увеличить уровень отладки укажите перед подкомандой `init` флаг `-v n`. Где `n` принимает значения от `0` до `9`-ти.
@@ -107,11 +113,11 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 
 6. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
 ```
-# kubectl taint nodes &lt;host> node-role.kubernetes.io/control-plane:NoSchedule-
+# kubectl taint nodes <host> node-role.kubernetes.io/control-plane:NoSchedule-
 node/<host> untainted
 ```
 
-6. Проверьте загрузку deployment nginx:
+7. Проверьте загрузку deployment nginx:
 
 ```
 # kubectl apply -f https://k8s.io/examples/application/deployment.yaml
@@ -129,18 +135,12 @@ pod/nginx-deployment-85996f8dbd-r5dt4   1/1     Running   0          5m34s
 ```
 
 
-7. Проверьте загрузку образа `registry.local/alt/alt`:
+8. Проверьте загрузку образа `registry.local/alt/alt`:
 ```
 # kubectl run -it --image=registry.local/alt/alt -- bash
 If you don't see a command prompt, try pressing enter.
 [root@bash /]# pwd
 ```
-
-
-8. Пока сервис не стартует после перезагрузки. Для запуска сервиса наберите:
-<pre>
-systemctl  start u7s
-</pre>
 
 
 ## Подключение worker-узла
@@ -160,10 +160,17 @@ apt-get update
 # apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
 ```
 
-3 Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`, заменив команду `kubeadm` на `podsec-u7s-kubeadm`.  Запустите ее:
+3. Измените переменную PATH:
+
+<pre> 
+export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
+</pre>
+
+
+3 Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
 
 ```
-podsec-u7s-kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
+kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
 ```
 
 > По умолчанию уровень отладки устанавливается в `0`. Если необходимо увеличить уровень отладки укажите перед подкомандой `join` флаг `-v n`. Где `n` принимает значения от `0` до `9`-ти.
@@ -241,13 +248,9 @@ kube-system    kube-proxy        2         2         2       2            2     
 
 ### Вход в namespace работающих сервисов и контейнеров.
 
-Для захода в `user namespace` перейдите в каталог 
+Для захода в `user namespace` наберите команду
 ```
-$ cd ~/usernetes/boot
-```
-и наберите команду
-```
-$ ./nsenter.sh
+$ nsenter_u7s
 [INFO] Entering RootlessKit namespaces: OK
 [root@<host> boot]# 
 ```
