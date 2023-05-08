@@ -144,6 +144,7 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> ~%u7s_admin_usr/.bash_p
 /usr/libexec/podsec/u7s/*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/systemd/system/*
+%_sysconfdir/kubernetes/manifests/*
 %_unitdir/*
 /usr/lib/systemd/user/*
 
