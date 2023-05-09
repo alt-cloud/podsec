@@ -37,14 +37,22 @@ if [ "$cmd" = 'init' ]
 then
   yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' $KUBEADM_CONFIGS_DIR/InitConfiguration.yaml
 else
-   yq -y '.discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
+  if [ -n "$U7S_CONTROLPLANE" ]
+  then
+    yq -y '
+          .discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
+          .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |
+          .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'" |
+          .nodeRegistration.name |= "'$host'" |
+          .controlPlane.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"
+          ' $KUBEADM_CONFIGS_DIR/JoinControlPlaneConfijuration.yaml
+  else
+   yq -y '
+          .discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
           .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |
           .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'" |
           .nodeRegistration.name |= "'$host'"
-         '  $KUBEADM_CONFIGS_DIR/JoinConfiguration.yaml
-  if [ -n "$U7S_CONTROLPLANE" ]
-  then
-    echo '{"JoinControlPlane":{"LocalAPIEndpoint":"'$U7S_EXTIP'"}}' | yq -y
+         ' $KUBEADM_CONFIGS_DIR/JoinConfiguration.yaml
   fi
 fi
 echo "---"
@@ -56,7 +64,7 @@ then
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
-         .controlPlaneEndpoint = "'${U7S_EXTIP}':6443"
+         .controlPlaneEndpoint = "'${U7S_APISERVER}'"
         ' $KUBEADM_CONFIGS_DIR/ClusterConfigurationWithEtcd.yaml
   echo "---"
 fi

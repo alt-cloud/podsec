@@ -142,6 +142,8 @@ install: all
 	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
 	# PODSEC-K8S USERNETES
+	mkdir -p $(DESTDIR)/var/lib/u7s-admin/
+	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)/var/lib/u7s-admin/
 	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin/
 	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)/usr/libexec/podsec/u7s/bin/; tar xvzf $(TMPFILE);
 	rm -f $(TMPFILE)
