@@ -1,6 +1,6 @@
-# https://deploy.equinix.com/developers/guides/kubernetes-with-kubeadm/
-kind: JoinConfiguration
+# kubectl -n kube-system get cm kubeadm-config -o yaml
 apiVersion: kubeadm.k8s.io/v1beta3
+kind: JoinConfiguration
 discovery:
   bootstrapToken:
     apiServerEndpoint: $U7S_APISERVER
@@ -12,4 +12,8 @@ nodeRegistration:
   imagePullPolicy: IfNotPresent
   name: $host
   taints: null
+controlPlane:
+  localAPIEndpoint:
+    advertiseAddress: U7S_EXTIP
+    bindPort: 6443
 
