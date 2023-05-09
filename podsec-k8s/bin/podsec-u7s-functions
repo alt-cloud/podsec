@@ -156,9 +156,9 @@ getStaticClusterIP() {
 	major=$3 minor=$4
 	if [ "$major" -eq 0 ]
 	then
-		if [ "$minor" -eq 1 -o "$minor" -eq 2 -o "$minor" -eq 10 ] # service kubernetes, default router for slirp4net, service kubedns,
+		if [ "$minor" -eq 1 -o "$minor" -eq 2  -o "$minor" -eq 3 -o "$minor" -eq 10 ] # service kubernetes, default router for slirp4net, service kubedns,
 		then
-			let minor+=2
+			let minor+=3
 		fi
 	fi
 	echo "10.96.$major.$minor"
