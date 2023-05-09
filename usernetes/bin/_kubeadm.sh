@@ -35,13 +35,17 @@ TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
 ALLIFACES="0.0.0.0/0"
 if [ "$cmd" = 'init' ]
 then
-  yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' < $KUBEADM_CONFIGS_DIR/InitConfiguration.yaml
+  yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' $KUBEADM_CONFIGS_DIR/InitConfiguration.yaml
 else
    yq -y '.discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
           .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |
           .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'" |
           .nodeRegistration.name |= "'$host'"
-         '  < $KUBEADM_CONFIGS_DIR/JoinConfiguration.yaml
+         '  $KUBEADM_CONFIGS_DIR/JoinConfiguration.yaml
+  if [ -n "$U7S_CONTROLPLANE" ]
+  then
+    echo '{"JoinControlPlane":{"LocalAPIEndpoint":"'$U7S_EXTIP'"}}' | yq -y
+  fi
 fi
 echo "---"
 if [ -n "$U7S_CONTROLPLANE" ]
@@ -53,7 +57,7 @@ then
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
          .controlPlaneEndpoint = "'${U7S_EXTIP}':6443"
-        ' < $KUBEADM_CONFIGS_DIR/ClusterConfigurationWithEtcd.yaml
+        ' $KUBEADM_CONFIGS_DIR/ClusterConfigurationWithEtcd.yaml
   echo "---"
 fi
 cat $KUBEADM_CONFIGS_DIR/KubeletConfiguration.yaml

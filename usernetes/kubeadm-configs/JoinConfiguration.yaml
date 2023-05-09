@@ -13,3 +13,12 @@ nodeRegistration:
   imagePullPolicy: IfNotPresent
   name: host-92
   taints: null
+#caCertPath:
+#discovery:
+#controlPlane: !!!https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3/#kubeadm-k8s-io-v1beta3-JoinControlPlane
+  #localAPIEndpoint:
+  #certificateKey:
+#skipPhases:
+#patches:
+
+# apiEndpoint:
