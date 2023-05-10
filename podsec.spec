@@ -114,8 +114,6 @@ to monitor and identify security threats
 %_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
 %_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G %kubernetes_grp,systemd-journal,podman,fuse \
     -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
-echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> ~%u7s_admin_usr/.bash_profile
-
 %preun
 %preun_systemd podsec-inotify-check-containers.service
 %preun_systemd u7s.service
@@ -147,7 +145,7 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> ~%u7s_admin_usr/.bash_p
 %_sysconfdir/kubernetes/manifests/*
 %_unitdir/*
 /usr/lib/systemd/user/*
-/var/lib/u7s-admin/.bashrc
+%attr(-,u7s-admin,u7s-admin) /var/lib/u7s-admin/.bashrc
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
