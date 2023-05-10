@@ -114,6 +114,12 @@ else
   tapIP=$(getStaticClusterIP $extIP)
 fi
 
+ifs=$IFS
+IFS=:
+set -- $apiServer
+IFS=$ifs
+apiServerIP=$1
+apiServerPort=$2
 
 # cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
 envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
@@ -126,6 +132,8 @@ U7S_TAPIP=$tapIP
 U7S_DEBUGLEVEL=$debugLevel
 U7S_CONTROLPLANE=$controlPlane
 U7S_APISERVER=$apiServer
+U7S_APISERVERIP=$apiServerIP
+U7S_APISERVERPORT=$apiServerPort
 U7S_TOKEN=$token
 U7S_CACERTHASH=$caCertHash" >> /etc/podsec/u7s/config/env
 

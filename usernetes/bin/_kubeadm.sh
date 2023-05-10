@@ -26,13 +26,11 @@ chown u7s-admin:u7s-admin /run/crio/
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
 
 KUBEADM_CONFIGS_DIR=/etc/podsec/u7s/config/kubeadm-configs
-# srcConfigFile="$KUBEADM_CONFIGS_DIR/$cmd.yaml"
 configFile="$XDG_CONFIG_HOME/usernetes/$cmd.yaml"
 host=$(hostname)
 TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
 
 (
-ALLIFACES="0.0.0.0/0"
 if [ "$cmd" = 'init' ]
 then
   yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' $KUBEADM_CONFIGS_DIR/InitConfiguration.yaml
