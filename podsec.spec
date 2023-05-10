@@ -47,11 +47,11 @@ This package contains utilities for:
 Summary: Set of scripts for Kubernetes Security
 Group: Development/Other
 Requires: podsec >= 0.3.1
-Requires: kubernetes-kubeadm >= 1.26.3
-Requires: kubernetes-kubelet >= 1.26.3
-Requires: kubernetes-crio >= 1.26.3
-Requires: kubernetes-master >= 1.26.3
-Requires: kubernetes-node >= 1.26.3
+Requires: kubernetes-kubeadm >= 1.26.3-alt2
+Requires: kubernetes-kubelet >= 1.26.3-alt2
+Requires: kubernetes-crio >= 1.26.3-alt2
+Requires: kubernetes-master >= 1.26.3-alt2
+Requires: kubernetes-node >= 1.26.3-alt2
 Requires: etcd >= 3.4.15
 Requires: flannel >= 0.13.0
 # Requires: flannel >= 0.19.2
@@ -62,7 +62,7 @@ Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: cri-o >= 1.26.2
 Requires: cri-tools >= 1.22.0
-Requires: kubernetes-client >= 1.26.3
+Requires: kubernetes-client >= 1.26.3-alt2
 Requires: systemd-container >= 249.16
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
@@ -73,7 +73,7 @@ This package contains utilities for:
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
-Requires: kubernetes-client >= 1.26.3
+Requires: kubernetes-client >= 1.26.3-alt2
 Requires: podsec >= 0.3.1
 Requires: curl >= 7.88.0
 
