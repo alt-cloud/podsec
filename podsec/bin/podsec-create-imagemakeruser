@@ -15,13 +15,13 @@ createImageMaker() {
   cd /home/$user
 
   mkdir -p .config/containers/
-  cat <<EOF > .config/containers/storage.conf
-[storage]
-driver = "overlay"
-[storage.options.overlay]
-mount_program = "/usr/bin/fuse-overlayfs"
-mountopt = "nodev,metacopy=on"
-EOF
+#   cat <<EOF > .config/containers/storage.conf
+# [storage]
+# driver = "overlay"
+# [storage.options.overlay]
+# mount_program = "/usr/bin/fuse-overlayfs"
+# mountopt = "nodev,metacopy=on"
+# EOF
 
   TMPFILE="/tmp/createImageMakerUser.$$"
   jq '.transports.docker."'$regPath'"=[{"type": "signedBy","keyType":"GPGKeys","keyPath": "/var/sigstore/keys/'$user'.pgp"}]' /etc/containers/$linkedPolicyFile > $TMPFILE &&
