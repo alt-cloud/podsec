@@ -3,7 +3,7 @@
 %define kubernetes_grp kube
 
 Name: podsec
-Version: 0.9.15
+Version: 0.9.16
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -162,6 +162,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> ~%u7s_admin_usr/.bash_p
 %_unitdir/podsec-inotify-check-containers.service
 
 %changelog
+* Wed May 10 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.16-alt1
+- 0.9.16
+
 * Sun May 07 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.15-alt1
 - 0.9.15
 
