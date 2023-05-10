@@ -145,7 +145,8 @@ to monitor and identify security threats
 %_sysconfdir/kubernetes/manifests/*
 %_unitdir/*
 /usr/lib/systemd/user/*
-%attr(-,u7s-admin,u7s-admin) /var/lib/u7s-admin/.bashrc
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) /var/lib/%u7s_admin_usr/
+%attr(-,%u7s_admin_usr,%u7s_admin_grp) /var/lib/%u7s_admin_usr/.bashrc
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
