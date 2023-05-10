@@ -46,7 +46,7 @@ case $cmd in
   init)
     if [ "$#" -gt 0 ]
     then
-      echo -ne "Лишние параметры $*\nФормат вызова: \n$0 init\n";
+      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@
       exit
     fi
     controlPlane="initMaster"
@@ -54,9 +54,10 @@ case $cmd in
   join)
     if [ $# -eq 0 ]
     then
-      echo -ne "Отсутствуют параметры\nФормат вызова: \n$0 init|join <параметры>\n";
-      exit 1
+      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@
+      exit
     fi
+    pars=$@
     apiServer=$1
     shift
     while [ $# -gt 0 ]
@@ -64,8 +65,8 @@ case $cmd in
       par=$1
       if [ "${par:0:2}" != '--' ]
       then
-        echo "Отсутствуют '--' у параметра $par в параметрах $**"
-        exit 1
+        machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+        exit
       fi
       par=${par:2}
       case $par in
@@ -82,8 +83,8 @@ case $cmd in
           shift;shift
           ;;
         *)
-          echo "Неизвестный параметр $par";
-          exit 1
+          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+          exit
           ;;
       esac
     done
@@ -99,8 +100,8 @@ case $cmd in
     fi
     ;;
   *)
-    echo -ne "Формат вызова: \n$0 init|join <параметры>\n";
-    exit 1;
+    machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@
+    exit
 esac
 
 uid=`id -u u7s-admin`
@@ -170,7 +171,7 @@ rm -f /etc/kubernetes/*.conf \
   /etc/kubernetes/pki/*.??? \
   /etc/kubernetes/pki/etcd/*.??? 2>/dev/null
 
-if ! machinectl shell u7s-admin@ /bin/sh -x /usr/libexec/podsec/u7s/bin/kubeadm.sh $cmd
+if ! machinectl shell u7s-admin@ /bin/sh /usr/libexec/podsec/u7s/bin/kubeadm.sh $cmd
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"

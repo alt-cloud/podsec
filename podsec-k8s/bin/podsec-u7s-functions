@@ -21,24 +21,24 @@ debug_enabled() {
 
 log_debug() {
 	if debug_enabled; then
-		echo -e "\e[102m\e[97m[DEBUG]\e[49m\e[39m $@"
+		echo -e "\e[102m\e[97m[DEBUG]\e[49m\e[39m $@" >&2
 	fi
 }
 
 log_info() {
-	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
+	echo -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@" >&2
 }
 
 log_info_n() {
-	echo -n -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@"
+	echo -n -e "\e[104m\e[97m[INFO]\e[49m\e[39m $@" >&2
 }
 
 log_warning() {
-	echo -e "\e[101m\e[97m[WARN]\e[49m\e[39m $@"
+	echo -e "\e[101m\e[97m[WARN]\e[49m\e[39m $@" >&2
 }
 
 log_error() {
-	echo -e "\e[101m\e[97m[ERROR]\e[49m\e[39m $@"
+	echo -e "\e[101m\e[97m[ERROR]\e[49m\e[39m $@" >&2
 }
 
 # nsenter utilities
