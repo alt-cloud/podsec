@@ -103,15 +103,18 @@ PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY_PLUGINS:=.1) $(PODSEC_INOTIFY:=.1)
 
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
-bindir = /usr/bin
-libexecdir = /usr/lib
-datadir = /usr/share
-mandir = $(datadir)/man
-man1dir = $(mandir)/man1
 DESTDIR =
-userusnitdir=/usr/lib/systemd/user
-unitdir=/lib/systemd/system
-
+prefix ?= /usr
+sysconfdir ?= /etc
+bindir ?= $(prefix)/bin
+libexecdir ?= $(prefix)/libexec
+datadir ?= $(prefix)/share
+mandir ?= $(datadir)/man
+man1dir ?= $(mandir)/man1
+localstatedir ?= /var/lib
+userunitdir ?= $(prefix)/lib/systemd/user
+unitdir ?= /lib/systemd/system
+nagios_plugdir ?= $(prefix)/lib/nagios/plugins
 
 CP = cp -L
 INSTALL = install
@@ -119,7 +122,6 @@ LN_S = ln -s
 MKDIR_P = mkdir -p
 TOUCH_R = touch -r
 CHMOD = chmod
-
 
 
 TARGETS = $(PROGRAMS)
@@ -140,40 +142,40 @@ install: all
 	cd ./podsec-k8s/bin;$(INSTALL) -m755 $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/bin;$(INSTALL) -m644 $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-	$(MKDIR_P) -m755 $(DESTDIR)/etc/kubernetes/manifests/
+	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	# PODSEC-K8S USERNETES
-	mkdir -p $(DESTDIR)/var/lib/u7s-admin/
-	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)/var/lib/u7s-admin/
-	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin/
-	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)/usr/libexec/podsec/u7s/bin/; tar xvzf $(TMPFILE);
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
+	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
+	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin/
+	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)$(libexecdir)/podsec/u7s/bin/; tar xvzf $(TMPFILE);
 	rm -f $(TMPFILE)
 	# bin
-	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin
-	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)/usr/libexec/podsec/u7s/; tar xvzf $(TMPFILE);
+	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
+	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)$(libexecdir)/podsec/u7s/; tar xvzf $(TMPFILE);
 	# /etc/podsec/u7s
-	mkdir -p $(DESTDIR)/etc/podsec/u7s/config;
-	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)/etc/podsec/u7s/config;tar xvzf $(TMPFILE);
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config;
+	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)$(sysconfdir)/podsec/u7s/config;tar xvzf $(TMPFILE);
 	# USERNETES_MANIFESTS
-	mkdir -p $(DESTDIR)/etc/kubernetes/manifests
-	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)/etc/kubernetes/manifests
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
+	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	# USERNETES_KUBEADM_CONFIGS
-	mkdir -p $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
-	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)/etc/podsec/u7s/config/kubeadm-configs
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
+	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
 	# USER SYSTEMD
-	mkdir -p $(DESTDIR)$(userusnitdir)
-	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)/$(userusnitdir)
+	$(MKDIR_P) $(DESTDIR)$(userunitdir)
+	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)$(userunitdir)
 	# SYSTEMD
-	mkdir -p $(DESTDIR)/etc/systemd/system/user@.service.d/
-	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)/etc/systemd/system/user@.service.d/delegate.conf
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/systemd/system/user@.service.d/
+	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)$(sysconfdir)/systemd/system/user@.service.d/delegate.conf
 	$(MKDIR_P) -m755 $(DESTDIR)$(unitdir)
-	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)/$(unitdir)/u7s.service
+	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)$(unitdir)/u7s.service
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	# PODSEC-NAGIOS
-	$(MKDIR_P) -m755 $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(libexecdir)/nagios/plugins/
+	$(MKDIR_P) -m755 $(DESTDIR)$(nagios_plugdir)
+	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(nagios_plugdir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
