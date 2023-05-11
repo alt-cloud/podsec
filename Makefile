@@ -144,28 +144,28 @@ install: all
 	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	# PODSEC-K8S USERNETES
-	mkdir -p $(DESTDIR)$(localstatedir)/u7s-admin/
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
 	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
-	mkdir -p $(DESTDIR)$(libexecdir)/podsec/u7s/bin/
+	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin/
 	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)$(libexecdir)/podsec/u7s/bin/; tar xvzf $(TMPFILE);
 	rm -f $(TMPFILE)
 	# bin
-	mkdir -p $(DESTDIR)$(libexecdir)/podsec/u7s/bin
+	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
 	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)$(libexecdir)/podsec/u7s/; tar xvzf $(TMPFILE);
 	# /etc/podsec/u7s
-	mkdir -p $(DESTDIR)$(sysconfdir)/podsec/u7s/config;
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config;
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)$(sysconfdir)/podsec/u7s/config;tar xvzf $(TMPFILE);
 	# USERNETES_MANIFESTS
-	mkdir -p $(DESTDIR)$(sysconfdir)/kubernetes/manifests
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	# USERNETES_KUBEADM_CONFIGS
-	mkdir -p $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
 	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
 	# USER SYSTEMD
-	mkdir -p $(DESTDIR)$(userunitdir)
-	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)$(userunitdir)/
+	$(MKDIR_P) $(DESTDIR)$(userunitdir)
+	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)$(userunitdir)
 	# SYSTEMD
-	mkdir -p $(DESTDIR)$(sysconfdir)/systemd/system/user@.service.d/
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/systemd/system/user@.service.d/
 	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)$(sysconfdir)/systemd/system/user@.service.d/delegate.conf
 	$(MKDIR_P) -m755 $(DESTDIR)$(unitdir)
 	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)$(unitdir)/u7s.service
