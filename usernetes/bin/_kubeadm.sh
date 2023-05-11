@@ -1,6 +1,6 @@
 #!/bin/sh
 source podsec-u7s-functions
-# set -x
+set -x
 source $envFile
 
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
@@ -72,6 +72,15 @@ echo "---"
 cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 # yq -y '.bindAddress="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 ) > $configFile
+
+ls -l /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock >&2
+
+until [ -L /run/crio/crio.sock ]
+do
+  echo "Отсутствует /run/crio/crio.sock"
+  ls -l /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock >&2
+  sleep 1
+done
 
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \
