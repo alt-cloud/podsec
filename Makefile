@@ -60,7 +60,6 @@ USERNETES_UNITS= \
 USERNETES_CONFIGS= \
 	cni_net.d\
 	flannel  \
-	modules-load.d \
 	env \
 	ENV
 
@@ -149,6 +148,9 @@ install: all
 	# /etc/podsec/u7s
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config;
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)$(sysconfdir)/podsec/u7s/config;tar xvzf $(TMPFILE);
+	# modules-load.
+	$(MKDIR_P) $(DESTDIR)//lib/modules-load.d/
+	cp usernetes/config/modules-load.d/u7s.conf $(DESTDIR)/lib/modules-load.d/
 	# USERNETES_MANIFESTS
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)$(sysconfdir)/kubernetes/manifests

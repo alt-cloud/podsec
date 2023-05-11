@@ -140,6 +140,7 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %config(noreplace) %_sysconfdir/systemd/system/user@.service.d/*
 %config(noreplace) %_sysconfdir/kubernetes/manifests/*
 %_libexecdir/podsec/u7s
+%_modules_loaddir/u7s.conf
 %_bindir/podsec-k8s-*
 %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*

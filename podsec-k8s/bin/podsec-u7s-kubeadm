@@ -151,8 +151,8 @@ U7S_CACERTHASH=$caCertHash" >> /etc/podsec/u7s/config/env
 # chgrp kube /etc/kubernetes/manifests/
 # ###############################
 
-cp /etc/podsec/u7s/config/modules-load.d/usernetes.conf /etc/modules-load.d/u7s.conf
-modprobe -a $(cat /etc/modules-load.d/u7s.conf)
+# cp /etc/podsec/u7s/config/modules-load.d/usernetes.conf /etc/modules-load.d/u7s.conf
+# modprobe -a $(cat /etc/modules-load.d/u7s.conf)
 
 if ! /bin/grep u7s-admin /etc/subuid
 then
