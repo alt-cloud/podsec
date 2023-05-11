@@ -98,7 +98,4 @@ then
   fi
 fi
 
-# Обеспечение доступа по root
-echo “PermitRootLogin yes” >> /etc/openssh/sshd_config
-systemctl restart sshd
 
