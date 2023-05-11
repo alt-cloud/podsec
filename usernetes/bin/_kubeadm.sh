@@ -73,12 +73,13 @@ cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 # yq -y '.bindAddress="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 ) > $configFile
 
-ls -l /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock >&2
 
+# На новом ядре 6.1 почему то иногда пропадает /run/crio/crio.sock, осивим пока "костыль"
 until [ -L /run/crio/crio.sock ]
 do
   echo "Отсутствует /run/crio/crio.sock"
-  ls -l /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock >&2
+  mkdir -p /run/crio/
+  /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
   sleep 1
 done
 

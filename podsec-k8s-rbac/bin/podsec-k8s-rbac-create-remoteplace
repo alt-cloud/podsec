@@ -8,5 +8,5 @@ fi
 
 clusterIP=$1
 mkdir .kube
-scp clusterIP:~/.kube/config ~/.kube
-chmod 700 ~/.kube
+scp clusterIP:~/.kube/config $HOME/.kube
+chmod 700 $HOME/.kube
