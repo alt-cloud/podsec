@@ -104,14 +104,14 @@ PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY_PLUGINS:=.1) $(PODSEC_INOTIFY:=.1)
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
 bindir = /usr/bin
-libexecdir = /usr/lib
+libexecdir = /usr/libexec
 datadir = /usr/share
 mandir = $(datadir)/man
 man1dir = $(mandir)/man1
 DESTDIR =
 userusnitdir=/usr/lib/systemd/user
 unitdir=/lib/systemd/system
-
+nagios_plugdir = /usr/lib/nagios/plugins
 
 CP = cp -L
 INSTALL = install
@@ -144,12 +144,12 @@ install: all
 	# PODSEC-K8S USERNETES
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/
 	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)/var/lib/u7s-admin/
-	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin/
-	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)/usr/libexec/podsec/u7s/bin/; tar xvzf $(TMPFILE);
+	mkdir -p $(DESTDIR)$(libexecdir)/podsec/u7s/bin/
+	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)$(libexecdir)/podsec/u7s/bin/; tar xvzf $(TMPFILE);
 	rm -f $(TMPFILE)
 	# bin
-	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin
-	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)/usr/libexec/podsec/u7s/; tar xvzf $(TMPFILE);
+	mkdir -p $(DESTDIR)$(libexecdir)/podsec/u7s/bin
+	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)$(libexecdir)/podsec/u7s/; tar xvzf $(TMPFILE);
 	# /etc/podsec/u7s
 	mkdir -p $(DESTDIR)/etc/podsec/u7s/config;
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)/etc/podsec/u7s/config;tar xvzf $(TMPFILE);
@@ -172,8 +172,8 @@ install: all
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	# PODSEC-NAGIOS
-	$(MKDIR_P) -m755 $(DESTDIR)$(libexecdir)/nagios/plugins/
-	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(libexecdir)/nagios/plugins/
+	$(MKDIR_P) -m755 $(DESTDIR)$(nagios_plugdir)
+	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(nagios_plugdir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
