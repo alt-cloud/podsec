@@ -46,7 +46,7 @@ case $cmd in
   init)
     if [ "$#" -gt 0 ]
     then
-      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@
+      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
       exit
     fi
     controlPlane="initMaster"
@@ -54,7 +54,7 @@ case $cmd in
   join)
     if [ $# -eq 0 ]
     then
-      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@
+      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
       exit
     fi
     pars=$@
@@ -65,7 +65,7 @@ case $cmd in
       par=$1
       if [ "${par:0:2}" != '--' ]
       then
-        machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+        machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars 2>/dev/null
         exit
       fi
       par=${par:2}
@@ -83,7 +83,7 @@ case $cmd in
           shift;shift
           ;;
         *)
-          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars 2>/dev/null
           exit
           ;;
       esac
@@ -100,7 +100,7 @@ case $cmd in
     fi
     ;;
   *)
-    machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@
+    machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
     exit
 esac
 
@@ -171,7 +171,7 @@ rm -f /etc/kubernetes/*.conf \
   /etc/kubernetes/pki/*.??? \
   /etc/kubernetes/pki/etcd/*.??? 2>/dev/null
 
-if ! machinectl shell u7s-admin@ /bin/sh /usr/libexec/podsec/u7s/bin/kubeadm.sh $cmd
+if ! machinectl shell u7s-admin@ /bin/sh /usr/libexec/podsec/u7s/bin/kubeadm.sh $cmd 2>/dev/null
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"
@@ -179,8 +179,8 @@ then
   exit 1
 fi
 
-machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target
-machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target
+# machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target 2>/dev/null
+machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
 /sbin/systemctl enable  u7s.service
 /sbin/systemctl start u7s.service
 
