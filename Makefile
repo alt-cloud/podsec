@@ -79,20 +79,14 @@ USERNETES_KUBEADM_CONFIGS= \
 	KubeProxyConfiguration.yaml
 
 PODSEC_INOTIFY_PLUGINS = \
-	podsec-inotify-check-audit \
-	podsec-inotify-check-images \
-	podsec-inotify-check-k8s \
-	podsec-inotify-check-policy \
-	podsec-inotify-check-rbac \
-	podsec-inotify-check-registry
+	podsec-inotify-check-policy
 
 PODSEC_INOTIFY_PROGRAMMS = \
 	podsec-inotify-create-nagiosuser \
 	podsec-inotify-check-containers
 
 PODSEC_INOTIFY_FUNCTIONS = \
-	podsec-inotify-functions \
-	podsec-inotify-create-nagiosuser
+	podsec-inotify-functions
 
 TMPFILE  := $(shell mktemp)
 
