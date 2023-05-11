@@ -3,6 +3,7 @@
 %define kubernetes_grp kube
 %define _libexecdir %_prefix/libexec
 %define nagios_plugdir %_prefix/lib/nagios/plugins
+%define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
 Version: 0.9.17
@@ -21,18 +22,17 @@ Requires: podman >= 4.4.2
 Requires: shadow-submap >= 4.5
 Requires: nginx >= 1.22.1
 Requires: docker-registry >= 2.8.1
-Requires: pinentry-common >= 1.1.0
-Requires: jq >= 1.6
-Requires: yq >= 2.12.2
+Requires: pinentry-common
+Requires: jq
+Requires: yq
 Requires: skopeo >= 1.9.1
-Requires: sh >= 4.4.23
-Requires: wget >= 1.21.3
-Requires: coreutils >= 8.32.0
-Requires: conntrack-tools >= 1.4.6
-Requires: findutils >= 4.8.0
-Requires: iproute2 >= 5.13.0
-Requires: iptables >= 1.8.7
-Requires: openssh-server >= 7.8
+Requires: wget
+Requires: coreutils
+Requires: conntrack-tools
+Requires: findutils
+Requires: iproute2
+Requires: iptables
+Requires: openssh-server
 
 %description
 This package contains utilities for:
@@ -54,18 +54,17 @@ Requires: kubernetes-kubelet >= 1.26.3-alt2
 Requires: kubernetes-crio >= 1.26.3-alt2
 Requires: kubernetes-master >= 1.26.3-alt2
 Requires: kubernetes-node >= 1.26.3-alt2
+Requires: kubernetes-client >= 1.26.3-alt2
 Requires: etcd >= 3.4.15
 Requires: flannel >= 0.13.0
 # Requires: flannel >= 0.19.2
 Requires: cni-plugin-flannel >= 1.1.2
-#Requires: cni-plugin-flannel >= 1.2.0
 Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: cri-o >= 1.26.2
 Requires: cri-tools >= 1.22.0
-Requires: kubernetes-client >= 1.26.3-alt2
-Requires: systemd-container >= 249.16
+Requires: systemd-container
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
 %description k8s
@@ -76,8 +75,8 @@ This package contains utilities for:
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
 Requires: kubernetes-client >= 1.26.3-alt2
-Requires: podsec >= 0.3.1
-Requires: curl >= 7.88.0
+Requires: podsec >= %EVR
+Requires: curl
 
 
 %description k8s-rbac
@@ -89,9 +88,9 @@ This package contains utilities for
 %package inotify
 Summary: Set of scripts for security monitoring
 Group: Development/Other
-Requires: inotify-tools >= 3.20
-Requires: podsec >= 0.3.1
-Requires: openssh-server >= 7.8
+Requires: inotify-tools
+Requires: podsec >= %EVR
+Requires: openssh-server
 
 %description inotify
 A set of scripts for  security monitoring by crontabs or
@@ -108,17 +107,20 @@ to monitor and identify security threats
 %makeinstall_std
 
 %pre
-%_sbindir/groupadd -r -f podman &>/dev/null
-%_sbindir/groupadd -r -f podman_dev &>/dev/null
+groupadd -r -f podman >/dev/null 2>&1 ||:
+groupadd -r -f podman_dev >/dev/null 2>&1 ||:
 
 
 %pre k8s
-%_sbindir/groupadd -r -f %u7s_admin_grp &>/dev/null
-%_sbindir/useradd -r -m -g %u7s_admin_grp -d %_localstatedir/%u7s_admin_usr -G %kubernetes_grp,systemd-journal,podman,fuse \
-    -c 'usernet user account' %u7s_admin_usr  >/dev/null 2>&1 || :
+groupadd -r -f %u7s_admin_grp >/dev/null 2>&1 ||:
+useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman,fuse \
+    -c 'usernet user account' %u7s_admin_usr >/dev/null 2>&1 ||:
+
+%post
+%post_systemd podsec-inotify-check-containers.service u7s.service
+
 %preun
-%preun_systemd podsec-inotify-check-containers.service
-%preun_systemd u7s.service
+%preun_systemd podsec-inotify-check-containers.service u7s.service
 
 %files
 %_bindir/podsec*
@@ -129,25 +131,26 @@ to monitor and identify security threats
 %exclude %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-u7s-*
 %exclude %_mandir/man?/podsec-inotify-*
+%dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
 
 %files k8s
+%dir %_sysconfdir/podsec/u7s
+%config(noreplace) %_sysconfdir/podsec/u7s/*
+%config(noreplace) %_sysconfdir/systemd/system/user@.service.d/*
+%config(noreplace) %_sysconfdir/kubernetes/manifests/*
 %_libexecdir/podsec/u7s
 %_bindir/podsec-k8s-*
 %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*
-%_unitdir/u7s.service
 %_mandir/man?/podsec-k8s-*
 %_mandir/man?/podsec-u7s-*
-%_userunitdir/*
-%_sysconfdir/podsec/u7s/*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
-%_sysconfdir/systemd/system/*
-%_sysconfdir/kubernetes/manifests/*
 %_unitdir/*
-/usr/lib/systemd/user/*
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) /var/lib/%u7s_admin_usr/
-%attr(-,%u7s_admin_usr,%u7s_admin_grp) /var/lib/%u7s_admin_usr/.bashrc
+%exclude %_unitdir/podsec-inotify-check-containers.service
+%_userunitdir/*
+%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
+%config(noreplace) %attr(0640,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.bashrc
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-*
