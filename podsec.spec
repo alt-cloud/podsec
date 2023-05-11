@@ -1,6 +1,8 @@
 %define u7s_admin_usr u7s-admin
 %define u7s_admin_grp u7s-admin
 %define kubernetes_grp kube
+%define _libexecdir %_prefix/libexec
+%define nagios_plugdir %_prefix/lib/nagios/plugins
 
 Name: podsec
 Version: 0.9.17
@@ -123,14 +125,14 @@ to monitor and identify security threats
 %exclude %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-*
 %exclude %_bindir/podsec-inotify-*
-%exclude %_libexecdir/nagios/plugins/podsec-inotify-*
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-u7s-*
 %exclude %_mandir/man?/podsec-inotify-*
+%dir %_libexecdir/podsec
 
 %files k8s
-/usr/libexec/podsec/u7s/*
+%_libexecdir/podsec/u7s
 %_bindir/podsec-k8s-*
 %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*
@@ -139,7 +141,6 @@ to monitor and identify security threats
 %_mandir/man?/podsec-u7s-*
 %_userunitdir/*
 %_sysconfdir/podsec/u7s/*
-/usr/libexec/podsec/u7s/*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_sysconfdir/systemd/system/*
 %_sysconfdir/kubernetes/manifests/*
@@ -153,11 +154,9 @@ to monitor and identify security threats
 %_mandir/man?/podsec-k8s-rbac-*
 
 %files inotify
-%_libexecdir/nagios/plugins/podsec-inotify-*
+%nagios_plugdir/podsec-inotify-*
 %_bindir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*
-%attr(-,root,root) %_libexecdir/nagios/
-%attr(-,root,root) %_libexecdir/nagios/*
 %_unitdir/podsec-inotify-check-containers.service
 
 %changelog
