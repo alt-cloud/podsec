@@ -21,10 +21,6 @@ fi
 
 uid=$(id -u u7s-admin)
 
-mkdir -p /run/crio/
-chown u7s-admin:u7s-admin /run/crio/
-/bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
-
 KUBEADM_CONFIGS_DIR=/etc/podsec/u7s/config/kubeadm-configs
 configFile="$XDG_CONFIG_HOME/usernetes/$cmd.yaml"
 host=$(hostname)
@@ -73,16 +69,8 @@ cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 # yq -y '.bindAddress="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 ) > $configFile
 
-
-# На новом ядре 6.1 почему то иногда пропадает /run/crio/crio.sock, возможно не успевает стартовать сервис rootlesskit
-until [ -S /run/user/${uid}/usernetes/crio/crio.sock ]
-do
-  echo "Отсутствует сокет  /run/user/${uid}/usernetes/crio/crio.sock"
-  sleep 1
-done
-
-mkdir -p /run/crio/
-/bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock
+mkdir -p /run/crio/ || :;
+/bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock || :;
 
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \

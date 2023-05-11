@@ -13,15 +13,14 @@ source $envFile
 # set -x
 cmd=$1
 
-# uid=$(id -u)
-# echo "$0: uid=$uid"
-# export XDG_RUNTIME_DIR="/run/user/$uid/"
-
-if ! /sbin/systemctl --no-pager --user status rootlesskit.service >/dev/null 2>&1
-then
+# На новом ядре 6.1 почему то иногда пропадает /run/crio/crio.sock, возможно не успевает стартовать сервис rootlesskit
+until [ -S /run/user/${U7S_UID}/usernetes/crio/crio.sock ]
+do
+  /sbin/systemctl --user -T stop rootlesskit.service
+  sleep 1
   /sbin/systemctl --user -T start rootlesskit.service
-fi
-
+  sleep 3
+done
 
 nsenter_u7s _kubeadm.sh "$cmd"
 
