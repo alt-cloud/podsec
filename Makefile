@@ -55,6 +55,7 @@ PODSEC_K8S_RBAC_FUNCTIONS = \
 USERNETES_UNITS= \
 	rootlesskit.service \
 	kubelet.service \
+	kube-proxy.service \
 	u7s.target
 
 USERNETES_CONFIGS= \
@@ -82,7 +83,6 @@ PODSEC_INOTIFY_PLUGINS = \
 	podsec-inotify-check-policy
 
 PODSEC_INOTIFY_PROGRAMMS = \
-	podsec-inotify-create-nagiosuser \
 	podsec-inotify-check-containers
 
 PODSEC_INOTIFY_FUNCTIONS = \
@@ -138,9 +138,6 @@ install: all
 	# PODSEC-K8S USERNETES
 	mkdir -p $(DESTDIR)/var/lib/u7s-admin/
 	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)/var/lib/u7s-admin/
-	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin/
-	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)/usr/libexec/podsec/u7s/bin/; tar xvzf $(TMPFILE);
-	rm -f $(TMPFILE)
 	# bin
 	mkdir -p $(DESTDIR)/usr/libexec/podsec/u7s/bin
 	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)/usr/libexec/podsec/u7s/; tar xvzf $(TMPFILE);

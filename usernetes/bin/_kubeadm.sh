@@ -73,6 +73,7 @@ cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 # yq -y '.bindAddress="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 ) > $configFile
 
+
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \
   --config $configFile

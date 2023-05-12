@@ -37,8 +37,21 @@ FLANNEL_MTU=1450
 FLANNEL_IPMASQ=true
 EOF
 
-uid=$(id -u u7s-admin)
-socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
+if [ -n "$U7S_CONTROLPLANE" ]
+then
+	(
+	# Установить правило передаресации 443 на 6443 после появления KUBE-SERVICES
+	set -x
+	until /sbin/iptables -L PREROUTING -t nat  | grep KUBE-SERVICES
+	do
+		sleep 1
+	done
+	/sbin/iptables -I PREROUTING -t nat -p tcp -d 10.96.0.1 --dport 443 -j DNAT --to 10.96.0.1:6443
+  /sbin/iptables -I PREROUTING -t nat -p tcp -d 10.96.0.1 --dport ${U7S_TAPIP} -j DNAT --to ${U7S_TAPIP}:6443
+	) &
+fi
+
+socket="unix:///run/user/$U7S_UID/usernetes/crio/crio.sock"
 
 kubelet \
 	--cert-dir /etc/kubernetes/pki \

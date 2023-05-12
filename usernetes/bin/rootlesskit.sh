@@ -115,7 +115,7 @@ else
 	/sbin/ip a del 10.96.0.100/12 dev tap0;
 	if [ -n "$U7S_CONTROLPLANE" ]
 	then
-		/sbin/iptables -A PREROUTING -t nat -p tcp --dport 443 -j DNAT --to ${U7S_TAPIP}:6443
+		/sbin/iptables -I PREROUTING -t nat -p tcp --dport 443 -j DNAT --to ${U7S_TAPIP}:6443
 	fi
 
 	rc=0
