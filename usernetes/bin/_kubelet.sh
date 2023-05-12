@@ -1,8 +1,9 @@
 #!/bin/sh
 source podsec-u7s-functions
 source $envFile
+logger  "=============================================== KUBELET ====================================="
 
-# set -x
+set -x
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n"  >&2
 
@@ -44,7 +45,6 @@ if [ -n "$U7S_CONTROLPLANE" ]
 then
 	(
 	# Установить правило передаресации 443 на 6443 после появления KUBE-SERVICES
-	set -x
 	until /sbin/iptables -L PREROUTING -t nat  | grep KUBE-SERVICES
 	do
 					sleep 1
