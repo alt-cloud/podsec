@@ -3,7 +3,7 @@
 %define kubernetes_grp kube
 
 Name: podsec
-Version: 0.9.19
+Version: 0.9.21
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -161,6 +161,9 @@ to monitor and identify security threats
 %_unitdir/podsec-inotify-check-containers.service
 
 %changelog
+* Fri May 12 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.21-alt1
+- 0.9.21
+
 * Thu May 11 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.19-alt1
 - 0.9.19
 
