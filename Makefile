@@ -74,6 +74,7 @@ USERNETES_KUBEADM_CONFIGS= \
 	ClusterConfigurationWithEtcd.yaml \
 	InitConfiguration.yaml \
 	JoinConfiguration.yaml \
+	JoinControlPlaneConfijuration.yaml \
 	KubeletConfiguration.yaml \
 	KubeProxyConfiguration.yaml
 
