@@ -9,12 +9,27 @@ echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/use
 # extIP=$1
 cmd=$1
 
-if [ "$U7S_CONTROLPLANE" = 'initMaster' ]
-then
-  # Создаем каталог базы etcd
-  rm -rf /var/lib/Etcd
-  mkdir -p /var/lib/Etcd
-fi
+# if [ "$U7S_CONTROLPLANE" = 'initMaster' ]
+# then
+#   # Создаем каталог базы etcd
+#   rm -rf /var/lib/Etcd
+#   mkdir -p /var/lib/Etcd
+# fi
+
+# if [ "$U7S_CONTROLPLANE" = 'initMaster' ]
+# then
+#   # Создаем каталог базы etcd
+#   rm -rf /var/lib/u7s-admin/usernetes/var/lib/etcd
+#   mkdir -p /var/lib/u7s-admin/usernetes/var/lib/etcd
+# fi
+#
+# if [ "$U7S_CONTROLPLANE" = 'initMaster' ]
+# then
+#   # Создаем каталог базы etcd
+#   rm -rf /var/lib/podsec/etcd
+#   mkdir -p /var/lib/podsec/etcd
+#   chown u7s-admin:u7s-admin /var/lib/podsec/etcd
+# fi
 
 # Копируем coredns.yaml  kube-flannel.yml
 # cp /etc/podsec/u7s/config/manifests/* /etc/kubernetes/manifests/
