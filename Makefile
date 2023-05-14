@@ -163,9 +163,9 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(userunitdir)
 	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)$(userunitdir)
 	# SYSTEMD
-	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/systemd/system/user@.service.d/
-	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)$(sysconfdir)/systemd/system/user@.service.d/delegate.conf
 	$(MKDIR_P) -m755 $(DESTDIR)$(unitdir)
+	$(MKDIR_P) $(DESTDIR)$(unitdir)/user@.service.d/
+	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)$(unitdir)/user@.service.d/delegate.conf
 	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)$(unitdir)/u7s.service
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
