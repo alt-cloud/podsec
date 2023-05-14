@@ -137,6 +137,7 @@ install: all
 	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	# PODSEC-K8S USERNETES
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/etcd
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
 	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin/

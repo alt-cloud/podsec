@@ -6,7 +6,7 @@ imageRepository: registry.local/k8s-p10
 dns: {}
 etcd:
   local:
-    dataDir: /var/lib/u7s-admin/usernetes/var/lib/etcd
+    dataDir: /var/lib/podsec/u7s/etcd
     imageRepository: registry.local/k8s-p10
     serverCertSANs:
       - 10.96.0.1
