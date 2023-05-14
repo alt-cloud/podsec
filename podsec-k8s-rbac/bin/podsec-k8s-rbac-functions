@@ -8,6 +8,11 @@ setEnv() {
 }
 
 setUserKubeconfigAccess() {
+  if ! id -nG | grep wheel
+  then
+    echo "Пользователь не входит в группу wheel" >&2
+    exit 1
+  fi
   slist=; n=1; while [ $n -le 64 ]; do slist+=" $n"; let n=$n+1; done
   trap "while ! su - -c 'chmod 700 $KUBECONFIGDIR'; do :; done" $slist
   echo "Введите пароль пользователя root"
@@ -15,6 +20,11 @@ setUserKubeconfigAccess() {
 }
 
 unsetUserKubeconfigAccess() {
+  if ! id -nG | grep wheel
+  then
+    echo "Пользователь не входит в группу wheel" >&2
+    exit 1
+  fi
   user=$1
   echo "Введите пароль пользователя root"
   while ! su - -c "chown -R $user:k8s $KUBECONFIGDIR;chmod 700 $KUBECONFIGDIR"; do :; done
