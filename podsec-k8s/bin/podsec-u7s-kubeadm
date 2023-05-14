@@ -137,6 +137,10 @@ case $cmd in
             exit
           fi
           ;;
+        'certificate-key')
+          certificateKey=$2
+          shift;shift
+          ;;
         'service-cidr')
           serviceCidr=$2
           shift;shift
@@ -226,6 +230,7 @@ U7S_APISERVERIP=$apiServerIP
 U7S_APISERVERPORT=$apiServerPort
 U7S_TOKEN=$token
 U7S_CACERTHASH=$caCertHash
+U7S_CERIFICATEKEY=$certificateKey
 U7S_SERVICECIDR=$serviceCidr
 U7S_SERVICECIDRIP=$serviceCidrIP
 U7S_SERVICEMASK=$serviceMask

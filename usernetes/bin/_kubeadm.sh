@@ -28,7 +28,8 @@ else
           .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |
           .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'" |
           .nodeRegistration.name |= "'$host'" |
-          .controlPlane.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"
+          .controlPlane.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'" |
+          .controlPlane.certificateKey |= "'$U7S_CERIFICATEKEY'"
           ' $KUBEADM_CONFIGS_DIR/JoinControlPlaneConfijuration.yaml
   else
    yq -y '
@@ -66,6 +67,15 @@ cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 mkdir -p /run/crio/ || :;
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock || :;
 
+pars=
+
+# TO DO - show join string for control plane
+# if [ $cmd = 'init' ]
+# then
+#   pars='--upload-certs'
+# fi
+
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \
+   $pars \
   --config $configFile

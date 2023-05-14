@@ -16,6 +16,6 @@ controlPlane:
   localAPIEndpoint:
     advertiseAddress: U7S_EXTIP
     bindPort: 6443
-  certificateKey:
+  certificateKey: U7S_CERIFICATEKEY
 
 # https://stackoverflow.com/questions/51126164/how-do-i-find-the-join-command-for-kubeadm-on-the-master
