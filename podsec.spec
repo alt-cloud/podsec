@@ -167,6 +167,9 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_unitdir/podsec-inotify-check-containers.service
 
 %changelog
+* Sun May 14 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.28-alt1
+- 0.9.28
+
 * Sun May 14 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.27-alt1
 - 0.9.27
 
