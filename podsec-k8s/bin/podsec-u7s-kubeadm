@@ -31,13 +31,6 @@ fi
 
 cmd=$1
 
-# if [ "$cmd" != 'init' -a "$cmd" != 'join' ]
-# then
-#   echo -ne "Неверная команда $cmd" >&2
-#   format
-#   exit 1
-# fi
-
 shift
 controlPlane=
 token=
@@ -48,11 +41,6 @@ apiServer=
 ifs=$IFS
 case $cmd in
   init)
-#     if [ "$#" -gt 0 ]
-#     then
-#       machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
-#       exit
-#     fi
     controlPlane="initMaster"
     pars=$@
     while [ $# -gt 0 ]
@@ -110,7 +98,7 @@ case $cmd in
       par=$1
       if [ "${par:0:2}" != '--' ]
       then
-        machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars 2>/dev/null
+        echo "Неверный параметр '--$par' в операции 'join'" >&1
         exit
       fi
       par=${par:2}
@@ -244,23 +232,7 @@ U7S_SLIRP4IP=$slirp4IP
 U7S_CONTROLPLANEENDPOINT=$controlPlaneEndpoint
 " >> /etc/podsec/u7s/config/env
 
-
-###############################
-# Данные команды будут удалены после установки соответсвующих прав в пакетах в пакете kubernetes-common-1.26.3-alt2
-#
-# # kubernetes-common
-# chmod 775 /etc/kubernetes
-# chgrp kube /etc/kubernetes
-#
-# # kubernetes-kubelet
-# chmod 775 /etc/kubernetes/manifests/
-# chgrp kube /etc/kubernetes/manifests/
-# ###############################
-
-# cp /etc/podsec/u7s/config/modules-load.d/usernetes.conf /etc/modules-load.d/u7s.conf
-# modprobe -a $(cat /etc/modules-load.d/u7s.conf)
-
-if ! /bin/grep u7s-admin /etc/subuid
+if ! /bin/grep u7s-admin /etc/subuid >/dev/null 2>&1
 then
   # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
   /usr/sbin/useradd -M u7s_admin_temp
