@@ -3,7 +3,7 @@ source podsec-u7s-functions
 source $envFile
 
 ip a add  $U7S_TAPIP/12 dev $U7S_EXTDEV  || :;
-iptables -I POSTROUTING -t nat -d $U7S_SERVICECIDR/$U7S_SERVICEMASK -j SNAT --to $U7S_TAPIP  || :;
+iptables -I POSTROUTING -t nat -d $U7S_SERVICECIDR -j SNAT --to $U7S_TAPIP  || :;
 if [ U7S_CONTROLPLANE = 'initMaster' ]
 then
   ip a add $U7S_KUBERNETESCLUSTERDNS/$U7S_SERVICEMASK dev $U7S_EXTDEV  || :;

@@ -48,6 +48,10 @@ then
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
+         .controllerManager.extraArgs."cluster-cidr" |= "'$U7S_PODNETWORKCIDR'" |
+         .controllerManager.extraArgs."service-cluster-ip-range" |= "'$U7S_SERVICECIDR'" |
+         .networking.podSubnet |= "'$U7S_PODNETWORKCIDR'" |
+         .networking.serviceSubnet |= "'$U7S_SERVICECIDR'" |
          .controlPlaneEndpoint = "'${U7S_APISERVER}'"
         ' $KUBEADM_CONFIGS_DIR/ClusterConfigurationWithEtcd.yaml
   echo "---"

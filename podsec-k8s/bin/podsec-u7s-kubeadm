@@ -83,8 +83,15 @@ case $cmd in
           serviceCidr=$2
           shift;shift
           set -- $(getCidr $serviceCidr)
-          serviceCidr=$1
+          serviceCidrIP=$1
           serviceMask=$2
+        ;;
+        'pod-network-cidr')
+          podNetworkCidr=$2
+          shift;shift
+          set -- $(getCidr $podNetworkCidr)
+          podNetworkCidr=$1
+          podNetworkMask=$2
         ;;
       esac
     done
@@ -134,7 +141,7 @@ case $cmd in
           serviceCidr=$2
           shift;shift
           set -- $(getCidr $serviceCidr)
-          serviceCidr=$1
+          serviceCidrIP=$1
           serviceMask=$2
           ;;
         *)
@@ -163,8 +170,16 @@ uid=`id -u u7s-admin`
 
 if [ -z "$serviceCidr" ]
 then
-  serviceCidr='10.96.0.0'
+  serviceCidrIP='10.96.0.0'
   serviceMask='12'
+  serviceCidr="$serviceCidrIP/$serviceMask"
+fi
+
+if [ -z "$podNetworkCidr" ]
+then
+  podNetworkCidrIP='10.244.0.0'
+  podNetworkMask='16'
+  podNetworkCidr="$podNetworkCidrIP/$podNetworkMask"
 fi
 
 if [ -z "$extIP" ]
@@ -212,8 +227,12 @@ U7S_APISERVERPORT=$apiServerPort
 U7S_TOKEN=$token
 U7S_CACERTHASH=$caCertHash
 U7S_SERVICECIDR=$serviceCidr
+U7S_SERVICECIDRIP=$serviceCidrIP
 U7S_SERVICEMASK=$serviceMask
-U7S_ROOTLESSKIT_FLAGS=--cidr=$serviceCidr/$serviceMask
+U7S_PODNETWORKCIDR=$podNetworkCidr
+U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
+U7S_PODNETWORKMASK=$podNetworkMask
+U7S_ROOTLESSKIT_FLAGS=--cidr=$serviceCidr
 U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
 U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
 U7S_SLIRP4IP=$slirp4IP
