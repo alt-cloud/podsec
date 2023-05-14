@@ -31,30 +31,68 @@ fi
 
 cmd=$1
 
-if [ "$cmd" != 'init' -a "$cmd" != 'join' ]
-then
-  echo -ne "Неверная команда $cmd" >&2
-  format
-  exit 1
-fi
+# if [ "$cmd" != 'init' -a "$cmd" != 'join' ]
+# then
+#   echo -ne "Неверная команда $cmd" >&2
+#   format
+#   exit 1
+# fi
 
 shift
 controlPlane=
 token=
 caCertHash=
+extIP=
+serviceCidr=
+apiServer=
+ifs=$IFS
 case $cmd in
   init)
-    if [ "$#" -gt 0 ]
-    then
-      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
-      exit
-    fi
+#     if [ "$#" -gt 0 ]
+#     then
+#       machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
+#       exit
+#     fi
     controlPlane="initMaster"
+    pars=$@
+    while [ $# -gt 0 ]
+    do
+      par=$1
+      if [ "${par:0:2}" != '--' ]
+      then
+        echo "Команда $par не поддерживается" >&2
+        exit
+      fi
+      par=${par:2}
+      case $par in
+        'apiserver-advertise-address')
+          extIP=$2
+          shift; shift
+          extDev=$(getExtDev $extIP)
+          if [ -z "$extDev" ]
+          then
+            echo "Для IP-адреса '$extIP' нет интерфейса" >&2
+            exit
+          fi
+        ;;
+        'control-plane-endpoint')
+          apiServer=$2
+          shift;shift
+        ;;
+        'service-cidr')
+          serviceCidr=$2
+          shift;shift
+          set -- $(getCidr $serviceCidr)
+          serviceCidr=$1
+          serviceMask=$2
+        ;;
+      esac
+    done
     ;;
   join)
     if [ $# -eq 0 ]
     then
-      machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
+      echo "Команда $par не поддерживается" >&2
       exit
     fi
     pars=$@
@@ -82,6 +120,23 @@ case $cmd in
           caCertHash=$2
           shift;shift
           ;;
+        'apiserver-advertise-address')
+          extIP=$2
+          shift; shift
+          extDev=$(getExtDev $extIP)
+          if [ -z "$extDev" ]
+          then
+            echo "Для IP-адреса '$extIP' нет интерфейса" >&2
+            exit
+          fi
+          ;;
+        'service-cidr')
+          serviceCidr=$2
+          shift;shift
+          set -- $(getCidr $serviceCidr)
+          serviceCidr=$1
+          serviceMask=$2
+          ;;
         *)
           machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars 2>/dev/null
           exit
@@ -105,15 +160,34 @@ case $cmd in
 esac
 
 uid=`id -u u7s-admin`
-extIP=$(getExtIP)
-extDev=$(getExtDev $extIP)
+
+if [ -z "$serviceCidr" ]
+then
+  serviceCidr='10.96.0.0'
+  serviceMask='12'
+fi
+
+if [ -z "$extIP" ]
+then
+  extIP=$(getExtIP)
+  extDev=$(getExtDev $extIP)
+fi
 
 if [ "$controlPlane" = 'initMaster' ]
 then
-  tapIP=10.96.0.1
+  tapIP=$(getKubernetesClusterIP $serviceCidr)
 else
-  tapIP=$(getStaticClusterIP $extIP)
+  tapIP=$(getStaticClusterIP $extIP $serviceCidr)
 fi
+
+if [ -z "$apiServer" ]
+then
+  apiServer="$extIP:6443"
+fi
+
+kubernetesClusterIP=$(getKubernetesClusterIP $serviceCidr)
+kubernetesClusterDNS="${kubernetesClusterIP}0"
+slirp4IP="${kubernetesClusterIP}00"
 
 ifs=$IFS
 IFS=:
@@ -136,7 +210,15 @@ U7S_APISERVER=$apiServer
 U7S_APISERVERIP=$apiServerIP
 U7S_APISERVERPORT=$apiServerPort
 U7S_TOKEN=$token
-U7S_CACERTHASH=$caCertHash" >> /etc/podsec/u7s/config/env
+U7S_CACERTHASH=$caCertHash
+U7S_SERVICECIDR=$serviceCidr
+U7S_SERVICEMASK=$serviceMask
+U7S_ROOTLESSKIT_FLAGS=--cidr=$serviceCidr/$serviceMask
+U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
+U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
+U7S_SLIRP4IP=$slirp4IP
+U7S_CONTROLPLANEENDPOINT=$controlPlaneEndpoint
+" >> /etc/podsec/u7s/config/env
 
 
 ###############################
