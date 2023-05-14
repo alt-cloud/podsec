@@ -140,7 +140,21 @@ getExtIP() {
 # Получение имени внешнего устройства
 getExtDev() {
 	extIP=$1
+	ifs=$IFS
+	IFS=.
+	set -- $extIP
+	IFS=$ifs
+	if [ $# _ne 4 ]
+	then
+		echo "Некорректный адрес '$extIP'" >&2
+		exit
+	fi
 	set -- $(ip a | grep $extIP)
+	l=${#extIP}
+	if [ "$1" != 'inet' -a ${2:$l:1} != '/' ]
+	then
+		return
+	fi
 	while [ $# -gt 1 ]; do shift; done
 	echo $1
 }
@@ -149,6 +163,7 @@ getExtDev() {
 # См. https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/ для Cidr 10.96.0.0/12
 getStaticClusterIP() {
 	extIP=$1
+	serviceCidr=$2
 	ifs=$IFS
 	IFS=.
 	set -- $extIP
@@ -161,7 +176,39 @@ getStaticClusterIP() {
 			let minor+=3
 		fi
 	fi
-	echo "10.96.$major.$minor"
+	ifs=$IFS
+	IFS=.
+	set -- $serviceCidr
+	IFS=$ifs
+	echo "${1}.${2}.${major}.${minor}"
+}
+
+getCidr() {
+	serviceCidr=$1
+	shift; shift
+	IFS=/
+	set -- $serviceCidr
+	IFS=$ifs
+	serviceCidr=$1
+	serviceMask=$2
+	IFS=.
+	set -- $serviceCidr
+	IFS=$ifs
+	if [ $# -ne 4 ]
+	then
+		echo "Некорректный адрес --service-cidr '$serviceCidr'" >&1
+		exit 1
+	fi
+	echo $serviceCidr $serviceMask
+}
+
+getKubernetesClusterIP() {
+	serviceCidr=$1
+	ifs=$IFS
+	IFS=.
+	set -- $serviceCidr
+	IFS=$ifs
+	echo "${1}.${2}.${3}.1"
 }
 
 
