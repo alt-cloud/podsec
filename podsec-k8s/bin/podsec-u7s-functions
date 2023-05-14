@@ -144,7 +144,7 @@ getExtDev() {
 	IFS=.
 	set -- $extIP
 	IFS=$ifs
-	if [ $# _ne 4 ]
+	if [ $# -ne 4 ]
 	then
 		echo "Некорректный адрес '$extIP'" >&2
 		exit
