@@ -213,8 +213,7 @@ host-226   Ready    <none>          8m30s   v1.26.3   10.96.0.1     <none>      
 5. На `master-узле` под пользоваталем `root` выполните команду:
 
 ```
-# machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh \
-    kubectl apply -f ~u7s-admin/usernetes/manifests/kube-flannel.yml
+# machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
 Connected to the local host. Press ^] three times within 1s to exit session.
 [INFO] Entering RootlessKit namespaces: OK
 namespace/kube-flannel created
