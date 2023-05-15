@@ -70,10 +70,10 @@ mkdir -p /run/crio/ || :;
 pars=
 
 # TO DO - show join string for control plane
-# if [ $cmd = 'init' ]
-# then
-#   pars='--upload-certs'
-# fi
+if [ $cmd = 'init' ]
+then
+  pars='--upload-certs'
+fi
 
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \
