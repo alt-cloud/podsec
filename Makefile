@@ -71,7 +71,8 @@ USERNETES_MANIFESTS = \
 	coredns.yaml
 
 USERNETES_KUBEADM_CONFIGS= \
-	ClusterConfigurationWithEtcd.yaml \
+	InitClusterConfiguration.yaml \
+	JoinClusterConfiguration.yaml \
 	InitConfiguration.yaml \
 	JoinConfiguration.yaml \
 	JoinControlPlaneConfijuration.yaml \

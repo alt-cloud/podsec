@@ -150,7 +150,6 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_unitdir/*
 %exclude %_unitdir/podsec-inotify-check-containers.service
 %_userunitdir/*
-%dir %attr(0750,root,root) %_sysconfdir/systemd/system/user@.service.d
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s

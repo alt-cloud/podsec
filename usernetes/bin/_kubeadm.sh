@@ -45,11 +45,7 @@ if [ -n "$U7S_CONTROLPLANE" ]
 then
   if [ "$U7S_CONTROLPLANE" =  'initMaster' ]
   then
-    state='new'
-  else
-    state='existing'
-  fi
-  yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
+    yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
          .etcd.local.extraArgs."initial-cluster" |="'${host}=https://0.0.0.0:2380'" |
          .etcd.local.extraArgs.name |= "'$host'" |
          .etcd.local.extraArgs."initial-cluster-state" |= "'$state'" |
@@ -61,7 +57,20 @@ then
          .networking.podSubnet |= "'$U7S_PODNETWORKCIDR'" |
          .networking.serviceSubnet |= "'$U7S_SERVICECIDR'" |
          .controlPlaneEndpoint = "'${U7S_APISERVER}'"
-        ' $KUBEADM_CONFIGS_DIR/ClusterConfigurationWithEtcd.yaml
+        ' $KUBEADM_CONFIGS_DIR/InitClusterConfiguration.yaml
+  else
+    yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
+         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
+         .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
+         .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
+         .controllerManager.extraArgs."cluster-cidr" |= "'$U7S_PODNETWORKCIDR'" |
+         .controllerManager.extraArgs."service-cluster-ip-range" |= "'$U7S_SERVICECIDR'" |
+         .networking.podSubnet |= "'$U7S_PODNETWORKCIDR'" |
+         .networking.serviceSubnet |= "'$U7S_SERVICECIDR'" |
+         .controlPlaneEndpoint = "'${U7S_APISERVER}'"
+        ' $KUBEADM_CONFIGS_DIR/JoinClusterConfiguration.yaml
+  fi
+
   echo "---"
 fi
 cat $KUBEADM_CONFIGS_DIR/KubeletConfiguration.yaml
