@@ -43,9 +43,16 @@ fi
 echo "---"
 if [ -n "$U7S_CONTROLPLANE" ]
 then
+  if [ "$U7S_CONTROLPLANE" =  'initMaster' ]
+  then
+    state='new'
+  else
+    state='existing'
+  fi
   yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
          .etcd.local.extraArgs."initial-cluster" |="'${host}=https://0.0.0.0:2380'" |
          .etcd.local.extraArgs.name |= "'$host'" |
+         .etcd.local.extraArgs."initial-cluster-state" |= "'$state'" |
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
