@@ -133,7 +133,7 @@ ln -sf $linkedDefaultYaml $defaultYaml
 
 cd /etc/containers
 # Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
-echo "Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.con"
+echo "Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf"
 registriesConf="registries.conf"
 if [ ! -L $registriesConf ]
 then :;
