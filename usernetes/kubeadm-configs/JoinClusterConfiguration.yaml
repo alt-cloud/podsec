@@ -1,0 +1,33 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: 1.26.3
+clusterName: kubernetes
+imageRepository: registry.local/k8s-p10
+dns: {}
+etcd:
+  local:
+    dataDir: /var/lib/podsec/u7s/etcd
+    imageRepository: registry.local/k8s-p10
+    serverCertSANs:
+    peerCertSANs:
+    extraArgs:
+      listen-peer-urls: https://0.0.0.0:2380
+      enable-v2: 'true'
+apiServer:
+  certSANs:
+    - 127.0.0.1
+  extraArgs:
+    advertise-address: U7S_EXTIP
+    etcd-servers: https://127.0.0.1:2379
+  timeoutForControlPlane: 4m0s
+controllerManager:
+  extraArgs:
+    allocate-node-cidrs: 'true'
+    cluster-cidr: U7S_PODNETWORKCIDR
+    service-cluster-ip-range: U7S_SERVICECIDR
+networking:
+  dnsDomain: cluster.local
+  serviceSubnet: U7S_SERVICECIDR
+  podSubnet: U7S_PODNETWORKCIDR # --pod-network-cidr
+controlPlaneEndpoint: U7S_EXTIP
+scheduler: {}

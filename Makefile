@@ -71,7 +71,8 @@ USERNETES_MANIFESTS = \
 	coredns.yaml
 
 USERNETES_KUBEADM_CONFIGS= \
-	ClusterConfigurationWithEtcd.yaml \
+	InitClusterConfiguration.yaml \
+	JoinClusterConfiguration.yaml \
 	InitConfiguration.yaml \
 	JoinConfiguration.yaml \
 	JoinControlPlaneConfijuration.yaml \
@@ -141,9 +142,6 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/etcd
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
 	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
-	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin/
-	cd usernetes;tar cvzf $(TMPFILE) bin;cd $(DESTDIR)$(libexecdir)/podsec/u7s/bin/; tar xvzf $(TMPFILE);
-	rm -f $(TMPFILE)
 	# bin
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
 	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)$(libexecdir)/podsec/u7s/; tar xvzf $(TMPFILE);

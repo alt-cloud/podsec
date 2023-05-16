@@ -118,28 +118,76 @@ setEnvsByYaml() {
 	done
 }
 
-# Получение внешнего IP (пока для маски сети /24)
-getExtIP() {
-  set -- $(ip r | grep default)
-  router=$3
+# Применение маски сети к указанному адресу
+maskAddr() {
+  addr=$1
+  mask=$2
+  if [ $mask -eq 0 -o $mask -gt 32 ]
+  then
+    echo "Неверная маска $mask" >&2
+    exit
+  fi
+  let tail=32-$mask
   ifs=$IFS
   IFS=.
-  set -- $router
+  set -- $addr
   IFS=$ifs
-  prefixIP=$1
-  shift
-  while [ $# -gt 1 ]; do prefixIP+=".$1"; shift; done
-  set -- $(ip a | grep $prefixIP | grep inet)
-  IFS=/
-  set -- $2
-  IFS=$ifs
-  extIP=$1
-  echo $extIP
+  if [ $# -ne 4 ]
+  then
+    echo "Неверный адрес $addr" >&2
+    exit
+  fi
+
+  Val=0
+  for val
+  do
+    let Val=$Val*256+$val
+  done
+  let "Val=$Val>>$tail"
+  let "Val=$Val<<$tail"
+
+  let "ret=$Val&255"
+  for i in 1 2 3
+  do
+    let "Val=$Val>>8"
+    let "val=$Val&255"
+    ret="$val.$ret"
+  done
+
+  echo $ret
+}
+
+# Получение внешнего IP
+getExtIP() {
+  set -- $(ip r | grep default)
+  export router=$3
+
+  ip a | grep 'inet ' |
+  (
+  while read inet
+  do
+    set -- $inet
+    AddrMask=$2
+    ifs=$IFS
+    IFS=/
+    set -- $AddrMask
+    IFS=$ifs
+    addr=$1
+    mask=$2
+    maskedAddr=$(maskAddr $addr $mask)
+    maskedRoute=$(maskAddr $router $mask)
+    if [ "$maskedAddr" = "$maskedRoute" ]
+    then
+      echo $addr
+      break
+    fi
+  done
+  )
 }
 
 # Получение имени внешнего устройства
 getExtDev() {
-	extIP=$1
+	export extIP=$1
 	ifs=$IFS
 	IFS=.
 	set -- $extIP
@@ -149,14 +197,25 @@ getExtDev() {
 		echo "Некорректный адрес '$extIP'" >&2
 		exit
 	fi
-	set -- $(ip a | grep $extIP)
-	l=${#extIP}
-	if [ "$1" != 'inet' -a ${2:$l:1} != '/' ]
-	then
-		return
-	fi
-	while [ $# -gt 1 ]; do shift; done
-	echo $1
+	ip a | grep $extIP |
+	(
+  while read inet
+  do
+    set -- $inet
+    if [ "$1" != 'inet' ]
+    then
+      continue
+    fi
+    addr=$2
+    l=${#extIP}
+    if [ "${addr:0:$l}" = "$extIP" -a "${addr:$l:1}" == '/' ]
+    then
+      while [ $# -gt 1 ]; do shift; done
+      echo $1
+      break
+    fi
+  done
+	)
 }
 
 # Обеспечить выделение статического кластерного адреса из диапазоны 10.96.0.1 - 10.96.255.254

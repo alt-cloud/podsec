@@ -11,11 +11,6 @@ etcd:
     serverCertSANs:
     peerCertSANs:
     extraArgs:
-      name: resign5stern
-      initial-cluster: resign5stern=https://0.0.0.0:2380
-      initial-cluster-state: new
-      listen-client-urls: https://0.0.0.0:2379
-      initial-advertise-peer-urls: https://0.0.0.0:2380
       listen-peer-urls: https://0.0.0.0:2380
       enable-v2: 'true'
 apiServer:

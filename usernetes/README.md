@@ -1,4 +1,25 @@
-# Установка и настройка U7S (rootless kuber) по состоянию на 7.05.2023 (podsec-k8s версии >= 0.9.9)
+# Установка и настройка U7S (rootless kuber) по состоянию на 16.05.2023 (podsec-k8s версии >= 0.9.32)
+
+На 16.05.2023 функционал `U7S` (`rootless kuber`)  в большей части совпадает с функционалом `rootfull kuber`.
+
+Основные отличия:
+
+- для разворачивания `rootless kubernetes` используется набор образов `registry.altlinux.org/k8s-p10`;
+
+- команда разворачивания кластера `kubeadm` пакета `podsec-k8s` (алиас shell-скрипта `podsec-k8s/bin/podsec-u7s-kubeadm`) поддерживает основные подкоманды и флаги для разворачивания кластера, но не поддерживает все. Для вызова "родной" команды `kubeadm` пакета `kubernetes-kubeadm` необходимо в пользователе `u7s-admin` запустить команду:
+  <pre>
+  $ nsenter_u7s /usr/bin/kubeadm <подкоманда> <параметры>...
+  </pre>
+
+- при использовании сервисов типа `NodePort` поднятые в рамках кластера порты в диапазоне `30000-32767` остаются в `namespace` пользователя `u7s-admin`. Для их проброса наружу необходимо в пользователе `u7s-admin` запустить команду:
+
+  <pre>
+  $ nsenter_u7s rootlessctl.sh add-ports 0.0.0.0:<port>:<port>/tcp
+  </pre>
+
+Сервисы типа `NodePort` из за их небольшого диапазона и "нестабильности" портов при переносе решения в другой кластер довольно редко используются. Рекомендуется вместо них использовать сервисы типа `ClusterIP` c доступом к ним через `Ingress`-контроллеры.
+
+- Для настройки сети используется сетевой плагин `flannel`. Настройка других типов сетевых плагинов планируется.
 
 ## Установка master-узла
 
@@ -14,7 +35,7 @@ apt-get update
 2 Установите podsec-пакеты:
 
 ```
-# apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.32-alt1.noarch.rpm podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
 ```
 
 3. Измените переменную PATH:
@@ -157,7 +178,7 @@ apt-get update
 2 Установите podsec-пакеты:
 
 ```
-# apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.32-alt1.noarch.rpm      podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
 ```
 
 3. Измените переменную PATH:
@@ -167,7 +188,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
 
-3 Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
+4. Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
 
 ```
 kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
@@ -184,7 +205,7 @@ This node has joined the cluster:
 Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 </pre>
 
-4. Проверьте состояние дерева процессов:
+5. Проверьте состояние дерева процессов:
 <pre>
 # pstree
 ...
@@ -202,7 +223,7 @@ Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 
 Все остальные процессы `kube-proxy`, `kube-flannel` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/flannel:v0.19.2`.
 
-4 Зайдите на `master-узел` и проверьте подключение `worker-узла`:
+6. Зайдите на `master-узел` и проверьте подключение `worker-узла`:
 ```
 # kubectl get nodes -o wide
 NAME       STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                 KERNEL-VERSION         CONTAINER-RUNTIME
@@ -210,11 +231,10 @@ host-212   Ready    control-plane   7h54m   v1.26.3   10.96.0.1     <none>      
 host-226   Ready    <none>          8m30s   v1.26.3   10.96.0.1     <none>        ALT SP Server 11100-01   5.15.105-un-def-alt1   cri-o://1.26.2
 ```
 
-5. На `master-узле` под пользоваталем `root` выполните команду:
+7. На `master-узле` под пользоваталем `root` выполните команду:
 
 ```
-# machinectl shell u7s-admin@ ~u7s-admin/usernetes/boot/nsenter.sh \
-    kubectl apply -f ~u7s-admin/usernetes/manifests/kube-flannel.yml
+# kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
 Connected to the local host. Press ^] three times within 1s to exit session.
 [INFO] Entering RootlessKit namespaces: OK
 namespace/kube-flannel created
@@ -226,7 +246,7 @@ daemonset.apps/kube-flannel-ds created
 Connection to the local host terminated.
 ```
 
-6. На `master-узле` выполните команду:
+8. На `master-узле` выполните команду:
 ```
 # kubectl get daemonsets.apps -A
 NAMESPACE      NAME              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
@@ -235,6 +255,222 @@ kube-system    kube-proxy        2         2         2       2            2     
 ```
 Число `READY` каждого `daemonset` должно быть равно числу `DESIRED` и должно быть равно числу узлов кластера.
 
+
+## Подключение control-plane (master)-узла
+
+При подключении дополнительного `control-plane`(`master`)-узла необходимо 
+
+- установить и настроить на один из улов в кластере или вне его `haproxy` для балансировки запросов;
+- переустановить начальный `master-узел` для работы с `haproxy`
+- подключать дополнительные `control-plane`(`master`)-узлы с указанием их в балансировщике запросов `haproxy`;
+- подключать дополнительные `worker`-узлы
+
+### Установка и настройка балансировщика запросов haproxy
+
+Полная настройка отказоустойчивого кластера `haproxy` из 3-х узлов описана в документе  
+[ALT Container OS подветка K8S. Создание HA кластера](https://www.altlinux.org/ALT_Container_OS_%D0%BF%D0%BE%D0%B4%D0%B2%D0%B5%D1%82%D0%BA%D0%B0_K8S._%D0%A1%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_HA_%D0%BA%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80%D0%B0).
+
+Здесь же мы рассмотрим создание и настройка с один `haproxy` с балансировкой запросов на `master`-узлы.
+
+Установите пакет `haproxy`:
+```
+# apt-get install haproxy
+```
+
+Отредактируйте конфигурационный файл `/etc/haproxy/haproxy.cfg`:
+
+- добавьте в него описание `frontend`'a `main`, принимающего запросы по порту `8443`:
+<pre> 
+ frontend main
+    bind *:8443
+    mode tcp
+    option tcplog
+    default_backend apiserver
+</pre>
+
+- добавьте описание `backend`'а `apiserver`:
+<pre>
+backend apiserver
+    option httpchk GET /healthz
+    http-check expect status 200
+    mode tcp
+    option ssl-hello-chk
+    balance     roundrobin
+        server master01 &lt;IP_или_DNS_начального_мастер_узла>:6443 check
+</pre>
+
+- запустите `haproxy`:
+```
+# systemctl enable haproxy
+# systemctl start haproxy
+```
+
+### Установка начального master-узла для работы с haproxy
+
+Настройте репозиторий обновления
+<pre>
+apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
+apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
+apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic'
+rm -f /etc/apt/sources.list.d/sources.list
+apt-get update
+</pre>
+
+Установите podsec-пакеты версии *0.9.32-alt1* и выше:
+
+```
+# apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+```
+
+Измените переменную `PATH`:
+
+<pre> 
+export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
+</pre>
+
+При установке начального master-узла необходимо параметром `control-plane-endpoint` указать URL  балансировщика `haproxy`:
+```
+# kubeadm init --control-plane-endpoint <IP_адрес_haproxy>:8443
+```
+
+В результате инициализации `kubeadm` выведет команды подключения дополнительных `control-plane` и `worker` узлов:
+<pre> 
+...
+You can now join any number of the control-plane node running the following command on each as root:
+
+kubeadm join <IP_адрес_haproxy>:8443 --token ... \
+        --discovery-token-ca-cert-hash sha256:... \
+        --control-plane --certificate-key ...
+
+Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
+As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use
+"kubeadm init phase upload-certs --upload-certs" to reload certs afterward.
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join <IP_адрес_haproxy>:8443 --token ... \
+        --discovery-token-ca-cert-hash sha256:...
+...
+</pre>
+
+Обратите внимание - в командах присоединения узлов указывается не URL созданного начального master-узла (`<IP_или_DNS_начального_мастер_узла>:6443`),
+а URL `haproxy`.
+
+В сформированных файлах конфигурации `/etc/kubernetes/admin.conf`, `~/.kube/config` также указывается URL `haproxy`:  
+<pre>
+apiVersion: v1
+clusters:
+- cluster:
+...
+    server: https://&lt;IP_адрес_haproxy>:8443
+</pre>
+
+То есть вся работа с кластеров в дальнейшем идет через балансировщик запросов `haproxy`.
+
+### Подключение дополнительных ControlPlane(master)-узлов с указанием их в балансировщике запросов haproxy
+
+Настройте репозиторий обновления
+<pre>
+apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
+apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
+apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic'
+rm -f /etc/apt/sources.list.d/sources.list
+apt-get update
+</pre>
+
+Установите podsec-пакеты версии *0.9.32-alt1* и выше:
+
+```
+# apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+```
+
+Измените переменную `PATH`:
+
+<pre> 
+export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
+</pre>
+
+Скопируйте строку подключения  `control-plane` узла и вызовите ее:
+```
+# kubeadm join <IP_адрес_haproxy>:8443 --token ... \
+        --discovery-token-ca-cert-hash sha256:... \
+        --control-plane --certificate-key ...
+```
+
+В результате работы команда kubeadm выведет строки:
+<pre> 
+ This node has joined the cluster and a new control plane instance was created:
+
+* Certificate signing request was sent to apiserver and approval was received.
+* The Kubelet was informed of the new secure connection details.
+* Control plane label and taint were applied to the new node.
+* The Kubernetes control plane instances scaled up.
+* A new etcd member was added to the local/stacked etcd cluster.
+...
+Run 'kubectl get nodes' to see this node join the cluster.
+</pre>
+
+Наберите на вновь созданном (или начальном)`control-plane` узле команду:  
+```
+# kubectl  get nodes
+NAME       STATUS   ROLES           AGE     VERSION
+<host1>   Ready    control-plane   4m31s   v1.26.3
+<host2>   Ready    control-plane   26s     v1.26.3
+
+```
+Обратите внимание, что роль (ROLES) обоих узлов - `control-plane`.
+
+Наберите команду:
+<pre>  
+# kubectl get all -A
+NAMESPACE      NAME                                   READY   STATUS    RESTARTS       AGE    IP             NODE       NOMINATED NODE   READINESS GATES
+kube-flannel   pod/kube-flannel-ds-2mhqg              1/1     Running   0              153m   10.96.0.1      <host1>   <none>           <none>
+kube-flannel   pod/kube-flannel-ds-95ht2              1/1     Running   0              153m   10.96.122.68   <host2>    <none>           <none>
+...
+kube-system    pod/etcd-<host1>                       1/1     Running   0              174m   10.96.0.1      <host1>   <none>           <none>
+kube-system    pod/etcd-<host2>                       1/1     Running   0              170m   10.96.122.68   <host2>    <none>           <none>
+
+kube-system    pod/kube-apiserver-<host1>             1/1     Running   0              174m   10.96.0.1      <host1>   <none>           <none>
+kube-system    pod/kube-apiserver-<host2>             1/1     Running   0              170m   10.96.122.68   <host2>    <none>           <none>
+
+kube-system    pod/kube-controller-manager-<host1>    1/1     Running   1 (170m ago)   174m   10.96.0.1      <host1>   <none>           <none>
+kube-system    pod/kube-controller-manager-<host2>    1/1     Running   0              170m   10.96.122.68   <host2>    <none>           <none>
+
+kube-system    pod/kube-proxy-9nbxz                   1/1     Running   0              174m   10.96.0.1      <host1>   <none>           <none>
+kube-system    pod/kube-proxy-bnmd7                   1/1     Running   0              170m   10.96.122.68   <host2>    <none>           <none>
+
+kube-system    pod/kube-scheduler-<host1>             1/1     Running   1 (170m ago)   174m   10.96.0.1      <host1>   <none>           <none>
+kube-system    pod/kube-scheduler-<host2>             1/1     Running   0              170m   10.96.122.68   <host2>    <none>           <none>
+...
+
+NAMESPACE      NAME                             DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE    CONTAINERS     IMAGES                                      SELECTOR
+kube-flannel   daemonset.apps/kube-flannel-ds   2         2         2       3            3           <none>                   153m   kube-flannel   registry.local/k8s-p10/flannel:v0.19.2      app=flannel
+kube-system    daemonset.apps/kube-proxy        2         2         2       2            2           kubernetes.io/os=linux   174m   kube-proxy     registry.local/k8s-p10/kube-proxy:v1.26.3   k8s-app=kube-proxy
+...
+</pre>
+
+Убедитесь, что сервисы `pod/etcd`, `kube-apiserver`, `kube-controller-manager`, `kube-scheduler`, `kube-proxy`, `kube-flannel` запустились на обоих control-plane узлах.
+
+Для балансировки запросов по двум серверам добавьте URL подключенного `control-plane` узла в файл конфигурации `/etc/haproxy/haproxy.cfg`:  
+<pre> 
+backend apiserver
+    option httpchk GET /healthz
+    http-check expect status 200
+    mode tcp
+    option ssl-hello-chk
+    balance     roundrobin
+        server master01 &lt;IP_или_DNS_начального_мастер_узла>:6443 check
+        server master02 &lt;IP_или_DNS_подключенного_мастер_узла>:6443 check
+</pre>
+
+и перезапустите `haproxy`:
+```
+# systemctl restart haproxy
+```
+
+### Подключение дополнительных worker-узлов
+
+Подключение дополнительных worker-узлов происходит аналогично описанному выше в главе **Подключение worker-узла**.
 
 
 ## Работа под администратором u7s-admin rootless процессов

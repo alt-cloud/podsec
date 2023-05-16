@@ -11,7 +11,7 @@ user=$1
 . /etc/kubernetes/kubelet
 if ! (echo $KUBELET_ARGS | grep pod-infra-container-image)
 then
-  KUBELET_ARGS+=' --pod-infra-container-image=registry.local/k8s-p10/pause:3.7'
+  KUBELET_ARGS+=' --pod-infra-container-image=registry.local/k8s-p10/pause:3.9'
   sed -i -e "s|KUBELET_ARGS.*|KUBELET_ARGS=\"$KUBELET_ARGS\"|" /etc/kubernetes/kubelet
 fi
 
@@ -21,7 +21,7 @@ systemctl enable --now crio kubelet
 
 # Инициализация master-узла кластера
 echo "Инициализация master-узла кластера"
-kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.24.8 --image-repository=registry.local/k8s-p10
+kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.26.3 --image-repository=registry.local/k8s-p10
 
 # Настройка root на роль администратора кластера
 echo "Настройка root на роль администратора кластера"

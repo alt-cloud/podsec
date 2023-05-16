@@ -43,9 +43,9 @@ fi
 echo "---"
 if [ -n "$U7S_CONTROLPLANE" ]
 then
-  yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
-         .etcd.local.extraArgs."initial-cluster" |="'${host}=https://0.0.0.0:2380'" |
-         .etcd.local.extraArgs.name |= "'$host'" |
+  if [ "$U7S_CONTROLPLANE" =  'initMaster' ]
+  then
+    yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
@@ -54,7 +54,20 @@ then
          .networking.podSubnet |= "'$U7S_PODNETWORKCIDR'" |
          .networking.serviceSubnet |= "'$U7S_SERVICECIDR'" |
          .controlPlaneEndpoint = "'${U7S_APISERVER}'"
-        ' $KUBEADM_CONFIGS_DIR/ClusterConfigurationWithEtcd.yaml
+        ' $KUBEADM_CONFIGS_DIR/InitClusterConfiguration.yaml
+  else
+    yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
+         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
+         .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
+         .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
+         .controllerManager.extraArgs."cluster-cidr" |= "'$U7S_PODNETWORKCIDR'" |
+         .controllerManager.extraArgs."service-cluster-ip-range" |= "'$U7S_SERVICECIDR'" |
+         .networking.podSubnet |= "'$U7S_PODNETWORKCIDR'" |
+         .networking.serviceSubnet |= "'$U7S_SERVICECIDR'" |
+         .controlPlaneEndpoint = "'${U7S_APISERVER}'"
+        ' $KUBEADM_CONFIGS_DIR/JoinClusterConfiguration.yaml
+  fi
+
   echo "---"
 fi
 cat $KUBEADM_CONFIGS_DIR/KubeletConfiguration.yaml
@@ -70,10 +83,10 @@ mkdir -p /run/crio/ || :;
 pars=
 
 # TO DO - show join string for control plane
-# if [ $cmd = 'init' ]
-# then
-#   pars='--upload-certs'
-# fi
+if [ $cmd = 'init' ]
+then
+  pars='--upload-certs'
+fi
 
 /usr/bin/kubeadm $cmd \
   -v $U7S_DEBUGLEVEL \

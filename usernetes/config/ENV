@@ -1,2 +1,1 @@
 PATH=/usr/libexec/podsec/u7s/bin:/sbin/:/usr/sbin/:/bin:/usr/bin/
-# U7S_ROOTLESSKIT_FLAGS=--cidr=10.96.0.0/12

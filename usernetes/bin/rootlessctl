@@ -1,0 +1,3 @@
+#!/bin/bash
+set -eu -o pipefail
+exec /usr/bin/rootlessctl --socket $XDG_RUNTIME_DIR/usernetes/rootlesskit/api.sock $@
