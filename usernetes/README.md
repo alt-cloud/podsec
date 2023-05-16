@@ -178,7 +178,7 @@ apt-get update
 2 Установите podsec-пакеты:
 
 ```
-# apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.32-alt1.noarch.rpm      podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
 ```
 
 3. Измените переменную PATH:
@@ -322,7 +322,7 @@ apt-get update
 # apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
 ```
 
-Измените переменную PATH:
+Измените переменную `PATH`:
 
 <pre> 
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
@@ -362,7 +362,7 @@ apiVersion: v1
 clusters:
 - cluster:
 ...
-    server: https://<IP_адрес_haproxy>:8443
+    server: https://&lt;IP_адрес_haproxy>:8443
 </pre>
 
 То есть вся работа с кластеров в дальнейшем идет через балансировщик запросов `haproxy`.
@@ -384,7 +384,7 @@ apt-get update
 # apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
 ```
 
-Измените переменную PATH:
+Измените переменную `PATH`:
 
 <pre> 
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
@@ -459,8 +459,8 @@ backend apiserver
     mode tcp
     option ssl-hello-chk
     balance     roundrobin
-        server master01 <IP_или_DNS_начального_мастер_узла>:6443 check
-        server master02 <IP_или_DNS_подключенного_мастер_узла>:6443 check
+        server master01 &lt;IP_или_DNS_начального_мастер_узла>:6443 check
+        server master02 &lt;IP_или_DNS_подключенного_мастер_узла>:6443 check
 </pre>
 
 и перезапустите `haproxy`:
