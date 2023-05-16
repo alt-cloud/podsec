@@ -1,4 +1,25 @@
-# Установка и настройка U7S (rootless kuber) по состоянию на 7.05.2023 (podsec-k8s версии >= 0.9.9)
+# Установка и настройка U7S (rootless kuber) по состоянию на 16.05.2023 (podsec-k8s версии >= 0.9.32)
+
+На 16.05.2023 функционал `U7S` (`rootless kuber`)  в большей части совпадает с функционалом `rootfull kuber`.
+
+Основные отличия:
+
+- для разворачивания `rootless kubernetes` используется набор образов `registry.altlinux.org/k8s-p10`;
+
+- команда разворачивания кластера `kubeadm` пакета `podsec-k8s` (алиас shell-скрипта `podsec-k8s/bin/podsec-u7s-kubeadm`) поддерживает основные подкоманды и флаги для разворачивания кластера, но не поддерживает все. Для вызова "родной" команды `kubeadm` пакета `kubernetes-kubeadm` необходимо в пользователе `u7s-admin` запустить команду:
+  <pre>
+  $ nsenter_u7s /usr/bin/kubeadm <подкоманда> <параметры>...
+  </pre>
+
+- при использовании сервисов типа `NodePort` поднятые в рамках кластера порты в диапазоне `30000-32767` остаются в `namespace` пользователя `u7s-admin`. Для их проброса наружу необходимо в пользователе `u7s-admin` запустить команду:
+
+  <pre>
+  $ nsenter_u7s rootlessctl.sh add-ports 0.0.0.0:<port>:<port>/tcp
+  </pre>
+
+Сервисы типа `NodePort` из за их небольшого диапазона и "нестабильности" портов при переносе решения в другой кластер довольно редко используются. Рекомендуется вместо них использовать сервисы типа `ClusterIP` c доступом к ним через `Ingress`-контроллеры.
+
+- Для настройки сети используется сетевой плагин `flannel`. Настройка других типов сетевых плагинов планируется.
 
 ## Установка master-узла
 
@@ -14,7 +35,7 @@ apt-get update
 2 Установите podsec-пакеты:
 
 ```
-# apt-get install -y podsec-0.9.9-alt1.noarch.rpm      podsec-k8s-rbac-0.9.9-alt1.noarch.rpm podsec-k8s-0.9.9-alt1.noarch.rpm  podsec-inotify-0.9.9-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.32-alt1.noarch.rpm podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
 ```
 
 3. Измените переменную PATH:
@@ -213,7 +234,7 @@ host-226   Ready    <none>          8m30s   v1.26.3   10.96.0.1     <none>      
 7. На `master-узле` под пользоваталем `root` выполните команду:
 
 ```
-# machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
+# kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
 Connected to the local host. Press ^] three times within 1s to exit session.
 [INFO] Entering RootlessKit namespaces: OK
 namespace/kube-flannel created
