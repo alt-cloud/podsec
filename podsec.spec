@@ -117,10 +117,16 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
     -c 'usernet user account' %u7s_admin_usr >/dev/null 2>&1 ||:
 
 %post inotify
-%post_systemd podsec-inotify-check-containers.service u7s.service
+%post_systemd podsec-inotify-check-containers.service
 
 %preun inotify
-%preun_systemd podsec-inotify-check-containers.service u7s.service
+%preun_systemd podsec-inotify-check-containers.service
+
+%post k8s
+%post_systemd  u7s.service
+
+%preun k8s
+%preun_systemd u7s.service
 
 %files
 %_bindir/podsec*
