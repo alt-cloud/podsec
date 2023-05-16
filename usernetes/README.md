@@ -235,21 +235,21 @@ kube-system    kube-proxy        2         2         2       2            2     
 Число `READY` каждого `daemonset` должно быть равно числу `DESIRED` и должно быть равно числу узлов кластера.
 
 
-## Подключение ControlPlane(master)-узла
+## Подключение control-plane (master)-узла
 
-При подключении дополнительного `ControlPlane`(`master`)-узла необходимо 
+При подключении дополнительного `control-plane`(`master`)-узла необходимо 
 
-- установить и настроить на один из улов в или вне кластера `haproxy` для балансировки запросов;
+- установить и настроить на один из улов в кластере или вне его `haproxy` для балансировки запросов;
 - переустановить начальный `master-узел` для работы с `haproxy`
-- подключать дополнительные `ControlPlane`(`master`)-узлы с указанием их в балансировщике запросов `haproxy`;
+- подключать дополнительные `control-plane`(`master`)-узлы с указанием их в балансировщике запросов `haproxy`;
 - подключать дополнительные `worker`-узлы
 
 ### Установка и настройка балансировщика запросов haproxy
 
-Полная настройка отказоустойчивого кластера haproxy из 3-х узлов описана в документе  
+Полная настройка отказоустойчивого кластера `haproxy` из 3-х узлов описана в документе  
 [ALT Container OS подветка K8S. Создание HA кластера](https://www.altlinux.org/ALT_Container_OS_%D0%BF%D0%BE%D0%B4%D0%B2%D0%B5%D1%82%D0%BA%D0%B0_K8S._%D0%A1%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_HA_%D0%BA%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80%D0%B0).
 
-Здесь же мы рассмотрим создание и настройка с один `haproxy` с балансировкой запросов на master-узлы.
+Здесь же мы рассмотрим создание и настройка с один `haproxy` с балансировкой запросов на `master`-узлы.
 
 Установите пакет `haproxy`:
 ```
@@ -262,7 +262,7 @@ kube-system    kube-proxy        2         2         2       2            2     
 <pre> 
  frontend main
     bind *:8443
-    mode tcpь
+    mode tcp
     option tcplog
     default_backend apiserver
 </pre>
@@ -275,7 +275,7 @@ backend apiserver
     mode tcp
     option ssl-hello-chk
     balance     roundrobin
-        server master01 <IP_или_DNS_начального_мастер_узла>:6443 check
+        server master01 &lt;IP_или_DNS_начального_мастер_узла>:6443 check
 </pre>
 
 - запустите `haproxy`:
@@ -311,12 +311,6 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 ```
 # kubeadm init --control-plane-endpoint <IP_адрес_haproxy>:8443
 ```
-> не забудьте предварительно установить переменную PATH:
-  <pre> 
-  export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
-  </pre>
-
-
 
 В результате инициализации `kubeadm` выведет команды подключения дополнительных `control-plane` и `worker` узлов:
 <pre> 

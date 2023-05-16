@@ -161,8 +161,6 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-k8s-rbac-*
 
 %files inotify
-%dir %attr(0750,root,root) %nagiosdir
-%dir %attr(0750,root,root) %nagios_plugdir
 %nagios_plugdir/podsec-inotify-*
 %_bindir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*

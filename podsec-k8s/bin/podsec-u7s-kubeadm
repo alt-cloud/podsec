@@ -3,7 +3,7 @@ source podsec-u7s-functions
 
 
 format() {
-  echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<join-параметр> ...]" >&2
+  echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
 
 debugLevel=0
@@ -48,8 +48,10 @@ case $cmd in
       par=$1
       if [ "${par:0:2}" != '--' ]
       then
-        echo "Команда $par не поддерживается" >&2
-        exit
+        echo "Подкоманда init '$par' не поддерживается" >&2
+        echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+        machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+        exit $?
       fi
       par=${par:2}
       case $par in
@@ -81,14 +83,21 @@ case $cmd in
           podNetworkCidr=$1
           podNetworkMask=$2
         ;;
+        *)
+          echo "Параметр '$par' команды '$cmd' не поддерживается" >&2
+          echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+          exit $?
+          ;;
       esac
     done
     ;;
   join)
     if [ $# -eq 0 ]
     then
-      echo "Команда $par не поддерживается" >&2
-      exit
+      echo "Команда join не имеет параметров" >&2
+      format
+      exit 1
     fi
     pars=$@
     apiServer=$1
@@ -137,8 +146,10 @@ case $cmd in
           serviceMask=$2
           ;;
         *)
-          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars 2>/dev/null
-          exit
+          echo "Параметр '$par' команды '$cmd' не поддерживается" >&2
+          echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+          exit $?
           ;;
       esac
     done
@@ -154,8 +165,10 @@ case $cmd in
     fi
     ;;
   *)
-    machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $@ 2>/dev/null
-    exit
+    echo "Команда '$cmd' не поддерживается" >&2
+    echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+    machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+    exit $?
 esac
 
 uid=`id -u u7s-admin`
@@ -285,6 +298,3 @@ cp -f $adminConf ~u7s-admin/.kube/config
 chmod 600 ~u7s-admin/.kube/config
 chmod 700 ~u7s-admin/.kube/
 chown -R u7s-admin:u7s-admin ~u7s-admin/.kube
-
-
-
