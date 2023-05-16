@@ -1,0 +1,21 @@
+#!/bin/sh
+# Функция возвращает список образов в кеше podman rootfull
+getimagelist() {
+  podman images --format="{{.Repository}}:{{.Tag}}"
+}
+images=$(getimagelist registry.local)
+TMP=/tmp/trivy.$$
+adminmail=imagemaker
+trivy_options="--security-checks vuln,config"
+for image in $images
+do
+  if trivy image $trivy_options $image | tee $TMP | systemd-cat -t trivy-check
+  then :;
+  fi
+  grep 'Total: [1-9][0-9]*' $TMP
+  if [ $? -eq 0 ]; then
+    mail -s "Найдены уязвимости в образе $image"  $adminmail < $TMP
+  fi
+done
+rm -f $TMP
+
