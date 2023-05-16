@@ -2,7 +2,7 @@
 source podsec-u7s-functions
 source $envFile
 
-ip a add  $U7S_TAPIP/12 dev $U7S_EXTDEV  || :;
+ip a add  $U7S_TAPIP/$U7S_SERVICEMASK dev $U7S_EXTDEV  || :;
 iptables -I POSTROUTING -t nat -d $U7S_SERVICECIDR -j SNAT --to $U7S_TAPIP  || :;
 if [ U7S_CONTROLPLANE = 'initMaster' ]
 then
