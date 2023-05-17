@@ -120,6 +120,7 @@ setEnvsByYaml() {
 
 # Применение маски сети к указанному адресу
 maskAddr() {
+	set +e
   addr=$1
   mask=$2
   if [ $mask -eq 0 -o $mask -gt 32 ]
