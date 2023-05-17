@@ -262,6 +262,7 @@ getCidr() {
 	echo $serviceCidr $serviceMask
 }
 
+# Функция формирует ClusterIP как serviceCidr с 1-чкой в последнем кварте
 getKubernetesClusterIP() {
 	serviceCidr=$1
 	ifs=$IFS
@@ -269,6 +270,34 @@ getKubernetesClusterIP() {
 	set -- $serviceCidr
 	IFS=$ifs
 	echo "${1}.${2}.${3}.1"
+}
+
+# Функция модифицирует файл /kubernetes/manifests/kube-apiserver.yaml запуска kube-apiserver
+# для настройки аудита
+function tuneAudit() {
+	haveAudit=$(cat /etc/kubernetes/manifests/kube-apiserver.yaml   | yq  '[.spec.volumes[].hostPath][].path | select(. == "/etc/kubernetes/audit")')
+	if [ -z "$haveAudit" ]
+	then
+		TMPFILE="/tmp/kube-api-server.$$"
+		confFile="/etc/kubernetes/manifests/kube-apiserver.yaml"
+		cat $confFile |
+		yq -y  '.spec.containers[].command |= . +
+		["--audit-policy-file=/etc/kubernetes/audit/policy.yaml"] +
+		["--audit-log-path=/etc/kubernetes/audit/audit.log"] +
+		["--audit-log-maxsize=500"] +
+		["--audit-log-maxbackup=3"]
+		' |
+		yq -y  '.spec.containers[].volumeMounts |= . +
+		[{ "mountPath": "/etc/kubernetes/audit", "name": "audit" }]
+		' |
+		yq -y '.spec.volumes |= . +
+		[{ "hostPath": {"path": "/etc/kubernetes/audit" , "type": "DirectoryOrCreate" }, "name": "audit" }]
+		' > $TMPFILE
+		if [ -s $TMPFILE ]
+		then
+			mv $TMPFILE $confFile
+		fi
+	fi
 }
 
 
