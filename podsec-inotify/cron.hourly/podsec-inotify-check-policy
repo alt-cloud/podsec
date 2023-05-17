@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/usr/lib/nagios/plugins/podsec-inotify-check-policy -vvv -c 100

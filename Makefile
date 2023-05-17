@@ -89,6 +89,9 @@ PODSEC_INOTIFY_PROGRAMMS = \
 PODSEC_INOTIFY_FUNCTIONS = \
 	podsec-inotify-functions
 
+PODSEC_INOTIFY_CRON_HOURLY= \
+	podsec-inotify-check-policy
+
 TMPFILE  := $(shell mktemp)
 
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
@@ -176,5 +179,9 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(INSTALL) -m644 ./podsec-inotify/services/podsec-inotify-check-containers.service $(DESTDIR)/$(unitdir)/podsec-inotify-check-containers.service
+	# CRONTAB SERVICRS
+	$(MKDIR_P) -m755 $(DESTDIR)/etc/cron.hourly
+	cd ./podsec-inotify/cron.hourly;$(INSTALL) -m755 $(PODSEC_INOTIFY_CRON_HOURLY) $(DESTDIR)/etc/cron.hourly
+
 clean:
 

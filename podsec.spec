@@ -91,6 +91,7 @@ Group: Development/Other
 Requires: inotify-tools
 Requires: podsec >= %EVR
 Requires: openssh-server
+Requires: mailx
 
 %description inotify
 A set of scripts for  security monitoring by crontabs or
@@ -140,6 +141,7 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
 
+
 %files k8s
 %dir %_sysconfdir/podsec/u7s
 %config(noreplace) %_sysconfdir/podsec/u7s/*
@@ -171,6 +173,7 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_bindir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*
 %_unitdir/podsec-inotify-check-containers.service
+%_sysconfdir/cron.hourly/*
 
 %changelog
 * Wed May 17 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.33-alt1

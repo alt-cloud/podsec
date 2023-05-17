@@ -19,7 +19,14 @@ fi
 setTraps
 
 # Проанализировать описание уровня интервалов во входных парамаетрах
-parseIntervalParameters $*
+if [ $# -eq 0 ]
+then
+  JOURNALPLUGINPARS[c]=100
+  NAGIIOSPLUGINPARS[c]=100
+  VERBOSELEVEL=2
+else
+  parseIntervalParameters $*
+fi
 
 checkUsersConfig=$(checkUsersConfig)
 # echo $checkUsersConfig
