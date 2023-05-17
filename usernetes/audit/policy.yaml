@@ -1,0 +1,24 @@
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+
+- level: None
+  verbs: ["get", "watch", "list"]
+
+- level: None
+  resources:
+  - group: "" # core
+    resources: ["events"]
+
+- level: None
+  users:
+  - "system:kube-scheduler"
+  - "system:kube-proxy"
+  - "system:apiserver"
+  - "system:kube-controller-manager"
+  - "system:serviceaccount:gatekeeper-system:gatekeeper-admin"
+
+- level: None
+  userGroups: ["system:nodes"]
+
+- level: RequestResponse

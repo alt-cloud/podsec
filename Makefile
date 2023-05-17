@@ -79,6 +79,9 @@ USERNETES_KUBEADM_CONFIGS= \
 	KubeletConfiguration.yaml \
 	KubeProxyConfiguration.yaml
 
+USERNETES_KUBEADM_AUDIT= \
+	policy.yaml
+
 PODSEC_INOTIFY_PLUGINS = \
 	podsec-inotify-check-policy
 
@@ -160,6 +163,9 @@ install: all
 	# USERNETES_KUBEADM_CONFIGS
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
 	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
+	# AUDIT POLICY
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kubernetes/audit
+	$(INSTALL) -m644 usernetes/audit/policy.yaml $(DESTDIR)$(sysconfdir)/kubernetes/audit
 	# USER SYSTEMD
 	$(MKDIR_P) $(DESTDIR)$(userunitdir)
 	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)$(userunitdir)

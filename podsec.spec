@@ -146,6 +146,7 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %dir %_sysconfdir/podsec/u7s
 %config(noreplace) %_sysconfdir/podsec/u7s/*
 %config(noreplace) %_sysconfdir/kubernetes/manifests/*
+%config(noreplace) %_sysconfdir/kubernetes/audit/*
 %_unitdir/user@.service.d/*
 %_libexecdir/podsec/u7s
 %_modules_loaddir/u7s.conf
