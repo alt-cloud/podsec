@@ -86,14 +86,17 @@ PODSEC_INOTIFY_PLUGINS = \
 	podsec-inotify-check-policy
 
 PODSEC_INOTIFY_PROGRAMMS = \
-	podsec-inotify-create-nagiosuser \
-	podsec-inotify-check-containers
+	podsec-inotify-check-containers \
+	podsec-inotify-check-kubeapi \
+	podsec-inotify-check-vuln
 
 PODSEC_INOTIFY_FUNCTIONS = \
 	podsec-inotify-functions
 
-PODSEC_INOTIFY_CRON_HOURLY= \
-	podsec-inotify-check-policy
+PODSEC_INOTIFY_CRON_PROGRAMS= \
+	podsec-inotify-check-policy \
+	podsec-inotify-check-vuln \
+	podsec-inotify-check-kubeapi
 
 TMPFILE  := $(shell mktemp)
 
@@ -145,6 +148,7 @@ install: all
 	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	# PODSEC-K8S USERNETES
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/log/kubeapi/
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/etcd
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
 	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
@@ -186,8 +190,9 @@ install: all
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	$(INSTALL) -m644 ./podsec-inotify/services/podsec-inotify-check-containers.service $(DESTDIR)/$(unitdir)/podsec-inotify-check-containers.service
 	# CRONTAB SERVICRS
-	$(MKDIR_P) -m755 $(DESTDIR)/etc/cron.hourly
-	cd ./podsec-inotify/cron.hourly;$(INSTALL) -m755 $(PODSEC_INOTIFY_CRON_HOURLY) $(DESTDIR)/etc/cron.hourly
+	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/podsec/crontabs
+	cd ./podsec-inotify/crontabs;$(INSTALL) -m755 $(PODSEC_INOTIFY_CRON_PROGRAMS) $(DESTDIR)/$(sysconfdir)/podsec/crontabs
+
 
 clean:
 

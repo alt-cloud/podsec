@@ -1,0 +1,1 @@
+*/10    *       *       *       *       /usr/lib/nagios/plugins/podsec-inotify-check-policy  -vvv -c 100 TMP="/tmp/check-policy.$$";if ! /usr/lib/nagios/plugins/podsec-inotify-check-policy  -vvv -c 100 >$TMP; then subject=$(head -1 $TMP);  mail -s "$subject" root <$TMP; rm -f $TMP; fi

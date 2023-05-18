@@ -12,35 +12,6 @@
 .SH "DESCRIPTION"
 .
 .SH "Установка master\-узла"
-1 Настройте репозиторий обновления
-.
-.IP "" 4
-.
-.nf
-
-
-apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64 classic\'
-apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64\-i586 classic\'
-apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/noarch classic\'
-rm \-f /etc/apt/sources\.list\.d/sources\.list
-apt\-get update
-.
-.fi
-.
-.IP "" 0
-.
-.P
-2 Установите podsec\-пакеты:
-.
-.IP "" 4
-.
-.nf
-
-# apt\-get install \-y podsec\-0\.9\.9\-alt1\.noarch\.rpm      podsec\-k8s\-rbac\-0\.9\.9\-alt1\.noarch\.rpm podsec\-k8s\-0\.9\.9\-alt1\.noarch\.rpm  podsec\-inotify\-0\.9\.9\-alt1\.noarch\.rpm
-.
-.fi
-.
-.IP "" 0
 .
 .IP "1." 4
 Измените переменную PATH:
@@ -112,8 +83,10 @@ kubeadm join xxx\.xxx\.xxx\.xxx:6443 \-\-token \.\.\. \-\-discovery\-token\-ca\-
 .
 .IP "" 0
 .
-.P
-5 После завершения скрипта проверьте работу \fBusernetes\fR (\fBrootless kuber\fR)
+.IP "1." 4
+После завершения скрипта проверьте работу \fBusernetes\fR (\fBrootless kuber\fR)
+.
+.IP "" 0
 .
 .IP "" 4
 .
@@ -202,12 +175,22 @@ kube\-system   replicaset\.apps/coredns\-c7df5cd6c   2         2         2      
 Все остальные процессы \fBkube\-controller\fR, \fBkube\-apiserver\fR, \fBkube\-scheduler\fR, \fBkube\-proxy\fR, \fBetcd\fR, \fBcoredns\fR запускаются как контейнеры от соответствующих образов \fBregistry\.local/k8s\-p10/kube\-controller\-manager:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-apiserver:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-scheduler:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-proxy:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/etcd:3\.5\.6\-0\fR, \fBregistry\.local/k8s\-p10/coredns:v1\.9\.3\fR\.
 .
 .IP "1." 4
-По умолчанию на master\-узле пользовательские \fBPod\fRы не запускаются\. Чтобы снять это ограничение наберите команду: ```
+По умолчанию на master\-узле пользовательские \fBPod\fRы не запускаются\. Чтобы снять это ограничение наберите команду:
 .
-.IP
-node/\fIhost\fR untainted ```
+.IP "" 0
 .
-.IP "2." 4
+.IP "" 4
+.
+.nf
+
+# kubectl taint nodes <host> node\-role\.kubernetes\.io/control\-plane:NoSchedule\-
+node/<host> untainted
+.
+.fi
+.
+.IP "" 0
+.
+.IP "1." 4
 Проверьте загрузку deployment nginx:
 .
 .IP "" 0
@@ -229,42 +212,23 @@ node/\fIhost\fR untainted ```
 NAME READY STATUS RESTARTS AGE pod/nginx\-deployment\-85996f8dbd\-2dw9h 1/1 Running 0 5m34s pod/nginx\-deployment\-85996f8dbd\-r5dt4 1/1 Running 0 5m34s ```
 .
 .IP "1." 4
+Проверьте загрузку образа \fBregistry\.local/alt/alt\fR:
 .
-.IP
-If you don\'t see a command prompt, try pressing enter\. [root@bash /]# pwd ```
+.IP "" 0
+.
+.IP "" 4
+.
+.nf
+
+# kubectl run \-it \-\-image=registry\.local/alt/alt \-\- bash
+If you don\'t see a command prompt, try pressing enter\.
+[root@bash /]# pwd
+.
+.fi
 .
 .IP "" 0
 .
 .SH "Подключение worker\-узла"
-1 Настройте репозиторий обновления
-.
-.IP "" 4
-.
-.nf
-
-
-apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64 classic\'
-apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/x86_64\-i586 classic\'
-apt\-repo add \'rpm [p10] http://ftp\.altlinux\.org/pub/distributions/ALTLinux p10/branch/noarch classic\'
-rm \-f /etc/apt/sources\.list\.d/sources\.list
-apt\-get update
-.
-.fi
-.
-.IP "" 0
-.
-.P
-2 Установите podsec\-пакеты:
-.
-.IP "" 4
-.
-.nf
-
-# apt\-get install \-y podsec\-0\.9\.9\-alt1\.noarch\.rpm      podsec\-k8s\-rbac\-0\.9\.9\-alt1\.noarch\.rpm podsec\-k8s\-0\.9\.9\-alt1\.noarch\.rpm  podsec\-inotify\-0\.9\.9\-alt1\.noarch\.rpm
-.
-.fi
-.
-.IP "" 0
 .
 .IP "1." 4
 Измените переменную PATH:
@@ -282,8 +246,10 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 .
 .IP "" 0
 .
-.P
-3 Скопируйте команду подключния \fBworker\-узла\fR, полученную на этапе установки начального \fBmaster\-узла\fR\. Запустите ее:
+.IP "1." 4
+Скопируйте команду подключния \fBworker\-узла\fR, полученную на этапе установки начального \fBmaster\-узла\fR\. Запустите ее:
+.
+.IP "" 0
 .
 .IP "" 4
 .

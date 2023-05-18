@@ -3,19 +3,38 @@
 getimagelist() {
   podman images --format="{{.Repository}}:{{.Tag}}"
 }
-images=$(getimagelist registry.local)
-TMP=/tmp/trivy.$$
-adminmail=imagemaker
-trivy_options="--security-checks vuln,config"
-for image in $images
-do
-  if trivy image $trivy_options $image | tee $TMP | systemd-cat -t trivy-check
-  then :;
-  fi
-  grep 'Total: [1-9][0-9]*' $TMP
-  if [ $? -eq 0 ]; then
-    mail -s "Найдены уязвимости в образе $image"  $adminmail < $TMP
-  fi
-done
-rm -f $TMP
+
+trivyUserImages() {
+  ueser=$1
+  images=$(getimagelist registry.local)
+  TMP=/tmp/trivy.$$
+  adminmail=root
+  trivy_options="--security-checks vuln,config"
+  for image in $images
+  do
+    if trivy image $trivy_options $image | tee $TMP | logger -t "check-images-trivy:$user"
+    then :;
+    fi
+    if grep 'Total: [1-9][0-9]*' $TMP >/dev/null 2>&1 ; then
+      mail -s "Найдены уязвимости в образе '$image' пользователя" $adminmail < $TMP
+    fi
+  done
+  rm -f $TMP
+}
+
+if [ $# -eq 0 ]
+then
+  $0 root
+  for dir in /home/*
+  do
+    if [ -d $dir ]
+    then
+      user=${dir:6}
+      su - -c "$0 $user" $user
+    fi
+  done
+else
+  user=$1
+  trivyUserImages $user
+fi
 

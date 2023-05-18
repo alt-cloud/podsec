@@ -1,0 +1,54 @@
+#!/bin/sh
+# Скрипт работает в двух режимах:
+#
+# - Мониторинг событий поступающих в файл  /etc/kubernete/audit/audit.log
+#   Если на запрос API-сервер ответл кодом > 400, то данное событие пишется в системный лог
+#   и добавляется к файлу событий монтиринга /var/lib/podsec/log/kubeapi/forbidden.log
+#
+# - Передача накопленных в файле событий монтиринга /var/lib/podsec/log/kubeapi/forbidden.log системному админстратору
+
+
+EVENTFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
+
+AUDITFILE='/etc/kubernetes/audit/audit.log'
+
+if [ $# -gt 1 ]
+then
+  echo "Неверное число параметров" >&2
+  exit 1
+fi
+
+if [ $# -eq 1 ]
+then
+  if [ $1 = '-d' ]
+  then
+    # Мониторинг
+    if [ -s $EVENTFILE ]
+    then
+      lastTime=$(jq -c '.[0]' $EVENTFILE | tail -1)
+      filtr="select(.[0]>$lastTime)"
+    else
+      filtr="."
+    fi
+
+    tail -n 1000000 -f $AUDITFILE |
+    jq --unbuffered -c '. |
+      select(.responseStatus.code >= 400) |
+      [.requestReceivedTimestamp,.sourceIPs[0],.responseStatus.message] |
+      '$filtr''  |
+    tee -a $EVENTFILE |
+    logger -t "check-kubeapi"
+  else
+    echo "Неверный параметр '$1'" >&2
+    exit 1
+  fi
+else
+  # Передача почты
+  if [ -s $EVENTFILE ]
+  then
+    mail -s "Detected requests to the kubernetes cluster with excess authority" root < $EVENTFILE
+    > $EVENTFILE
+  fi
+fi
+
+

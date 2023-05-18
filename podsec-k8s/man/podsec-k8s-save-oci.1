@@ -4,7 +4,7 @@
 .TH "PODSEC\-K8S\-SAVE\-OCI" "1" "May 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-k8s\-save\-oci\fR \- архивация образов kubernetes версии 1\.24\.8 различных архитектур в указанный первым параметром каталог c последующим сжатием и формированием \fBxz\-oci\-архива\fR
+\fBpodsec\-k8s\-save\-oci\fR \- архивация образов kubernetes версии 1\.26\.3 различных архитектур в указанный первым параметром каталог c последующим сжатием и формированием \fBxz\-oci\-архива\fR
 .
 .SH "SYNOPSIS"
 \fBpodsec\-save\-oci каталог_архивирования_образов архитектура,архитектура,\.\.\.|all образ \.\.\.\fR
@@ -18,7 +18,7 @@
 Второй параметры задает через запятую архивируемые архитектуры\. Если второй параметр имеет значение all архивируются все архитектуры: \fBamd64\fR, \fBarm64\fR, \fBarm ppc64le\fR, \fB386\fR\.
 .
 .IP "\(bu" 4
-Скрипт производит загрузку образов \fBk8s\-p10/coredns:v1\.8\.6\fR, \fBk8s\-p10/kube\-controller\-manager:v1\.24\.8\fR, \fBk8s\-p10/kube\-apiserver:v1\.24\.8\fR, \fBk8s\-p10/kube\-proxy:v1\.24\.8\fR, \fBk8s\-p10/etcd:3\.5\.5\-0\fR, \fBk8s\-p10/flannel:v0\.19\.2\fR, \fBk8s\-p10/kube\-scheduler:v1\.24\.8\fR, \fBk8s\-p10/pause:3\.7\fR, \fBk8s\-p10/flannel\-cni\-plugin:v1\.2\.0\fR, \fBk8s\-p10/cert\-manager\-controller:v1\.9\.1\fR, \fBk8s\-p10/cert\-manager\-cainjector:v1\.9\.1\fR, \fBk8s\-p10/cert\-manager\-webhook:v1\.9\.1\fR с регистратора \fBregistry\.altlinux\.org\fR в \fBcontainers\-storage:\fR системы с последующим помещением их в указанный первым параметром каталог в подкаталог с именем архитектуры \fB$ociDir/$arch\fR\. Для улучшения последующей компресии слои образа помещаются несжатыми (параметр \fB\-\-dest\-oci\-accept\-uncompressed\-layers\fR)
+Скрипт производит загрузку образов \fBk8s\-p10/coredns:v1\.9\.3\fR, \fBk8s\-p10/kube\-controller\-manager:v1\.26\.3\fR, \fBk8s\-p10/kube\-apiserver:v1\.26\.3\fR, \fBk8s\-p10/kube\-proxy:v1\.26\.3\fR, \fBk8s\-p10/etcd:3\.5\.6\-0\fR, \fBk8s\-p10/flannel:v0\.19\.2\fR, \fBk8s\-p10/kube\-scheduler:v1\.26\.3\fR, \fBk8s\-p10/pause:3\.9\fR, \fBk8s\-p10/flannel\-cni\-plugin:v1\.2\.0\fR, \fBk8s\-p10/cert\-manager\-controller:v1\.9\.1\fR, \fBk8s\-p10/cert\-manager\-cainjector:v1\.9\.1\fR, \fBk8s\-p10/cert\-manager\-webhook:v1\.9\.1\fR с регистратора \fBregistry\.altlinux\.org\fR в \fBcontainers\-storage:\fR системы с последующим помещением их в указанный первым параметром каталог в подкаталог с именем архитектуры \fB$ociDir/$arch\fR\. Для улучшения последующей компресии слои образа помещаются несжатыми (параметр \fB\-\-dest\-oci\-accept\-uncompressed\-layers\fR)
 .
 .IP "\(bu" 4
 После окончания наполнения подкаталога архитектуры он архивируется, сжимается и помещается в файл \fB$ociDir/$arch\.tar\.xz\fR
