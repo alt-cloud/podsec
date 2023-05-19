@@ -7,7 +7,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 0.9.34
+Version: 0.9.35
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -195,6 +195,9 @@ chmod 600 $rootcrontab
 %_sysconfdir/podsec/crontabs/*
 
 %changelog
+* Fri May 19 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.35-alt1
+- 0.9.35
+
 * Thu May 18 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.34-alt1
 - 0.9.34
 
