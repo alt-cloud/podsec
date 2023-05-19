@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-CREATE\-IMAGEMAKERUSER" "1" "March 2023" "" ""
+.TH "PODSEC\-CREATE\-IMAGEMAKERUSER" "1" "May 2023" "" ""
 .
 .SH "NAME"
 \fBpodsec\-create\-imagemakeruser\fR \- создание пользователей разработчиков образов контейнеров
@@ -87,7 +87,7 @@ Cкрипт создает пользователей разработчиков
 Все открытые ключи пользователей располагаются в каталоге \fB/var/sigstore/keys/\fR и должны быть скопированы на каждый сервер кластера к каталог \fB/var/sigstore/keys/\fR
 .
 .IP "\(bu" 4
-Подписи образов хранятся в каталоге \fB/var/sigstore/sigstore/\fR с отброшенными именами регистраторов\. Таким образом, если в системе контролируются подписи образов с разных регистраторов (например: \fBregistry\.altlinux\.org\fR и \fBregistry\.local\fR) и образ \fBregistry\.local/k8s\-p10/pause:3\.7\fR c \fB@sha256\e=347a15493d0a38d9ce74f23ea9f081583728a20dbdc11d7c17ef286d9cade3ec\fR подписан, то будут считаться подписанными все образы с данным \fBsha256\fR: \fBregistry\.altlinux\.orh/k8s\-p10/pause:3\.7\fR, \.\.\.
+Подписи образов хранятся в каталоге \fB/var/sigstore/sigstore/\fR с отброшенными именами регистраторов\. Таким образом, если в системе контролируются подписи образов с разных регистраторов (например: \fBregistry\.altlinux\.org\fR и \fBregistry\.local\fR) и образ \fBregistry\.local/k8s\-p10/pause:3\.9\fR c \fB@sha256\e=347a15493d0a38d9ce74f23ea9f081583728a20dbdc11d7c17ef286d9cade3ec\fR подписан, то будут считаться подписанными все образы с данным \fBsha256\fR: \fBregistry\.altlinux\.orh/k8s\-p10/pause:3\.9\fR, \.\.\.
 .
 .IP "" 0
 .

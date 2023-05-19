@@ -1,0 +1,10 @@
+[Unit]
+Description=Kubernetes api audit log monitoring service
+After=u7s.service
+
+[Service]
+ExecStart=/usr/bin/podsec-inotify-check-kubeapi -d
+Restart=always
+RestartSec=1s
+[Install]
+WantedBy=multi-user.target
