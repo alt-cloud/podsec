@@ -1,0 +1,48 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "PODSEC\-INOTIFY\-CHECK\-VULN" "1" "May 2023" "" ""
+.
+.SH "NAME"
+\fBpodsec\-inotify\-check\-vuln\fR \- скрипт мониторинга docker\-образов узла сканером безопасности trivy
+.
+.SH "SYNOPSIS"
+\fBpodsec\-inotify\-check\-vuln\fR
+.
+.SH "DESCRIPTION"
+Скрипт производит мониторинг \fBdocker\-образов\fR узла сканером безопасности \fBtrivy\fR\. Анализ производится для \fBrootfull\fR\-образов пользователя \fBroot\fR и \fBrootless\fR\-образов пользователей, располагающихся в каталоге \fB/home\fR\.
+.
+.P
+Если при анализе образа число обнаруженных угроз уровня \fBHIGH\fR более 10\-ти, результат анализа посылается в системный лог и посылается почтой системному администратору (\fBroot\fR)\.
+.
+.SH "OPTIONS"
+Отсутствуют\.
+.
+.P
+В состав пакета кроме этого скрипта входит файл для \fBcron\fR \fB/etc/podsec/crontabs/podsec\-inotify\-check\-vuln\fR\. Файл содержит единственную строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-vuln\fR\. Во время установки пакета строка файла (в случае ее отсутствия) дописыватся в \fBcrontab\fR\-файл \fB/var/spool/cron/root\fR пользователя \fBroot\fR\.
+.
+.P
+Если необходимо изменить режим запуска скрипта или выключить его это можно сделать командой редактирования \fBcrontab\fR\-файла:
+.
+.IP "" 4
+.
+.nf
+
+
+#  crontab \-e
+.
+.fi
+.
+.IP "" 0
+.
+.SH "EXAMPLES"
+\fBpodsec\-inotify\-check\-vuln\fR
+.
+.SH "SECURITY CONSIDERATIONS"
+\-
+.
+.SH "SEE ALSO"
+The all\-in\-one open source security scanner \fIhttps://trivy\.dev/\fR
+.
+.SH "AUTHOR"
+Костарев Алексей, Базальт СПО kaf@basealt\.ru
