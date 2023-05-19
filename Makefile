@@ -100,7 +100,8 @@ PODSEC_INOTIFY_CRON_PROGRAMS= \
 
 PODSEC_INOTIFY_UNITS= \
 	podsec-inotify-check-containers.service \
-	podsec-inotify-check-kubeapi.service
+	podsec-inotify-check-kubeapi.service \
+	podsec-inotify-server-trivy.service
 
 TMPFILE  := $(shell mktemp)
 

@@ -5,18 +5,18 @@ getimagelist() {
 }
 
 trivyUserImages() {
-  ueser=$1
+  user=$1
   images=$(getimagelist registry.local)
   TMP=/tmp/trivy.$$
   adminmail=root
-  trivy_options="--security-checks vuln,config"
+  trivy_options="--scanners vuln,config --server http://127.0.0.1:4954"
   for image in $images
   do
-    if trivy image $trivy_options $image | tee $TMP | logger -t "check-images-trivy:$user"
+    if trivy image $trivy_options $image 2>/dev/null | tee $TMP | logger -t "check-images-trivy:$user"
     then :;
     fi
-    if grep 'Total: [1-9][0-9]*' $TMP >/dev/null 2>&1 ; then
-      mail -s "Найдены уязвимости в образе '$image' пользователя" $adminmail < $TMP
+    if grep 'Total:.*HIGH: [1-9][0-9]*' $TMP >/dev/null 2>&1 ; then
+      mail -s "Vulnerabilities found in image '$image'  of user $user" $adminmail < $TMP
     fi
   done
   rm -f $TMP

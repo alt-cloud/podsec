@@ -172,8 +172,7 @@ chmod 600 $rootcrontab
 %_mandir/man?/podsec-k8s-*
 %_mandir/man?/podsec-u7s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
-%_unitdir/*
-%exclude %_unitdir/podsec-inotify-check-containers.service
+%_unitdir/u7s.service
 %_userunitdir/*
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/kubernetes/audit/
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
@@ -191,7 +190,8 @@ chmod 600 $rootcrontab
 %nagios_plugdir/podsec-inotify-*
 %_bindir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*
-%_unitdir/*
+%_unitdir/podsec-inotify-*
+%exclude %_unitdir/u7s.service
 %_sysconfdir/podsec/crontabs/*
 
 %changelog
