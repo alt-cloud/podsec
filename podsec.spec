@@ -135,6 +135,11 @@ chmod 600 $rootcrontab
 
 %preun inotify
 %preun_systemd podsec-inotify-check-containers.service
+%preun_systemd podsec-inotify-check-kubeapi.service
+
+%post inotify
+%post_systemd  podsec-inotify-check-containers.service
+%post_systemd  podsec-inotify-check-kubeapi.service
 
 %post k8s
 %post_systemd  u7s.service
