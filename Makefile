@@ -98,6 +98,10 @@ PODSEC_INOTIFY_CRON_PROGRAMS= \
 	podsec-inotify-check-vuln \
 	podsec-inotify-check-kubeapi
 
+PODSEC_INOTIFY_UNITS= \
+	podsec-inotify-check-containers.service \
+	podsec-inotify-check-kubeapi.service
+
 TMPFILE  := $(shell mktemp)
 
 PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
@@ -188,7 +192,7 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-	$(INSTALL) -m644 ./podsec-inotify/services/podsec-inotify-check-containers.service $(DESTDIR)/$(unitdir)/podsec-inotify-check-containers.service
+	cd ./podsec-inotify/services;$(INSTALL) -m644 $(PODSEC_INOTIFY_UNITS) $(DESTDIR)/$(unitdir)/
 	# CRONTAB SERVICRS
 	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/podsec/crontabs
 	cd ./podsec-inotify/crontabs;$(INSTALL) -m755 $(PODSEC_INOTIFY_CRON_PROGRAMS) $(DESTDIR)/$(sysconfdir)/podsec/crontabs

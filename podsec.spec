@@ -191,7 +191,7 @@ chmod 600 $rootcrontab
 %nagios_plugdir/podsec-inotify-*
 %_bindir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*
-%_unitdir/podsec-inotify-check-containers.service
+%_unitdir/*
 %_sysconfdir/podsec/crontabs/*
 
 %changelog
