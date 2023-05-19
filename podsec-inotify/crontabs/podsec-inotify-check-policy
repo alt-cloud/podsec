@@ -1,1 +1,1 @@
-*/10    *       *       *       *       TMPF="/tmp/check-policy.$$";if /usr/lib/nagios/plugins/podsec-inotify-check-policy  -vvv -c 100 >$TMPF 2>&1; then :; else subject=$(head -1 $TMPF);  mail -s "$subject" root <$TMPF; rm -f $TMPF; fi
+*/10    *       *       *       *       /usr/lib/nagios/plugins/podsec-inotify-check-policy  -vvv -c 100 >/dev/null 2>&1

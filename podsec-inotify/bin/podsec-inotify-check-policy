@@ -2,6 +2,8 @@
 # Плугин проверяет политики настройки контейнеризации на сервере
 export LANG=C
 
+export adminmail=root
+
 if [ $EUID -ne 0 ]
 then
   if [ "$LANG" == 'ru_RU.UTF-8' ]
@@ -326,30 +328,42 @@ then
   users=$(echo "$users" | tr ' ' "\n" | sort -u | tr "\n" ' ')
   prefix=${LEVELSNAMES[$key]}
   priority=${NAGIOSPRIORITY[$key]}
+  outMessage=
+  subject=
   case $VERBOSELEVEL in
     0)
       if [ "$LANG" == 'ru_RU.UTF-8' ]
       then
-        echo  "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users"
+        subject="POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users"
+        outMessage=$subject
       else
-        echo  "POLICY $prefix($metricWeight): Violating User Containerization Policies $users"
+        subject="POLICY $prefix($metricWeight): Violating User Containerization Policies $users"
+        outMessage=$subject
       fi
       ;;
     1|2|3)
       if [ "$LANG" == 'ru_RU.UTF-8' ]
       then
-        echo -ne "POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users | Есть пользователи:"
+        subject="POLICY $prefix($metricWeight): Нарушение политик контейнеризации пользователей $users"
+        outMessage="$subject | Есть пользователи:"
       else
-        echo -ne "POLICY $prefix($metricWeight): Violation of user containerization policies $users | There are users:"
+        subject="POLICY $prefix($metricWeight): Violation of user containerization policies $users "
+        outMessage="$subject | There are users:"
       fi
-      echo -ne "$nagiosHeads"
+      outMessage+="$nagiosHeads"
       if [ $VERBOSELEVEL -gt 1 ]
       then
-        echo -ne " | $messages"
+        outMessage+=" | $messages"
       fi
       ;;
   esac
-  echo
+  outMessage+="\n"
+  if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
+  then
+    echo -ne $outMessage
+  else  # Вызов через cron
+    echo -ne $outMessage | mail -s "$subject" $adminmail
+  fi
   exit $priority
 fi
 if [ "$LANG" == 'ru_RU.UTF-8' ]
