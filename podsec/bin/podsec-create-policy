@@ -7,6 +7,14 @@ then
   echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>\n"
   exit 1
 fi
+
+if [ $# -gt 1 ]
+then
+  echo -ne "Должен быть указан только один IP-адрес регистратора и сервера подписей\n"
+  echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>\n"
+  exit 1
+fi
+
 regIP=$1
 
 case $regIP in
@@ -62,7 +70,7 @@ then
   shift
   for domain
   do
-    if [ $domain == 'registry.local' || $domain == 'sigstore.local' ]
+    if [ "$domain" = 'registry.local' ] || [ "$domain" = 'sigstore.local' ]
     then
       echo "Домены registry.local sigstore.local уже привязаны к IP-адресу $ip" >&2
       echo "Удалите привязку и запустите скрипт заново" >&2

@@ -73,8 +73,13 @@ do
   do
     echo "  image=$image"
     Image="$regName/$image"
-    skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers docker://$Image containers-storage:$Image
-    skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers containers-storage:$Image oci:$ociArchDir:$image
+    if skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers docker://$Image containers-storage:$Image && \
+      skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers containers-storage:$Image oci:$ociArchDir:$image
+    then :;
+    else
+      rm -rf $ociDir
+      exit 1
+    fi
   done
   tar cvCf $ociDir -  $arch | xz -9v > $ociArchDir.tar.xz
   rm -rf $ociArchDir
