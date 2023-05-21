@@ -83,7 +83,8 @@ USERNETES_KUBEADM_AUDIT= \
 	policy.yaml
 
 PODSEC_INOTIFY_PLUGINS = \
-	podsec-inotify-check-policy
+	podsec-inotify-check-policy \
+	podsec-inotify-check-images
 
 PODSEC_INOTIFY_PROGRAMMS = \
 	podsec-inotify-check-containers \
@@ -95,6 +96,7 @@ PODSEC_INOTIFY_FUNCTIONS = \
 
 PODSEC_INOTIFY_CRON_PROGRAMS= \
 	podsec-inotify-check-policy \
+	podsec-inotify-check-images \
 	podsec-inotify-check-vuln \
 	podsec-inotify-check-kubeapi
 
