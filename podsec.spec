@@ -155,7 +155,7 @@ chmod 600 $rootcrontab
 %exclude %_mandir/man?/podsec-inotify-*
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
-
+%dir %_localstatedir/podsec/
 
 %files k8s
 %dir %_sysconfdir/podsec/u7s

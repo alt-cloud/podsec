@@ -9,6 +9,7 @@
 
 
 EVENTFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
+LASTEVENTTIMEFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
 
 AUDITFILE='/etc/kubernetes/audit/audit.log'
 
@@ -23,9 +24,9 @@ then
   if [ $1 = '-d' ]
   then
     # Мониторинг
-    if [ -s $EVENTFILE ]
+    if [ -s $LASTEVENTTIMEFILE ]
     then
-      lastTime=$(jq -c '.[0]' $EVENTFILE | tail -1)
+      lastTime=$(cat $LASTEVENTTIMEFILE)
       filtr="select(.[0]>$lastTime)"
     else
       filtr="."
@@ -47,6 +48,7 @@ else
   if [ -s $EVENTFILE ]
   then
     mail -s "Detected requests to the kubernetes cluster with excess authority" root < $EVENTFILE
+    tail -1 $EVENTFILE | jq '.[0]' > $LASTEVENTTIMEFILE
     > $EVENTFILE
   fi
 fi
