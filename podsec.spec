@@ -155,7 +155,7 @@ chmod 600 $rootcrontab
 %exclude %_mandir/man?/podsec-inotify-*
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
-%dir %_localstatedir/podsec/
+%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec
 
 %files k8s
 %dir %_sysconfdir/podsec/u7s
@@ -177,7 +177,6 @@ chmod 600 $rootcrontab
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/kubernetes/audit/
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
 %config(noreplace) %attr(0640,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.bashrc
