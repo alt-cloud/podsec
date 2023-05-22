@@ -100,7 +100,7 @@ then
   outPolicyImagesUsers=$(echo $outPolicyImagesJSON | jq '[.[].key] | join (", ")')
   outPolicyImages=$(echo $outPolicyImagesJSON | jq '[[.[]][] | (.key, ": ", (.value | sort | unique | join(", ") ))] | join("")')
 #   echo "outPolicyImagesUsers=$outPolicyImagesUsers"
-  metricWeight=102
+  metricWeight=103
   key=$(getJournalKeyByMetric $metricWeight);
   if [ -n "$key" ]
   then
@@ -109,8 +109,8 @@ then
     priority=${JOURNALPRIORITY[$key]}
     if [ "$LANG" == 'ru_RU.UTF-8' ]
     then
-      nagiosHeads+="\nимеют образы вне политик поддерживаемых"
-      message="$prefix($metricWeight): Пользователи $outPolicyImagesUsers имеют образы вне политик поддерживаемых: $outPolicyImages"
+      nagiosHeads+="\nимеют образы вне поддерживаемых политик"
+      message="$prefix($metricWeight): Пользователи $outPolicyImagesUsers имеют образы вне поддерживаемых политик:  $outPolicyImages"
     else
       nagiosHeads+="\nhave unsigned images,"
       message="$prefix($metricWeight): $outPolicyImagesUsers users have images outside of supported policies: $outPolicyImages"
