@@ -28,8 +28,8 @@ arch=$2
 signBy="${3}"
 if [ $# -eq 3 ]
 then
-  regName="registry.local/k8s-p10"
-  base="k8s-p10/"
+  regName="registry.local/k8s-c10f1"
+  base="k8s-c10f1/"
 else
   dir=$(dirname $4)
   if [ $dir == '.' ]

@@ -4,7 +4,7 @@
 
 Основные отличия:
 
-- для разворачивания `rootless kubernetes` используется набор образов `registry.altlinux.org/k8s-p10`;
+- для разворачивания `rootless kubernetes` используется набор образов `registry.altlinux.org/k8s-c10f1`;
 
 - команда разворачивания кластера `kubeadm` пакета `podsec-k8s` (алиас shell-скрипта `podsec-k8s/bin/podsec-u7s-kubeadm`) поддерживает основные подкоманды и флаги для разворачивания кластера, но не поддерживает все. Для вызова "родной" команды `kubeadm` пакета `kubernetes-kubeadm` необходимо в пользователе `u7s-admin` запустить команду:
   <pre>
@@ -40,7 +40,7 @@ apt-get update
 
 3. Измените переменную PATH:
 
-<pre> 
+<pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
@@ -54,7 +54,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 
 После:
 
-- генерации сертификатов в каталоге `/etc/kuarnetes/pki`, 
+- генерации сертификатов в каталоге `/etc/kuarnetes/pki`,
 - загрузки образов, -генерации conf-файлов в каталоге `/etc/kubernetes/manifests/`, `/etc/kubernetes/manifests/etcd/`
 - запуска сервиса `kubelet` и `Pod`'ов системных `kubernetes-образов`
 
@@ -65,7 +65,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 You can now join any number of control-plane nodes by copying certificate authorities
 and service account keys on each node and then running the following as root:
 
-kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:.. --control-plane 
+kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:.. --control-plane
 
 Then you can join any number of worker nodes by running the following on each as root:
 
@@ -130,7 +130,7 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 </pre>
 Процесс `kubelet`  запускается как сервис в `user namespace` процесса `rootlesskit`.
 
-Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-controller-manager:v1.26.3`, `registry.local/k8s-p10/kube-apiserver:v1.26.3`, `registry.local/k8s-p10/kube-scheduler:v1.26.3`, `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/etcd:3.5.6-0`,  `registry.local/k8s-p10/coredns:v1.9.3`.
+Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-c10f1/kube-controller-manager:v1.26.3`, `registry.local/k8s-c10f1/kube-apiserver:v1.26.3`, `registry.local/k8s-c10f1/kube-scheduler:v1.26.3`, `registry.local/k8s-c10f1/kube-proxy:v1.26.3`, `registry.local/k8s-c10f1/etcd:3.5.6-0`,  `registry.local/k8s-c10f1/coredns:v1.9.3`.
 
 6. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
 ```
@@ -183,7 +183,7 @@ apt-get update
 
 3. Измените переменную PATH:
 
-<pre> 
+<pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
@@ -221,7 +221,7 @@ Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 </pre>
 Процесс `kubelet`  запускается как сервис в `user namespace` процесса `rootlesskit`.
 
-Все остальные процессы `kube-proxy`, `kube-flannel` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/flannel:v0.19.2`.
+Все остальные процессы `kube-proxy`, `kube-flannel` запускаются как контейнеры от соответствующих образов `registry.local/k8s-c10f1/kube-proxy:v1.26.3`, `registry.local/k8s-c10f1/flannel:v0.19.2`.
 
 6. Зайдите на `master-узел` и проверьте подключение `worker-узла`:
 ```
@@ -258,7 +258,7 @@ kube-system    kube-proxy        2         2         2       2            2     
 
 ## Подключение control-plane (master)-узла
 
-При подключении дополнительного `control-plane`(`master`)-узла необходимо 
+При подключении дополнительного `control-plane`(`master`)-узла необходимо
 
 - установить и настроить на один из улов в кластере или вне его `haproxy` для балансировки запросов;
 - переустановить начальный `master-узел` для работы с `haproxy`
@@ -267,7 +267,7 @@ kube-system    kube-proxy        2         2         2       2            2     
 
 ### Установка и настройка балансировщика запросов haproxy
 
-Полная настройка отказоустойчивого кластера `haproxy` из 3-х узлов описана в документе  
+Полная настройка отказоустойчивого кластера `haproxy` из 3-х узлов описана в документе
 [ALT Container OS подветка K8S. Создание HA кластера](https://www.altlinux.org/ALT_Container_OS_%D0%BF%D0%BE%D0%B4%D0%B2%D0%B5%D1%82%D0%BA%D0%B0_K8S._%D0%A1%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_HA_%D0%BA%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80%D0%B0).
 
 Здесь же мы рассмотрим создание и настройка с один `haproxy` с балансировкой запросов на `master`-узлы.
@@ -280,7 +280,7 @@ kube-system    kube-proxy        2         2         2       2            2     
 Отредактируйте конфигурационный файл `/etc/haproxy/haproxy.cfg`:
 
 - добавьте в него описание `frontend`'a `main`, принимающего запросы по порту `8443`:
-<pre> 
+<pre>
  frontend main
     bind *:8443
     mode tcp
@@ -324,7 +324,7 @@ apt-get update
 
 Измените переменную `PATH`:
 
-<pre> 
+<pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
@@ -334,7 +334,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 ```
 
 В результате инициализации `kubeadm` выведет команды подключения дополнительных `control-plane` и `worker` узлов:
-<pre> 
+<pre>
 ...
 You can now join any number of the control-plane node running the following command on each as root:
 
@@ -356,7 +356,7 @@ kubeadm join <IP_адрес_haproxy>:8443 --token ... \
 Обратите внимание - в командах присоединения узлов указывается не URL созданного начального master-узла (`<IP_или_DNS_начального_мастер_узла>:6443`),
 а URL `haproxy`.
 
-В сформированных файлах конфигурации `/etc/kubernetes/admin.conf`, `~/.kube/config` также указывается URL `haproxy`:  
+В сформированных файлах конфигурации `/etc/kubernetes/admin.conf`, `~/.kube/config` также указывается URL `haproxy`:
 <pre>
 apiVersion: v1
 clusters:
@@ -386,7 +386,7 @@ apt-get update
 
 Измените переменную `PATH`:
 
-<pre> 
+<pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
@@ -398,7 +398,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 ```
 
 В результате работы команда kubeadm выведет строки:
-<pre> 
+<pre>
  This node has joined the cluster and a new control plane instance was created:
 
 * Certificate signing request was sent to apiserver and approval was received.
@@ -410,7 +410,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 Run 'kubectl get nodes' to see this node join the cluster.
 </pre>
 
-Наберите на вновь созданном (или начальном)`control-plane` узле команду:  
+Наберите на вновь созданном (или начальном)`control-plane` узле команду:
 ```
 # kubectl  get nodes
 NAME       STATUS   ROLES           AGE     VERSION
@@ -421,7 +421,7 @@ NAME       STATUS   ROLES           AGE     VERSION
 Обратите внимание, что роль (ROLES) обоих узлов - `control-plane`.
 
 Наберите команду:
-<pre>  
+<pre>
 # kubectl get all -A
 NAMESPACE      NAME                                   READY   STATUS    RESTARTS       AGE    IP             NODE       NOMINATED NODE   READINESS GATES
 kube-flannel   pod/kube-flannel-ds-2mhqg              1/1     Running   0              153m   10.96.0.1      <host1>   <none>           <none>
@@ -444,15 +444,15 @@ kube-system    pod/kube-scheduler-<host2>             1/1     Running   0       
 ...
 
 NAMESPACE      NAME                             DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE    CONTAINERS     IMAGES                                      SELECTOR
-kube-flannel   daemonset.apps/kube-flannel-ds   2         2         2       3            3           <none>                   153m   kube-flannel   registry.local/k8s-p10/flannel:v0.19.2      app=flannel
-kube-system    daemonset.apps/kube-proxy        2         2         2       2            2           kubernetes.io/os=linux   174m   kube-proxy     registry.local/k8s-p10/kube-proxy:v1.26.3   k8s-app=kube-proxy
+kube-flannel   daemonset.apps/kube-flannel-ds   2         2         2       3            3           <none>                   153m   kube-flannel   registry.local/k8s-c10f1/flannel:v0.19.2      app=flannel
+kube-system    daemonset.apps/kube-proxy        2         2         2       2            2           kubernetes.io/os=linux   174m   kube-proxy     registry.local/k8s-c10f1/kube-proxy:v1.26.3   k8s-app=kube-proxy
 ...
 </pre>
 
 Убедитесь, что сервисы `pod/etcd`, `kube-apiserver`, `kube-controller-manager`, `kube-scheduler`, `kube-proxy`, `kube-flannel` запустились на обоих control-plane узлах.
 
-Для балансировки запросов по двум серверам добавьте URL подключенного `control-plane` узла в файл конфигурации `/etc/haproxy/haproxy.cfg`:  
-<pre> 
+Для балансировки запросов по двум серверам добавьте URL подключенного `control-plane` узла в файл конфигурации `/etc/haproxy/haproxy.cfg`:
+<pre>
 backend apiserver
     option httpchk GET /healthz
     http-check expect status 200
@@ -488,7 +488,7 @@ backend apiserver
 ```
 $ nsenter_u7s
 [INFO] Entering RootlessKit namespaces: OK
-[root@<host> boot]# 
+[root@<host> boot]#
 ```
 
 В `user namespace`:
@@ -510,19 +510,19 @@ $ nsenter_u7s
 
 Необходимо:
 
-- в пользователе `u7s-admin` 
+- в пользователе `u7s-admin`
   * остановить сервис
-  <pre> 
+  <pre>
    systemctl --user stop u7s.target
   </pre>
   * на мастер-узле удалить базу `etcd`:
-  <pre> 
+  <pre>
   $ rm -rf /var/lib/podsec/u7s/etcd/member/
   </pre>
 
 - в пользователе `root`:
-  * если текущая версия пакета совпадает с новой удалить пакет  
-  <pre> 
+  * если текущая версия пакета совпадает с новой удалить пакет
+  <pre>
   # apt-get remove -y podsec-k8s
   </pre>
   * установить новый пакет;

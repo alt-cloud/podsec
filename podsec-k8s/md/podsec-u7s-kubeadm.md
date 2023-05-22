@@ -101,7 +101,7 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 </pre>
 Процесс `kubelet`  запускается как сервис в `user namespace` процесса `rootlesskit`.
 
-Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-controller-manager:v1.26.3`, `registry.local/k8s-p10/kube-apiserver:v1.26.3`, `registry.local/k8s-p10/kube-scheduler:v1.26.3`, `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/etcd:3.5.6-0`,  `registry.local/k8s-p10/coredns:v1.9.3`.
+Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-c10f1/kube-controller-manager:v1.26.3`, `registry.local/k8s-c10f1/kube-apiserver:v1.26.3`, `registry.local/k8s-c10f1/kube-scheduler:v1.26.3`, `registry.local/k8s-c10f1/kube-proxy:v1.26.3`, `registry.local/k8s-c10f1/etcd:3.5.6-0`,  `registry.local/k8s-c10f1/coredns:v1.9.3`.
 
 
 4. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
@@ -180,7 +180,7 @@ Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 </pre>
 Процесс `kubelet`  запускается как сервис в `user namespace` процесса `rootlesskit`.
 
-Все остальные процессы `kube-proxy`, `kube-flannel` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/flannel:v0.19.2`.
+Все остальные процессы `kube-proxy`, `kube-flannel` запускаются как контейнеры от соответствующих образов `registry.local/k8s-c10f1/kube-proxy:v1.26.3`, `registry.local/k8s-c10f1/flannel:v0.19.2`.
 
 4 Зайдите на `master-узел` и проверьте подключение `worker-узла`:
 ```

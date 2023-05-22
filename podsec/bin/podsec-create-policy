@@ -156,9 +156,9 @@ else
   ln -sf $linkedRegistriesConf  $registriesConf
 fi
 
-# Настройка использования образа registry.local/k8s-p10/pause:3.9 при запуска pod'ов в podman (podman pod init)
-echo "Настройка использования образа registry.local/k8s-p10/pause:3.9 при запуска pod'ов в podman (podman pod init)"
-sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-p10/pause:3.9"|' /usr/share/containers/containers.conf
+# Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+echo "Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)"
+sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-c10f1/pause:3.9"|' /usr/share/containers/containers.conf
 
 if [ -z "$localIP" ]
 then
