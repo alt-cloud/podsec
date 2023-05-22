@@ -67,6 +67,7 @@ Requires: crun >= 1.8.1
 Requires: systemd-container
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
+
 %description k8s
 This package contains utilities for:
 - cluster node configurations
@@ -99,6 +100,14 @@ Requires: vixie-cron
 A set of scripts for  security monitoring by crontabs or
 called from the nagios server side via check_ssh plugin
 to monitor and identify security threats
+
+%package dev
+Summary: Set of scripts for podsec developers
+Group: Development/Other
+Requires: podsec >= %EVR
+
+%description dev
+A set of scripts for developers
 
 %prep
 %setup
@@ -146,12 +155,14 @@ chmod 600 $rootcrontab
 
 %files
 %_bindir/podsec*
+%exclude %_bindir/podsec-save-oci
 %exclude %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-*
 %exclude %_bindir/podsec-inotify-*
 %_mandir/man?/podsec*
 %exclude %_mandir/man?/podsec-k8s-*
 %exclude %_mandir/man?/podsec-u7s-*
+%exclude %_mandir/man?/podsec-save-oci*
 %exclude %_mandir/man?/podsec-inotify-*
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
@@ -169,7 +180,9 @@ chmod 600 $rootcrontab
 %_bindir/podsec-k8s-*
 %_bindir/podsec-u7s-*
 %exclude %_bindir/podsec-k8s-rbac-*
+%exclude %_bindir/podsec-k8s-save-oci
 %_mandir/man?/podsec-k8s-*
+%exclude %_mandir/man?/podsec-k8s-save-oci*
 %_mandir/man?/podsec-u7s-*
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_unitdir/u7s.service
@@ -192,6 +205,12 @@ chmod 600 $rootcrontab
 %_unitdir/podsec-inotify-*
 %exclude %_unitdir/u7s.service
 %_sysconfdir/podsec/crontabs/*
+
+%files dev
+%_bindir/podsec-save-oci
+%_bindir/podsec-k8s-save-oci
+%_mandir/man?/podsec-k8s-save-oci*
+%_mandir/man?/podsec-save-oci*
 
 %changelog
 * Mon May 22 2023 Alexey Kostarev <kaf@altlinux.org> 0.9.37-alt1
