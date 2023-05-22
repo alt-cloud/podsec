@@ -270,9 +270,6 @@ then
   exit 1
 fi
 
-# Настроить в /kubernetes/manifests/kube-apiserver.yaml аудит API-запросов
-tuneAudit
-
 # machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target 2>/dev/null
 machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
 /sbin/systemctl enable  u7s.service
@@ -282,6 +279,9 @@ if [ -z "$controlPlane" ] # WORKER node
 then
   exit 0
 fi
+
+# Настроить в /kubernetes/manifests/kube-apiserver.yaml аудит API-запросов
+tuneAudit
 
 adminConf="/etc/kubernetes/admin.conf"
 

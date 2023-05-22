@@ -3,7 +3,7 @@
 # в указанный первым параметром каталог
 # Второй параметры задает через запятую архивируемые архитектуры.
 # Если второй параметр имеет значение all архивируются все архитектуры: amd64 arm64 arm ppc64le 386
-# Скрипт производит загрузку kubernet-образов с регистратора registry.altlinux.org/k8s-p10 в containers-storage: системы
+# Скрипт производит загрузку kubernet-образов с регистратора registry.altlinux.org/k8s-c10f1 в containers-storage: системы
 # с последующим помещением их в указанный первым параметром каталог в подкаталог с именем архитектуры ($ociDir/$arch)
 # Для улучшения последующей компресии слои образа помещаются несжатыми (параметр --dest-oci-accept-uncompressed-layers)
 # После окончания наполнения подкаталога архитектуры он архивируется, сжимается и помещается в файл $ociDir/$arch.tar.xz
@@ -30,18 +30,18 @@ ociDir=$1
 archs=$2
 
 imagesList='
-k8s-p10/coredns:v1.9.3
-k8s-p10/pause:3.9
-k8s-p10/kube-controller-manager:v1.26.3
-k8s-p10/kube-apiserver:v1.26.3
-k8s-p10/kube-proxy:v1.26.3
-k8s-p10/etcd:3.5.6-0
-k8s-p10/flannel:v0.19.2
-k8s-p10/kube-scheduler:v1.26.3
-k8s-p10/flannel-cni-plugin:v1.2.0
-k8s-p10/cert-manager-controller:v1.9.1
-k8s-p10/cert-manager-cainjector:v1.9.1
-k8s-p10/cert-manager-webhook:v1.9.1
+registry.altlinux.org/k8s-c10f1/coredns:v1.9.3
+registry.altlinux.org/k8s-c10f1/pause:3.9
+registry.altlinux.org/k8s-c10f1/kube-controller-manager:v1.26.3
+registry.altlinux.org/k8s-c10f1/kube-apiserver:v1.26.3
+registry.altlinux.org/k8s-c10f1/kube-proxy:v1.26.3
+registry.altlinux.org/k8s-c10f1/etcd:3.5.6-0
+registry.altlinux.org/k8s-c10f1/flannel:v0.19.2
+registry.altlinux.org/k8s-c10f1/kube-scheduler:v1.26.3
+registry.altlinux.org/k8s-c10f1/flannel-cni-plugin:v1.2.0
+registry.altlinux.org/k8s-c10f1/cert-manager-controller:v1.9.1
+registry.altlinux.org/k8s-c10f1/cert-manager-cainjector:v1.9.1
+registry.altlinux.org/k8s-c10f1/cert-manager-webhook:v1.9.1
 '
 
 podsec-save-oci $ociDir $archs $imagesList
