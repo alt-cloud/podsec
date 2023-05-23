@@ -7,6 +7,14 @@ then
   echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>\n"
   exit 1
 fi
+
+if [ $# -gt 1 ]
+then
+  echo -ne "Должен быть указан только один IP-адрес регистратора и сервера подписей\n"
+  echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>\n"
+  exit 1
+fi
+
 regIP=$1
 
 case $regIP in
@@ -62,7 +70,7 @@ then
   shift
   for domain
   do
-    if [ $domain == 'registry.local' || $domain == 'sigstore.local' ]
+    if [ "$domain" = 'registry.local' ] || [ "$domain" = 'sigstore.local' ]
     then
       echo "Домены registry.local sigstore.local уже привязаны к IP-адресу $ip" >&2
       echo "Удалите привязку и запустите скрипт заново" >&2
@@ -112,8 +120,21 @@ then :;
   mv $policyFile "policy_${yesterday}"
 fi
 linkedPolicyFile="policy_${now}"
-echo '{"default":[{"type":"reject"}], "transports":{"docker": {}}}' |
-jq . > $linkedPolicyFile
+if [ -n "$localIP" ]
+then
+  echo '{"default":[{"type":"reject"}], "transports":{"docker": {}}}' |
+  jq . > $linkedPolicyFile
+else
+  # Копирование ключей и policy.json с sigstore
+  mkdir -p /var/sigstore/keys/
+  files=$(curl -s  http://sigstore.local:81/keys/ | jq '.[].name')
+  for file in $files
+  do
+    file=${file:1:-1}
+    curl -s  http://sigstore.local:81/keys/$file -o /var/sigstore/keys/$file
+  done
+  cp /var/sigstore/keys/policy.json  $linkedPolicyFile
+fi
 ln -sf $linkedPolicyFile $policyFile
 
 # Создание с сохранением предыдущих файла `/etc/containers/registries.d/default.yaml` описания доступа к открытым ключам подписантов
@@ -148,14 +169,9 @@ else
   ln -sf $linkedRegistriesConf  $registriesConf
 fi
 
-# Настройка использования образа registry.local/k8s-p10/pause:3.9 при запуска pod'ов в podman (podman pod init)
-echo "Настройка использования образа registry.local/k8s-p10/pause:3.9 при запуска pod'ов в podman (podman pod init)"
-sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-p10/pause:3.9"|' /usr/share/containers/containers.conf
+# Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+echo "Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)"
+sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-c10f1/pause:3.9"|' /usr/share/containers/containers.conf
 
-if [ -z "$localIP" ]
-then
-  echo "Файл политик /etc/containets/policy.json созадется на сервере '$regIP' при создании пользователей подписывающих образы.\
-  Скопируйте этот  файл c '$regIP' после добавления этих пользователей."
-fi
 
 

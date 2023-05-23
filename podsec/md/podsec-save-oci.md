@@ -20,7 +20,7 @@ podsec-save-oci(1) -- архивация образов различных ар�
 
 ## EXAMPLES
 
-`podsec-save-oci /tmp/ociDir/ amd64,arm64 k8s-p10/flannel:v0.19.2 k8s-p10/flannel-cni-plugin:v1.2.0`
+`podsec-save-oci /tmp/ociDir/ amd64,arm64 k8s-c10f1/flannel:v0.19.2 k8s-c10f1/flannel-cni-plugin:v1.2.0`
 
 ## SECURITY CONSIDERATIONS
 

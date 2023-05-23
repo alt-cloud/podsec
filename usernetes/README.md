@@ -4,7 +4,7 @@
 
 Основные отличия:
 
-- для разворачивания `rootless kubernetes` используется набор образов `registry.altlinux.org/k8s-p10`;
+- для разворачивания `rootless kubernetes` используется набор образов `registry.altlinux.org/k8s-c10f1`;
 
 - команда разворачивания кластера `kubeadm` пакета `podsec-k8s` (алиас shell-скрипта `podsec-k8s/bin/podsec-u7s-kubeadm`) поддерживает основные подкоманды и флаги для разворачивания кластера, но не поддерживает все. Для вызова "родной" команды `kubeadm` пакета `kubernetes-kubeadm` необходимо в пользователе `u7s-admin` запустить команду:
   <pre>
@@ -23,7 +23,8 @@
 
 ## Установка master-узла
 
-1 Настройте репозиторий обновления
+### Настройка репозиторий обновления
+
 <pre>
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
@@ -32,29 +33,283 @@ rm -f /etc/apt/sources.list.d/sources.list
 apt-get update
 </pre>
 
-2 Установите podsec-пакеты:
+### Установка podsec-пакетов:
 
 ```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.38-alt1.noarch.rpm podsec-k8s-rbac-0.9.38-alt1.noarch.rpm podsec-k8s-0.9.38-alt1.noarch.rpm  podsec-inotify-0.9.38-alt1.noarch.rpm
 ```
 
-3. Измените переменную PATH:
+### Выделение IP-адресов
 
+Выделите для `регистратора` и `WEB-сервера подписей` **отдельный IP-адрес**. Это может быть доступный из локальной сети адрес другого интерфейса или дополнительный статический адрес на интерфейсе локальной сети.
+Основной адрес, используемый для доступа к API-интерфейсу kube-apiserver мастер узла и адрес `регистратора` и `WEB-сервера подписей` должны быть статическими и не изменяться после перезагрузки узла.
+Например структура файлов каталога `/etc/net/ifaces/enp1s0` описания интерфейса `ensp1s0` с адресом `192.168.122.70` для `регистратора` и `WEB-сервера подписей` и адресом `192.168.122.80` для `API-интерфейса` `kube-apiserver`:
+
+- `options`:
+<pre>
+BOOTPROTO=static
+TYPE=eth
+CONFIG_WIRELESS=no
+SYSTEMD_BOOTPROTO=static
+CONFIG_IPV4=yes
+DISABLED=no
+NM_CONTROLLED=no
+SYSTEMD_CONTROLLED=no
+</pre>
+
+- `ipv4address`:
 <pre> 
+192.168.122.70/24
+192.168.122.80/24
+</pre>
+
+- `ipv4route`:
+<pre>  
+default via 192.168.122.1
+</pre>
+
+- `resolv.conf`:
+<pre>
+nameserver 192.168.122.1
+</pre>
+
+Интерфейс для данных параметров выглядит следующим образом:
+<pre> 
+# ip a show dev enp1s0
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:db:e1:57 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.70/24 brd 192.168.122.255 scope global enp1s0
+       valid_lft forever preferred_lft forever
+    inet 192.168.122.80/24 brd 192.168.122.255 scope global secondary enp1s0
+       valid_lft forever preferred_lft forever
+    ...
+</pre>
+
+### Настройка политики контейнеризации
+
+Вызовите команду:
+<pre>
+# podsec-create-policy 192.168.122.70 # ip-aдрес_регистратора и WEB-сервера подписей
+Добавление привязки доменов registry.local sigstore.local к IP-адресу 192.168.122.70
+Создание группы podman
+Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов
+Создание каталога и подкаталогов  /var/sigstore/
+Создание группы podman_dev
+Создание с сохранением предыдущих файла политик /etc/containers/policy.json
+Создание с сохранением предыдущих файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов
+Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
+Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+</pre>
+
+После выполнения команды:
+
+- файл `/etc/host` должен содержать строку:
+<pre> 
+...
+192.168.122.70 registry.local sigstore.local
+</pre>
+
+- файл `/etc/containers/policy.json`, являющийся `symlink'ом` к файлу `/etc/containers/policy_YYYY-MM-DD_HH:mm:SS`  
+ должен иметь содержимое (запрет доступа по всем ресурсам):
+<pre> 
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {}
+  }
+} 
+</pre>
+
+- файл `/etc/containers/registries.d/default.yaml`, являющийся `symlink'ом` к файлу `/etc/containers/registries.d/default_YYYY-MM-DD_HH:mm:SS` должен иметь содержимое (ю URLs доступа к серверу подписей):
+<pre> 
+default-docker:
+  lookaside: http://sigstore.local:81/sigstore/
+  sigstore: http://sigstore.local:81/sigstore/ 
+</pre>
+
+### Создание сервисов регистратора и WEB-сервера подписей
+
+Поднимите сервисы `регистратора` и `WEB-сервера подписей` командой:
+<pre>
+# podsec-create-services
+Synchronizing state of nginx.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable nginx
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /lib/systemd/system/nginx.service.
+registry
+Created symlink /etc/systemd/system/multi-user.target.wants/docker-registry.service → /lib/systemd/system/docker-registry.service.
+</pre> 
+
+Проверьте функционирование сервисов:  
+<pre>
+# netstat -nlpt
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address               Foreign Address             State       PID/Program name 
+...  
+tcp        0      0 0.0.0.0:81                  0.0.0.0:*                   LISTEN      14996/nginx -g daem 
+...
+tcp        0      0 :::80                       :::*                        LISTEN      15044/docker-regist 
+...
+</pre>
+
+### Создание пользователя разработчика образов контейнеров
+
+Cоздайте пользователя *разработчик образов контейнеров*:
+<pre>
+# podsec-create-imagemakeruser imagemaker
+</pre>
+Шаги создания пользователя подробно описаны в []().
+
+Файл `/etc/containers/policy.json`, должен изменить `symlink` на другой файл `/etc/containers/policy_YYYY-MM-DD_HH:mm:SS` с содержимым (разрешение доступа к регистратору `registry.local` с открытым ключом пользователя `imagemaker`):
+<pre> 
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {
+      "registry.local": [
+        {
+          "type": "signedBy",
+          "keyType": "GPGKeys",
+          "keyPath": "/var/sigstore/keys/imagemaker.pgp"
+        }
+      ]
+    }
+  }
+} 
+</pre>
+
+
+Должен появится каталог `/var/sigstore/` со следующей структурой:
+<pre>
+├── index.html
+├── keys
+│   ├── imagemaker.pgp
+│   └── policy.json
+└── sigstore
+</pre>
+
+Проверьте доступ к этому каталогу через `http`:
+<pre>
+# curl -s  http://sigstore.local:81/keys/ | jq
+[
+  {
+    "name": "imagemaker.pgp",
+    "type": "file",
+    "mtime": "Tue, 23 May 2023 05:43:59 GMT",
+    "size": 2436
+  },
+  {
+    "name": "policy.json",
+    "type": "file",
+    "mtime": "Tue, 23 May 2023 05:43:25 GMT",
+    "size": 276
+  }
+]
+</pre>
+
+
+### Создание пользователя информационной системы
+
+Создайте пользователя информационной системы:
+<pre> 
+# podsec-create-podmanusers poduser
+</pre>
+
+### Загрузка kubernetes-образов:
+
+Загрузите kubernetes-образы от пользователя `imagemaker`.
+<pre> 
+# podsec-load-sign-oci amd64_c10f1.tar.xz amd64 <E-mail_подписанта>
+</pre>
+
+Во время выполнения скрипта будет запрошен пароль для подписи.
+
+**Внимание**: Данную команду нельзя запускать путем получения прав пользователя через команду `su - imagemaker`, так как устанавливаются не все переменные среды. Сделайте полный заход под пользователем, например по протоколу `ssh`:
+```
+# ssh imagemaker@localhost
+```
+
+После выполнения скрипта проверьте наличие образов в регистраторе:
+<pre> 
+# curl -s registry.local/v2/_catalog | jq
+{
+  "repositories": [
+    "k8s-c10f1/cert-manager-cainjector",
+    "k8s-c10f1/cert-manager-controller",
+    "k8s-c10f1/cert-manager-webhook",
+    "k8s-c10f1/coredns",
+    "k8s-c10f1/etcd",
+    "k8s-c10f1/flannel",
+    "k8s-c10f1/flannel-cni-plugin",
+    "k8s-c10f1/kube-apiserver",
+    "k8s-c10f1/kube-controller-manager",
+    "k8s-c10f1/kube-proxy",
+    "k8s-c10f1/kube-scheduler",
+    "k8s-c10f1/pause"
+  ]
+}
+</pre>
+
+И наличие подписей в каталоге `/var/sigstore/sigstore/k8s-c10f1`:
+<pre>
+└── k8s-c10f1
+    ├── cert-manager-cainjector@sha256=36a19269312740daa04ea77e4edb87983230d6c4e6e5dd95b9c3640e5fa300b5
+    │   └── signature-1
+    ├── cert-manager-controller@sha256=0d6eed2c732d605488e51c3d74aa61d29eb75b2cfadd0276488791261368b911
+    │   └── signature-1
+    ├── cert-manager-webhook@sha256=7f0ca1ca7724c31b95efc0cfa21f91768e8e057e9a42a9c1e24d18960c9fe88c
+    │   └── signature-1
+    ├── coredns@sha256=5256bbacc84b80295e64b51d03577dc0494f7db7944ae95b7a63fd6cb0c7737a
+    │   └── signatuдкаталогов re-1
+    ├── etcd@sha256=da030977338e36b5a1cadb6380a1f87c2cbda4da4950bd915328c3aed5264896
+    │   └── signature-1
+    ├── flannel-cni-plugin@sha256=8fdc6ac8dbbc9916814a950471e1bf9da9e3928dca342216f931d96b6e9017fe
+    │   └── signature-1
+    ├── flannel@sha256=7994c6c2a5e0e6d206b84a516b0a4215ba9de3b898cab9972f0015f8fd0c0f69
+    │   └── signature-1
+    ├── kube-apiserver@sha256=035d353805cc994b12a030c9495adddb66fc91e4325b879e4578c7603b1bb982
+    │   └── signature-1
+    ├── kube-controller-manager@sha256=50217c9d11a0d41b069efa231958fada60de3666d8c682df297ee371f7e559c0
+    │   └── signature-1
+    ├── kube-proxy@sha256=d6e80ea2485beb059cb1c565fc92f91561c3e28a335c022da4d548f429b811da
+    │   └── signature-1
+    ├── kube-scheduler@sha256=ad17d07c44aff8d0e8ca234f051556761bdeb82d4f62ff892a4f7aa7d9f027d4
+    │   └── signature-1
+    └── pause@sha256=f14315ad18ed3dc1672572c3af9f6b28427cf036a43cc00ebac885e919b59548
+        └── signature-1
+</pre>
+Число подкаталогов должно совпадать с числом образов в регистраторе и каждый подкаталог должен иметь файл `signature-1`.
+
+
+### Установка тропы PATH поиска исполняемых команд
+
+Измените переменную PATH:
+<pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
-4. Запустите команду:
+### Инициализация мастер-узла
 
+При запуске в параметре `--apiserver-advertise-address` укажите IP-адрес API-интерфейса `kube-apiserver`.
+**Этот адрес должен отличаться от IP-адреса регистратора и WEB-сервера подписей.**
+
+Запустите команду:
 <pre>
-# kubeadm init
+# kubeadm -v 9 init  --apiserver-advertise-address 192.168.122.80
 </pre>
 
 > По умолчанию уровень отладки устанавливается в `0`. Если необходимо увеличить уровень отладки укажите перед подкомандой `init` флаг `-v n`. Где `n` принимает значения от `0` до `9`-ти.
 
 После:
 
-- генерации сертификатов в каталоге `/etc/kuarnetes/pki`, 
+- генерации сертификатов в каталоге `/etc/kuarnetes/pki`,
 - загрузки образов, -генерации conf-файлов в каталоге `/etc/kubernetes/manifests/`, `/etc/kubernetes/manifests/etcd/`
 - запуска сервиса `kubelet` и `Pod`'ов системных `kubernetes-образов`
 
@@ -65,15 +320,17 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 You can now join any number of control-plane nodes by copying certificate authorities
 and service account keys on each node and then running the following as root:
 
-kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:.. --control-plane 
+kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:.. --control-plane
 
 Then you can join any number of worker nodes by running the following on each as root:
 
 kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
 </pre>
 
-5 После завершения скрипта проверьте работу `usernetes` (`rootless kuber`)
+### Проверка работы узла
 
+После завершения скрипта  в течении минуты настраиваются сервисы мастер-узла кластера.
+По ее истечении проверьте работу `usernetes` (`rootless kuber`)
 <pre>
 # kubectl get nodes -o wide
 NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE           KERNEL-VERSION         CONTAINER-RUNTIME
@@ -130,15 +387,21 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 </pre>
 Процесс `kubelet`  запускается как сервис в `user namespace` процесса `rootlesskit`.
 
-Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-controller-manager:v1.26.3`, `registry.local/k8s-p10/kube-apiserver:v1.26.3`, `registry.local/k8s-p10/kube-scheduler:v1.26.3`, `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/etcd:3.5.6-0`,  `registry.local/k8s-p10/coredns:v1.9.3`.
+Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-c10f1/kube-controller-manager:v1.26.3`, `registry.local/k8s-c10f1/kube-apiserver:v1.26.3`, `registry.local/k8s-c10f1/kube-scheduler:v1.26.3`, `registry.local/k8s-c10f1/kube-proxy:v1.26.3`, `registry.local/k8s-c10f1/etcd:3.5.6-0`,  `registry.local/k8s-c10f1/coredns:v1.9.3`.
 
-6. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
+
+### Обеспечение запуска обычных POD'ов на мастер-узле
+
+По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
 ```
 # kubectl taint nodes <host> node-role.kubernetes.io/control-plane:NoSchedule-
 node/<host> untainted
 ```
 
-7. Проверьте загрузку deployment nginx:
+<!--
+### Проверка загрузки POD'ов 
+
+Проверьте загрузку deployment nginx:
 
 ```
 # kubectl apply -f https://k8s.io/examples/application/deployment.yaml
@@ -155,18 +418,20 @@ pod/nginx-deployment-85996f8dbd-2dw9h   1/1     Running   0          5m34s
 pod/nginx-deployment-85996f8dbd-r5dt4   1/1     Running   0          5m34s
 ```
 
-
-8. Проверьте загрузку образа `registry.local/alt/alt`:
+### 
+14. Проверьте загрузку образа `registry.local/alt/alt`:
 ```
 # kubectl run -it --image=registry.local/alt/alt -- bash
 If you don't see a command prompt, try pressing enter.
 [root@bash /]# pwd
 ```
-
+-->
 
 ## Подключение worker-узла
 
-1 Настройте репозиторий обновления
+### Настройка репозиторий обновления
+
+Настройте репозиторий обновления
 <pre>
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
@@ -175,20 +440,70 @@ rm -f /etc/apt/sources.list.d/sources.list
 apt-get update
 </pre>
 
-2 Установите podsec-пакеты:
+### Установка podsec-пакетов:
+
+Установите podsec-пакеты:
 
 ```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm      podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.38-alt1.noarch.rpm  podsec-k8s-rbac-0.9.38-alt1.noarch.rpm podsec-k8s-0.9.38-alt1.noarch.rpm  podsec-inotify-0.9.38-alt1.noarch.rpm
 ```
 
-3. Измените переменную PATH:
 
-<pre> 
+### Настройка политики контейнеризации
+
+Вызовите команду:
+<pre>
+# podsec-create-policy 192.168.122.70 # ip-aдрес_регистратора и WEB-сервера подписей
+Добавление привязки доменов registry.local sigstore.local к IP-адресу 192.168.122.70
+Создание группы podman
+Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов
+Создание каталога и подкаталогов  /var/sigstore/
+Создание с сохранением предыдущих файла политик /etc/containers/policy.json
+Создание с сохранением предыдущих файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов
+Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
+Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+</pre>
+
+Проверьте содержимое файла /etc/containers/policy.json скопированного с мастер-узла:
+<pre>
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {
+      "registry.local": [
+        {
+          "type": "signedBy",
+          "keyType": "GPGKeys",
+          "keyPath": "/var/sigstore/keys/imagemaker.pgp"
+        }
+      ]
+    }
+  }
+}
+</pre>
+
+Проверьте наличие открытого ключа `imagemaker.pgp` в каталоге `/var/sigstore/`:
+<pre>
+└── keys
+    ├── imagemaker.pgp
+    └── policy.json
+</pre>
+
+### Установка тропы PATH поиска исполняемых команд
+
+Измените переменную PATH:
+
+<pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
+### Подключение worker-узла
 
-4. Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
+Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
 
 ```
 kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
@@ -205,7 +520,9 @@ This node has joined the cluster:
 Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 </pre>
 
-5. Проверьте состояние дерева процессов:
+### Проверка состояния процессов
+
+Проверьте состояние дерева процессов:
 <pre>
 # pstree
 ...
@@ -221,7 +538,7 @@ Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 </pre>
 Процесс `kubelet`  запускается как сервис в `user namespace` процесса `rootlesskit`.
 
-Все остальные процессы `kube-proxy`, `kube-flannel` запускаются как контейнеры от соответствующих образов `registry.local/k8s-p10/kube-proxy:v1.26.3`, `registry.local/k8s-p10/flannel:v0.19.2`.
+Все остальные процессы `kube-proxy`, `kube-flannel` запускаются как контейнеры от соответствующих образов `registry.local/k8s-c10f1/kube-proxy:v1.26.3`, `registry.local/k8s-c10f1/flannel:v0.19.2`.
 
 6. Зайдите на `master-узел` и проверьте подключение `worker-узла`:
 ```
@@ -231,7 +548,9 @@ host-212   Ready    control-plane   7h54m   v1.26.3   10.96.0.1     <none>      
 host-226   Ready    <none>          8m30s   v1.26.3   10.96.0.1     <none>        ALT SP Server 11100-01   5.15.105-un-def-alt1   cri-o://1.26.2
 ```
 
-7. На `master-узле` под пользоваталем `root` выполните команду:
+### Запуск сетевого маршрутизатора для контейекров kube-flannel
+
+На `master-узле` под пользоваталем `root` выполните команду:
 
 ```
 # kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
@@ -246,7 +565,7 @@ daemonset.apps/kube-flannel-ds created
 Connection to the local host terminated.
 ```
 
-8. На `master-узле` выполните команду:
+На `master-узле` выполните команду:
 ```
 # kubectl get daemonsets.apps -A
 NAMESPACE      NAME              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
@@ -258,7 +577,7 @@ kube-system    kube-proxy        2         2         2       2            2     
 
 ## Подключение control-plane (master)-узла
 
-При подключении дополнительного `control-plane`(`master`)-узла необходимо 
+При подключении дополнительного `control-plane`(`master`)-узла необходимо
 
 - установить и настроить на один из улов в кластере или вне его `haproxy` для балансировки запросов;
 - переустановить начальный `master-узел` для работы с `haproxy`
@@ -267,7 +586,7 @@ kube-system    kube-proxy        2         2         2       2            2     
 
 ### Установка и настройка балансировщика запросов haproxy
 
-Полная настройка отказоустойчивого кластера `haproxy` из 3-х узлов описана в документе  
+Полная настройка отказоустойчивого кластера `haproxy` из 3-х узлов описана в документе
 [ALT Container OS подветка K8S. Создание HA кластера](https://www.altlinux.org/ALT_Container_OS_%D0%BF%D0%BE%D0%B4%D0%B2%D0%B5%D1%82%D0%BA%D0%B0_K8S._%D0%A1%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_HA_%D0%BA%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80%D0%B0).
 
 Здесь же мы рассмотрим создание и настройка с один `haproxy` с балансировкой запросов на `master`-узлы.
@@ -280,7 +599,7 @@ kube-system    kube-proxy        2         2         2       2            2     
 Отредактируйте конфигурационный файл `/etc/haproxy/haproxy.cfg`:
 
 - добавьте в него описание `frontend`'a `main`, принимающего запросы по порту `8443`:
-<pre> 
+<pre>
  frontend main
     bind *:8443
     mode tcp
@@ -307,34 +626,20 @@ backend apiserver
 
 ### Установка начального master-узла для работы с haproxy
 
-Настройте репозиторий обновления
-<pre>
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic'
-rm -f /etc/apt/sources.list.d/sources.list
-apt-get update
-</pre>
+Выполните все пункты из главы *Установка master-узла* до раздела *Инициализация мастер-узла*.
 
-Установите podsec-пакеты версии *0.9.32-alt1* и выше:
-
-```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
-```
-
-Измените переменную `PATH`:
-
-<pre> 
-export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
-</pre>
+#### Инициализация мастер-узла  при работа с балансировщиков haproxy
 
 При установке начального master-узла необходимо параметром `control-plane-endpoint` указать URL  балансировщика `haproxy`:
 ```
-# kubeadm init --control-plane-endpoint <IP_адрес_haproxy>:8443
+# kubeadm init --apiserver-advertise-address 192.168.122.80 --control-plane-endpoint <IP_адрес_haproxy>:8443
 ```
 
+При запуске в параметре `--apiserver-advertise-address` укажите IP-адрес API-интерфейса `kube-apiserver`.
+**Этот адрес должен отличаться от IP-адреса регистратора и WEB-сервера подписей.**
+
 В результате инициализации `kubeadm` выведет команды подключения дополнительных `control-plane` и `worker` узлов:
-<pre> 
+<pre>
 ...
 You can now join any number of the control-plane node running the following command on each as root:
 
@@ -356,7 +661,7 @@ kubeadm join <IP_адрес_haproxy>:8443 --token ... \
 Обратите внимание - в командах присоединения узлов указывается не URL созданного начального master-узла (`<IP_или_DNS_начального_мастер_узла>:6443`),
 а URL `haproxy`.
 
-В сформированных файлах конфигурации `/etc/kubernetes/admin.conf`, `~/.kube/config` также указывается URL `haproxy`:  
+В сформированных файлах конфигурации `/etc/kubernetes/admin.conf`, `~/.kube/config` также указывается URL `haproxy`:
 <pre>
 apiVersion: v1
 clusters:
@@ -369,6 +674,8 @@ clusters:
 
 ### Подключение дополнительных ControlPlane(master)-узлов с указанием их в балансировщике запросов haproxy
 
+#### Настройка репозиторий обновления
+
 Настройте репозиторий обновления
 <pre>
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
@@ -378,15 +685,64 @@ rm -f /etc/apt/sources.list.d/sources.list
 apt-get update
 </pre>
 
-Установите podsec-пакеты версии *0.9.32-alt1* и выше:
+### Установка podsec-пакетов:
+
+Установите podsec-пакеты версии *0.9.38-alt1* и выше:
 
 ```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.38-alt1.noarch.rpm  podsec-k8s-rbac-0.9.38-alt1.noarch.rpm podsec-k8s-0.9.38-alt1.noarch.rpm  podsec-inotify-0.9.38-alt1.noarch.rpm
 ```
+
+### Настройка политики контейнеризации
+
+Вызовите команду:
+<pre>
+# podsec-create-policy 192.168.122.70 # ip-aдрес_регистратора и WEB-сервера подписей
+Добавление привязки доменов registry.local sigstore.local к IP-адресу 192.168.122.70
+Создание группы podman
+Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов
+Создание каталога и подкаталогов  /var/sigstore/
+Создание с сохранением предыдущих файла политик /etc/containers/policy.json
+Создание с сохранением предыдущих файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов
+Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
+Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+</pre>
+
+Проверьте содержимое файла /etc/containers/policy.json скопированного с мастер-узла:
+<pre>
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {
+      "registry.local": [
+        {
+          "type": "signedBy",
+          "keyType": "GPGKeys",
+          "keyPath": "/var/sigstore/keys/imagemaker.pgp"
+        }
+      ]
+    }
+  }
+}
+</pre>
+
+Проверьте наличие открытого ключа `imagemaker.pgp` в каталоге `/var/sigstore/`:
+
+<pre>
+└── keys
+    ├── imagemaker.pgp
+    └── policy.json
+</pre>
+
+### Установка тропы PATH поиска исполняемых команд
 
 Измените переменную `PATH`:
 
-<pre> 
+<pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
@@ -398,7 +754,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 ```
 
 В результате работы команда kubeadm выведет строки:
-<pre> 
+<pre>
  This node has joined the cluster and a new control plane instance was created:
 
 * Certificate signing request was sent to apiserver and approval was received.
@@ -410,7 +766,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 Run 'kubectl get nodes' to see this node join the cluster.
 </pre>
 
-Наберите на вновь созданном (или начальном)`control-plane` узле команду:  
+Наберите на вновь созданном (или начальном)`control-plane` узле команду:
 ```
 # kubectl  get nodes
 NAME       STATUS   ROLES           AGE     VERSION
@@ -421,7 +777,7 @@ NAME       STATUS   ROLES           AGE     VERSION
 Обратите внимание, что роль (ROLES) обоих узлов - `control-plane`.
 
 Наберите команду:
-<pre>  
+<pre>
 # kubectl get all -A
 NAMESPACE      NAME                                   READY   STATUS    RESTARTS       AGE    IP             NODE       NOMINATED NODE   READINESS GATES
 kube-flannel   pod/kube-flannel-ds-2mhqg              1/1     Running   0              153m   10.96.0.1      <host1>   <none>           <none>
@@ -444,15 +800,15 @@ kube-system    pod/kube-scheduler-<host2>             1/1     Running   0       
 ...
 
 NAMESPACE      NAME                             DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE    CONTAINERS     IMAGES                                      SELECTOR
-kube-flannel   daemonset.apps/kube-flannel-ds   2         2         2       3            3           <none>                   153m   kube-flannel   registry.local/k8s-p10/flannel:v0.19.2      app=flannel
-kube-system    daemonset.apps/kube-proxy        2         2         2       2            2           kubernetes.io/os=linux   174m   kube-proxy     registry.local/k8s-p10/kube-proxy:v1.26.3   k8s-app=kube-proxy
+kube-flannel   daemonset.apps/kube-flannel-ds   2         2         2       3            3           <none>                   153m   kube-flannel   registry.local/k8s-c10f1/flannel:v0.19.2      app=flannel
+kube-system    daemonset.apps/kube-proxy        2         2         2       2            2           kubernetes.io/os=linux   174m   kube-proxy     registry.local/k8s-c10f1/kube-proxy:v1.26.3   k8s-app=kube-proxy
 ...
 </pre>
 
 Убедитесь, что сервисы `pod/etcd`, `kube-apiserver`, `kube-controller-manager`, `kube-scheduler`, `kube-proxy`, `kube-flannel` запустились на обоих control-plane узлах.
 
-Для балансировки запросов по двум серверам добавьте URL подключенного `control-plane` узла в файл конфигурации `/etc/haproxy/haproxy.cfg`:  
-<pre> 
+Для балансировки запросов по двум серверам добавьте URL подключенного `control-plane` узла в файл конфигурации `/etc/haproxy/haproxy.cfg`:
+<pre>
 backend apiserver
     option httpchk GET /healthz
     http-check expect status 200
@@ -467,6 +823,12 @@ backend apiserver
 ```
 # systemctl restart haproxy
 ```
+
+Логи обращений и балансировку запросов между узлами можно посмотреть командой:
+```
+# tail -f /var/log/haproxy.log
+```
+
 
 ### Подключение дополнительных worker-узлов
 
@@ -488,7 +850,7 @@ backend apiserver
 ```
 $ nsenter_u7s
 [INFO] Entering RootlessKit namespaces: OK
-[root@<host> boot]# 
+[root@<host> boot]#
 ```
 
 В `user namespace`:
@@ -510,19 +872,19 @@ $ nsenter_u7s
 
 Необходимо:
 
-- в пользователе `u7s-admin` 
+- в пользователе `u7s-admin`
   * остановить сервис
-  <pre> 
+  <pre>
    systemctl --user stop u7s.target
   </pre>
   * на мастер-узле удалить базу `etcd`:
-  <pre> 
+  <pre>
   $ rm -rf /var/lib/podsec/u7s/etcd/member/
   </pre>
 
 - в пользователе `root`:
-  * если текущая версия пакета совпадает с новой удалить пакет  
-  <pre> 
+  * если текущая версия пакета совпадает с новой удалить пакет
+  <pre>
   # apt-get remove -y podsec-k8s
   </pre>
   * установить новый пакет;

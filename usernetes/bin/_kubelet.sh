@@ -54,5 +54,5 @@ kubelet \
 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
 	--config $kubelet_config \
 	--container-runtime-endpoint=$socket \
-	--pod-infra-container-image=registry.local/k8s-p10/pause:3.9 \
+	--pod-infra-container-image=registry.local/k8s-c10f1/pause:3.9 \
 	$@

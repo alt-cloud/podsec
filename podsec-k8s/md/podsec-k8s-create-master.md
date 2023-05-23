@@ -9,7 +9,7 @@ podsec-k8s-create-master(1) -- инициализация мастер-узла 
 
 Скрипт производит:
 
-- Настройку /etc/crio/crio.conf на использования в качестве образа pause `registry.local/k8s-p10/pause:3.9`
+- Настройку /etc/crio/crio.conf на использования в качестве образа pause `registry.local/k8s-c10f1/pause:3.9`
 
 - Запуск серввиса `kubelet`
 

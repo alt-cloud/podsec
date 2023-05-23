@@ -2,12 +2,12 @@ apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 kubernetesVersion: 1.26.3
 clusterName: kubernetes
-imageRepository: registry.local/k8s-p10
+imageRepository: registry.local/k8s-c10f1
 dns: {}
 etcd:
   local:
     dataDir: /var/lib/podsec/u7s/etcd
-    imageRepository: registry.local/k8s-p10
+    imageRepository: registry.local/k8s-c10f1
     serverCertSANs:
     peerCertSANs:
     extraArgs:
