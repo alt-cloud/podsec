@@ -72,6 +72,7 @@ else
 	cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
 	mkdir -p /run/flannel
 	mkdir -p /opt/cni/bin
+	mount --bind /usr/libexec/cni /opt/cni/bin
 
 	mkdir -p /run/crio/
 	ln -sf /run/user/$U7S_UID/usernetes/crio/crio.sock /run/crio/crio.sock

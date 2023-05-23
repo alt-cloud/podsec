@@ -129,20 +129,17 @@ spec:
         effect: NoSchedule
       serviceAccountName: flannel
       initContainers:
-      - name: install-cni-plugin
-        image: registry.local/k8s-c10f1/flannel-cni-plugin:v1.2.0
-        command:
-        - cp
-        args:
-        - -f
-        - /usr/libexec/cni/*
-        - /opt/cni/bin/
-        volumeMounts:
-        - name: cni-plugins
-          mountPath: /usr/libexec/cni/
-        volumeMounts:
-        - name: cni-plugin
-          mountPath: /opt/cni/bin
+      #- name: install-cni-plugin
+        #image: registry.local/k8s-c10f1/flannel-cni-plugin:v1.2.0
+        #command:
+        #- cp
+        #args:
+        #- -f
+        #- /flannel
+        #- /opt/cni/bin/flannel
+        #volumeMounts:
+        #- name: cni-plugin
+          #mountPath: /opt/cni/bin
       - name: install-cni
         image: registry.local/k8s-c10f1/flannel:v0.19.2
         command:
