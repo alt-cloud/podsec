@@ -226,7 +226,7 @@ Cоздайте пользователя *разработчик образов 
 
 Загрузите kubernetes-образы от пользователя `imagemaker`.
 <pre> 
-# podsec-load-sign-oci amd64_c10f1.tar.xz amd64 <E-mail_подписанта>
+$ podsec-load-sign-oci amd64_c10f1.tar.xz amd64 &lt;E-mail_подписанта>
 </pre>
 
 Во время выполнения скрипта будет запрошен пароль для подписи.
@@ -833,6 +833,166 @@ backend apiserver
 ### Подключение дополнительных worker-узлов
 
 Подключение дополнительных worker-узлов происходит аналогично описанному выше в главе **Подключение worker-узла**.
+
+
+## Тестовые запуски 
+
+### Тестовый запуск nginx
+
+#### Помещение образа nginx на регистратор
+
+Зайдите в пользователя `imagemaker`.
+
+- Загрузка исходного образа:
+
+<pre>
+$ podman pull --tls-verify  docker.io/library/nginx:1.14.2
+Trying to pull docker.io/library/nginx:1.14.2...
+Getting image source signatures
+Copying blob 8ca774778e85 skipped: already exists
+Copying blob 27833a3ba0a5 skipped: already exists
+Copying blob 0f23e58bd0b7 skipped: already exists
+Copying config 295c7be079 done
+Writing manifest to image destination
+Storing signatures
+295c7be079025306c4f1d65997fcf7adb411c88f139ad1d34b537164aa060369
+</pre>
+
+- Создание alias'а для помещения на локальный регистратор:
+<pre>
+$ podman  tag docker.io/library/nginx:1.14.2 registry.local/nginx
+</pre>
+
+-  Помещение на локальный регистратор
+<pre>
+$ podman push --tls-verify=false    --sign-by='<EMAIL>'   registry.local/nginx
+Getting image source signatures
+Copying blob 5dacd731af1b done  
+Copying blob 82ae01d5004e done  
+Copying blob b8f18c3b860b done  
+Copying config 295c7be079 done  
+Writing manifest to image destination
+Creating signature: Signing image using simple signing
+Storing signatures
+</pre>
+
+Во время помещения образа (если прошло достаточно много времени после последнего `podman push`) необходимо ввести пароль для подписи.
+
+#### Запуск образа в виде deployment
+
+Под пользователем `root`:
+
+- Создайте манифест `deployment.yaml`:
+
+<pre> 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.local/nginx
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: nginx 
+</pre>
+
+- Запустите deployment:
+
+<pre> 
+# kubectl apply -f deployment.yaml 
+</pre>
+
+- Дождитесь разворачивания `deployment` и `POD`'ов:
+<pre>  
+# kubectl  get pods,service -o wide
+NAME                                    READY   STATUS    RESTARTS   AGE   IP           NODE      NOMINATED NODE   READINESS GATES
+pod/nginx-deployment-7f688b6459-h2p7k   1/1     Running   0          20s   10.244.0.4   host-99   <none>           <none>
+pod/nginx-deployment-7f688b6459-sz86q   1/1     Running   0          20s   10.244.1.2   host-26   <none>           <none>
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE   SELECTOR
+service/kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        42m   <none>
+service/nginx        NodePort    10.111.222.98   <none>        80:31280/TCP   20s   app=nginx
+</pre>
+
+#### Проверка роботоспособности POD'ов
+
+На одном из узлов, где развернулся `POD` зайдите под пользователем `u7s-admin` и перейдите в `namespace` пользователя:
+<pre>
+$ nsenter_u7s
+</pre>
+
+Выберите любой из IP_адресов интерфейсов `tap0` или `cni0`:
+<pre>
+# ip a show dev tap0
+2: tap0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 65520 qdisc fq_codel state UP group default qlen 1000
+    link/ether 12:98:24:5b:ac:8d brd ff:ff:ff:ff:ff:ff
+    inet 10.96.122.26/32 scope global tap0
+</pre>
+<pre>
+# ip a show dev cni0
+4: cni0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 65470 qdisc noqueue state UP group default qlen 1000
+    link/ether 7e:8e:4e:7f:f7:5c brd ff:ff:ff:ff:ff:ff
+    inet 10.244.1.1/24 brd 10.244.1.255 scope global cni0
+</pre>
+
+Обратитесь к сервису `nginx` по выбраному IP-адресу и выделенному порту (`31280`):
+<pre>
+service/nginx        NodePort    10.111.222.98   <none>        80:31280/TCP   20s   app=nginx
+</pre>
+
+<pre>
+# curl http://10.244.1.1:31280
+&!DOCTYPE html>
+&lt;html>
+&lt;head>
+&lt;title>Welcome to nginx!&lt;/title>
+&lt;style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+&lt;/style>
+&lt;/head>
+&lt;body>
+&lt;h1>Welcome to nginx!&lt;/h1>
+&lt;p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.&lt;/p>
+
+&lt;p>For online documentation and support please refer to
+&lt;a href="http://nginx.org/">nginx.org&lt;/a>.&lt;br/>
+Commercial support is available at
+&lt;a href="http://nginx.com/">nginx.com&lt;/a>.&lt;/p>
+
+&lt;p>&lt;em>Thank you for using nginx.&lt;/em>&lt;/p>
+&lt;/body>
+&lt;/html>
+&lt;/pre>
+
 
 
 ## Работа под администратором u7s-admin rootless процессов

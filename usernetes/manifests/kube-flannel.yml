@@ -135,8 +135,11 @@ spec:
         - cp
         args:
         - -f
-        - /flannel
-        - /opt/cni/bin/flannel
+        - /usr/libexec/cni/*
+        - /opt/cni/bin/
+        volumeMounts:
+        - name: cni-plugins
+          mountPath: /usr/libexec/cni/
         volumeMounts:
         - name: cni-plugin
           mountPath: /opt/cni/bin

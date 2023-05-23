@@ -71,9 +71,7 @@ else
 	cp -f /etc/podsec/u7s/config/cni_net.d/* /etc/cni/net.d
 	cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
 	mkdir -p /run/flannel
-	# Bind-mount /opt/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /opt/cni/bin
-# 	mount --bind /usr/libexec/cni /opt/cni/bin
 
 	mkdir -p /run/crio/
 	ln -sf /run/user/$U7S_UID/usernetes/crio/crio.sock /run/crio/crio.sock
@@ -106,7 +104,6 @@ else
 	do
 		rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/tcp"
 	done
-# 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:30080:30080/tcp
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:8472:8472/udp
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6053:53/udp
 
