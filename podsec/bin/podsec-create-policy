@@ -120,8 +120,21 @@ then :;
   mv $policyFile "policy_${yesterday}"
 fi
 linkedPolicyFile="policy_${now}"
-echo '{"default":[{"type":"reject"}], "transports":{"docker": {}}}' |
-jq . > $linkedPolicyFile
+if [ -n "$localIP" ]
+then
+  echo '{"default":[{"type":"reject"}], "transports":{"docker": {}}}' |
+  jq . > $linkedPolicyFile
+else
+  # Копирование ключей и policy.json с sigstore
+  mkdir -p /var/sigstore/keys/
+  files=$(curl -s  http://sigstore.local:81/keys/ | jq '.[].name')
+  for file in $files
+  do
+    file=${file:1:-1}
+    curl -s  http://sigstore.local:81/keys/$file -o /var/sigstore/keys/$file
+  done
+  cp /var/sigstore/keys/policy.json  $linkedPolicyFile
+fi
 ln -sf $linkedPolicyFile $policyFile
 
 # Создание с сохранением предыдущих файла `/etc/containers/registries.d/default.yaml` описания доступа к открытым ключам подписантов

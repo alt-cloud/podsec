@@ -34,6 +34,7 @@ Requires: findutils
 Requires: iproute2
 Requires: iptables
 Requires: openssh-server
+Requires: curl
 
 %description
 This package contains utilities for:
@@ -77,7 +78,6 @@ Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
 Requires: kubernetes-client >= 1.26.3-alt2
 Requires: podsec >= %EVR
-Requires: curl
 
 
 %description k8s-rbac
