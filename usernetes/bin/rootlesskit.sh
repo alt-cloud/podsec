@@ -73,7 +73,7 @@ else
 	mkdir -p /run/flannel
 	# Bind-mount /opt/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /opt/cni/bin
-	mount --bind /usr/libexec/cni /opt/cni/bin
+# 	mount --bind /usr/libexec/cni /opt/cni/bin
 
 	mkdir -p /run/crio/
 	ln -sf /run/user/$U7S_UID/usernetes/crio/crio.sock /run/crio/crio.sock
