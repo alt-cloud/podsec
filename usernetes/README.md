@@ -23,7 +23,8 @@
 
 ## Установка master-узла
 
-1 Настройте репозиторий обновления
+### Настройка репозиторий обновления
+
 <pre>
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
@@ -32,22 +33,180 @@ rm -f /etc/apt/sources.list.d/sources.list
 apt-get update
 </pre>
 
-2 Установите podsec-пакеты:
+### Установка podsec-пакетов:
 
 ```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.38-alt1.noarch.rpm podsec-k8s-rbac-0.9.38-alt1.noarch.rpm podsec-k8s-0.9.38-alt1.noarch.rpm  podsec-inotify-0.9.38-alt1.noarch.rpm
 ```
 
-3. Измените переменную PATH:
+### Выделение IP-адресов
 
+Выделите для `регистратора` и `WEB-сервера подписей` **отдельный IP-адрес**. Это может быть доступный из локальной сети адрес другого интерфейса или дополнительный статический адрес на интерфейсе локальной сети.
+Основной адрес, используемый для доступа к API-интерфейсу kube-apiserver мастер узла и адрес `регистратора` и `WEB-сервера подписей` должны быть статическими и не изменяться после перезагрузки узла.
+Например структура файлов каталога `/etc/net/ifaces/enp1s0` описания интерфейса `ensp1s0` с адресом `192.168.122.70` для `регистратора` и `WEB-сервера подписей` и адресом `192.168.122.80` для `API-интерфейса` `kube-apiserver`:
+
+- `options`:
+<pre>
+BOOTPROTO=static
+TYPE=eth
+CONFIG_WIRELESS=no
+SYSTEMD_BOOTPROTO=static
+CONFIG_IPV4=yes
+DISABLED=no
+NM_CONTROLLED=no
+SYSTEMD_CONTROLLED=no
+</pre>
+
+- `ipv4address`:
+<pre> 
+192.168.122.70/24
+192.168.122.80/24
+</pre>
+
+- `ipv4route`:
+<pre>  
+default via 192.168.122.1
+</pre>
+
+- `resolv.conf`:
+<pre>
+nameserver 192.168.122.1
+</pre>
+
+
+### Настройте политики контейнеризации
+
+Вызовите команду:
+<pre>
+# podsec-create-policy 192.168.122.70 # ip-aдрес_регистратора и WEB-сервера подписей
+Добавление привязки доменов registry.local sigstore.local к IP-адресу 192.168.122.70
+Создание группы podman
+Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов
+Создание каталога и подкаталогов  /var/sigstore/
+Создание группы podman_dev
+Создание с сохранением предыдущих файла политик /etc/containers/policy.json
+Создание с сохранением предыдущих файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов
+Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
+Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+</pre>
+
+После выполнения команды:
+
+- файл `/etc/host` должен содержать строку:
+<pre> 
+...
+192.168.122.70 registry.local sigstore.local
+</pre>
+
+- файл `/etc/containers/policy.json`, являющийся `symlink'ом` к файлу `/etc/containers/policy_YYYY-MM-DD_HH:mm:SS`  
+ должен иметь содержимое (запрет доступа по всем ресурсам):
+<pre> 
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {}
+  }
+} 
+</pre>
+
+- файл `/etc/containers/registries.d/default.yaml`, являющийся `symlink'ом` к файлу `/etc/containers/registries.d/default_YYYY-MM-DD_HH:mm:SS` должен иметь содержимое (ю URLs доступа к серверу подписей):
+<pre> 
+default-docker:
+  lookaside: http://sigstore.local:81/sigstore/
+  sigstore: http://sigstore.local:81/sigstore/ 
+</pre>
+
+### Создание сервисов регистратора и WEB-сервера подписей
+
+Поднимите сервисы `регистратора` и `WEB-сервера подписей` командой:
+<pre>
+# podsec-create-services
+Synchronizing state of nginx.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable nginx
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /lib/systemd/system/nginx.service.
+registry
+Created symlink /etc/systemd/system/multi-user.target.wants/docker-registry.service → /lib/systemd/system/docker-registry.service.
+</pre> 
+
+Проверьте функционирование сервисов:  
+<pre>
+# netstat -nlpt
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address               Foreign Address             State       PID/Program name 
+...  
+tcp        0      0 0.0.0.0:81                  0.0.0.0:*                   LISTEN      14996/nginx -g daem 
+...
+tcp        0      0 :::80                       :::*                        LISTEN      15044/docker-regist 
+...
+</pre>
+
+### Создание пользователя разработчика образов контейнеров
+
+Cоздайте пользователя *разработчик образов контейнеров*:
+<pre>
+# podsec-create-imagemakeruser imagemaker
+</pre>
+Шаги создания пользователя подробно описаны в []().
+
+Файл `/etc/containers/policy.json`, должен изменить `symlink` на другой файл `/etc/containers/policy_YYYY-MM-DD_HH:mm:SS` с содержимым (разрешение доступа к регистратору `registry.local` с открытым ключом пользователя `imagemaker`):
+<pre> 
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {
+      "registry.local": [
+        {
+          "type": "signedBy",
+          "keyType": "GPGKeys",
+          "keyPath": "/var/sigstore/keys/imagemaker.pgp"
+        }
+      ]
+    }
+  }
+} 
+</pre>
+
+### Создание пользователя информационной системы
+
+Создайте пользователя информационной системы:
+<pre> 
+# podsec-create-podmanusers poduser
+</pre>
+
+### Загрузка kubernetes-образов:
+
+Загрузите kubernetes-образы от пользователя `imagemaker`.
+<pre> 
+# podsec-load-sign-oci amd64_c10f1.tar.xz amd64 <E-mail_подписанта>
+</pre>
+
+Во время выполнения скрипта будет запрошен пароль для подписи.
+
+**Внимание**: Данную команду нельзя запускать путем получения прав пользователя через команду `su - imagemaker`, так как устанавливаются не все переменные среды. Сделайте полный заход под пользователем, например по протоколу `ssh`:
+```
+# ssh imagemaker@localhost
+```
+### Установка тропы PATH поиска исполняемых команд
+
+Измените переменную PATH:
 <pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
-4. Запустите команду:
+### Инициализация мастер-узла
+
+Запустите команду:
 
 <pre>
-# kubeadm init
+# kubeadm -v 9 init
 </pre>
 
 > По умолчанию уровень отладки устанавливается в `0`. Если необходимо увеличить уровень отладки укажите перед подкомандой `init` флаг `-v n`. Где `n` принимает значения от `0` до `9`-ти.
@@ -72,8 +231,10 @@ Then you can join any number of worker nodes by running the following on each as
 kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
 </pre>
 
-5 После завершения скрипта проверьте работу `usernetes` (`rootless kuber`)
+### Проверка работы узла
 
+После завершения скрипта  в течении минуты настраиваются сервисы мастер-узла кластера.
+По ее истечении проверьте работу `usernetes` (`rootless kuber`)
 <pre>
 # kubectl get nodes -o wide
 NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE           KERNEL-VERSION         CONTAINER-RUNTIME
@@ -132,13 +293,19 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 
 Все остальные процессы `kube-controller`, `kube-apiserver`, `kube-scheduler`, `kube-proxy`, `etcd`, `coredns` запускаются как контейнеры от соответствующих образов `registry.local/k8s-c10f1/kube-controller-manager:v1.26.3`, `registry.local/k8s-c10f1/kube-apiserver:v1.26.3`, `registry.local/k8s-c10f1/kube-scheduler:v1.26.3`, `registry.local/k8s-c10f1/kube-proxy:v1.26.3`, `registry.local/k8s-c10f1/etcd:3.5.6-0`,  `registry.local/k8s-c10f1/coredns:v1.9.3`.
 
-6. По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
+
+### Обеспечение запуска обычных POD'ов на мастер-узле
+
+По умолчанию на master-узле пользовательские `Pod`ы не запускаются. Чтобы снять это ограничение наберите команду:
 ```
 # kubectl taint nodes <host> node-role.kubernetes.io/control-plane:NoSchedule-
 node/<host> untainted
 ```
 
-7. Проверьте загрузку deployment nginx:
+<!--
+### Проверка загрузки POD'ов 
+
+Проверьте загрузку deployment nginx:
 
 ```
 # kubectl apply -f https://k8s.io/examples/application/deployment.yaml
@@ -155,14 +322,14 @@ pod/nginx-deployment-85996f8dbd-2dw9h   1/1     Running   0          5m34s
 pod/nginx-deployment-85996f8dbd-r5dt4   1/1     Running   0          5m34s
 ```
 
-
-8. Проверьте загрузку образа `registry.local/alt/alt`:
+### 
+14. Проверьте загрузку образа `registry.local/alt/alt`:
 ```
 # kubectl run -it --image=registry.local/alt/alt -- bash
 If you don't see a command prompt, try pressing enter.
 [root@bash /]# pwd
 ```
-
+-->
 
 ## Подключение worker-узла
 

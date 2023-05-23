@@ -162,7 +162,7 @@ sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-c10f1/pause:3.9"
 
 if [ -z "$localIP" ]
 then
-  echo "Файл политик /etc/containets/policy.json созадется на сервере '$regIP' при создании пользователей подписывающих образы.\
+  echo "Файл политик /etc/containets/policy.json создается на сервере '$regIP' при создании пользователей подписывающих образы.\
   Скопируйте этот  файл c '$regIP' после добавления этих пользователей."
 fi
 
