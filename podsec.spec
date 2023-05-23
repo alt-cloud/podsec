@@ -166,7 +166,7 @@ chmod 600 $rootcrontab
 %exclude %_mandir/man?/podsec-inotify-*
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
-%dir %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec
+%dir %attr(0755,root,root) %_localstatedir/podsec
 
 %files k8s
 %dir %_sysconfdir/podsec/u7s

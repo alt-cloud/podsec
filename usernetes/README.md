@@ -73,8 +73,19 @@ default via 192.168.122.1
 nameserver 192.168.122.1
 </pre>
 
+Интерфейс для данных параметров выглядит следующим образом:
+<pre> 
+# ip a show dev enp1s0
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 52:54:00:db:e1:57 brd ff:ff:ff:ff:ff:ff
+    inet 192.168.122.70/24 brd 192.168.122.255 scope global enp1s0
+       valid_lft forever preferred_lft forever
+    inet 192.168.122.80/24 brd 192.168.122.255 scope global secondary enp1s0
+       valid_lft forever preferred_lft forever
+    ...
+</pre>
 
-### Настройте политики контейнеризации
+### Настройка политики контейнеризации
 
 Вызовите команду:
 <pre>
@@ -174,6 +185,36 @@ Cоздайте пользователя *разработчик образов 
 } 
 </pre>
 
+
+Должен появится каталог `/var/sigstore/` со следующей структурой:
+<pre>
+├── index.html
+├── keys
+│   ├── imagemaker.pgp
+│   └── policy.json
+└── sigstore
+</pre>
+
+Проверьте доступ к этому каталогу через `http`:
+<pre>
+# curl -s  http://sigstore.local:81/keys/ | jq
+[
+  {
+    "name": "imagemaker.pgp",
+    "type": "file",
+    "mtime": "Tue, 23 May 2023 05:43:59 GMT",
+    "size": 2436
+  },
+  {
+    "name": "policy.json",
+    "type": "file",
+    "mtime": "Tue, 23 May 2023 05:43:25 GMT",
+    "size": 276
+  }
+]
+</pre>
+
+
 ### Создание пользователя информационной системы
 
 Создайте пользователя информационной системы:
@@ -194,6 +235,59 @@ Cоздайте пользователя *разработчик образов 
 ```
 # ssh imagemaker@localhost
 ```
+
+После выполнения скрипта проверьте наличие образов в регистраторе:
+<pre> 
+# curl -s registry.local/v2/_catalog | jq
+{
+  "repositories": [
+    "k8s-c10f1/cert-manager-cainjector",
+    "k8s-c10f1/cert-manager-controller",
+    "k8s-c10f1/cert-manager-webhook",
+    "k8s-c10f1/coredns",
+    "k8s-c10f1/etcd",
+    "k8s-c10f1/flannel",
+    "k8s-c10f1/flannel-cni-plugin",
+    "k8s-c10f1/kube-apiserver",
+    "k8s-c10f1/kube-controller-manager",
+    "k8s-c10f1/kube-proxy",
+    "k8s-c10f1/kube-scheduler",
+    "k8s-c10f1/pause"
+  ]
+}
+</pre>
+
+И наличие подписей в каталоге `/var/sigstore/sigstore/k8s-c10f1`:
+<pre>
+└── k8s-c10f1
+    ├── cert-manager-cainjector@sha256=36a19269312740daa04ea77e4edb87983230d6c4e6e5dd95b9c3640e5fa300b5
+    │   └── signature-1
+    ├── cert-manager-controller@sha256=0d6eed2c732d605488e51c3d74aa61d29eb75b2cfadd0276488791261368b911
+    │   └── signature-1
+    ├── cert-manager-webhook@sha256=7f0ca1ca7724c31b95efc0cfa21f91768e8e057e9a42a9c1e24d18960c9fe88c
+    │   └── signature-1
+    ├── coredns@sha256=5256bbacc84b80295e64b51d03577dc0494f7db7944ae95b7a63fd6cb0c7737a
+    │   └── signatuдкаталогов re-1
+    ├── etcd@sha256=da030977338e36b5a1cadb6380a1f87c2cbda4da4950bd915328c3aed5264896
+    │   └── signature-1
+    ├── flannel-cni-plugin@sha256=8fdc6ac8dbbc9916814a950471e1bf9da9e3928dca342216f931d96b6e9017fe
+    │   └── signature-1
+    ├── flannel@sha256=7994c6c2a5e0e6d206b84a516b0a4215ba9de3b898cab9972f0015f8fd0c0f69
+    │   └── signature-1
+    ├── kube-apiserver@sha256=035d353805cc994b12a030c9495adddb66fc91e4325b879e4578c7603b1bb982
+    │   └── signature-1
+    ├── kube-controller-manager@sha256=50217c9d11a0d41b069efa231958fada60de3666d8c682df297ee371f7e559c0
+    │   └── signature-1
+    ├── kube-proxy@sha256=d6e80ea2485beb059cb1c565fc92f91561c3e28a335c022da4d548f429b811da
+    │   └── signature-1
+    ├── kube-scheduler@sha256=ad17d07c44aff8d0e8ca234f051556761bdeb82d4f62ff892a4f7aa7d9f027d4
+    │   └── signature-1
+    └── pause@sha256=f14315ad18ed3dc1672572c3af9f6b28427cf036a43cc00ebac885e919b59548
+        └── signature-1
+</pre>
+Число подкаталогов должно совпадать с числом образов в регистраторе и каждый подкаталог должен иметь файл `signature-1`.
+
+
 ### Установка тропы PATH поиска исполняемых команд
 
 Измените переменную PATH:
@@ -203,10 +297,12 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 
 ### Инициализация мастер-узла
 
-Запустите команду:
+При запуске в параметре `--apiserver-advertise-address` укажите IP-адрес API-интерфейса `kube-apiserver`.
+**Этот адрес должен отличаться от IP-адреса регистратора и WEB-сервера подписей.**
 
+Запустите команду:
 <pre>
-# kubeadm -v 9 init
+# kubeadm -v 9 init  --apiserver-advertise-address 192.168.122.80
 </pre>
 
 > По умолчанию уровень отладки устанавливается в `0`. Если необходимо увеличить уровень отладки укажите перед подкомандой `init` флаг `-v n`. Где `n` принимает значения от `0` до `9`-ти.
@@ -333,7 +429,9 @@ If you don't see a command prompt, try pressing enter.
 
 ## Подключение worker-узла
 
-1 Настройте репозиторий обновления
+### Настройка репозиторий обновления
+
+Настройте репозиторий обновления
 <pre>
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
@@ -342,20 +440,70 @@ rm -f /etc/apt/sources.list.d/sources.list
 apt-get update
 </pre>
 
-2 Установите podsec-пакеты:
+### Установка podsec-пакетов:
+
+Установите podsec-пакеты:
 
 ```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm      podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.38-alt1.noarch.rpm  podsec-k8s-rbac-0.9.38-alt1.noarch.rpm podsec-k8s-0.9.38-alt1.noarch.rpm  podsec-inotify-0.9.38-alt1.noarch.rpm
 ```
 
-3. Измените переменную PATH:
+
+### Настройка политики контейнеризации
+
+Вызовите команду:
+<pre>
+# podsec-create-policy 192.168.122.70 # ip-aдрес_регистратора и WEB-сервера подписей
+Добавление привязки доменов registry.local sigstore.local к IP-адресу 192.168.122.70
+Создание группы podman
+Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов
+Создание каталога и подкаталогов  /var/sigstore/
+Создание с сохранением предыдущих файла политик /etc/containers/policy.json
+Создание с сохранением предыдущих файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов
+Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
+Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+</pre>
+
+Проверьте содержимое файла /etc/containers/policy.json скопированного с мастер-узла:
+<pre>
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {
+      "registry.local": [
+        {
+          "type": "signedBy",
+          "keyType": "GPGKeys",
+          "keyPath": "/var/sigstore/keys/imagemaker.pgp"
+        }
+      ]
+    }
+  }
+}
+</pre>
+
+Проверьте наличие открытого ключа `imagemaker.pgp` в каталоге `/var/sigstore/`:
+<pre>
+└── keys
+    ├── imagemaker.pgp
+    └── policy.json
+</pre>
+
+### Установка тропы PATH поиска исполняемых команд
+
+Измените переменную PATH:
 
 <pre>
 export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 </pre>
 
+### Подключение worker-узла
 
-4. Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
+Скопируйте команду подключния `worker-узла`, полученную на этапе установки начального `master-узла`.  Запустите ее:
 
 ```
 kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha256:...
@@ -372,7 +520,9 @@ This node has joined the cluster:
 Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 </pre>
 
-5. Проверьте состояние дерева процессов:
+### Проверка состояния процессов
+
+Проверьте состояние дерева процессов:
 <pre>
 # pstree
 ...
@@ -398,7 +548,9 @@ host-212   Ready    control-plane   7h54m   v1.26.3   10.96.0.1     <none>      
 host-226   Ready    <none>          8m30s   v1.26.3   10.96.0.1     <none>        ALT SP Server 11100-01   5.15.105-un-def-alt1   cri-o://1.26.2
 ```
 
-7. На `master-узле` под пользоваталем `root` выполните команду:
+### Запуск сетевого маршрутизатора для контейекров kube-flannel
+
+На `master-узле` под пользоваталем `root` выполните команду:
 
 ```
 # kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
@@ -413,7 +565,7 @@ daemonset.apps/kube-flannel-ds created
 Connection to the local host terminated.
 ```
 
-8. На `master-узле` выполните команду:
+На `master-узле` выполните команду:
 ```
 # kubectl get daemonsets.apps -A
 NAMESPACE      NAME              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
@@ -474,31 +626,17 @@ backend apiserver
 
 ### Установка начального master-узла для работы с haproxy
 
-Настройте репозиторий обновления
-<pre>
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64-i586 classic'
-apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/noarch classic'
-rm -f /etc/apt/sources.list.d/sources.list
-apt-get update
-</pre>
+Выполните все пункты из главы *Установка master-узла* до раздела *Инициализация мастер-узла*.
 
-Установите podsec-пакеты версии *0.9.32-alt1* и выше:
-
-```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
-```
-
-Измените переменную `PATH`:
-
-<pre>
-export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
-</pre>
+#### Инициализация мастер-узла  при работа с балансировщиков haproxy
 
 При установке начального master-узла необходимо параметром `control-plane-endpoint` указать URL  балансировщика `haproxy`:
 ```
-# kubeadm init --control-plane-endpoint <IP_адрес_haproxy>:8443
+# kubeadm init --apiserver-advertise-address 192.168.122.80 --control-plane-endpoint <IP_адрес_haproxy>:8443
 ```
+
+При запуске в параметре `--apiserver-advertise-address` укажите IP-адрес API-интерфейса `kube-apiserver`.
+**Этот адрес должен отличаться от IP-адреса регистратора и WEB-сервера подписей.**
 
 В результате инициализации `kubeadm` выведет команды подключения дополнительных `control-plane` и `worker` узлов:
 <pre>
@@ -536,6 +674,8 @@ clusters:
 
 ### Подключение дополнительных ControlPlane(master)-узлов с указанием их в балансировщике запросов haproxy
 
+#### Настройка репозиторий обновления
+
 Настройте репозиторий обновления
 <pre>
 apt-repo add 'rpm [p10] http://ftp.altlinux.org/pub/distributions/ALTLinux p10/branch/x86_64 classic'
@@ -545,11 +685,60 @@ rm -f /etc/apt/sources.list.d/sources.list
 apt-get update
 </pre>
 
-Установите podsec-пакеты версии *0.9.32-alt1* и выше:
+### Установка podsec-пакетов:
+
+Установите podsec-пакеты версии *0.9.38-alt1* и выше:
 
 ```
-# apt-get install -y podsec-0.9.32-alt1.noarch.rpm  podsec-k8s-rbac-0.9.32-alt1.noarch.rpm podsec-k8s-0.9.32-alt1.noarch.rpm  podsec-inotify-0.9.32-alt1.noarch.rpm
+# apt-get install -y podsec-0.9.38-alt1.noarch.rpm  podsec-k8s-rbac-0.9.38-alt1.noarch.rpm podsec-k8s-0.9.38-alt1.noarch.rpm  podsec-inotify-0.9.38-alt1.noarch.rpm
 ```
+
+### Настройка политики контейнеризации
+
+Вызовите команду:
+<pre>
+# podsec-create-policy 192.168.122.70 # ip-aдрес_регистратора и WEB-сервера подписей
+Добавление привязки доменов registry.local sigstore.local к IP-адресу 192.168.122.70
+Создание группы podman
+Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов
+Создание каталога и подкаталогов  /var/sigstore/
+Создание с сохранением предыдущих файла политик /etc/containers/policy.json
+Создание с сохранением предыдущих файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов
+Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
+Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
+</pre>
+
+Проверьте содержимое файла /etc/containers/policy.json скопированного с мастер-узла:
+<pre>
+{
+  "default": [
+    {
+      "type": "reject"
+    }
+  ],
+  "transports": {
+    "docker": {
+      "registry.local": [
+        {
+          "type": "signedBy",
+          "keyType": "GPGKeys",
+          "keyPath": "/var/sigstore/keys/imagemaker.pgp"
+        }
+      ]
+    }
+  }
+}
+</pre>
+
+Проверьте наличие открытого ключа `imagemaker.pgp` в каталоге `/var/sigstore/`:
+
+<pre>
+└── keys
+    ├── imagemaker.pgp
+    └── policy.json
+</pre>
+
+### Установка тропы PATH поиска исполняемых команд
 
 Измените переменную `PATH`:
 
@@ -634,6 +823,12 @@ backend apiserver
 ```
 # systemctl restart haproxy
 ```
+
+Логи обращений и балансировку запросов между узлами можно посмотреть командой:
+```
+# tail -f /var/log/haproxy.log
+```
+
 
 ### Подключение дополнительных worker-узлов
 
