@@ -993,7 +993,116 @@ Commercial support is available at
 &lt;/html>
 &lt;/pre>
 
+- пробросьте порт наружу
+<pre>
+# rootlessctl add-ports 0.0.0.0:31280:31280/tcp
+</pre>
 
+- запросите доступ к `Pod`'у `nginx` по внешнему порту
+<pre>
+# curl http://192.168.122.26:31280
+&!DOCTYPE html>
+&lt;html>
+&lt;head>
+&lt;title>Welcome to nginx!&lt;/title>
+</pre>
+
+
+### Тестовый запуск alt/alt (Проверка работы coredns)
+
+#### Помещение образа alt/alt на регистратор
+
+Зайдите в пользователя `imagemaker`.
+
+- Загрузка исходного образа:
+
+<pre>
+$ podman pull --tls-verify registry.altlinux.org/alt/alt
+Trying to pull registry.altlinux.org/alt/alt:latest...
+Getting image source signatures
+Copying blob 9ab3f3206235 done
+Copying blob cedd146c7d35 done
+Copying config ff2762c6c8 done
+Writing manifest to image destination
+Storing signatures
+ff2762c6c8cc9468e0651364e4347aa5c769d78541406209e9ab74717f29e641
+</pre>
+
+- Создание alias'а для помещения на локальный регистратор:
+<pre>
+$ podman tag registry.altlinux.org/alt/alt registry.local/alt/alt
+</pre>
+
+-  Помещение на локальный регистратор
+<pre>
+$ podman push --tls-verify=false  --sign-by='<kaf@basealt.ru>' registry.local/alt/alt
+Getting image source signatures
+Copying blob 9a03b2bc42d8 done
+Copying blob 60bdc4ff8a54 done
+Copying config ff2762c6c8 done
+Writing manifest to image destination
+Creating signature: Signing image using simple signing
+Storing signatures</pre>
+</pre>
+Во время помещения образа (если прошло достаточно много времени после последнего `podman push`) необходимо ввести пароль для подписи.
+
+#### Запуск образа
+
+Запустите образ с входом в терминальный режим:
+<pre> 
+# kubectl  run -it --image=registry.local/alt/alt -- bash
+If you don't see a command prompt, try pressing enter.
+[root@bash /]# 
+</pre>
+
+- Обновите пакетную базу:
+<pre>
+[root@bash /]# apt-get update
+... 
+</pre> 
+
+- Установите необходимые пакеты:
+<pre> 
+ [root@bash /]# apt-get install bind-utils curl
+</pre>
+
+- Запросите DNS-запись запущенного `deployment` `nginx`:
+<pre>  
+root@bash /]# nslookup nginx
+Server:         10.96.0.10
+Address:        10.96.0.10#53
+
+Name:   nginx.default.svc.cluster.local
+Address: 10.111.9.232
+</pre>
+
+- сделайте запрос по DNS имени и адресу:
+<pre> 
+ [root@bash /]# curl http://10.111.9.232
+&!DOCTYPE html>
+&lt;html>
+&lt;head>
+&lt;title>Welcome to nginx!&lt;/title>
+...
+</pre>
+
+<pre> 
+root@bash /]# curl http://nginx.default.svc.cluster.local
+&!DOCTYPE html>
+&lt;html>
+&lt;head>
+&lt;title>Welcome to nginx!&lt;/title>
+...
+</pre>
+
+<pre> 
+root@bash /]# curl http://nginx
+&!DOCTYPE html>
+&lt;html>
+&lt;head>
+&lt;title>Welcome to nginx!&lt;/title>
+...
+</pre>
 
 ## Работа под администратором u7s-admin rootless процессов
 
