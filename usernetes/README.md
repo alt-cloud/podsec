@@ -676,6 +676,29 @@ clusters:
 
 То есть вся работа с кластеров в дальнейшем идет через балансировщик запросов `haproxy`.
 
+Для перевода узла в состояние `Ready`, запуска coredns Pod'ов запустите flannel
+
+#### Запуск сетевого маршрутизатора для контейенеров kube-flannel
+
+На `master-узле` под пользоваталем `root` выполните команду:
+
+```
+# kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
+Connected to the local host. Press ^] three times within 1s to exit session.
+[INFO] Entering RootlessKit namespaces: OK
+namespace/kube-flannel created
+clusterrole.rbac.authorization.k8s.io/flannel created
+clusterrolebinding.rbac.authorization.k8s.io/flannel created
+serviceaccount/flannel created
+configmap/kube-flannel-cfg created
+daemonset.apps/kube-flannel-ds created
+Connection to the local host terminated.
+```
+
+После завершения скрипта  в течении минуты настраиваются сервисы мастер-узла кластера.
+По ее истечении проверьте работу `usernetes` (`rootless kuber`)
+
+
 ### Подключение дополнительных ControlPlane(master)-узлов с указанием их в балансировщике запросов haproxy
 
 #### Настройка репозиторий обновления
