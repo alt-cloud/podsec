@@ -493,7 +493,7 @@ apt-get update
 Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
 </pre>
 
-Проверьте содержимое файла /etc/containers/policy.json скопированного с мастер-узла:
+Проверьте содержимое файла `/etc/containers/policy.json` скопированного с мастер-узла:
 <pre>
 {
   "default": [
@@ -735,7 +735,7 @@ apt-get update
 Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
 </pre>
 
-Проверьте содержимое файла /etc/containers/policy.json скопированного с мастер-узла:
+Проверьте содержимое файла `/etc/containers/policy.json` скопированного с мастер-узла:
 <pre>
 {
   "default": [
@@ -892,7 +892,7 @@ $ podman  tag docker.io/library/nginx:1.14.2 registry.local/nginx
 
 -  Помещение на локальный регистратор
 <pre>
-$ podman push --tls-verify=false    --sign-by='<EMAIL>'   registry.local/nginx
+$ podman push --tls-verify=false    --sign-by='&lt;EMAIL>'   registry.local/nginx
 Getting image source signatures
 Copying blob 5dacd731af1b done
 Copying blob 82ae01d5004e done
@@ -1020,6 +1020,8 @@ Commercial support is available at
 &lt;/html>
 </pre>
 
+По этим `URL` (`http://10.244.1.1:31280`, `http://10.96.122.26:31280`) вы можете обращаться в `user namespace` (`nsenter_u7s`) любого узла кластера.
+
 - пробросьте порт наружу
 <pre>
 # rootlessctl add-ports 0.0.0.0:31280:31280/tcp
@@ -1061,94 +1063,7 @@ $ podman tag registry.altlinux.org/alt/alt registry.local/alt/alt
 
 -  Помещение на локальный регистратор
 <pre>
-$ podman push --tls-verify=false  --sign-by='<kaf@basealt.ru>' registry.local/alt/alt
-Getting image source signatures
-Copying blob 9a03b2bc42d8 done
-Copying blob 60bdc4ff8a54 done
-Copying config ff2762c6c8 done
-Writing manifest to image destination
-Creating signature: Signing image using simple signing
-Storing signatures</pre>
-</pre>
-Во время помещения образа (если прошло достаточно много времени после последнего `podman push`) необходимо ввести пароль для подписи.
-
-#### Запуск образа
-
-Запустите образ с входом в терминальный режим:
-<pre>
-# kubectl  run -it --image=registry.local/alt/alt -- bash
-If you don't see a command prompt, try pressing enter.
-[root@bash /]#
-</pre>
-
-- Обновите пакетную базу:
-<pre>
-[root@bash /]# apt-get update
-...
-</pre>
-
-- Установите необходимые пакеты:
-<pre>
- [root@bash /]# apt-get install bind-utils curl
-</pre>
-
-- Запросите DNS-запись запущенного `deployment` `nginx`:
-<pre>
-root@bash /]# nslookup nginx
-Server:         10.96.0.10
-Address:        10.96.0.10#53
-
-Name:   nginx.default.svc.cluster.local
-Address: 10.111.9.232
-</pre>
-
-- сделайте запрос по DNS имени и адресу:
-<pre>
- [root@bash /]# curl http://10.111.9.232
-&!DOCTYPE html>
-&lt;html>
-&lt;head>
-&lt;title>Welcome to nginx!&lt;/title>
-...
-</pre>
-
-<pre>
-root@bash /]# curl http://nginx.default.svc.cluster.local
-&!DOCTYPE html>
-&lt;html>
-&lt;head>
-&lt;title>Welcome to nginx!&lt;/title>
-...
-</pre>
-
-### Тестовый запуск alt/alt (Проверка работы coredns)
-
-#### Помещение образа alt/alt на регистратор
-
-Зайдите в пользователя `imagemaker`.
-
-- Загрузка исходного образа:
-
-<pre>
-$ podman pull --tls-verify registry.altlinux.org/alt/alt
-Trying to pull registry.altlinux.org/alt/alt:latest...
-Getting image source signatures
-Copying blob 9ab3f3206235 done
-Copying blob cedd146c7d35 done
-Copying config ff2762c6c8 done
-Writing manifest to image destination
-Storing signatures
-ff2762c6c8cc9468e0651364e4347aa5c769d78541406209e9ab74717f29e641
-</pre>
-
-- Создание alias'а для помещения на локальный регистратор:
-<pre>
-$ podman tag registry.altlinux.org/alt/alt registry.local/alt/alt
-</pre>
-
--  Помещение на локальный регистратор
-<pre>
-$ podman push --tls-verify=false  --sign-by='<kaf@basealt.ru>' registry.local/alt/alt
+$ podman push --tls-verify=false  --sign-by='&lt;EMAIL>' registry.local/alt/alt
 Getting image source signatures
 Copying blob 9a03b2bc42d8 done
 Copying blob 60bdc4ff8a54 done
