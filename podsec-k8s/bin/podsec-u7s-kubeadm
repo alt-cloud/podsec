@@ -266,11 +266,10 @@ if ! machinectl shell u7s-admin@ /bin/sh /usr/libexec/podsec/u7s/bin/kubeadm.sh 
 then
   echo "Разворачивание кластера закончилось неудачно.
   Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"
-  patree -pal
+  pstree -pal
   exit 1
 fi
 
-# machinectl shell u7s-admin@ /sbin/systemctl --user enable u7s.target 2>/dev/null
 machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
 /sbin/systemctl enable  u7s.service
 /sbin/systemctl start u7s.service

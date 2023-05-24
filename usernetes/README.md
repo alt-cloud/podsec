@@ -161,7 +161,6 @@ Cоздайте пользователя *разработчик образов 
 <pre>
 # podsec-create-imagemakeruser imagemaker
 </pre>
-Шаги создания пользователя подробно описаны в []().
 
 Файл `/etc/containers/policy.json`, должен изменить `symlink` на другой файл `/etc/containers/policy_YYYY-MM-DD_HH:mm:SS` с содержимым (разрешение доступа к регистратору `registry.local` с открытым ключом пользователя `imagemaker`):
 <pre>
@@ -329,7 +328,7 @@ kubeadm join xxx.xxx.xxx.xxx:6443 --token ... --discovery-token-ca-cert-hash sha
 
 ### Проверка работы узла
 
-Для перевода узла в состояние `Ready`, запуска coredns Pod'ов запустите flannel
+Для перевода узла в состояние `Ready`, запуска `coredns` `Pod`'ов запустите `flannel`.
 
 ### Запуск сетевого маршрутизатора для контейенеров kube-flannel
 
@@ -393,7 +392,7 @@ NAMESPACE     NAME                                DESIRED   CURRENT   READY   AG
 kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19m
 </pre>
 
-Состояние всех Pod'ов должны быть в `1/1`.
+Состояние всех `Pod`'ов должны быть в `1/1`.
 
 Проверьте состояние дерева процессов:
 <pre>
@@ -426,35 +425,6 @@ kube-system   replicaset.apps/coredns-c7df5cd6c   2         2         2       19
 # kubectl taint nodes <host> node-role.kubernetes.io/control-plane:NoSchedule-
 node/<host> untainted
 ```
-
-<!--
-### Проверка загрузки POD'ов
-
-Проверьте загрузку deployment nginx:
-
-```
-# kubectl apply -f https://k8s.io/examples/application/deployment.yaml
-```
-
-После загрузки образов `nginx` проверьте состояние `deployment` и `Pod`ов:
-```
-# kubectl get deployments.apps,pods
-NAME                               READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/nginx-deployment   2/2     2            2           5m34s
-
-NAME                                    READY   STATUS    RESTARTS   AGE
-pod/nginx-deployment-85996f8dbd-2dw9h   1/1     Running   0          5m34s
-pod/nginx-deployment-85996f8dbd-r5dt4   1/1     Running   0          5m34s
-```
-
-###
-14. Проверьте загрузку образа `registry.local/alt/alt`:
-```
-# kubectl run -it --image=registry.local/alt/alt -- bash
-If you don't see a command prompt, try pressing enter.
-[root@bash /]# pwd
-```
--->
 
 ## Подключение worker-узла
 
@@ -593,7 +563,7 @@ host-226   Ready    <none>          8m30s   v1.26.3   10.96.0.1     <none>      
 Полная настройка отказоустойчивого кластера `haproxy` из 3-х узлов описана в документе
 [ALT Container OS подветка K8S. Создание HA кластера](https://www.altlinux.org/ALT_Container_OS_%D0%BF%D0%BE%D0%B4%D0%B2%D0%B5%D1%82%D0%BA%D0%B0_K8S._%D0%A1%D0%BE%D0%B7%D0%B4%D0%B0%D0%BD%D0%B8%D0%B5_HA_%D0%BA%D0%BB%D0%B0%D1%81%D1%82%D0%B5%D1%80%D0%B0).
 
-Здесь же мы рассмотрим создание и настройка с один `haproxy` с балансировкой запросов на `master`-узлы.
+Здесь же мы рассмотрим создание и настройка с одним сервером `haproxy` с балансировкой запросов на `master`-узлы.
 
 Установите пакет `haproxy`:
 ```
@@ -642,12 +612,14 @@ backend apiserver
 При запуске в параметре `--apiserver-advertise-address` укажите IP-адрес API-интерфейса `kube-apiserver`.
 **Этот адрес должен отличаться от IP-адреса регистратора и WEB-сервера подписей.**
 
+**Кроме этого IP-адреса в параметрах** `--apiserver-advertise-address` **и** `--control-plane-endpoint` **должны отличаться. Если Вы развернули** `haproxy` **на том же мастер-узле, укажите в параметре** `--control-plane-endpoint` **IP-адрес (или домен) регистратора и WEB-сервера подписей.**
+
 В результате инициализации `kubeadm` выведет команды подключения дополнительных `control-plane` и `worker` узлов:
 <pre>
 ...
 You can now join any number of the control-plane node running the following command on each as root:
 
-kubeadm join <IP_адрес_haproxy>:8443 --token ... \
+kubeadm join &lt;IP_адрес_haproxy>:8443 --token ... \
         --discovery-token-ca-cert-hash sha256:... \
         --control-plane --certificate-key ...
 
@@ -678,7 +650,7 @@ clusters:
 
 Для перевода узла в состояние `Ready`, запуска coredns Pod'ов запустите flannel
 
-#### Запуск сетевого маршрутизатора для контейенеров kube-flannel
+#### Запуск сетевого маршрутизатора для контейнеров kube-flannel
 
 На `master-узле` под пользоваталем `root` выполните команду:
 
@@ -972,7 +944,7 @@ service/nginx        NodePort    10.111.222.98   <none>        80:31280/TCP   20
 $ nsenter_u7s
 </pre>
 
-Выберите любой из IP_адресов интерфейсов `tap0` или `cni0`:
+Выберите любой из IP-адресов интерфейсов `tap0` или `cni0`:
 <pre>
 # ip a show dev tap0
 2: tap0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 65520 qdisc fq_codel state UP group default qlen 1000
@@ -993,7 +965,7 @@ service/nginx        NodePort    10.111.222.98   <none>        80:31280/TCP   20
 
 <pre>
 # curl http://10.244.1.1:31280
-&!DOCTYPE html>
+&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
 &lt;title>Welcome to nginx!&lt;/title>
@@ -1030,7 +1002,7 @@ Commercial support is available at
 - запросите доступ к `Pod`'у `nginx` по внешнему порту
 <pre>
 # curl http://192.168.122.26:31280
-&!DOCTYPE html>
+&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
 &lt;title>Welcome to nginx!&lt;/title>
@@ -1107,7 +1079,7 @@ Address: 10.111.9.232
 - сделайте запрос по DNS имени и адресу:
 <pre>
  [root@bash /]# curl http://10.111.9.232
-&!DOCTYPE html>
+&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
 &lt;title>Welcome to nginx!&lt;/title>
@@ -1116,7 +1088,7 @@ Address: 10.111.9.232
 
 <pre>
 root@bash /]# curl http://nginx.default.svc.cluster.local
-&!DOCTYPE html>
+&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
 &lt;title>Welcome to nginx!&lt;/title>
@@ -1125,7 +1097,7 @@ root@bash /]# curl http://nginx.default.svc.cluster.local
 
 <pre>
 root@bash /]# curl http://nginx
-&!DOCTYPE html>
+&lt;!DOCTYPE html>
 &lt;html>
 &lt;head>
 &lt;title>Welcome to nginx!&lt;/title>
@@ -1156,11 +1128,13 @@ $ nsenter_u7s
 
 - в файловой системе присутствуют каталоги и файлы (`/run/crio/crio.sock`, ...) используемые сервисом `kubelet` и работающих `Pod`ов и частично отсутствующие в основной файловой системе;
 
-- присутствуют сетевые интерфейсы используемые в `rootless kubernetes`, но отсутсвующие в основной системе (см. команду `ip a`, `ip r`);
+- присутствуют сетевые интерфейсы используемые в `rootless kubernetes`, но отсутствующие в основной системе (см. команду `ip a`, `ip r`);
 
 - присутствуют правила фильтрации и переадресации (`iptables`, `iptables -t nat`) использующиеся в `rootless kubernetes`, но отсутствующие в основной системе;
 
-- Вы можете выполнять привелигированные команды по настройке узла: `ip`, `iptables`, ...
+- Вы можете выполнять привелигированные команды по настройке узла: `ip`, `iptables`, ...  
+
+- Логи `Pod`'ов  доступны в каталоге `/var/log/pods/`
 
 
 ### Тестирование новых версий пакета podsec-k8s
