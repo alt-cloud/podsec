@@ -1011,21 +1011,6 @@ Commercial support is available at
 &lt;title>Welcome to nginx!&lt;/title>
 </pre>
 
-- пробросьте порт наружу
-<pre>
-# rootlessctl add-ports 0.0.0.0:31280:31280/tcp
-</pre>
-
-- запросите доступ к `Pod`'у `nginx` по внешнему порту
-<pre>
-# curl http://192.168.122.26:31280
-&!DOCTYPE html>
-&lt;html>
-&lt;head>
-&lt;title>Welcome to nginx!&lt;/title>
-</pre>
-
-
 ### Тестовый запуск alt/alt (Проверка работы coredns)
 
 #### Помещение образа alt/alt на регистратор
