@@ -1,6 +1,8 @@
 #!/bin/sh
 # Скрипт создает
 
+
+
 if [ $# -lt 1 ]
 then
   echo -ne "Не указан IP-адрес регистратора и сервера подписей\n"
@@ -169,9 +171,12 @@ else
   ln -sf $linkedRegistriesConf  $registriesConf
 fi
 
-# Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)
-echo "Настройка использования образа registry.local/k8s-c10f1/pause:3.9 при запуска pod'ов в podman (podman pod init)"
-sed -i -e 's|#infra_image =.*|infra_image = "registry.local/k8s-c10f1/pause:3.9"|' /usr/share/containers/containers.conf
+source /etc/podsec/u7s/env/platform
+source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+# Настройка использования образа registry.local/U7S_PAUSE_IMAGE при запуска pod'ов в podman (podman pod init)
+pause_image="registry.local/$U7S_PAUSE_IMAGE"
+echo "Настройка использования образа $pause_image при запуска pod'ов в podman (podman pod init)"
+sed -i -e 's|#infra_image =.*|infra_image = "'$pause_image'"|' /usr/share/containers/containers.conf
 
 
 

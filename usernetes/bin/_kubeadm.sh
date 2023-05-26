@@ -82,7 +82,6 @@ mkdir -p /run/crio/ || :;
 
 pars=
 
-# TO DO - show join string for control plane
 if [ $cmd = 'init' ]
 then
   pars='--upload-certs'

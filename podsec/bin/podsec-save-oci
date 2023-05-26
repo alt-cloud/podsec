@@ -10,6 +10,7 @@
 # Так как скрипт производит загрузку образов различных архитектур
 # последняя загруженная в containers-storage: архитектура может отличаться от текущей архитектуры процессора
 # При необходимости нужно будет произвести перезагрузку образов для рабочей архитектуры процессора
+set -x
 
 if [ $# -lt 1 ]
 then
@@ -37,13 +38,14 @@ then
   exit 1
 fi
 
-# regName='registry.altlinux.org'
+regName='registry.altlinux.org'
 
 case $archs in
   'all') archs='amd64 arm64 arm ppc64le 386';;
   *)
     ifs=$IFS IFS=,
     set -- $archs
+    IFS=$ifs
     archs=$*
     IFS=$ifs
     for arch in $archs
@@ -72,14 +74,10 @@ do
   for image in $images
   do
     echo "  image=$image"
-    Image=$image
-    if skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers docker://$Image containers-storage:$Image && \
-      skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers containers-storage:$Image oci:$ociArchDir:$image
-    then :;
-    else
-      rm -rf $ociDir
-      exit 1
-    fi
+    Image="$regName/$image"
+    podman image rm $Image >/dev/null 2>&1
+    skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers docker://$Image containers-storage:$Image
+    skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers containers-storage:$Image oci:$ociArchDir:$image
   done
   tar cvCf $ociDir -  $arch | xz -9v > $ociArchDir.tar.xz
   rm -rf $ociArchDir

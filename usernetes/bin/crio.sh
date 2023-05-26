@@ -1,6 +1,7 @@
 #!/bin/sh
 # needs to be called inside the namespaces
-
+source /etc/podsec/u7s/env/platform
+source "/etc/podsec/u7s/env/$U7S_PLATFORM"
 source podsec-u7s-functions
 export _CRIO_ROOTLESS=1
 export User='u7s-admin'
@@ -17,7 +18,7 @@ cat >$XDG_CONFIG_HOME/usernetes/crio/crio.conf <<EOF
     listen = "$XDG_RUNTIME_DIR/usernetes/crio/crio.sock"
   [crio.image]
     signature_policy = "/etc/containers/policy.json"
-    pause_image = "registry.local/k8s-c10f1/pause:3.9"
+    pause_image = "registry.local/$U7S_PAUSE_IMAGE"
     insecure_registries = [
       "registry.local"
     ]

@@ -7,7 +7,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.2
+Version: 1.0.3
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -105,6 +105,7 @@ to monitor and identify security threats
 Summary: Set of scripts for podsec developers
 Group: Development/Other
 Requires: podsec >= %EVR
+Requires: podsec-k8s >= %EVR
 
 %description dev
 A set of scripts for developers
@@ -142,6 +143,12 @@ do
   fi
 done
 chmod 600 $rootcrontab
+source /etc/podsec/u7s/env/platform
+source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+sed -i -e "s|image:.*|image: registry.local/$U7S_FLANNEL_IMAGE|" /etc/kubernetes/manifests/kube-flannel.yml
+sed -i -e "s|image:.*|image: registry.local/$U7S_COREDNS_IMAGE|" /etc/kubernetes/manifests/coredns.yaml
+sed -i -e "s|imageRepository: .*|imageRepository: registry.local/$U7S_PLATFORM|" /etc/podsec/u7s/config/kubeadm-configs/InitClusterConfiguration.yaml
+sed -i -e "s|imageRepository: .*|imageRepository: registry.local/$U7S_PLATFORM|" /etc/podsec/u7s/config/kubeadm-configs/JoinClusterConfiguration.yaml
 
 %preun inotify
 %preun_systemd podsec-inotify-check-containers.service
@@ -213,8 +220,15 @@ chmod 600 $rootcrontab
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+
+* Fri May 26 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.3-alt1
+- 1.0.3
+
 * Fri May 26 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.2-alt1
 - 1.0.2
+
+* Fri May 26 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.1-alt1
+- 1.0.1
 
 * Wed May 24 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.0-alt1
 - 1.0.0

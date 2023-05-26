@@ -1,0 +1,9 @@
+source /etc/os-release
+
+if echo $CPE_NAME | grep spserver >/dev/null 2>&1
+then
+  export U7S_PLATFORM="k8s-c10f1"
+else
+  export U7S_PLATFORM="k8s-p10"
+fi
+

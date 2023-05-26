@@ -63,6 +63,11 @@ USERNETES_CONFIGS= \
 	env \
 	ENV
 
+USERNETES_ENVS = \
+	platform \
+	k8s-c10f1 \
+	k8s-p10
+
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh
 
@@ -168,6 +173,9 @@ install: all
 	# modules-load.
 	$(MKDIR_P) $(DESTDIR)//lib/modules-load.d/
 	cp usernetes/config/modules-load.d/u7s.conf $(DESTDIR)/lib/modules-load.d/
+	# USERNETES_ENVS
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/env
+	cd usernetes/env; $(INSTALL) -m644 $(USERNETES_ENVS) $(DESTDIR)$(sysconfdir)/podsec/u7s/env
 	# USERNETES_MANIFESTS
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
