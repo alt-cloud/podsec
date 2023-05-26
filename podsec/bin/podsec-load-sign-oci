@@ -106,6 +106,24 @@ then
   exit 8
 fi
 
+image=$(jq '[.manifests[].annotations[]][0]' $archIndexFile)
+image=${image:1:-1}
+ifs=$IFS
+IFS=/
+set -- $image
+IFS=$ifs
+platform=$1
+if [ "$platform" != "$U7S_PLATFORM" ]
+then
+  echo "Текущая платформа $U7S_PLATFORM не совпадает у устанавлиаемой $platform"
+  echo "Продолжать (y/N)?"
+  read answer
+  if [ "$answer" != "y" ]
+  then
+    exit 1
+  fi
+fi
+
 imagesList=$(jq '.manifests[].annotations[]' $archIndexFile)
 ImageList=""
 for image in $imagesList

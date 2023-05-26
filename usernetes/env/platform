@@ -1,13 +1,9 @@
 source /etc/os-release
-ifs=$IFS
-IFS=:
-set -- $CPE_NAME
-IFS=$ifs
-product-$4
-case $product in
-  'spserver')
-    export U7S_PLATFORM="k8s-c10f1"
-     ;;
-   *) export U7S_PLATFORM="k8s-c10f1"
-esac
+
+if echo $CPE_NAME | grep spserver >/dev/null 2>&1
+then
+  export U7S_PLATFORM="k8s-c10f1"
+else
+  export U7S_PLATFORM="k8s-p10"
+fi
 

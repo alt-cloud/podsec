@@ -30,9 +30,22 @@ fi
 ociDir=$1
 archs=$2
 
+
 if [ $# -gt 2 ]
 then
-  U7S_PLATFORM=$3
+  platform=$3
+  source /etc/podsec/u7s/env/platform
+  if [ "$platform" != "$U7S_PLATFORM" ]
+  then
+    echo "Текущая правтформа $U7S_PLATFORM не совпадает с загружаемой"
+    echo "Продолжать? (Yes/no)"
+    read answer
+    if [ "$answer" == 'n' ]
+    then
+      exit 1
+    fi
+  fi
+  U7S_PLATFORM=$platform
 else
   source /etc/podsec/u7s/env/platform
 fi
