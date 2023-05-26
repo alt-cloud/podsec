@@ -1,4 +1,6 @@
 #!/bin/sh
+source /etc/podsec/u7s/env/platform
+source "/etc/podsec/u7s/env/$U7S_PLATFORM"
 
 if [ $# -ne 1 ]
 then
@@ -11,7 +13,7 @@ user=$1
 . /etc/kubernetes/kubelet
 if ! (echo $KUBELET_ARGS | grep pod-infra-container-image)
 then
-  KUBELET_ARGS+=' --pod-infra-container-image=registry.local/k8s-c10f1/pause:3.9'
+  KUBELET_ARGS+=" --pod-infra-container-image=registry.local/$U7S_PAUSE_IMAGE"
   sed -i -e "s|KUBELET_ARGS.*|KUBELET_ARGS=\"$KUBELET_ARGS\"|" /etc/kubernetes/kubelet
 fi
 
@@ -21,7 +23,7 @@ systemctl enable --now crio kubelet
 
 # Инициализация master-узла кластера
 echo "Инициализация master-узла кластера"
-kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.26.3 --image-repository=registry.local/k8s-c10f1
+kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.26.3 --image-repository="registry.local/$U7S_PLATFORM"
 
 # Настройка root на роль администратора кластера
 echo "Настройка root на роль администратора кластера"

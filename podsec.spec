@@ -105,6 +105,7 @@ to monitor and identify security threats
 Summary: Set of scripts for podsec developers
 Group: Development/Other
 Requires: podsec >= %EVR
+Requires: podsec-k8s >= %EVR
 
 %description dev
 A set of scripts for developers
@@ -142,6 +143,12 @@ do
   fi
 done
 chmod 600 $rootcrontab
+source /etc/podsec/u7s/env/platform
+source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+sed -i -e "s|image:.*|image: registry.local/$U7S_FLANNEL_IMAGE|" /etc/kubernetes/manifests/kube-flannel.yml
+sed -i -e "s|image:.*|image: registry.local/$U7S_COREDNS_IMAGE|" /etc/kubernetes/manifests/coredns.yaml
+sed -i -e "s|imageRepository: .*|imageRepository: registry.local/$U7S_PLATFORM|" /etc/podsec/u7s/config/kubeadm-configs/InitClusterConfiguration.yaml
+sed -e "s|imageRepository: .*|imageRepository: registry.local/$U7S_PLATFORM|" /etc/podsec/u7s/config/kubeadm-configs/JoinClusterConfiguration.yaml
 
 %preun inotify
 %preun_systemd podsec-inotify-check-containers.service

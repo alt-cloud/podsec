@@ -1,0 +1,11 @@
+source /etc/os-release
+case $NAME in
+  'ALT SP Server')
+    export U7S_PLATFORM="k8s-c10f1"
+    ;;
+   'ALT')
+     export U7S_PLATFORM="k8s-p10"
+     ;;
+   *) export U7S_PLATFORM="k8s-c10f1"
+esac
+

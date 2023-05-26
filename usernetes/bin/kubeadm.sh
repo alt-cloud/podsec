@@ -13,7 +13,6 @@ source $envFile
 # set -x
 cmd=$1
 
-# На новом ядре 6.1 почему то иногда пропадает /run/crio/crio.sock, возможно не успевает стартовать сервис rootlesskit
 until [ -S /run/user/${U7S_UID}/usernetes/crio/crio.sock ]
 do
   /sbin/systemctl --user -T stop rootlesskit.service

@@ -3,7 +3,8 @@
 # в указанный первым параметром каталог
 # Второй параметры задает через запятую архивируемые архитектуры.
 # Если второй параметр имеет значение all архивируются все архитектуры: amd64 arm64 arm ppc64le 386
-# Скрипт производит загрузку kubernet-образов с регистратора registry.altlinux.org/k8s-c10f1 в containers-storage: системы
+# Третий необязаьельный параметр определяет платформу - k8s-c10f1, k8s-p10. Если не указан, определяется по файлу /etc/os-release
+# Скрипт производит загрузку kubernet-образов с регистратора k8s-c10f1 в containers-storage: системы
 # с последующим помещением их в указанный первым параметром каталог в подкаталог с именем архитектуры ($ociDir/$arch)
 # Для улучшения последующей компресии слои образа помещаются несжатыми (параметр --dest-oci-accept-uncompressed-layers)
 # После окончания наполнения подкаталога архитектуры он архивируется, сжимается и помещается в файл $ociDir/$arch.tar.xz
@@ -19,7 +20,7 @@ then
   exit 1
 fi
 
-if [ $# -ne 2 ]
+if [ $# -lt 2 ]
 then
   echo "Не указан список архитектур"
   echo -ne "Формат:\n\t$0 <каталог_архивирования_образов> <архитектура>,<архитектура>,...|all\n"
@@ -29,19 +30,21 @@ fi
 ociDir=$1
 archs=$2
 
-imagesList='
-registry.altlinux.org/k8s-c10f1/coredns:v1.9.3
-registry.altlinux.org/k8s-c10f1/pause:3.9
-registry.altlinux.org/k8s-c10f1/kube-controller-manager:v1.26.3
-registry.altlinux.org/k8s-c10f1/kube-apiserver:v1.26.3
-registry.altlinux.org/k8s-c10f1/kube-proxy:v1.26.3
-registry.altlinux.org/k8s-c10f1/etcd:3.5.6-0
-registry.altlinux.org/k8s-c10f1/flannel:v0.19.2
-registry.altlinux.org/k8s-c10f1/kube-scheduler:v1.26.3
-registry.altlinux.org/k8s-c10f1/flannel-cni-plugin:v1.2.0
-registry.altlinux.org/k8s-c10f1/cert-manager-controller:v1.9.1
-registry.altlinux.org/k8s-c10f1/cert-manager-cainjector:v1.9.1
-registry.altlinux.org/k8s-c10f1/cert-manager-webhook:v1.9.1
-'
+if [ $# -gt 2 ]
+then
+  U7S_PLATFORM=$3
+else
+  source /etc/podsec/u7s/env/platform
+fi
 
-podsec-save-oci $ociDir $archs $imagesList
+platformFile="/etc/podsec/u7s/env/$U7S_PLATFORM"
+
+if [ ! -f $platformFile ]
+then
+  echo "Отсутствует файл  описания среды платформы  $U7S_PLATFORM"
+  exit 1
+fi
+
+source $platformFile
+
+podsec-save-oci $ociDir $archs $U7S_IMAGES
