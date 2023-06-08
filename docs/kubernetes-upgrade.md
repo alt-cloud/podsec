@@ -1,4 +1,4 @@
-# Процедура обновления миновныъ версия kubernetes
+# Процедура обновления миновных версия kubernetes
 ```
 $ kubectl edit cm kubeadm-config -n kube-system
 ```
