@@ -15,7 +15,7 @@ trivyUserImages() {
     if trivy image $trivy_options $image 2>/dev/null | tee $TMP | logger -t "check-images-trivy:$user"
     then :;
     fi
-    if grep 'Total:.*HIGH: [1-9][0-9]*' $TMP >/dev/null 2>&1 ; then
+    if grep 'Total:.*HIGH: [1-9]*' $TMP >/dev/null 2>&1 ; then
       mail -s "Vulnerabilities found in image '$image'  of user $user" $adminmail < $TMP
     fi
   done
