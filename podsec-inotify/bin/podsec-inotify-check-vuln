@@ -22,19 +22,25 @@ trivyUserImages() {
   rm -f $TMP
 }
 
-if [ $# -eq 0 ]
+if [ $(id -u) -eq 0 ]
 then
-  $0 root
+  trivyUserImages root
   for dir in /home/*
   do
-    if [ -d $dir ]
+    imagesJSON="$dir/.local/share/containers/storage/overlay-images/images.json/"
+    if [ -f $imagesJSON ]
     then
       user=${dir:6}
-      su - -c "$0 $user" $user
+      machinectl shell ${user}@ $0
     fi
   done
 else
-  user=$1
-  trivyUserImages $user
+  user=$(id -u -n)
+  dir="/home/$user"
+  imagesJSON="$dir/.local/share/containers/storage/overlay-images/images.json/"
+  if [ -f $imagesJSON ]
+  then
+    trivyUserImages $user
+  fi
 fi
 
