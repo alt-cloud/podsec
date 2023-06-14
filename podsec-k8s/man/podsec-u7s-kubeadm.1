@@ -172,7 +172,7 @@ kube\-system   replicaset\.apps/coredns\-c7df5cd6c   2         2         2      
 Процесс \fBkubelet\fR запускается как сервис в \fBuser namespace\fR процесса \fBrootlesskit\fR\.
 .
 .P
-Все остальные процессы \fBkube\-controller\fR, \fBkube\-apiserver\fR, \fBkube\-scheduler\fR, \fBkube\-proxy\fR, \fBetcd\fR, \fBcoredns\fR запускаются как контейнеры от соответствующих образов \fBregistry\.local/k8s\-p10/kube\-controller\-manager:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-apiserver:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-scheduler:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/kube\-proxy:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/etcd:3\.5\.6\-0\fR, \fBregistry\.local/k8s\-p10/coredns:v1\.9\.3\fR\.
+Все остальные процессы \fBkube\-controller\fR, \fBkube\-apiserver\fR, \fBkube\-scheduler\fR, \fBkube\-proxy\fR, \fBetcd\fR, \fBcoredns\fR запускаются как контейнеры от соответствующих образов \fBregistry\.local/k8s\-c10f1/kube\-controller\-manager:v1\.26\.3\fR, \fBregistry\.local/k8s\-c10f1/kube\-apiserver:v1\.26\.3\fR, \fBregistry\.local/k8s\-c10f1/kube\-scheduler:v1\.26\.3\fR, \fBregistry\.local/k8s\-c10f1/kube\-proxy:v1\.26\.3\fR, \fBregistry\.local/k8s\-c10f1/etcd:3\.5\.6\-0\fR, \fBregistry\.local/k8s\-c10f1/coredns:v1\.9\.3\fR\.
 .
 .IP "1." 4
 По умолчанию на master\-узле пользовательские \fBPod\fRы не запускаются\. Чтобы снять это ограничение наберите команду:
@@ -309,7 +309,7 @@ Run \'kubectl get nodes\' on the control\-plane to see this node join the cluste
 Процесс \fBkubelet\fR запускается как сервис в \fBuser namespace\fR процесса \fBrootlesskit\fR\.
 .
 .P
-Все остальные процессы \fBkube\-proxy\fR, \fBkube\-flannel\fR запускаются как контейнеры от соответствующих образов \fBregistry\.local/k8s\-p10/kube\-proxy:v1\.26\.3\fR, \fBregistry\.local/k8s\-p10/flannel:v0\.19\.2\fR\.
+Все остальные процессы \fBkube\-proxy\fR, \fBkube\-flannel\fR запускаются как контейнеры от соответствующих образов \fBregistry\.local/k8s\-c10f1/kube\-proxy:v1\.26\.3\fR, \fBregistry\.local/k8s\-c10f1/flannel:v0\.19\.2\fR\.
 .
 .P
 4 Зайдите на \fBmaster\-узел\fR и проверьте подключение \fBworker\-узла\fR: ```NAME STATUS ROLES AGE VERSION INTERNAL\-IP EXTERNAL\-IP OS\-IMAGE KERNEL\-VERSION CONTAINER\-RUNTIME host\-212 Ready control\-plane 7h54m v1\.26\.3 10\.96\.0\.1 \fInone\fR ALT SP Server 11100\-01 5\.15\.105\-un\-def\-alt1 cri\-o://1\.26\.2 host\-226 Ready \fInone\fR 8m30s v1\.26\.3 10\.96\.0\.1 \fInone\fR ALT SP Server 11100\-01 5\.15\.105\-un\-def\-alt1 cri\-o://1\.26\.2 ```
