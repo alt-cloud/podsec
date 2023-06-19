@@ -7,7 +7,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.3
+Version: 1.0.4
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -220,6 +220,9 @@ sed -i -e "s|imageRepository: .*|imageRepository: registry.local/$U7S_PLATFORM|"
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+* Mon Jun 19 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.4-alt1
+- 1.0.4
+
 
 * Fri May 26 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.3-alt1
 - 1.0.3
