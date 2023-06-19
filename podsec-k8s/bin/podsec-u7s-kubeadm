@@ -243,6 +243,8 @@ U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
 U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
 U7S_SLIRP4IP=$slirp4IP
 U7S_CONTROLPLANEENDPOINT=$controlPlaneEndpoint
+_CONTAINERS_ROOTLESS_UID=$uid
+_CONTAINERS_USERNS_CONFIGURED=1
 " >> /etc/podsec/u7s/config/env
 
 if ! /bin/grep u7s-admin /etc/subuid >/dev/null 2>&1
