@@ -220,6 +220,7 @@ apiServerPort=$2
 envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
 cp /etc/podsec/u7s/config/ENV /etc/podsec/u7s/config/env
 echo  "
+U7S_REGISTRY=$U7S_REGISTRY
 U7S_UID=$uid
 U7S_EXTIP=$extIP
 U7S_EXTDEV=$extDev
