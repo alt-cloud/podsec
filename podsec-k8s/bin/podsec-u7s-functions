@@ -307,9 +307,9 @@ function setRegistryName() {
 	source /etc/podsec/u7s/env/platform
 	if grep registry.local /etc/hosts >/dev/null 2>&1
 	then
-		$U7S_REGISTRY="registry.local/$U7S_PLATFORM"
+		U7S_REGISTRY="registry.local/$U7S_PLATFORM"
 	else
-		$U7S_REGISTRY="registry.altlinux.org/$U7S_PLATFORM"
+		U7S_REGISTRY="registry.altlinux.org/$U7S_PLATFORM"
 	fi
 
 }
