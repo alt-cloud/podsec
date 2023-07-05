@@ -17,8 +17,8 @@ then
   sed -i -e "s|KUBELET_ARGS.*|KUBELET_ARGS=\"$KUBELET_ARGS\"|" /etc/kubernetes/kubelet
 fi
 
-# Запуск серввиса kubelet
-echo "Запуск серввиса kubelet"
+# Запуск сервиса kubelet
+echo "Запуск сервиса kubelet"
 systemctl enable --now crio kubelet
 
 # Инициализация master-узла кластера

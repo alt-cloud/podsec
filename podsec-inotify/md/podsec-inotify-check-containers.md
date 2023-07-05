@@ -1,9 +1,9 @@
-podsec-inotify-overlays(1) -- проверка наличия изменений файлов в директориях rootless контейнерах
+podsec-inotify-check-containers(1) -- проверка наличия изменений файлов в директориях rootless контейнерах
 ================================
 
 ## SYNOPSIS
 
-`podsec-inotify-overlays`
+`podsec-inotify-check-containers`
 
 ## DESCRIPTION
 
@@ -18,7 +18,7 @@ podsec-inotify-overlays(1) -- проверка наличия изменений
 
 ## SECURITY CONSIDERATIONS
 
-- Данный скрипт запускается сервисом inotify-overlays.service. 
+- Данный скрипт запускается сервисом inotify-overlays.service.
 
 ## EXAMPLES
 
@@ -27,7 +27,7 @@ podsec-inotify-overlays(1) -- проверка наличия изменений
 # systemctl enable --now inotify-overlays.service
 ```
 По умолчанию в системный лог отсылаются сообщения двух типов: CRITICAL и INFO.
-Для отключения логгирования событий типа INFO замените в скрипте /usr/bin/podsec-inotify-overlays значение переменной INFO_LOG с YES на NO.
+Для отключения логгирования событий типа INFO замените в скрипте /usr/bin/podsec-inotify-check-containers значение переменной INFO_LOG с YES на NO.
 
 ## AUTHOR
 

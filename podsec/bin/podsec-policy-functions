@@ -246,7 +246,7 @@ $out  )
     inPolicyImagesTree=$(echo -ne "$in"  | imagesTree)
     if [ -n "$DEBUG" ]
     then
-      echo "Рабочее местр $HOSTNAME, пользователь $user: Образы согласно политики файла $policyFile:" >&2
+      echo "Рабочее место $HOSTNAME, пользователь $user: Образы согласно политики файла $policyFile:" >&2
       echo -ne "$inPolicyImages\n\n" >&2
     fi
 #     inPolicyImages=$(echo $inPolicyImages | jq .)
