@@ -131,7 +131,7 @@ do
   image=${image:1:-1}
   if [ "${image:0:$baselen}" == "$base" ]
   then
-    echo "Разворачиваение образа $image в локальную систему"
+    echo "Разворачивание образа $image в локальную систему"
     image=${image:$baselen}
     Image="$regName/$image"
     skopeo --override-arch $arch copy oci:$archDir:$base$image containers-storage:$Image

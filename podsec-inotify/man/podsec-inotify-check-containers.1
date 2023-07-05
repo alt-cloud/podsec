@@ -1,13 +1,13 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-INOTIFY\-OVERLAYS" "1" "May 2023" "" ""
+.TH "PODSEC\-INOTIFY\-CHECK\-CONTAINERS" "1" "July 2023" "" ""
 .
 .SH "NAME"
-\fBpodsec\-inotify\-overlays\fR \- проверка наличия изменений файлов в директориях rootless контейнерах
+\fBpodsec\-inotify\-check\-containers\fR \- проверка наличия изменений файлов в директориях rootless контейнерах
 .
 .SH "SYNOPSIS"
-\fBpodsec\-inotify\-overlays\fR
+\fBpodsec\-inotify\-check\-containers\fR
 .
 .SH "DESCRIPTION"
 Скрипт:
@@ -31,7 +31,7 @@
 .IP "" 0
 .
 .SH "EXAMPLES"
-Если в системе развернуты контейнеры, и требуется следить за модификацией файлов внутри этих контейнеров, запустите сервис inotify\-overlays\.service: `````` По умолчанию в системный лог отсылаются сообщения двух типов: CRITICAL и INFO\. Для отключения логгирования событий типа INFO замените в скрипте /usr/bin/podsec\-inotify\-overlays значение переменной INFO_LOG с YES на NO\.
+Если в системе развернуты контейнеры, и требуется следить за модификацией файлов внутри этих контейнеров, запустите сервис inotify\-overlays\.service: `````` По умолчанию в системный лог отсылаются сообщения двух типов: CRITICAL и INFO\. Для отключения логгирования событий типа INFO замените в скрипте /usr/bin/podsec\-inotify\-check\-containers значение переменной INFO_LOG с YES на NO\.
 .
 .SH "AUTHOR"
 Burykin Nikolay, ALT Linux Team, bne@altlinux\.org

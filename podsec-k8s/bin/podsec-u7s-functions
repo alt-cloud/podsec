@@ -300,6 +300,20 @@ function tuneAudit() {
 	fi
 }
 
+export U7S_REGISTRY
+# Функция устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY
+function setRegistryName() {
+  if [  ! -z ${U7S_REGISTRY+x}  ]; then return; fi
+	source /etc/podsec/u7s/env/platform
+	if grep registry.local /etc/hosts >/dev/null 2>&1
+	then
+		export U7S_REGISTRY="registry.local/$U7S_PLATFORM"
+	else
+		U7S_REGISTRY="registry.altlinux.org/$U7S_PLATFORM"
+	fi
+
+}
+
 
 # export XDG_{DATA,CONFIG,CACHE}_HOME
 : ${XDG_DATA_HOME=~u7s-admin/.local/share}

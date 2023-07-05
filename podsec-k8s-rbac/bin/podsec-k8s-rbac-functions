@@ -3,6 +3,11 @@
 setEnv() {
   user=$1
   USERDIR="/home/$user"
+  if [ ! -d $USERDIR ]
+  then
+    echo "Пользователь $user отсутствует в системе" >&2
+    exit 1
+  fi
   export KUBECONFIGDIR=$USERDIR/.kube
   export KUBECONFIGFILE="$KUBECONFIGDIR/config"
 }

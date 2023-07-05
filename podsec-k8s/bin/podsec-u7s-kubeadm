@@ -249,7 +249,7 @@ _CONTAINERS_USERNS_CONFIGURED=1
 
 if ! /bin/grep u7s-admin /etc/subuid >/dev/null 2>&1
 then
-  # Сформровать /etc/subuid, /etc/subgid для системного user путем временного создания обчного пользователя
+  # Сформировать /etc/subuid, /etc/subgid для системного user путем временного создания обычного пользователя
   /usr/sbin/useradd -M u7s_admin_temp
   /bin/sed -e 's/u7s_admin_temp/u7s-admin/' -i /etc/subuid
   /bin/sed -e 's/u7s_admin_temp/u7s-admin/' -i /etc/subgid
@@ -258,7 +258,7 @@ fi
 
 mkdir -p /var/lib/crio/
 
-# Чистим предыдещий конфиг kuber
+# Чистим предыдущий конфиг kuber
 rm -f /etc/kubernetes/*.conf \
   /etc/kubernetes/manifests/*.yaml \
   /etc/kubernetes/pki/*.??? \
@@ -267,7 +267,9 @@ rm -f /etc/kubernetes/*.conf \
 if ! machinectl shell u7s-admin@ /bin/sh /usr/libexec/podsec/u7s/bin/kubeadm.sh $cmd 2>/dev/null
 then
   echo "Разворачивание кластера закончилось неудачно.
-  Посмотрите в пользователе u7s-admin статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"
+Выполните вход в пользователя u7s-admin:
+machinectl shell u7s-admin@ /bin/bash
+и посмотрите статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"
   pstree -pal
   exit 1
 fi
@@ -288,7 +290,7 @@ adminConf="/etc/kubernetes/admin.conf"
 
 if [ ! -s $adminConf ]
 then
-  echo "Конфигурацонный файл администратора кластера не сформирован!"
+  echo "Конфигурационный файл администратора кластера не сформирован!"
   exit 2
 fi
 

@@ -115,8 +115,8 @@ policyFile='policy.json'
 yesterday=$(date '+%Y-%m-%d_%H:%M:%S' -d "yesterday")
 now=$(date '+%Y-%m-%d_%H:%M:%S')
 
-# Создание с сохранением предыдущих файла политик /etc/containers/policy.json
-echo "Создание с сохранением предыдущих файла политик /etc/containers/policy.json"
+# Создание с сохранением предыдущего файла политик /etc/containers/policy.json
+echo "Создание с сохранением предыдущего файла политик /etc/containers/policy.json"
 if [ ! -L $policyFile ]
 then :;
   mv $policyFile "policy_${yesterday}"
@@ -139,8 +139,8 @@ else
 fi
 ln -sf $linkedPolicyFile $policyFile
 
-# Создание с сохранением предыдущих файла `/etc/containers/registries.d/default.yaml` описания доступа к открытым ключам подписантов
-echo "Создание с сохранением предыдущих файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов"
+# Создание с сохранением предыдущего файла `/etc/containers/registries.d/default.yaml` описания доступа к открытым ключам подписантов
+echo "Создание с сохранением предыдущего файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов"
 cd /etc/containers/registries.d
 defaultYaml='default.yaml'
 if [ ! -L $defaultYaml ]

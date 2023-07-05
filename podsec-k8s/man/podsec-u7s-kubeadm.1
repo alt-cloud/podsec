@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-U7S\-KUBEADM" "1" "May 2023" "" ""
+.TH "PODSEC\-U7S\-KUBEADM" "1" "July 2023" "" ""
 .
 .SH "NAME"
 \fBpodsec\-u7s\-kubeadm\fR \- инициализация master\- или worker\-узла в rootless\-kubernetes (alt usernetes)
@@ -352,7 +352,7 @@ NAMESPACE NAME DESIRED CURRENT READY UP\-TO\-DATE AVAILABLE NODE SELECTOR AGE ku
 .SH "SECURITY CONSIDERATIONS"
 .
 .IP "\(bu" 4
-Так как все работа с кластером производится по REST\-интерфейсу, то для обеспечения повышенных мер безопасности следует заводить \fBВСЕХ пользователей\fR, включая \fIадминистратор безопасности средства контейнеризации\fR \fBВНЕ узлов кластера\fR\. Для работы с кластером достаточно команды \fBkubectl\fR, входящую в пакет \fBkubernetes\-client\fR\.
+Так как все работа с кластером производится по REST\-интерфейсу, то для обеспечения повышенных мер безопасности следует заводить \fBВСЕХ пользователей\fR, включая \fIадминистратора безопасности средства контейнеризации\fR \fBВНЕ узлов кластера\fR\. Для работы с кластером достаточно команды \fBkubectl\fR, входящую в пакет \fBkubernetes\-client\fR\.
 .
 .IP "" 0
 .
@@ -365,7 +365,7 @@ Kubernetes \fIhttps://www\.altlinux\.org/Kubernetes\fR;
 Usernetes: Kubernetes without the root privileges \fIhttps://github\.com/rootless\-containers/usernetes\fR;
 .
 .IP "\(bu" 4
-Настроика аудита API\-сервиса \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+Настройка аудита API\-сервиса \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
 .
 .IP "" 0
 .

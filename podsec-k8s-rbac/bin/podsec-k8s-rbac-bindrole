@@ -69,7 +69,7 @@ then
 fi
 
 TMPFILE="/tmp/$cmdname.$$"
-# Сформировать шаблон манифеса создания rolebinging
+# Сформировать шаблон манифеста создания rolebinging
 kubectl $namespace create ${roleType}binding $bindName --$bindedRoleType=$roleName --user=$user --dry-run=client -o json > $TMPFILE
 # Выделить subjects из шаблона
 templateSubject=$(jq '.subjects[]' $TMPFILE)
