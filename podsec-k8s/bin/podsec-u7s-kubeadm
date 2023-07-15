@@ -218,8 +218,14 @@ apiServerPort=$2
 
 # cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
 envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
+setRegistryName
+source /etc/podsec/u7s/env/platform
+source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+sed -i -e "s|image:.*|image: registry.local/$U7S_FLANNEL_IMAGE|" /etc/kubernetes/manifests/kube-flannel.yml
+
 cp /etc/podsec/u7s/config/ENV /etc/podsec/u7s/config/env
 echo  "
+U7S_REGISTRY=$U7S_REGISTRY
 U7S_UID=$uid
 U7S_EXTIP=$extIP
 U7S_EXTDEV=$extDev
