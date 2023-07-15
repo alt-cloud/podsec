@@ -46,6 +46,7 @@ This package contains utilities for:
 - creating users with rights to run containers in rootless mode
 - downloading docker images from the oci archive, placing them
   on the local system, signing and placing them on the registry
+- deploying a rootless kubernetes cluster
 
 %package k8s
 Summary: Set of scripts for Kubernetes Security
@@ -71,6 +72,7 @@ Requires: systemd-container
 
 %description k8s
 This package contains utilities for:
+- deploying a rootless kubernetes cluster
 - cluster node configurations
 
 %package k8s-rbac
