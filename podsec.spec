@@ -127,6 +127,7 @@ groupadd -r -f podman_dev >/dev/null 2>&1 ||:
 
 
 %pre k8s
+groupadd -r -f podman >/dev/null 2>&1 ||:
 groupadd -r -f %u7s_admin_grp  2>&1 ||:
 useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
     -c 'usernet user account' %u7s_admin_usr  2>&1 ||:
