@@ -46,8 +46,8 @@ then
   if [ "$U7S_CONTROLPLANE" =  'initMaster' ]
   then
     yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
-         .imageRepository|="'$U7S_REGISTRY'" |
-         .etcd.local.imageRepository|="'$U7S_REGISTRY'" |
+         .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
+         .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
@@ -59,8 +59,8 @@ then
         ' $KUBEADM_CONFIGS_DIR/InitClusterConfiguration.yaml
   else
     yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
-         .imageRepository|="'$U7S_REGISTRY'" |
-         .etcd.local.imageRepository|="'$U7S_REGISTRY'" |
+         .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
+         .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
