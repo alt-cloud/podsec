@@ -18,9 +18,9 @@ cat >$XDG_CONFIG_HOME/usernetes/crio/crio.conf <<EOF
     listen = "$XDG_RUNTIME_DIR/usernetes/crio/crio.sock"
   [crio.image]
     signature_policy = "/etc/containers/policy.json"
-    pause_image = "registry.local/$U7S_PAUSE_IMAGE"
+    pause_image = "$U7S_REGISTRY/$U7S_PAUSE_IMAGE"
     insecure_registries = [
-      "registry.local"
+      "$U7S_REGISTRY"
     ]
   [crio.runtime]
     conmon = "/usr/bin/conmon"
