@@ -127,7 +127,7 @@ export PATH=/usr/libexec/podsec/u7s/bin/:$PATH
 
 - Запускается скрипт 'kubeadm' пакета `podsec-k8s` в режиме `kubeadm join ...` с параметрами, сгенерированными при установке начального `Master` (`ControlPlane`) узла.
 
-## "RootFullLess" кластера kubernetes
+## "Гетерогенные" кластера kubernetes
 
 В рамках одного кластера могут функционировать как `rootfull`, так и `rootless` ControlPlane и `Worker` узлы.
 Этот вариант можно использовать как для постоянной работы (запустив все `Worker`узлы в режиме `rootless`), так и как переходный режим при последовательной замене `rootfull` узлов кластера на `rootless` узлы.
