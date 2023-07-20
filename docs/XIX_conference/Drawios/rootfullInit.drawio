@@ -1,0 +1,43 @@
+<mxfile host="Electron" modified="2023-07-19T14:28:10.039Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="Hq2sbAF--tjVyIBMK1h6" version="21.2.1" type="device">
+  <diagram name="Страница 1" id="3Fc0vSVozqevy4aIU-6P">
+    <mxGraphModel dx="3055" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="V3j0KglJR2Gk7BleBFke-1" value="&lt;font style=&quot;font-size: 64px;&quot;&gt;&lt;b&gt;ROOTFULL INITMASTER&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&amp;nbsp;&lt;/b&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-250" y="60" width="2040" height="1180" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-1" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;# kubeadm init&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="20" y="400" width="460" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-2" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 36px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;systemctl&amp;nbsp; start kubelet&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="30" y="510" width="470" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-3" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=0.519;exitY=1.2;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.485;entryY=0.014;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="IUNzLnWi2bgsbS9b6XEX-1" target="IUNzLnWi2bgsbS9b6XEX-2" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="570" as="sourcePoint" />
+            <mxPoint x="330" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-5" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 36px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd (root)&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─kubelet&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; ├─conmon───coredns&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─conmon───kube-controller&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─conmon───kube-apiserver&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─conmon───kube-scheduler&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─conmon───etcd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;nbsp; └─&lt;b&gt;crio&lt;/b&gt;&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="1100" y="329.5" width="590" height="431" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-6" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="IUNzLnWi2bgsbS9b6XEX-2" target="IUNzLnWi2bgsbS9b6XEX-5" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="290" y="730" as="sourcePoint" />
+            <mxPoint x="340" y="680" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-7" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;&lt;i&gt;&lt;u&gt;# Команда подключения MASTER-узла&lt;br&gt;kubeadm join --token ... \&amp;nbsp;&lt;br&gt;&lt;span style=&quot;font-family:monospace&quot;&gt;&lt;/span&gt;&lt;span style=&quot;font-family:monospace&quot;&gt;&lt;/span&gt;&amp;nbsp; &amp;nbsp; --discovery-token-ca-cert-hash sha256:...&amp;nbsp;\&lt;br&gt;&amp;nbsp; &amp;nbsp; --control-plane --certificate-key ...&lt;br&gt;&lt;/u&gt;&lt;/i&gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;i style=&quot;border-color: var(--border-color); font-size: 36px;&quot;&gt;&lt;u style=&quot;border-color: var(--border-color);&quot;&gt;# Команда подключения WORKER-узла&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;/u&gt;&lt;/i&gt;&lt;i style=&quot;border-color: var(--border-color); font-size: 36px;&quot;&gt;&lt;u style=&quot;border-color: var(--border-color);&quot;&gt;kubeadm join --token ... \&amp;nbsp;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); font-family: monospace;&quot;&gt;&lt;/span&gt;&lt;span style=&quot;border-color: var(--border-color); font-family: monospace;&quot;&gt;&lt;/span&gt;&amp;nbsp; &amp;nbsp; --discovery-token-ca-cert-hash sha256:...&amp;nbsp;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;/u&gt;&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="10" y="770" width="1020" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="V3j0KglJR2Gk7BleBFke-2" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="490" y="414" as="sourcePoint" />
+            <mxPoint x="1090" y="414" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
