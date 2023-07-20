@@ -1,0 +1,79 @@
+<mxfile host="Electron" modified="2023-07-19T14:58:36.793Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="kU_Kmi28U9GXgoMqBm6L" version="21.2.1" type="device">
+  <diagram name="Страница 1" id="3Fc0vSVozqevy4aIU-6P">
+    <mxGraphModel dx="1546" dy="1685" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-23" value="&lt;font style=&quot;font-size: 64px;&quot;&gt;&lt;b&gt;ROOTLESS INITMASTER&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&amp;nbsp;&lt;/b&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-90" y="-80" width="2040" height="1220" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-1" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;#&amp;nbsp;export PATH=/usr/libexec/podsec/u7s/bin/:$PATH&lt;br&gt;&amp;nbsp;(@/usr/libexec/podsec/u7s/bin/)&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="19" y="130" width="950" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-2" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 36px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;(@/usr/libexec/podsec/u7s/bin/)&lt;br&gt;systemctl&amp;nbsp; start kubelet&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="455" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-6" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.841;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="IUNzLnWi2bgsbS9b6XEX-13" target="IUNzLnWi2bgsbS9b6XEX-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="290" y="730" as="sourcePoint" />
+            <mxPoint x="930" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-10" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;nsenter_u7s /usr/bin/kubeadm init&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="30" y="280" width="640" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-11" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;entryX=0.055;entryY=-0.067;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="IUNzLnWi2bgsbS9b6XEX-10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="66" y="240" as="sourcePoint" />
+            <mxPoint x="20" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-13" value="&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 36px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(251, 251, 251); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;systemctl&amp;nbsp; --user -M u7s-admin@ start kubelet&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="10" y="515" width="850" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-14" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;entryX=0.485;entryY=0.014;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.481;exitY=1.075;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="267.15999999999997" y="450" as="sourcePoint" />
+            <mxPoint x="267.15999999999997" y="509" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-15" value="&lt;font face=&quot;Courier New&quot; style=&quot;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;systemd&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; ├&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;─rootlesskit (u7s-admin)&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;├&lt;span style=&quot;background-color: initial;&quot;&gt;─exe&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp; │&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&amp;nbsp; ├─conmon───coredns&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp; │&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;&amp;nbsp; ├─conmon───kube-controller&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;│&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp;├─conmon───kube-apiserver&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;│&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp;├─conmon───kube-scheduler&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;│&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp;├─conmon───etcd&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;│&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp;├─conmon───kube-proxy&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;│&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp;├─conmon───flanneld&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;│&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp;└─&lt;/span&gt;&lt;b style=&quot;background-color: initial;&quot;&gt;crio&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp; │&amp;nbsp; &amp;nbsp;&amp;nbsp;└─slirp4netns&lt;/div&gt;&lt;div style=&quot;font-size: 36px;&quot;&gt;&amp;nbsp;&amp;nbsp;└&lt;span style=&quot;background-color: initial;&quot;&gt;─nsenter_u7s───&lt;/span&gt;&lt;span style=&quot;background-color: initial; border-color: var(--border-color);&quot;&gt;kubelet&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="461" width="730" height="639" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-18" value="&lt;br&gt;&lt;font style=&quot;font-size: 36px;&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;/sbin/systemctl --user -T start rootlesskit&lt;/span&gt;&lt;/font&gt;&lt;span style=&quot;font-family:monospace&quot;&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="770" y="270" width="740" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-19" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="IUNzLnWi2bgsbS9b6XEX-20" target="IUNzLnWi2bgsbS9b6XEX-18">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="630" y="200" as="sourcePoint" />
+            <mxPoint x="707" y="245" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-20" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;# kubeadm init&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="19" y="200" width="280" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-21" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;entryX=-0.002;entryY=0.187;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="IUNzLnWi2bgsbS9b6XEX-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1050" y="310" as="sourcePoint" />
+            <mxPoint x="900" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-22" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;entryX=0.485;entryY=0.014;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.481;exitY=1.075;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="259.99999999999994" y="320" as="sourcePoint" />
+            <mxPoint x="259.99999999999994" y="379" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-25" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;&lt;i&gt;&lt;u&gt;# Команда подключения MASTER-узла&lt;br&gt;kubeadm join --token ... \&amp;nbsp;&lt;br&gt;&lt;span style=&quot;font-family:monospace&quot;&gt;&lt;/span&gt;&lt;span style=&quot;font-family:monospace&quot;&gt;&lt;/span&gt;&amp;nbsp; &amp;nbsp; --discovery-token-ca-cert-hash sha256:...&amp;nbsp;\&lt;br&gt;&amp;nbsp; &amp;nbsp; --control-plane --certificate-key ...&lt;br&gt;&lt;/u&gt;&lt;/i&gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;i style=&quot;border-color: var(--border-color); font-size: 36px;&quot;&gt;&lt;u style=&quot;border-color: var(--border-color);&quot;&gt;# Команда подключения WORKER-узла&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;/u&gt;&lt;/i&gt;&lt;i style=&quot;border-color: var(--border-color); font-size: 36px;&quot;&gt;&lt;u style=&quot;border-color: var(--border-color);&quot;&gt;kubeadm join --token ... \&amp;nbsp;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); font-family: monospace;&quot;&gt;&lt;/span&gt;&lt;span style=&quot;border-color: var(--border-color); font-family: monospace;&quot;&gt;&lt;/span&gt;&amp;nbsp; &amp;nbsp; --discovery-token-ca-cert-hash sha256:...&amp;nbsp;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;/u&gt;&lt;/i&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="19" y="730" width="1020" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="IUNzLnWi2bgsbS9b6XEX-26" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;entryX=-0.001;entryY=0.321;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryPerimeter=0;" edge="1" parent="1" source="IUNzLnWi2bgsbS9b6XEX-10" target="IUNzLnWi2bgsbS9b6XEX-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="309" y="233" as="sourcePoint" />
+            <mxPoint x="780" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

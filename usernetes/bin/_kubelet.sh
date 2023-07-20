@@ -48,5 +48,5 @@ kubelet \
 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
 	--config $kubelet_config \
 	--container-runtime-endpoint=$socket \
-	--pod-infra-container-image="registry.local/$U7S_PAUSE_IMAGE" \
+	--pod-infra-container-image="$U7S_REGISTRY/$U7S_PAUSE_IMAGE" \
 	$@

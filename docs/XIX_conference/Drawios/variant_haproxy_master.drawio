@@ -1,0 +1,130 @@
+<mxfile host="Electron" modified="2023-07-09T06:41:51.504Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.2.1 Chrome/112.0.5615.87 Electron/24.1.2 Safari/537.36" etag="hsuy_Jq5KwGg97Gi9Tg-" version="21.2.1" type="device">
+  <diagram name="Страница 1" id="AiksV5m0dz1OjJnIhgO2">
+    <mxGraphModel dx="3303" dy="1778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-49" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="-cLVmQIbnKNBn2Y4Gjlf-46" target="-cLVmQIbnKNBn2Y4Gjlf-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1001" y="1530.1100000000001" as="sourcePoint" />
+            <mxPoint x="1083.3483251462562" y="1410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-41" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Worker Node N&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1360" y="469.5" width="400" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-42" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Worker&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1400" y="539.5" width="320" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-43" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─nsenter────────kubelet&lt;/div&gt;&lt;div&gt;&amp;nbsp; └─rootlesskit&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; └─exe&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; └─crio&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1420" y="599.5" width="300" height="161" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-38" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Worker_Node_2&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="549.5" width="400" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-39" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Worker&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="619.5" width="320" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-40" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─nsenter────────kubelet&lt;/div&gt;&lt;div&gt;&amp;nbsp; └─rootlesskit&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; └─exe&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; └─crio&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="679.5" width="300" height="161" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-16" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Master_Node_N&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="720" y="350" width="466" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-17" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Join ControlPlane&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="778" y="440" width="370" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-18" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─nsenter────────kubelet&lt;/div&gt;&lt;div&gt;&amp;nbsp; └─rootlesskit&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; └─exe&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-controller&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-apiserver&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-scheduler&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───etcd&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; └─crio&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="788" y="479" width="350" height="271" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-13" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Master_Node 3&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="610" y="440" width="466" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-14" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Join ControlPlane&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="668" y="530" width="370" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-15" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─nsenter────────kubelet&lt;/div&gt;&lt;div&gt;&amp;nbsp; └─rootlesskit&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; └─exe&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-controller&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-apiserver&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-scheduler&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───etcd&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; └─crio&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="678" y="569" width="350" height="271" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-7" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Master_Node 1&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="50" y="520" width="466" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-8" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Init ControlPlane&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="590" width="370" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-9" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─nsenter────────kubelet&lt;/div&gt;&lt;div&gt;&amp;nbsp; └─rootlesskit&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; └─exe&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───&lt;b&gt;coredns&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-controller&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-apiserver&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-scheduler&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───etcd&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; └─crio&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="629" width="350" height="271" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-10" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Master_Node 2&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="552" y="510" width="466" height="430" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-11" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Join ControlPlane&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="600" width="370" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-12" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─nsenter────────kubelet&lt;/div&gt;&lt;div&gt;&amp;nbsp; └─rootlesskit&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; └─exe&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-controller&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-apiserver&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-scheduler&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───etcd&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; └─crio&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="620" y="639" width="350" height="271" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-24" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;Worker_Node_1&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="619.5" width="400" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-25" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Worker&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="689.5" width="320" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-26" value="&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&lt;div style=&quot;&quot;&gt;&lt;div&gt;systemd&lt;/div&gt;&lt;div&gt;&amp;nbsp; ├─nsenter────────kubelet&lt;/div&gt;&lt;div&gt;&amp;nbsp; └─rootlesskit&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; └─exe&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───kube-proxy&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; ├─conmon───flanneld&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; └─crio&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="749.5" width="300" height="161" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-44" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;kubectl ...&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-50" y="1620" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-45" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;kubectl ...&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="190" y="1620.0000000000002" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-46" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;kubectl ...&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="428" y="1620.0000000000002" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-47" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="-cLVmQIbnKNBn2Y4Gjlf-44" target="-cLVmQIbnKNBn2Y4Gjlf-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="310" y="1620" as="sourcePoint" />
+            <mxPoint x="920" y="1346.0581931464176" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-48" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0.387;exitY=-0.106;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="-cLVmQIbnKNBn2Y4Gjlf-45" target="-cLVmQIbnKNBn2Y4Gjlf-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1001" y="1530.1100000000001" as="sourcePoint" />
+            <mxPoint x="920" y="1405.800032193159" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-50" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;6443&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="220" y="919.5" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-51" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;6443&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="730" y="909.5" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-52" value="&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;b&gt;Haproxy&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 24px;&quot;&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="73" y="1000" width="420" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-53" value="&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font face=&quot;Courier New&quot;&gt;&lt;div style=&quot;&quot;&gt;systemd&lt;/div&gt;&lt;div style=&quot;&quot;&gt;&amp;nbsp; └─haproxy&lt;/div&gt;&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="103" y="1030" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-54" value="&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;backend apiserver&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&amp;nbsp; server Master_Node_1 &amp;lt;IP&amp;gt;:6443 check&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&amp;nbsp; server Master_Node_2 &amp;lt;IP&amp;gt;:6443 check&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&amp;nbsp; ...&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 18px;&quot;&gt;&amp;nbsp; server Master_Node_N &amp;lt;IP&amp;gt;:6443 check&lt;/font&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="83" y="1090" width="400" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-57" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="-cLVmQIbnKNBn2Y4Gjlf-52" target="-cLVmQIbnKNBn2Y4Gjlf-51">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="947.7055837563453" y="1060" as="sourcePoint" />
+            <mxPoint x="940" y="1170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-58" value="&lt;font style=&quot;font-size: 36px;&quot;&gt;8443&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="234" y="1240" width="110" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="-cLVmQIbnKNBn2Y4Gjlf-60" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="-cLVmQIbnKNBn2Y4Gjlf-50">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="275" y="990" as="sourcePoint" />
+            <mxPoint x="840" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

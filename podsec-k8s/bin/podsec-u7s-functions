@@ -300,18 +300,23 @@ function tuneAudit() {
 	fi
 }
 
-export U7S_REGISTRY
-# Функция устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY
+export U7S_REGISTRY_PLATFORM U7S_REGISTRY
+# Функция устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
 function setRegistryName() {
-  if [  ! -z ${U7S_REGISTRY+x}  ]; then return; fi
+  if [  ! -z ${U7S_REGISTRY_PLATFORM+x}  ];
+  then
+		export U7S_REGISTRY="registry.k8s.io"
+		export U7S_REGISTRY_PLATFORM=$U7S_REGISTRY
+		return;
+  fi
 	source /etc/podsec/u7s/env/platform
 	if grep registry.local /etc/hosts >/dev/null 2>&1
 	then
-		export U7S_REGISTRY="registry.local/$U7S_PLATFORM"
+		export U7S_REGISTRY="registry.local"
 	else
-		U7S_REGISTRY="registry.altlinux.org/$U7S_PLATFORM"
+		U7S_REGISTRY="registry.altlinux.org"
 	fi
-
+	export U7S_REGISTRY_PLATFORM="$U7S_REGISTRY/$U7S_PLATFORM"
 }
 
 
