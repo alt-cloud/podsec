@@ -1,0 +1,10 @@
+[Unit]
+Description=Monitoring host docker images with trivy security scanner
+Requires=podsec-inotify-check-vuln.service
+
+[Timer]
+Unit=podsec-inotify-check-vuln.service
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target
