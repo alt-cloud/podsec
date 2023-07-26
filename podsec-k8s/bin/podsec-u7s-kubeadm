@@ -3,7 +3,7 @@ source podsec-u7s-functions
 
 
 format() {
-  echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
+  echo -e "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
 
 debugLevel=0
@@ -13,12 +13,14 @@ then
   then
     echo "Неверное число параметров"
     format
+    exit 3
   fi
   debugLevel=$2
-  if [ $n -ge 0 -a $n -lt 10 ] 2>/dev/null
+  if [ "$debugLevel" -lt 0 -o "$debugLevel" -ge 10 ] 2>/dev/null
   then
     echo "Неверный уровень отладки"
     format
+    exit 3
   fi
   shift;shift
 fi
@@ -27,6 +29,7 @@ if [ $# -eq 0 ]
 then
   echo "Неверное число параметров"
   format
+  exit 3
 fi
 
 cmd=$1
@@ -84,6 +87,7 @@ case $cmd in
           podNetworkMask=$2
         ;;
         *)
+          pars="$*"
           echo "Параметр '$par' команды '$cmd' не поддерживается" >&2
           echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
           machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
