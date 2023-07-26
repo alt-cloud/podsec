@@ -15,7 +15,7 @@ then
     format
   fi
   debugLevel=$2
-  if [ $n -ge 0 -a $n -lt 10 ] 2>/dev/null
+  if [ "$debugLevel" -lt 0 -o "$debugLevel" -ge 10 ] 2>/dev/null
   then
     echo "Неверный уровень отладки"
     format
