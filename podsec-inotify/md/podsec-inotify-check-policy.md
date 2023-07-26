@@ -226,7 +226,7 @@ define service {
 
 ### Запуск сервиса через systemd/Timers
 
-Кроме запуска скирпта через `nagios` скрипт может запускаться через `systemd/Timers`.
+Кроме запуска скрипта через `nagios` скрипт может запускаться через `systemd/Timers`.
 В состав пакета входит systemd-файлы `podsec-inotify-check-policy.service`,  `podsec-inotify-check-policy.timer`.
 Файл сервисов `podsec-inotify-check-policy.service` описывает в параметре `ExecStart` строку с описанием режима запуска скрипта `podsec-inotify-check-policy`.
 Скрипт запускается с флагами `-vvv -c 100` - выводить подробную информацию, все сообщения имеют уровень `c` - критический.
