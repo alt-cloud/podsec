@@ -3,7 +3,7 @@ source podsec-u7s-functions
 
 
 format() {
-  echo -ne "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
+  echo -e "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
 
 debugLevel=0
