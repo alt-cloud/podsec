@@ -13,12 +13,14 @@ then
   then
     echo "Неверное число параметров"
     format
+    exit 3
   fi
   debugLevel=$2
   if [ "$debugLevel" -lt 0 -o "$debugLevel" -ge 10 ] 2>/dev/null
   then
     echo "Неверный уровень отладки"
     format
+    exit 3
   fi
   shift;shift
 fi
@@ -27,6 +29,7 @@ if [ $# -eq 0 ]
 then
   echo "Неверное число параметров"
   format
+  exit 3
 fi
 
 cmd=$1
