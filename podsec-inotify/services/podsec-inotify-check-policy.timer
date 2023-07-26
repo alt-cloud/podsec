@@ -1,0 +1,10 @@
+[Unit]
+Description=Check containerization policy settings on the host and output violations in the system log
+Requires=podsec-inotify-check-policy.service
+
+[Timer]
+Unit=podsec-inotify-check-policy.service
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target
