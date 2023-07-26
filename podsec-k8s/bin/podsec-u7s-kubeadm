@@ -87,6 +87,7 @@ case $cmd in
           podNetworkMask=$2
         ;;
         *)
+          pars="$*"
           echo "Параметр '$par' команды '$cmd' не поддерживается" >&2
           echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
           machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
