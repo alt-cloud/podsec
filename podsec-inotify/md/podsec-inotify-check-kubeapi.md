@@ -86,19 +86,22 @@ rules:
 
 В состав пакета кроме этого скрипта входят:
 
-- файл описания сервиса `/lib/systemd/system/podsec-inotify-check-kubeapi.service`. Для его запуска екобходимо выполнить команды:
+- файл описания сервиса `/lib/systemd/system/podsec-inotify-check-kubeapi.service`. Для его запуска необходимо выполнить команды:
   <pre> 
   # systemctl enable  podsec-inotify-check-kubeapi.service
   # systemctl start  podsec-inotify-check-kubeapi.service
   </pre>
 
-- файл для `cron`  `/etc/podsec/crontabs/podsec-inotify-check-kubeapi`. Файл содержит единственную строку с описанием режима запуска скрипта `podsec-inotify-check-kubeapi` для передачи почты системному администратору.  
-  Скрипт запускается один раз в 10 минут.
-  Во время установки пакета строка файла (в случае ее отсутствия) дописыватся в `crontab`-файл `/var/spool/cron/root` пользователя `root`.   
-  Если необходимо изменить режим запуска скрипта или выключить его это можно сделать командой редактирования `crontab`-файла:
-  <pre>
-  #  crontab -e
-  </pre>
+- Файл сервисов `podsec-inotify-check-kubeapi.service` описывает в параметре `ExecStart` строку с описанием режима запуска скрипта `podsec-inotify-check-kubeapi` для анализа логов, обнаружения нарушений, записи их в системный лог и передачи их почтой системному администратору.
+
+- Файла расписания `podsec-inotify-check-kubeapi.timer`, задающий в параметре `OnCalendar` расписание запуска сервиса `podsec-inotify-check-kubeapi.service`. Сервис вызывается ежечасно.
+
+По умолчанию таймер запуска сервиса выключен. Для его включения наберите команду:
+<pre>
+#  systemctl enable --now podsec-inotify-check-kubeapi.timer
+</pre>
+Если необходимо изменить режим запуска скрипта отредактируйте параметр `OnCalendar` файла расписания `podsec-inotify-check-kubeapi.timer`.
+
 
 ## EXAMPLE
 

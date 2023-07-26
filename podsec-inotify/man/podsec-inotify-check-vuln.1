@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-INOTIFY\-CHECK\-VULN" "1" "June 2023" "" ""
+.TH "PODSEC\-INOTIFY\-CHECK\-VULN" "1" "July 2023" "" ""
 .
 .SH "NAME"
 \fBpodsec\-inotify\-check\-vuln\fR \- скрипт мониторинга docker\-образов узла сканером безопасности trivy
@@ -39,21 +39,32 @@
 Отсутствуют\.
 .
 .P
-В состав пакета кроме этого скрипта входит файл для \fBcron\fR \fB/etc/podsec/crontabs/podsec\-inotify\-check\-vuln\fR\. Файл содержит единственную строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-vuln\fR\. Во время установки пакета строка файла (в случае ее отсутствия) дописыватся в \fBcrontab\fR\-файл \fB/var/spool/cron/root\fR пользователя \fBroot\fR\.
+В состав пакета кроме этого скрипта входят:
+.
+.IP "\(bu" 4
+Файл сервисов \fBpodsec\-inotify\-check\-vuln\.service\fR описывает в параметре \fBExecStart\fR строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-vuln\fR для обнаружения уязвимостей, записи их в системный лог и передачи их почтой системному администратору\.
+.
+.IP "\(bu" 4
+Файла расписания \fBpodsec\-inotify\-check\-vuln\.timer\fR, задающий в параметре \fBOnCalendar\fR расписание запуска сервиса \fBpodsec\-inotify\-check\-vuln\.service\fR\. Сервис вызывается ежечасно\.
+.
+.IP "" 0
 .
 .P
-Если необходимо изменить режим запуска скрипта или выключить его это можно сделать командой редактирования \fBcrontab\fR\-файла:
+По умолчанию таймер запуска сервиса выключен\. Для его включения наберите команду:
 .
 .IP "" 4
 .
 .nf
 
 
-#  crontab \-e
+#  systemctl enable \-\-now podsec\-inotify\-check\-vuln\.timer
 .
 .fi
 .
 .IP "" 0
+.
+.P
+Если необходимо изменить режим запуска скрипта отредактируйте параметр \fBOnCalendar\fR файла расписания \fBpodsec\-inotify\-check\-vuln\.timer\fR\.
 .
 .SH "EXAMPLES"
 \fBpodsec\-inotify\-check\-vuln\fR

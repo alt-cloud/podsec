@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-INOTIFY\-CHECK\-POLICY" "1" "May 2023" "" ""
+.TH "PODSEC\-INOTIFY\-CHECK\-POLICY" "1" "July 2023" "" ""
 .
 .SH "NAME"
 \fBpodsec\-inotify\-check\-policy\fR \- Плугин проверяет настройки политики контейнеризации на узле
@@ -419,31 +419,28 @@ define service {
 .P
 В строке \fBservice_description\fR укахите иям сервиска которое будет отображаться в WEB\-интерейсе nagios\. В \fBcheck_command\fR имя команды, из вышеописанного файла \fBnagios\-plugins\-podsec\.cfg\fR каталога \fB/etc/nagios/commands/\fR\. Параметры использумые в команде указываются через символ \fB|\fR\.
 .
-.SS "Запуск сервиса через cron"
-Кроме запуска скирпта через \fBnagios\fR скрипт может запускаться через \fBcrond\fR\. В состав пакета входит файл для \fBcron\fR \fB/etc/podsec/crontabs/podsec\-inotify\-check\-policy\fR\. Файл содержит единственную строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-policy\fR\.
+.SS "Запуск сервиса через systemd/Timers"
+Кроме запуска скрипта через \fBnagios\fR скрипт может запускаться через \fBsystemd/Timers\fR\. В состав пакета входит systemd\-файлы \fBpodsec\-inotify\-check\-policy\.service\fR, \fBpodsec\-inotify\-check\-policy\.timer\fR\. Файл сервисов \fBpodsec\-inotify\-check\-policy\.service\fR описывает в параметре \fBExecStart\fR строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-policy\fR\. Скрипт запускается с флагами \fB\-vvv \-c 100\fR \- выводить подробную информацию, все сообщения имеют уровень \fBc\fR \- критический\. Если во время работы скрипта обнаружены некорректные настройки политики, они выводятся в системный лог и передаются почтой системному администратору (\fBroot\fR)\.
 .
 .P
-Скрипт запускается с флагами \fB\-vvv \-c 100\fR \- выводить подробную информацию, все сообщения имеют уровень \fBc\fR \- критический\.
-.
-.br
-Если во время работы скрипта обнаружены некорректные настройки политики, они выводятся в системный лог и передаются почтой системному администратору (\fBroot\fR)\.
+Расписание запуска сервиса \fBpodsec\-inotify\-check\-policy\.service\fR описывается в параметре \fBOnCalendar\fR файла расписания \fBpodsec\-inotify\-check\-policy\.timer\fR\. Сервис вызывается ежечасно\.
 .
 .P
-Во время установки пакета строка файла (в случае ее отсутствия) дописыватся в \fBcrontab\fR\-файл \fB/var/spool/cron/root\fR пользователя \fBroot\fR\.
-.
-.P
-Если необходимо изменить режим запуска скрипта или выключить его это можно сделать командой редактирования \fBcrontab\fR\-файла:
+По умолчанию таймер запуска сервиса выключен\. Для его включения наберите команду:
 .
 .IP "" 4
 .
 .nf
 
 
-#  crontab \-e
+#  systemctl enable \-\-now podsec\-inotify\-check\-policy\.timer
 .
 .fi
 .
 .IP "" 0
+.
+.P
+Если необходимо изменить режим запуска скрипта отредактируйте параметр \fBOnCalendar\fR файла расписания \fBpodsec\-inotify\-check\-policy\.timer\fR\.
 .
 .SH "EXAMPLES"
 Проанализировать политики политики с максимальным уровнем детализации\. Критический уровень (\fBnagios\fR, \fBsystem\fR) \fB>100\fR\. Уровень предупреждений (\fBnagios\fR) \fB>0\fR\. Низкий уровень (\fBsystem\fR) \fB>0\fR\.
