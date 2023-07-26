@@ -1,0 +1,10 @@
+[Unit]
+Description=Check the images to see if they match the containerization policy settings on the host and output violations in the system log
+Wants=podsec-inotify-check-images.timer
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/nagios/plugins/podsec-inotify-check-images  -vvv -c 100 >/dev/null 2>&1
+
+[Install]
+WantedBy=multi-user.target

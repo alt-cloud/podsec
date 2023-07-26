@@ -99,16 +99,19 @@ PODSEC_INOTIFY_PROGRAMMS = \
 PODSEC_INOTIFY_FUNCTIONS = \
 	podsec-inotify-functions
 
-PODSEC_INOTIFY_CRON_PROGRAMS= \
-	podsec-inotify-check-policy \
-	podsec-inotify-check-images \
-	podsec-inotify-check-vuln \
-	podsec-inotify-check-kubeapi
-
 PODSEC_INOTIFY_UNITS= \
 	podsec-inotify-check-containers.service \
+	podsec-inotify-check-images.service \
+	podsec-inotify-check-images.timer \
+	podsec-inotify-check-kubeapi-mail.service \
+	podsec-inotify-check-kubeapi-mail.timer \
 	podsec-inotify-check-kubeapi.service \
+	podsec-inotify-check-policy.service \
+	podsec-inotify-check-policy.timer \
+	podsec-inotify-check-vuln.service \
+	podsec-inotify-check-vuln.timer \
 	podsec-inotify-server-trivy.service
+
 
 TMPFILE  := $(shell mktemp)
 
@@ -204,10 +207,6 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	cd ./podsec-inotify/services;$(INSTALL) -m644 $(PODSEC_INOTIFY_UNITS) $(DESTDIR)/$(unitdir)/
-	# CRONTAB SERVICRS
-	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/podsec/crontabs
-	cd ./podsec-inotify/crontabs;$(INSTALL) -m755 $(PODSEC_INOTIFY_CRON_PROGRAMS) $(DESTDIR)/$(sysconfdir)/podsec/crontabs
-
 
 clean:
 

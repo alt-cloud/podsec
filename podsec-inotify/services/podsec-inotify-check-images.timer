@@ -1,0 +1,10 @@
+[Unit]
+Description=Check the images to see if they match the containerization policy settings on the host and output violations in the system log
+Requires=podsec-inotify-check-images.service
+
+[Timer]
+Unit=podsec-inotify-check-images.service
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target

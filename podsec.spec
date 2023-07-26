@@ -7,7 +7,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.5
+Version: 1.0.6
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -99,7 +99,7 @@ Requires: trivy
 Requires: vixie-cron
 
 %description inotify
-A set of scripts for  security monitoring by crontabs or
+A set of scripts for  security monitoring by systemd timers or
 called from the nagios server side via check_ssh plugin
 to monitor and identify security threats
 
@@ -134,18 +134,7 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 
 %post inotify
 %post_systemd podsec-inotify-check-containers.service
-%post_systemd  podsec-inotify-check-kubeapi.service
-cd %_sysconfdir/podsec/crontabs/;
-rootcrontab="%_var/spool/cron/root"
-if [ ! -f $rootcrontab ]; then touch $rootcrontab; fi
-for crontab in *
-do
-  if grep $crontab $rootcrontab >/dev/null 2>&1 ; then :;
-  else
-    cat $crontab >> $rootcrontab
-  fi
-done
-chmod 600 $rootcrontab
+%post_systemd podsec-inotify-check-kubeapi.service
 
 %preun inotify
 %preun_systemd podsec-inotify-check-containers.service
@@ -208,7 +197,6 @@ chmod 600 $rootcrontab
 %_mandir/man?/podsec-inotify-*
 %_unitdir/podsec-inotify-*
 %exclude %_unitdir/u7s.service
-%_sysconfdir/podsec/crontabs/*
 
 %files dev
 %_bindir/podsec-save-oci
@@ -217,6 +205,9 @@ chmod 600 $rootcrontab
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+* Tue Jul 25 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.6-alt1
+- 1.0.6
+
 * Sat Jul 15 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.5-alt1
 - 1.0.5
 

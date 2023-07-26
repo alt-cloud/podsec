@@ -1,0 +1,10 @@
+[Unit]
+Description=Monitoring of unauthorized access to kune api
+Requires=podsec-inotify-check-kubeapi-mail.service
+
+[Timer]
+Unit=podsec-inotify-check-kubeapi-mail.service
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target

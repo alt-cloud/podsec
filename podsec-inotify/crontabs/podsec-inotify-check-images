@@ -1,1 +1,0 @@
-*/10    *       *       *       *       /usr/lib/nagios/plugins/podsec-inotify-check-images  -vvv -c 100 >/dev/null 2>&1
