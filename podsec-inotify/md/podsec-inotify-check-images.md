@@ -191,6 +191,7 @@ define service {
 ### Запуск сервиса через systemd/Timers
 
 Кроме запуска скрипта через `nagios` скрипт может запускаться через `systemd/Timers`.
+
 В состав пакета входит systemd-файлы `podsec-inotify-check-images.service`,  `podsec-inotify-check-images.timer`.
 Файл сервисов `podsec-inotify-check-images.service` описывает в параметре `ExecStart` строку с описанием режима запуска скрипта `podsec-inotify-check-images`.
 Скрипт запускается с флагами `-vvv -c 100` - выводить подробную информацию, все сообщения имеют уровень `c` - критический.
