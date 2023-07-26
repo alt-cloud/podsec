@@ -29,14 +29,18 @@ systemctl enable --now podsec-inotify-server-trivy
 
 Отсутствуют.
 
-В состав пакета кроме этого скрипта входит файл для `cron` `/etc/podsec/crontabs/podsec-inotify-check-vuln`. Файл содержит единственную строку с описанием режима запуска скрипта `podsec-inotify-check-vuln`.
-Во время установки пакета строка файла (в случае ее отсутствия) дописыватся в `crontab`-файл `/var/spool/cron/root` пользователя `root`.
+В состав пакета кроме этого скрипта входят:
 
-Если необходимо изменить режим запуска скрипта или выключить его это можно сделать командой редактирования `crontab`-файла:
+
+- Файл сервисов `podsec-inotify-check-vuln.service` описывает в параметре `ExecStart` строку с описанием режима запуска скрипта `podsec-inotify-check-vuln` для обнаружения уязвимостей, записи их в системный лог и передачи их почтой системному администратору.
+
+- Файла расписания `podsec-inotify-check-vuln.timer`, задающий в параметре `OnCalendar` расписание запуска сервиса `podsec-inotify-check-vuln.service`. Сервис вызывается ежечасно.
+
+По умолчанию таймер запуска сервиса выключен. Для его включения наберите команду:
 <pre>
-#  crontab -e
+#  systemctl enable --now podsec-inotify-check-vuln.timer
 </pre>
-
+Если необходимо изменить режим запуска скрипта отредактируйте параметр `OnCalendar` файла расписания `podsec-inotify-check-vuln.timer`.
 
 
 ## EXAMPLES
