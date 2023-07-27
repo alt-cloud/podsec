@@ -96,7 +96,6 @@ Requires: podsec >= %EVR
 Requires: openssh-server
 Requires: mailx
 Requires: trivy
-Requires: vixie-cron
 
 %description inotify
 A set of scripts for  security monitoring by systemd timers or
