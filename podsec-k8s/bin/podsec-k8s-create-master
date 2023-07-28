@@ -31,7 +31,7 @@ mkdir /root/.kube
 cp /etc/kubernetes/admin.conf /root/.kube/config
 chmod -R 600 /root/.kube
 pwd=$PWD
-su -c "kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml"
+su -c "kubectl apply -f /etc/podsec/u7s/manifests/kube-flannel.yml"
 
 # Настройка $user на роль администратора кластера
 echo "Настройка $user на роль администратора кластера"

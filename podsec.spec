@@ -163,8 +163,6 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %files k8s
 %dir %_sysconfdir/podsec/u7s
 %config(noreplace) %_sysconfdir/podsec/u7s/*
-%config(noreplace) %_sysconfdir/kubernetes/manifests/*
-%config(noreplace) %_sysconfdir/kubernetes/audit/*
 %_unitdir/user@.service.d/*
 %_libexecdir/podsec/u7s
 %_localstatedir/podsec/u7s/*
@@ -179,7 +177,6 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_unitdir/u7s.service
 %_userunitdir/*
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/kubernetes/audit/
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
