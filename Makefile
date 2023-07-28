@@ -180,14 +180,14 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/env
 	cd usernetes/env; $(INSTALL) -m644 $(USERNETES_ENVS) $(DESTDIR)$(sysconfdir)/podsec/u7s/env
 	# USERNETES_MANIFESTS
-	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
-	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)$(sysconfdir)/kubernetes/manifests
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/manifests
+	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)$(sysconfdir)/podsec/u7s/manifests
 	# USERNETES_KUBEADM_CONFIGS
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
 	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
 	# AUDIT POLICY
-	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/kubernetes/audit
-	$(INSTALL) -m644 usernetes/audit/policy.yaml $(DESTDIR)$(sysconfdir)/kubernetes/audit
+	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/audit
+	$(INSTALL) -m644 usernetes/audit/policy.yaml $(DESTDIR)$(sysconfdir)/podsec/u7s/audit
 	# USER SYSTEMD
 	$(MKDIR_P) $(DESTDIR)$(userunitdir)
 	cd ./usernetes/systemd; $(INSTALL) -m644 $(USERNETES_UNITS) $(DESTDIR)$(userunitdir)
