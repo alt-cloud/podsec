@@ -224,7 +224,7 @@ getExtDev() {
 # См. https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/ для Cidr 10.96.0.0/12
 getStaticClusterIP() {
 	extIP=$1
-	serviceCidr=$2
+	cidr=$2
 	ifs=$IFS
 	IFS=.
 	set -- $extIP
@@ -239,36 +239,37 @@ getStaticClusterIP() {
 	fi
 	ifs=$IFS
 	IFS=.
-	set -- $serviceCidr
+	set -- $cidr
 	IFS=$ifs
 	echo "${1}.${2}.${major}.${minor}"
 }
 
 getCidr() {
-	serviceCidr=$1
-	shift; shift
+	export CIDRIP CIDRMASK
+	cidr=$1
+# 	shift; shift
 	IFS=/
-	set -- $serviceCidr
+	set -- $cidr
 	IFS=$ifs
-	serviceCidr=$1
-	serviceMask=$2
+	CIDRIP=$1
+	CIDRMASK=$2
 	IFS=.
-	set -- $serviceCidr
+	set -- $cidr
 	IFS=$ifs
 	if [ $# -ne 4 ]
 	then
-		echo "Некорректный адрес --service-cidr '$serviceCidr'" >&1
+		echo "Некорректный адрес --service-cidr '$cidr'" >&1
 		exit 1
 	fi
-	echo $serviceCidr $serviceMask
+# 	echo $cidr $serviceMask
 }
 
-# Функция формирует ClusterIP как serviceCidr с 1-чкой в последнем кварте
+# Функция формирует ClusterIP как cidr с 1-чкой в последнем кварте
 getKubernetesClusterIP() {
-	serviceCidr=$1
+	cidr=$1
 	ifs=$IFS
 	IFS=.
-	set -- $serviceCidr
+	set -- $cidr
 	IFS=$ifs
 	echo "${1}.${2}.${3}.1"
 }
