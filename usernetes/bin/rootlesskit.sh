@@ -69,8 +69,11 @@ else
 	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
 	mkdir -p /etc/cni/net.d
 	cp -f /etc/podsec/u7s/config/cni_net.d/* /etc/cni/net.d
-	cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
-	mkdir -p /run/flannel
+	case $U7S_CNI_PLUGIN in
+	flannel)
+		cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
+		mkdir -p /run/flannel;;
+	esac
 	mkdir -p /opt/cni/bin
 	mount --bind /usr/libexec/cni /opt/cni/bin
 
@@ -79,6 +82,7 @@ else
 
 	# These bind-mounts are needed at the moment because the paths are hard-coded in Kube and CRI-O.
 	binds=(/var/lib/kubelet /var/lib/cni /var/log /var/lib/containers /var/cache)
+# 	mount --make-rshared /var/lib/kubelet/
 	for f in ${binds[@]}; do
 		src=$XDG_DATA_HOME/usernetes/$(echo $f | sed -e s@/@_@g)
 		if [[ -L $f ]]; then
@@ -88,6 +92,7 @@ else
 		mkdir -p $src $f
 		mount --bind $src $f
 	done
+	(cd /var/lib/u7s-admin/.local/share/usernetes/; ln -sf _var_lib_kubelet kubelet)
 
 	rk_pid=$(cat $rk_state_dir/child_pid)
 	# workaround for https://github.com/rootless-containers/rootlesskit/issues/37
