@@ -83,6 +83,11 @@ case $cmd in
           podNetworkCidr=$2
           shift;shift
           getCidr $podNetworkCidr
+          case $podNetworkCidr in
+            '10.244.0.0/16') : ${U7S_CNI_PLUGIN:=flannel};;
+            '192.168.0.0/16') : ${U7S_CNI_PLUGIN:=calico};;
+            *) ${U7S_CNI_PLUGIN:=flannel};;
+          esac
           podNetworkCidrIP=$CIDRIP
           podNetworkMask=$CIDRMASK
         ;;
@@ -186,10 +191,19 @@ fi
 
 if [ -z "$podNetworkCidr" ]
 then
-  podNetworkCidrIP='10.244.0.0'
-  podNetworkMask='16'
+  : ${U7S_CNI_PLUGIN:=flannel}
+  case $U7S_CNI_PLUGIN in
+  flannel)
+    podNetworkCidrIP='10.244.0.0'
+    podNetworkMask='16';;
+  calico)
+    podNetworkCidrIP='192.168.0.0'
+    podNetworkMask='16';;
+  esac
   podNetworkCidr="$podNetworkCidrIP/$podNetworkMask"
 fi
+
+: ${U7S_CNI_PLUGIN:=flannel}
 
 if [ -z "$extIP" ]
 then
@@ -252,6 +266,7 @@ U7S_SERVICEMASK=$serviceMask
 U7S_PODNETWORKCIDR=$podNetworkCidr
 U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
 U7S_PODNETWORKMASK=$podNetworkMask
+U7S_CNI_PLUGIN=$U7S_CNI_PLUGIN
 U7S_ROOTLESSKIT_FLAGS=--cidr=$serviceCidr
 U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
 U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
@@ -307,6 +322,11 @@ then
   echo "Конфигурационный файл администратора кластера не сформирован!"
   exit 2
 fi
+
+# Настроить режим монтирования  /var/lib/kubelet
+machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s mount --make-rshared /var/lib/kubelet/
+machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s findmnt -o TARGET,PROPAGATION /var/lib/kubelet
+chown -R u7s-admin:u7s-admin /usr/libexec/cni
 
 mkdir -p /root/.kube/
 cp -f $adminConf /root/.kube/config
