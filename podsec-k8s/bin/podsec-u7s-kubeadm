@@ -303,6 +303,11 @@ machinectl shell u7s-admin@ /bin/bash
   exit 1
 fi
 
+# Настроить режим монтирования  /var/lib/kubelet
+machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s mount --make-rshared /var/lib/kubelet/
+machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s findmnt -o TARGET,PROPAGATION /var/lib/kubelet
+chown -R u7s-admin:u7s-admin /usr/libexec/cni
+
 machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
 /sbin/systemctl enable  u7s.service
 /sbin/systemctl start u7s.service
@@ -322,11 +327,6 @@ then
   echo "Конфигурационный файл администратора кластера не сформирован!"
   exit 2
 fi
-
-# Настроить режим монтирования  /var/lib/kubelet
-machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s mount --make-rshared /var/lib/kubelet/
-machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s findmnt -o TARGET,PROPAGATION /var/lib/kubelet
-chown -R u7s-admin:u7s-admin /usr/libexec/cni
 
 mkdir -p /root/.kube/
 cp -f $adminConf /root/.kube/config
