@@ -113,14 +113,24 @@ else
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:8472:8472/udp
 	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6053:53/udp
 
-	if [ $U7S_CNI_PLUGIN = 'calico' ]
-	then
-		ports=5473
-		for port in $ports
-		do
-			rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/tcp"
-		done
-	fi
+  # Пробросить порты для CNI-нтерфейсов
+	cniTCPPorts=
+	cniUDPPorts=
+	case $U7S_CNI_PLUGIN in
+	'calico')
+		cniTCPPorts=5473
+# 		cniTCPPorts="$cniTCPPorts 179 5473"
+		cniUDPPorts="4789 51820"
+	esac
+	for port in $cniTCPPorts
+	do
+		rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/tcp"
+	done
+	for port in $cniUDPPorts
+	do
+		rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/udp"
+	done
+
 	# Обеспечить выделение статичесикх IP-адресов для tap0 интерфейсов и роутнг пакетов до них
 	until /sbin/ip a add ${U7S_TAPIP}/32 dev tap0; do sleep 1; done
 	/sbin/ip a del $U7S_SLIRP4IP/$U7S_SERVICEMASK dev tap0;
