@@ -293,6 +293,22 @@ rm -f /etc/kubernetes/*.conf \
   /etc/kubernetes/pki/*.??? \
   /etc/kubernetes/pki/etcd/*.??? 2>/dev/null
 
+
+case $U7S_CNI_PLUGIN in
+flannel)
+  rm -rf /etc/cni
+  # Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
+  mkdir -p /etc/cni/net.d
+  cp -f /etc/podsec/u7s/config/cni_net.d/* /etc/cni/net.d
+  cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
+  mkdir -p /run/flannel
+  ;;
+'calico')
+  cp -f /etc/cni/net.d/100-crio-bridge.conflist.sample /etc/cni/net.d/100-crio-bridge.conflist
+  ;;
+esac
+
+chown -R u7s-admin:u7s-admin /usr/libexec/cni /etc/cni/net.d/
 if ! machinectl shell u7s-admin@ /bin/sh /usr/libexec/podsec/u7s/bin/kubeadm.sh $cmd 2>/dev/null
 then
   echo "Разворачивание кластера закончилось неудачно.
@@ -306,7 +322,6 @@ fi
 # Настроить режим монтирования  /var/lib/kubelet
 machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s mount --make-rshared /var/lib/kubelet/
 machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s findmnt -o TARGET,PROPAGATION /var/lib/kubelet
-chown -R u7s-admin:u7s-admin /usr/libexec/cni
 
 machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
 /sbin/systemctl enable  u7s.service
@@ -328,24 +343,24 @@ then
   exit 2
 fi
 
+mkdir -p /root/.kube/
+cp -f $adminConf /root/.kube/config
+chmod 600 /root/.kube/config
+chmod 700 /root/.kube/
+
 # Запустить CNI plugin's
 if [ "$controlPlane" = 'initMaster' ]
 then
   	case $U7S_CNI_PLUGIN in
     'flannel')
-      kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
+      until kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml; do sleep 1; done
       ;;
     'calico')
-      kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml;
-      kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml
+      until kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml;  do sleep 1; done
+      until kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml;  do sleep 1; done
       ;;
     esac
 fi
-
-mkdir -p /root/.kube/
-cp -f $adminConf /root/.kube/config
-chmod 600 /root/.kube/config
-chmod 700 /root/.kube/
 
 mkdir -p ~u7s-admin/.kube/
 cp -f $adminConf ~u7s-admin/.kube/config

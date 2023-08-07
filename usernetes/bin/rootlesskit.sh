@@ -60,24 +60,11 @@ else
 		/run/xtables.lock /run/netns \
 		/run/runc /run/crun  /run/flannel \
 		/run/containerd /run/containers /run/crio \
-		/etc/cni \
 		/etc/containerd /etc/crio
 
 	mkdir -p /etc/kubernetes/pki
 	mkdir -p /usr/libexec/kubernetes
 
-	# Copy CNI config to /etc/cni/net.d (Likely to be hardcoded in CNI installers)
-	mkdir -p /etc/cni/net.d
-	cp -f /etc/podsec/u7s/config/cni_net.d/* /etc/cni/net.d
-	case $U7S_CNI_PLUGIN in
-	flannel)
-		cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
-		mkdir -p /run/flannel
-		;;
-	'calico')
-		cp -f /etc/cni/net.d/100-crio-bridge.conflist.sample /etc/cni/net.d/100-crio-bridge.conflist
-		;;
-	esac
 	mkdir -p /opt/cni/bin
 	mount --bind /usr/libexec/cni /opt/cni/bin
 
