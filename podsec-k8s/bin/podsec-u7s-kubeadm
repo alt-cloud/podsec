@@ -328,6 +328,20 @@ then
   exit 2
 fi
 
+# Запустить CNI plugin's
+if [ "$controlPlane" = 'initMaster' ]
+then
+  	case $U7S_CNI_PLUGIN in
+    'flannel')
+      kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml
+      ;;
+    'calico')
+      kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml;
+      kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml
+      ;;
+    esac
+fi
+
 mkdir -p /root/.kube/
 cp -f $adminConf /root/.kube/config
 chmod 600 /root/.kube/config

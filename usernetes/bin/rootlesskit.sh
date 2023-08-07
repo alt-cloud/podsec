@@ -72,7 +72,11 @@ else
 	case $U7S_CNI_PLUGIN in
 	flannel)
 		cp -f /etc/podsec/u7s/config/flannel/cni_net.d/* /etc/cni/net.d
-		mkdir -p /run/flannel;;
+		mkdir -p /run/flannel
+		;;
+	'calico')
+		cp -f /etc/cni/net.d/100-crio-bridge.conflist.sample /etc/cni/net.d/100-crio-bridge.conflist
+		;;
 	esac
 	mkdir -p /opt/cni/bin
 	mount --bind /usr/libexec/cni /opt/cni/bin
