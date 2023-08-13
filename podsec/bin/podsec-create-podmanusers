@@ -14,7 +14,7 @@ fi
 groupadd -r podman 2>/dev/null
 for user
 do
-  adduser $user -g podman -G fuse
+  adduser $user -g podman
   echo "Введите пароль пользователя '$user':"
   passwd $user
   cd /home/$user
