@@ -125,11 +125,6 @@ else
 	# Обеспечить выделение статичесикх IP-адресов для tap0 интерфейсов и роутнг пакетов до них
 	until /sbin/ip a add ${U7S_EXTIP}/32 dev tap0; do sleep 1; done
 	/sbin/ip a del $U7S_SLIRP4IP/$U7S_SERVICEMASK dev tap0;
-#	if [ -n "$U7S_CONTROLPLANE" ]
-#	then
-#		/sbin/ip a add ${U7S_EXTIP}/32 dev tap0;
-#		/sbin/iptables -A PREROUTING -t nat -p tcp --dport 443 -j DNAT --to ${U7S_TAPIP}:6443
-#	fi
 
 	rc=0
 	if [[ $# -eq 0 ]]; then

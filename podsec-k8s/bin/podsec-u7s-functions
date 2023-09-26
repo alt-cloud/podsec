@@ -220,30 +220,6 @@ getExtDev() {
 	)
 }
 
-# Обеспечить выделение статического кластерного адреса из диапазоны 10.96.0.1 - 10.96.255.254
-# См. https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/ для Cidr 10.96.0.0/12
-getStaticClusterIP() {
-	extIP=$1
-	cidr=$2
-	ifs=$IFS
-	IFS=.
-	set -- $extIP
-	IFS=$ifs
-	major=$3 minor=$4
-	if [ "$major" -eq 0 ]
-	then
-		if [ "$minor" -eq 1 -o "$minor" -eq 2  -o "$minor" -eq 3 -o "$minor" -eq 10 ] # service kubernetes, default router for slirp4net, service kubedns,
-		then
-			let minor+=3
-		fi
-	fi
-	ifs=$IFS
-	IFS=.
-	set -- $cidr
-	IFS=$ifs
-	echo "${1}.${2}.${major}.${minor}"
-}
-
 getCidr() {
 	export CIDRIP CIDRMASK
 	cidr=$1

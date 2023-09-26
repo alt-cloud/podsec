@@ -29,18 +29,6 @@ fi
 uid=$(id -u u7s-admin)
 socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
 
-#if [ -n "$U7S_CONTROLPLANE" ]
-#then
-#	(
-#	# Установить правило передаресации 443 на 6443 после появления KUBE-SERVICES
-#	until /sbin/iptables -L PREROUTING -t nat  | grep KUBE-SERVICES
-#	do
-#					sleep 1
-#	done
-#	/sbin/iptables -I PREROUTING -t nat -p tcp -d ${U7S_TAPIP}/32 --dport 443 -j DNAT --to ${U7S_TAPIP}:6443
-#	) &
-#fi
-
 kubelet \
 	--cert-dir /etc/kubernetes/pki \
 	--root-dir $XDG_DATA_HOME/usernetes/kubelet \

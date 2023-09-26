@@ -48,7 +48,7 @@ then
     yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
          .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
-         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
+         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
          .controllerManager.extraArgs."cluster-cidr" |= "'$U7S_PODNETWORKCIDR'" |
@@ -61,7 +61,7 @@ then
     yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
          .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
-         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'","'$U7S_TAPIP'", "127.0.0.1"] |
+         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'", "127.0.0.1"] |
          .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
          .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
          .controllerManager.extraArgs."cluster-cidr" |= "'$U7S_PODNETWORKCIDR'" |
@@ -75,10 +75,8 @@ then
   echo "---"
 fi
 cat $KUBEADM_CONFIGS_DIR/KubeletConfiguration.yaml
-# yq -y '.address="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeletConfiguration.yaml
 echo "---"
 cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
-# yq -y '.bindAddress="'$U7S_TAPIP'"' < $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 ) > $configFile
 
 mkdir -p /run/crio/ || :;

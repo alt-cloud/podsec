@@ -211,13 +211,6 @@ then
   extDev=$(getExtDev $extIP)
 fi
 
-if [ "$controlPlane" = 'initMaster' ]
-then
-  tapIP=$(getKubernetesClusterIP $serviceCidr)
-else
-  tapIP=$(getStaticClusterIP $extIP $serviceCidr)
-fi
-
 if [ -z "$apiServer" ]
 then
   apiServer="$extIP:6443"
@@ -251,7 +244,6 @@ U7S_REGISTRY_PLATFORM=$U7S_REGISTRY_PLATFORM
 U7S_UID=$uid
 U7S_EXTIP=$extIP
 U7S_EXTDEV=$extDev
-U7S_TAPIP=$tapIP
 U7S_DEBUGLEVEL=$debugLevel
 U7S_CONTROLPLANE=$controlPlane
 U7S_APISERVER=$apiServer
