@@ -8,6 +8,7 @@
 
 Name: podsec
 Version: 1.0.8
+
 Release: alt1
 
 Summary: Set of scripts for Podman Security
