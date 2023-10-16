@@ -1,101 +1,100 @@
-# PODSEC (Podman Security)
+#PODSEC (Podman Security)
 
-`podsec` - набор скриптов для разворачивания и поддержки защищенных `rootless` решений для `podman` и `rootless-kubernetes` (`podsec-u7s`)  в рамках дистрибутивов `c10+`, `p10+` `ALTLinux`.
+`podsec` - a set of scripts for deploying and supporting secure `rootless` solutions for `podman` and `rootless-kubernetes` (`podsec-u7s`) within the `c10+`, `p10+` `ALTLinux` distributions.
 
 
-Обеспечивает:
+Provides:
 
-1. Разворачивание `rootfull` или `rootless` кластера `kubernetes` версии `v1.26.3` и выше
- 
-2. Создание пользователей различных категорий  с различными правами доступа и работы с docker-образами.
+1. Deploying a `rootfull` or `rootless` `kubernetes` cluster version `v1.26.3` and higher
 
-3. Создание регистратора образов и WEB-сервера доступа к подписям образов
- этом
-4. Настройку политик доступа и работы с образами для различных категорий пользователей
+2. Creating users of different categories with different rights to access and work with docker images.
 
-5. Предоставление пользователям доступа к kubernetes-кластеру
+3. Creation of an image `docker registry` and a `WEB serve`r for access to image signatures.
 
-6. Настройку RBAC-правил доступа к кластеру kubernetes
+4. Setting up access policies and working with images for several categories of users.
 
-Для плавной миграции с `rootfull`-кластеров 
-возможно разворачивание гетерогененных кластеров путем подключения `rootless`-узлов к `rootfull`-кластеру.
-При этом нет необходимости в использовании остальных режимов (2-6).
+5. Providing users access to the kubernetes cluster.
 
-Подробности установки и настройки описаны на странице [Rootless kubernetes](https://www.altlinux.org/Rootless_kubernetes).
+6. Configuring RBAC access rules to the kubernetes cluster.
 
-## Категории пользователей
+For step by step migration from `rootfull` clusters it is possible to deploy heterogeneous clusters by connecting `rootless` nodes to a `rootfull` cluster.
+In this case, there is no need to use the other features (2-6).
 
-Пользователи делятся на следующие категории:
+Installation and configuration details are described on the [Rootless kubernetes](https://www.altlinux.org/Rootless_kubernetes) page.
 
-- Администраторы  - пользователя, входящие в группу `whell` включая root.
+## User categories
 
-- Администратор `rootless kubernetes` - `u7s-admin`.
+Users are divided into the following categories:
 
-- Создателей `docker-образов`
+- Administrators - users belonging to the `whell` group including root.
 
-- Пользователей `docker-образов`
+- The `rootless kubernetes` administrator is `u7s-admin`.
 
-### Администраторы
+- Creators of `docker images`
 
-Эта категория пользователей имеет право создавать пользователей категории *создателей* и *пользователей* `docker-образов`.
+- Users of `docker images`
 
-Кроме этого при создании кластера kubernetes они имеют право администрировать кластер.
+### Administrators
 
-### Администратор rootless kubernetes - u7s-admin
+This user category has the right to create *creator* users and *docker image users*.
 
-Этот пользователь принадлежит системным пользователям.
-Не входит в группу `wheel`. С точки зрения системы является обычным (непривелигрованным) пользователем.
-От его имени (под его `uid`) и в рамках его `namespace` запускаются все `Pod`'ы в `rootless kubernetes-кластере`.
+In addition, when creating a kubernetes cluster, they have the right to administer the cluster.
 
-Как и `Администратор` имеет право администрировать `rootless` `kubernetes-кластер`.
-Но в отличие от него, позволяет войти в его `namespace` и администрировать в рамках узла ресурсы этого `namespace`:
-- сетевые интерфейсы `tap0`, `cni0`, ...;
-- правила `iptables`;
-- файлы и каталоги созданные в рамках этого `namespace`;
-- процессы;
+### Rootless kubernetes administrator - u7s-admin
+
+This user belongs to system users.
+Not belong to the `wheel` group. From the point of view of the host system, he is an ordinary (non-privileged) user.
+All `Pods` in the `rootless kubernetes cluster` are launched on his behalf (under his `uid`) and within his `namespace`.
+
+Like the `Administrator`, he has the right to administer the `rootless` `kubernetes cluster`.
+But unlike it, it allows you to enter its `namespace` and administer the resources of this `namespace` within the node:
+- network interfaces `tap0`, `cni0`, ...;
+- `iptables` rules;
+- files and directories created within this `namespace`;
+- processes;
 - ...
 
-Кроме этого позволяет просматривать логи `Pod`ов узла в каталоге `/var/log/pods/...`
+In addition, it allows you to view the logs of the node's Pods in the directory `/var/log/pods/...`
 
 
-### Создатели docker-образов
+### Docker image creators
 
-Пользователи этой категории имеют все права по работе с образами:
+Users in this category have all rights to work with images:
 
-- Скачивать образы с любого доступного регистратора.
+- Download images from any available registrar.
 
-- Импорт/Экспорт образов из архивных форматов.
+- Import/Export of images from archive formats.
 
-- Создание образов из `Dockefile`'s.
+- Creating images from `Dockefile`'s.
 
-- Помещение образов на регистраторы.
+- Placing images on recorders.
 
-- Помещение с подписыванием свой электронной подписью образов на локальный регистратор `registry.local`
+- Placing your images with your electronic signature on the local registrar `registry.local`
 
-Пользователи входят в группы `podman-dev`, `podman`.
+Users belong to the groups `podman-dev`, `podman`.
 
-### Пользователи docker-образов
+### Docker image users
 
-Пользователи этой категории не имеют ни одного из вышеперечисленных прав работы с образами, за исключением загрузки подписанных образов с локального регистратора `registry.local` и работы с ними.
+Users in this category do not have any of the above rights to work with images, with the exception of downloading signed images from the local registry `registry.local` and working with them.
 
-Пользователи входят в группы `podman`.
+Users belong to `podman` groups.
 
-## Набор RPM-пакетов
+## A set of RPM packages
 
-Файл спецификации `podsec.spec` обеспечивает создание следующих `RPM-пакетов`:
+The specification file `podsec.spec` provides the creation of the following `RPM packages`:
 
-- `podsec` - набор скриптов по созданию пользователей, политик доступа, разворачивания локального регистратора и WEB-сервера подписей, загрузки архива kubernetes-образов в локальный регистратор.
+- `podsec` - a set of scripts for creating `users`, `access policies`, deploying a `local registry and `WEB signature server`, loading an archive of kubernetes images into the `local registry`.
 
-- `podsec-k8s` - набор скриптов по разворачиванию rootless кластера `kubernetes`
+- `podsec-k8s` - a set of scripts for deploying a rootless `kubernetes` cluster
 
-- `podsec-k8s-rbac` - набор скриптов по предоставлению пользователям доступа к `kubernetes-кластеру` и назначения им ролей в рамках кластера.
+- `podsec-k8s-rbac` - a set of scripts for providing users with access to the `kubernetes cluster` and assigning them roles within the cluster.
 
-- `podsec-inotify` - набор скриптов по мониторингу нарушения политик безопасности.
+- `podsec-inotify` - a set of scripts for monitoring violations of security policies.
 
-- `podsec-dev` - набор скриптов по уcтановке и обновлению `kubernetes-образов`.
+- `podsec-dev` - a set of scripts for installing and updating `kubernetes images`.
 
 
 
-## Замечания
+## Notes
 
-- пакеты `podsec*` работает под `Linux kernel` версии `5.15` и выше.
+- `podsec*` packages work under `Linux kernel` version `5.15` and higher.
