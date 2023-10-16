@@ -1,4 +1,4 @@
-#PODSEC (Podman Security)
+# PODSEC (Podman Security)
 
 `podsec` - a set of scripts for deploying and supporting secure `rootless` solutions for `podman` and `rootless-kubernetes` (`podsec-u7s`) within the `c10+`, `p10+` `ALTLinux` distributions.
 
