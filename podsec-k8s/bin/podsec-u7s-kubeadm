@@ -345,11 +345,11 @@ if [ "$controlPlane" = 'initMaster' ]
 then
   	case $U7S_CNI_PLUGIN in
     'flannel')
-      until kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml; do sleep 1; done
+      until kubectl apply -f /etc/kubernetes/manifests/kube-flannel.yml 2>dev/null; do sleep 1; done
       ;;
     'calico')
-      until kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml;  do sleep 1; done
-      until kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml;  do sleep 1; done
+      until kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml 2>dev/null;  do sleep 1; done
+      until kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml 2>dev/null;  do sleep 1; done
       ;;
     esac
 fi
