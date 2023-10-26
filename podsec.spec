@@ -8,10 +8,6 @@
 
 Name: podsec
 Version: 1.0.8
-<<<<<<< HEAD
-
-=======
->>>>>>> 2a11d2a (new tag 1.0.8. Удаление статических кластерных адресов 10.96.x.x и переменной U7S_TAPIP хранящей этот адрес)
 Release: alt1
 
 Summary: Set of scripts for Podman Security
