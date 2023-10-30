@@ -2,7 +2,7 @@
 
 . podsec-functions
 source /etc/podsec/u7s/env/platform
-source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+#source "/etc/podsec/u7s/env/$U7S_PLATFORM"
 mes=$(isSigstoreServer)
 if [ -n "$mes" ]
 then

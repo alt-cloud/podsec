@@ -172,7 +172,7 @@ else
 fi
 
 source /etc/podsec/u7s/env/platform
-source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+# source "/etc/podsec/u7s/env/$U7S_PLATFORM"
 # Настройка использования образа registry.local/U7S_PAUSE_IMAGE при запуска pod'ов в podman (podman pod init)
 pause_image="registry.local/$U7S_PAUSE_IMAGE"
 echo "Настройка использования образа $pause_image при запуска pod'ов в podman (podman pod init)"

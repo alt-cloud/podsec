@@ -2,7 +2,7 @@
 source podsec-u7s-functions
 source $envFile
 source /etc/podsec/u7s/env/platform
-source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+# source "/etc/podsec/u7s/env/$U7S_PLATFORM"
 logger  "=============================================== KUBELET ====================================="
 
 # set -x

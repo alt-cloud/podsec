@@ -1,7 +1,7 @@
 #!/bin/sh
 # needs to be called inside the namespaces
 source /etc/podsec/u7s/env/platform
-source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+#source "/etc/podsec/u7s/env/$U7S_PLATFORM"
 source podsec-u7s-functions
 export _CRIO_ROOTLESS=1
 export User='u7s-admin'

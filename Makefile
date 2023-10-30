@@ -65,8 +65,10 @@ USERNETES_CONFIGS= \
 
 USERNETES_ENVS = \
 	platform \
-	k8s-c10f1 \
-	k8s-p10
+	v1.26.3 \
+	v1.26.6 \
+	v1.26.9 \
+	v1.27.7
 
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh
