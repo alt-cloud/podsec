@@ -2,6 +2,8 @@
 source podsec-u7s-functions
 # set -x
 source $envFile
+source /etc/podsec/u7s/env/platform
+source "/etc/podsec/u7s/env/$U7S_PLATFORM"
 
 logger -- "`(echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*")`"
 echo -ne "$0: TIME=$(date  +%H:%M:%S.%N) UID=$UID PID=$(cat $XDG_RUNTIME_DIR/usernetes/rootlesskit/child_pid) PARS=$*\n" >&2
@@ -46,6 +48,7 @@ then
   if [ "$U7S_CONTROLPLANE" =  'initMaster' ]
   then
     yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
+          .kubernetesVersion |= "'${U7S_KUBEVERSION:1}'" |
          .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'", "127.0.0.1"] |
@@ -59,6 +62,7 @@ then
         ' $KUBEADM_CONFIGS_DIR/InitClusterConfiguration.yaml
   else
     yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
+          .kubernetesVersion |= "'${U7S_KUBEVERSION:1}'" |
          .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'", "127.0.0.1"] |
