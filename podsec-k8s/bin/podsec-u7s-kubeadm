@@ -229,9 +229,7 @@ apiServerPort=$2
 
 # cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
 envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
-setRegistryName
-source /etc/podsec/u7s/env/platform
-# source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+setRegistryName # устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
 sed -e "s|image:.*|image: $U7S_FLANNEL_REGISTRY/$U7S_FLANNEL_IMAGE|" </etc/podsec/u7s/manifests/kube-flannel.yml > /etc/kubernetes/manifests/kube-flannel.yml
 mkdir -p /etc/kubernetes/audit
 cp /etc//podsec/u7s/audit/policy.yaml /etc/kubernetes/audit

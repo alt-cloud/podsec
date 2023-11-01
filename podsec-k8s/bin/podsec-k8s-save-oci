@@ -34,7 +34,8 @@ archs=$2
 if [ $# -gt 2 ]
 then
   platform=$3
-  source /etc/podsec/u7s/env/platform
+  source /etc/podsec/u7s/env/u7s_platform
+  source /etc/podsec/u7s/env/u7s_images
   if [ "$platform" != "$U7S_PLATFORM" ]
   then
     echo "Текущая правтформа $U7S_PLATFORM не совпадает с загружаемой"
@@ -47,17 +48,8 @@ then
   fi
   U7S_PLATFORM=$platform
 else
-  source /etc/podsec/u7s/env/platform
+  source /etc/podsec/u7s/env/u7s_platform
+  source /etc/podsec/u7s/env/u7s_images
 fi
-
-platformFile="/etc/podsec/u7s/env/$U7S_PLATFORM"
-
-if [ ! -f $platformFile ]
-then
-  echo "Отсутствует файл  описания среды платформы  $U7S_PLATFORM"
-  exit 1
-fi
-
-source $platformFile
 
 podsec-save-oci $ociDir $archs $U7S_IMAGES

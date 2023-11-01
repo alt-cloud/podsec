@@ -1,11 +1,4 @@
-source /etc/os-release
 
-if echo $CPE_NAME | grep spserver >/dev/null 2>&1
-then
-  export U7S_PLATFORM="k8s-c10f1"
-else
-  export U7S_PLATFORM="k8s-p10"
-fi
 platformDir="/etc/podsec/u7s/env/"
 
 if [ -z "$U7S_KUBEVERSION" ]
@@ -15,12 +8,13 @@ fi
 
 source "$platformDir/$U7S_KUBEVERSION"
 
-if [ "$U7S_REGISTRY_PLATFORM" == "$U7S_REGISTRY" ]  # Образы не имеют платформы
+if [ "$U7S_REGISTRY" == 'registry.k8s.io' ]  # Образы не имеют платформы
 then
   prefix=''
   U7S_FLANNEL_REGISTRY="docker.io/flannel"
 else
   prefix="$U7S_PLATFORM/"
+  U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
 fi
 
 export U7S_COREDNS_IMAGE="${prefix}coredns:$U7S_COREDNS_VERSION"

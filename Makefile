@@ -64,7 +64,8 @@ USERNETES_CONFIGS= \
 	ENV
 
 USERNETES_ENVS = \
-	platform \
+	u7s_platform \
+	u7s_images \
 	v1.26.3 \
 	v1.26.6 \
 	v1.26.9 \
