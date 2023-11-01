@@ -1,6 +1,10 @@
 #!/bin/sh
-source /etc/podsec/u7s/env/u7s_platform
-source /etc/podsec/u7s/env/u7s_images
+
+source podsec-u7s-functions
+setRegistryName
+
+# source /etc/podsec/u7s/env/u7s_platform
+# source /etc/podsec/u7s/env/u7s_images
 
 if [ $# -ne 1 ]
 then
