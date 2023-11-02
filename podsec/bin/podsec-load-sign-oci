@@ -1,8 +1,7 @@
 #!/bin/sh
 
 source podsec-functions
-source podsec-u7s-functions
-setRegistryName
+source /etc/podsec/u7s/env/u7s_platform
 
 mes=$(isSigstoreServer)
 if [ -n "$mes" ]
