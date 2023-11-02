@@ -174,8 +174,6 @@ fi
 source podsec-functions
 source podsec-u7s-functions
 setRegistryName
-# source /etc/podsec/u7s/env/u7s_platform
-# source /etc/podsec/u7s/env/u7s_images
 
 # Настройка использования образа registry.local/U7S_PAUSE_IMAGE при запуска pod'ов в podman (podman pod init)
 pause_image="registry.local/$U7S_PAUSE_IMAGE"

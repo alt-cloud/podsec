@@ -1,10 +1,7 @@
 #!/bin/sh
 source podsec-u7s-functions
 source $envFile
-setRegistryName
-# source /etc/podsec/u7s/env/u7s_platform
-# source /etc/podsec/u7s/env/u7s_images
-# source "/etc/podsec/u7s/env/$U7S_PLATFORM"
+
 logger  "=============================================== KUBELET ====================================="
 
 # set -x

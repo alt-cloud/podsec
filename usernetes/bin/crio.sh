@@ -4,10 +4,6 @@
 source podsec-u7s-functions
 setRegistryName
 
-# source /etc/podsec/u7s/env/u7s_platform
-# source /etc/podsec/u7s/env/u7s_images
-# #source "/etc/podsec/u7s/env/$U7S_PLATFORM"
-# source podsec-u7s-functions
 export _CRIO_ROOTLESS=1
 export User='u7s-admin'
 

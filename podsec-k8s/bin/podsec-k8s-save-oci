@@ -31,6 +31,8 @@ ociDir=$1
 archs=$2
 
 source podsec-u7s-functions
+source $envFile
+
 setRegistryName
 if [ $# -gt 2 ]
 then
