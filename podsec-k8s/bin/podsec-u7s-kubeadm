@@ -32,6 +32,15 @@ then
   exit 3
 fi
 
+if [ -n "$U7S_KUBEVERSION" ]
+then
+  ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
+  if ! $ReplaceKubeCommand
+  then
+    exit 1
+  fi
+fi
+
 cmd=$1
 
 shift

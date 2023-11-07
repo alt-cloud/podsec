@@ -299,6 +299,41 @@ function setRegistryName() {
 	export U7S_REGISTRY_PLATFORM="$U7S_REGISTRY/$U7S_PLATFORM"
 }
 
+# Функция выводит команду apt-get install использую механизм удаения (${packege}-) и добавления (${packege}-+) пакетов
+# обновляет пакеты kubernetes и cri-o до указанной версии с сохранением пакетов podsec
+function replaceKubeCommand() {
+	IFS=.
+	set -- $1
+	IFS=$ifs
+	kubeVersion=${1:1}.$2
+	rpm -qa | grep -E  "kubernetes|cri-o" | (
+	ifs=$IFS
+	cmd='apt-get install -y'
+	while read pName
+	do
+		if [ ${pName:0:10} != 'kubernetes' -a  ${pName:0:5} != 'cri-o' ]; then continue; fi
+		IFS=-
+		set -- $pName
+		IFS=$ifs
+		if [ ${pName:0:10} = 'kubernetes' ]
+		then
+			delName="${1}-${2}-"
+			addName="kubernetes${kubeVersion}-${2}+"
+		else
+			if [ ${pName:0:5} = 'cri-o' ]
+			then
+				delName="${1}-${2}-"
+				addName="cri-o${kubeVersion}+"
+			fi
+		fi
+		cmd+=" $delName $addName"
+	done
+	echo $cmd
+	)
+}
+
+# replaceKubeCommand v1.23.5
+
 
 # export XDG_{DATA,CONFIG,CACHE}_HOME
 : ${XDG_DATA_HOME=~u7s-admin/.local/share}
