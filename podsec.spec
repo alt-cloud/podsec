@@ -7,7 +7,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.9
+Version: 
 Release: alt1
 
 Summary: Set of scripts for Podman Security
