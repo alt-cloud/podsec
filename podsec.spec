@@ -5,9 +5,10 @@
 %define nagiosdir %_prefix/lib/nagios
 %define nagios_plugdir %nagiosdir/plugins
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
+%define min_kube_version 1.22.17
 
 Name: podsec
-Version: 
+Version: 1.0.10
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -56,12 +57,12 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-Requires: kubernetes-kubeadm >= 1.26.3-alt2
-Requires: kubernetes-kubelet >= 1.26.3-alt2
-Requires: kubernetes-crio >= 1.26.3-alt2
-Requires: kubernetes-client >= 1.26.3-alt2
-Requires: cri-o >= 1.26.2
-Requires: cri-tools >= 1.22.0
+Requires: kubernetes-kubeadm >= %min_kube_version
+Requires: kubernetes-kubelet >= %min_kube_version
+Requires: kubernetes-crio >= %min_kube_version
+Requires: kubernetes-client >= %min_kube_version
+Requires: cri-o >= %min_kube_version
+Requires: cri-tools >= %min_kube_version
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
 %filter_from_requires /kubernetes-node/d
 
@@ -74,7 +75,7 @@ This package contains utilities for:
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
-Requires: kubernetes-client >= 1.26.3-alt2
+Requires: kubernetes-client >= %min_kube_version
 Requires: podsec >= %EVR
 
 
@@ -197,6 +198,9 @@ useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+* Tue Nov 07 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt1
+- 1.0.10
+
 * Mon Oct 30 2023 Alexey Kostarev <kaf@altlinux.org> 1.0.9-alt1
 - 1.0.9
 
