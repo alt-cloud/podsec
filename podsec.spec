@@ -52,22 +52,18 @@ This package contains utilities for:
 Summary: Set of scripts for Kubernetes Security
 Group: Development/Other
 Requires: podsec >= 0.3.1
-Requires: kubernetes-kubeadm >= 1.26.3-alt2
-Requires: kubernetes-kubelet >= 1.26.3-alt2
-Requires: kubernetes-crio >= 1.26.3-alt2
-Requires: kubernetes-master >= 1.26.3-alt2
-Requires: kubernetes-node >= 1.26.3-alt2
-Requires: kubernetes-client >= 1.26.3-alt2
-Requires: cri-o >= 1.26.2
-Requires: cri-tools >= 1.22.0
-Requires: etcd >= 3.4.15
-Requires: flannel >= 0.19.2
-Requires: cni-plugin-flannel >= 1.1.2
 Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
+Requires: kubernetes-kubeadm >= 1.26.3-alt2
+Requires: kubernetes-kubelet >= 1.26.3-alt2
+Requires: kubernetes-crio >= 1.26.3-alt2
+Requires: kubernetes-client >= 1.26.3-alt2
+Requires: cri-o >= 1.26.2
+Requires: cri-tools >= 1.22.0
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
+%filter_from_requires /kubernetes-node/d
 
 
 %description k8s
