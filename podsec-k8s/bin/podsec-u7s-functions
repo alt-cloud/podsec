@@ -281,22 +281,26 @@ function tuneAudit() {
 export U7S_REGISTRY_PLATFORM U7S_REGISTRY
 # Функция устанавливает имя регистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
 function setRegistryName() {
-  if [  ! -z ${U7S_REGISTRY+x}  ];
+  if [  ! -z "${U7S_REGISTRY+x}" -a ${#U7S_REGISTRY} -eq 0  ]
   then
 		export U7S_REGISTRY="registry.k8s.io"
-		export U7S_REGISTRY_PLATFORM=$U7S_REGISTRY
-		source /etc/podsec/u7s/env/u7s_images
-		return;
-  fi
-	source /etc/podsec/u7s/env/u7s_platform
-	if grep registry.local /etc/hosts >/dev/null 2>&1
+		U7S_PLATFORM=
+  else
+		source /etc/podsec/u7s/env/u7s_platform
+		if grep registry.local /etc/hosts >/dev/null 2>&1
+		then
+			export U7S_REGISTRY="registry.local"
+		else
+			export U7S_REGISTRY="registry.altlinux.org"
+		fi
+	fi
+	U7S_REGISTRY_PLATFORM=$U7S_REGISTRY
+	if [ -n "$U7S_PLATFORM" ]
 	then
-		export U7S_REGISTRY="registry.local"
-	else
-		U7S_REGISTRY="registry.altlinux.org"
+		U7S_REGISTRY_PLATFORM+="/$U7S_PLATFORM"
 	fi
 	source /etc/podsec/u7s/env/u7s_images
-	export U7S_REGISTRY_PLATFORM="$U7S_REGISTRY/$U7S_PLATFORM"
+	export U7S_REGISTRY_PLATFORM
 }
 
 # Функция выводит команду apt-get install использую механизм удаения (${packege}-) и добавления (${packege}-+) пакетов

@@ -65,11 +65,7 @@ USERNETES_CONFIGS= \
 
 USERNETES_ENVS = \
 	u7s_platform \
-	u7s_images \
-	v1.26.3 \
-	v1.26.6 \
-	v1.26.9 \
-	v1.27.7
+	u7s_images
 
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh

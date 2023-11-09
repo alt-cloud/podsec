@@ -1,44 +1,84 @@
 
-platformDir="/etc/podsec/u7s/env/"
 
 if [ -z "$U7S_KUBEVERSION" ]
 then
-  export U7S_KUBEVERSION="v1.26.3"
+  export U7S_KUBEVERSION="v1.26.9"
 fi
 
-source "$platformDir/$U7S_KUBEVERSION"
+case $U7S_REGISTRY in
+  registry.altlinux.org | registry.local) # Образы ALTLINUX
+    prefix="$U7S_PLATFORM/"
+    U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
+    ;;
+  *)
+    prefix=''
+    U7S_FLANNEL_REGISTRY="docker.io/flannel"
+    ;;
+esac
 
-if [ "$U7S_REGISTRY" == 'registry.k8s.io' ]  # Образы не имеют платформы
+if [ -z "$U7S_FLANNEL_TAG" ]
 then
-  prefix=''
-  U7S_FLANNEL_REGISTRY="docker.io/flannel"
-else
-  prefix="$U7S_PLATFORM/"
-  U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
+  U7S_FLANNEL_TAG="v0.22.3"
 fi
 
-export U7S_COREDNS_IMAGE="${prefix}coredns:$U7S_COREDNS_VERSION"
-export U7S_PAUSE_IMAGE="${prefix}pause:$U7S_PAUSE_VERSION"
-export U7S_KUBECONTROLLER_IMAGE="${prefix}kube-controller-manager:$U7S_KUBEVERSION"
-export U7S_KUBEAPISERVER_IMAGE="${prefix}kube-apiserver:$U7S_KUBEVERSION"
-export U7S_KUBEPROXY_IMAGE="${prefix}kube-proxy:$U7S_KUBEVERSION"
-export U7S_ETCD_IMAGE="${prefix}etcd:$U7S_ETCD_VERSION"
-export U7S_KUBESCHEDULER_IMAGE="${prefix}kube-scheduler:$U7S_KUBEVERSION"
-export U7S_FLANNEL_IMAGE="${prefix}flannel:$U7S_FLANNEL_VERSION"
-export U7S_FLANNEL_CNI_IMAGE="${prefix}flannel-cni-plugin:$U7S_FLANNEL_CNI_VERSION"
-export U7S_CERTMANAGER_CONTROLLER_IMAGE="${prefix}cert-manager-controller:$U7S_CERTMANAGER_VERSION"
-export U7S_CERTMANAGER_CAINJECTOR_IMAGE="${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_VERSION"
-export U7S_CERTMANAGER_WEBHOOK_IMAGE="${prefix}cert-manager-webhook:$U7S_CERTMANAGER_VERSION"
+if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
+then
+  U7S_FLANNELCNIPLUGIN_TAG="v1.2.0"
+fi
 
-export U7S_IMAGES="$U7S_KUBEAPISERVER_IMAGE
-$U7S_KUBECONTROLLER_IMAGE
-$U7S_KUBEPROXY_IMAGE
-$U7S_KUBESCHEDULER_IMAGE
-$U7S_COREDNS_IMAGE
-$U7S_ETCD_IMAGE
+if [ -z "$U7S_CERTMANAGER_TAG" ]
+then
+  U7S_CERTMANAGER_TAG="v1.11.0"
+fi
+
+longImageList=$(/usr/bin/kubeadm --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
+let lenRegistry=${#U7S_REGISTRY}+1
+let lenRegistryPlatform=${#U7S_REGISTRY_PLATFORM}+1
+ifs=$IFS
+U7S_IMAGES=
+for longImage in $longImageList
+do
+  image=${longImage:lenRegistry}
+  shortImage=${longImage:lenRegistryPlatform}
+  U7S_IMAGES+=" shortImage"
+  IFS=:
+  set -- $shortImage
+  IFS=$ifs
+  shortImageName=$1
+  case $shortImageName in
+    coredns)
+      export U7S_COREDNS_IMAGE=$image
+      ;;
+    pause)
+      export U7S_PAUSE_IMAGE=$image
+      ;;
+    etcd)
+      export U7S_ETCD_IMAGE=$image
+      ;;
+    kube-controller-manager)
+      export U7S_KUBECONTROLLER_IMAGE=$image
+      ;;
+    kube-apiserver)
+      export U7S_KUBEAPISERVER_IMAGE=$image
+      ;;
+    kube-proxy)
+      export U7S__KUBEPROXY_IMAGE=$image
+      ;;
+    kube-scheduler)
+      export U7S_KUBESCHEDULER_IMAGE=$image
+      ;;
+  esac
+done
+
+export U7S_FLANNEL_IMAGE="${prefix}flannel:$U7S_FLANNEL_TAG"
+export U7S_FLANNEL_CNI_IMAGE="${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
+export U7S_CERTMANAGER_CONTROLLER_IMAGE="$U7S_PLATFORM/cert-manager-controller:$U7S_CERTMANAGER_TAG"
+export U7S_CERTMANAGER_CAINJECTOR_IMAGE="$U7S_PLATFORM/cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
+export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+
+export U7S_IMAGES+="
 $U7S_FLANNEL_IMAGE
 $U7S_FLANNEL_CNI_IMAGE
-$U7S_PAUSE_IMAGE
 $U7S_CERTMANAGER_CONTROLLER_IMAGE
 $U7S_CERTMANAGER_CAINJECTOR_IMAGE
 $U7S_CERTMANAGER_WEBHOOK_IMAGE

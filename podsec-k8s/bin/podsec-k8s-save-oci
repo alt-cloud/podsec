@@ -31,13 +31,20 @@ ociDir=$1
 archs=$2
 
 source podsec-u7s-functions
+if [ -n "$U7S_KUBEVERSION" ]
+then
+  ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
+  if ! $ReplaceKubeCommand
+  then
+    exit 1
+  fi
+fi
+
 setRegistryName
 
 if [ $# -gt 2 ]
 then
   platform=$3
-#   source /etc/podsec/u7s/env/u7s_platform
-#   source /etc/podsec/u7s/env/u7s_images
   if [ "$platform" != "$U7S_PLATFORM" ]
   then
     echo "Текущая платформа $U7S_PLATFORM не совпадает с загружаемой"
@@ -49,9 +56,6 @@ then
     fi
   fi
   U7S_PLATFORM=$platform
-# else
-#   source /etc/podsec/u7s/env/u7s_platform
-#   source /etc/podsec/u7s/env/u7s_images
 fi
 
 podsec-save-oci $ociDir $archs $U7S_IMAGES
