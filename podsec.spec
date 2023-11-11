@@ -5,7 +5,8 @@
 %define nagiosdir %_prefix/lib/nagios
 %define nagios_plugdir %nagiosdir/plugins
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
-%define min_kube_version 1.22.17
+%define min_kube_version 1.26.10
+%define min_kube_minor_version 1.26
 
 Name: podsec
 Version: 1.0.10
@@ -57,12 +58,12 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-Requires: kubernetes-kubeadm >= %min_kube_version
-Requires: kubernetes-kubelet >= %min_kube_version
-Requires: kubernetes-crio >= %min_kube_version
-Requires: kubernetes-client >= %min_kube_version
-Requires: cri-o >= %min_kube_version
-Requires: cri-tools >= %min_kube_version
+Requires: kubernetes%min_kube_minor_version-kubeadm
+Requires: kubernetes%min_kube_minor_version-kubelet
+Requires: kubernetes%min_kube_minor_version-crio
+Requires: kubernetes%min_kube_minor_version-client
+Requires: cri-o
+Requires: cri-tools
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
 %filter_from_requires /kubernetes-node/d
 
@@ -75,7 +76,7 @@ This package contains utilities for:
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
-Requires: kubernetes-client >= %min_kube_version
+Requires: Requires: kubernetes%min_kube_minor_version-client
 Requires: podsec >= %EVR
 
 
