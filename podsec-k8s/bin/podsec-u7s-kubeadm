@@ -32,16 +32,38 @@ then
   exit 3
 fi
 
-if [ -n "$U7S_KUBEVERSION" ]
-then
-  ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
-  if ! $ReplaceKubeCommand
-  then
-    exit 1
-  fi
-fi
+# if [ -n "$U7S_KUBEVERSION" ]
+# then
+#   ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
+#   if ! $ReplaceKubeCommand
+#   then
+#     exit 1
+#   fi
+# fi
 
 cmd=$1
+
+if [ -z "$U7S_KUBEVERSION" ]
+then
+  export U7S_KUBEVERSION="v1.26.9"
+fi
+
+case $cmd in
+  init | join)
+    echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/90-ipforward.conf
+    kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
+    apt-get install -y kubernetes$kubeVersion-kubeadm
+    ;;
+  update)
+    CurrentKubeVersion=$(currentKubeVersion)
+    if [ $CurrentKubeVersion != $U7S_KUBEVERSION ]
+    then
+      echo "UPDATE"
+      exit 0
+    fi
+    ;;
+
+esac
 
 shift
 controlPlane=

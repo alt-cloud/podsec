@@ -58,14 +58,14 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-Requires: kubernetes%min_kube_minor_version-kubeadm
-Requires: kubernetes%min_kube_minor_version-kubelet
-Requires: kubernetes%min_kube_minor_version-crio
-Requires: kubernetes%min_kube_minor_version-client
+Requires: kubernetes-common
 Requires: cri-o
 Requires: cri-tools
-%filter_from_requires /\/etc\/kubernetes\/kubelet/d
-%filter_from_requires /kubernetes-node/d
+%filter_from_requires /\/usr\/bin\/kubeadm/d
+# %filter_from_requires /\/etc\/kubernetes\/kubelet/d
+%filter_from_requires /kubernetes-client/d
+%filter_from_requires /kubernetes-kubeadm/d
+%filter_from_requires /kubernetes-kubelet/d
 
 
 %description k8s

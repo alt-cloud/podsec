@@ -303,6 +303,25 @@ function setRegistryName() {
 	export U7S_REGISTRY_PLATFORM
 }
 
+function currentKubeVersion() {
+	ifs=$IFS
+  common=$(rpm -qa | grep kubernetes-common)
+  IFS=-
+  set -- $common
+  IFS=$ifs
+  echo v$3
+}
+
+function kubeVersionToMinorVersion() {
+	ifs=$IFS
+	IFS=.
+	set -- $1
+	IFS=$ifs
+	echo "$1.$2"
+}
+
+
+
 # Функция выводит команду apt-get install использую механизм удаения (${packege}-) и добавления (${packege}-+) пакетов
 # обновляет пакеты kubernetes и cri-o до указанной версии с сохранением пакетов podsec
 function replaceKubeCommand() {
