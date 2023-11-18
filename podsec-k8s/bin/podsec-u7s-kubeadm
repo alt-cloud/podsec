@@ -52,7 +52,7 @@ case $cmd in
   init | join)
     echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/90-ipforward.conf
     kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
-    apt-get install -y kubernetes$kubeVersion-kubeadm
+    apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
     ;;
   update)
     CurrentKubeVersion=$(currentKubeVersion)
