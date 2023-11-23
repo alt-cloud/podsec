@@ -340,7 +340,7 @@ then
   echo "Разворачивание кластера закончилось неудачно.
 Выполните вход в пользователя u7s-admin:
 machinectl shell u7s-admin@ /bin/bash
-и посмотрите статус командой 'systemctl --user u7s.target' и системные логи командами journalctl"
+и посмотрите статус командой 'systemctl --user u7s.service' и системные логи командами journalctl"
   pstree -pal
   exit 1
 fi
@@ -349,9 +349,9 @@ fi
 machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s mount --make-rshared /var/lib/kubelet/
 machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s findmnt -o TARGET,PROPAGATION /var/lib/kubelet
 
-machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
+# machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
 /sbin/systemctl enable  u7s.service
-/sbin/systemctl start u7s.service
+# /sbin/systemctl start u7s.service
 
 if [ -z "$controlPlane" ] # WORKER node
 then

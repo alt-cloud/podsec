@@ -1,10 +1,10 @@
 [Unit]
 Description=Usernetes kubelet service (crio)
 BindsTo=rootlesskit.service
-PartOf=u7s.target
+# PartOf=u7s.target
 
 [Install]
-WantedBy=u7s.target
+# WantedBy=u7s.target
 
 [Service]
 Type=notify

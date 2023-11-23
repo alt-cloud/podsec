@@ -1,9 +1,9 @@
 [Unit]
 Description=Usernetes RootlessKit service (crio)
-PartOf=u7s.target
+# PartOf=u7s.target
 
 [Install]
-WantedBy=u7s.target
+# WantedBy=u7s.target
 
 [Service]
 ExecStart=/usr/libexec/podsec/u7s/bin/rootlesskit.sh /usr/libexec/podsec/u7s/bin/crio.sh

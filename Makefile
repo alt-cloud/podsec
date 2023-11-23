@@ -54,8 +54,8 @@ PODSEC_K8S_RBAC_FUNCTIONS = \
 
 USERNETES_UNITS= \
 	rootlesskit.service \
-	kubelet.service \
-	u7s.target
+	kubelet.service
+# 	u7s.target
 
 USERNETES_CONFIGS= \
 	cni_net.d\
