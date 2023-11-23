@@ -5,8 +5,8 @@ After=sshd.service
 [Service]
 WorkingDirectory=/var/lib/u7s-admin
 ExecStartPre=/usr/libexec/podsec/u7s/bin/u7sinit.sh
-ExecStart=machinectl shell u7s-admin@ /sbin/systemctl --user -T --wait start u7s.target
-ExecStop=machinectl shell u7s-admin@ /sbin/systemctl --user -T stop u7s.target
+ExecStart=machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/u7s-start-stop.sh start
+ExecStop=machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/u7s-start-stop.sh stop
 Restart=on-failure
 KillMode=process
 
