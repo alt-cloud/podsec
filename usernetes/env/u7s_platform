@@ -26,10 +26,13 @@ function getPlatform() {
       *) export U7S_PLATFORM="k8s-p${version}"; break;;
     esac
   fi
+<<<<<<< HEAD
   case $U7S_PLATFORM in
     test_k8s|k8s-c10f1|k8s-p10) break;;
     *) export U7S_PLATFORM="test_k8s";
   esac
+=======
+>>>>>>> 3df7c83 (Более точное автоматическое определение переменных $U7S_PLATFORM, $U7S_KUBEVERSION)
 }
 
 if [ -z "$U7S_PLATFORM" ]
