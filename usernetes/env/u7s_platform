@@ -6,6 +6,11 @@ then
   then
     export U7S_PLATFORM="k8s-c10f1"
   else
-    export U7S_PLATFORM="k8s-p10"
+    if echo $CPE_NAME | grep sisyphus >/dev/null 2>&1
+    then
+      export U7S_PLATFORM="test_k8s"
+    else
+      export U7S_PLATFORM="k8s-p10"
+    fi
   fi
 fi
