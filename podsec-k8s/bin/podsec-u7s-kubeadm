@@ -351,15 +351,12 @@ machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s findmnt -o T
 
 # machinectl shell u7s-admin@ /sbin/systemctl --user start u7s.target 2>/dev/null
 /sbin/systemctl enable  u7s.service
-# /sbin/systemctl start u7s.service
+/sbin/systemctl start u7s.service
 
 if [ -z "$controlPlane" ] # WORKER node
 then
   exit 0
 fi
-
-# Настроить в /kubernetes/manifests/kube-apiserver.yaml аудит API-запросов
-tuneAudit
 
 adminConf="/etc/kubernetes/admin.conf"
 
@@ -387,6 +384,13 @@ then
       ;;
     esac
 fi
+
+# Настроить в /kubernetes/manifests/kube-apiserver.yaml аудит API-запросов
+tuneAudit
+# Перезапустить сервисы
+/sbin/systemctl stop u7s.service
+/sbin/systemctl start u7s.service
+
 
 mkdir -p ~u7s-admin/.kube/
 cp -f $adminConf ~u7s-admin/.kube/config
