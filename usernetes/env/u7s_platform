@@ -1,16 +1,39 @@
-source /etc/os-release
+
+function getPlatform() {
+  source /etc/os-release
+  if [ -n "$ALT_BRANCH_ID" ]
+  then
+    export U7S_PLATFORM="k8s-$ALT_BRANCH_ID"
+  else
+    ifs=$IFS
+    IFS=:
+    set -- $CPE_NAME
+    IFS=$ifs
+    platform=$4
+    version=$5
+    IFS=.
+    set -- $version
+    IFS=$ifs
+    version=$1
+    case $platform in
+      spserver) export U7S_PLATFORM="k8s-c${bersion}f1"; break;;
+      sisyphus) export U7S_PLATFORM="test_k8s"; break;;
+      *) export U7S_PLATFORM="k8s-p${version}"; break;;
+    esac
+  fi
+}
 
 if [ -z "$U7S_PLATFORM" ]
 then
-  if echo $CPE_NAME | grep spserver >/dev/null 2>&1
-  then
-    export U7S_PLATFORM="k8s-c10f1"
-  else
-    if echo $CPE_NAME | grep sisyphus >/dev/null 2>&1
-    then
-      export U7S_PLATFORM="test_k8s"
-    else
-      export U7S_PLATFORM="k8s-p10"
-    fi
-  fi
+  getPlatform
 fi
+
+if [ -z "$U7S_KUBEVERSION" ]
+then
+  case $U7S_PLATFORM in
+    'test_k8s') export U7S_KUBEVERSION="v1.27.7";break;;
+    'k8s-c10f1') export U7S_KUBEVERSION="v1.26.10";break;;
+    *) export U7S_KUBEVERSION="v1.26.9";break;;
+  esac
+fi
+

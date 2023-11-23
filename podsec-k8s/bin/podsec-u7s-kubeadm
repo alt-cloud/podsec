@@ -1,5 +1,6 @@
 #!/bin/sh
 source podsec-u7s-functions
+source /etc/podsec/u7s/env/u7s_platform
 
 
 format() {
@@ -42,11 +43,6 @@ fi
 # fi
 
 cmd=$1
-
-if [ -z "$U7S_KUBEVERSION" ]
-then
-  export U7S_KUBEVERSION="v1.26.9"
-fi
 
 case $cmd in
   init | join)
