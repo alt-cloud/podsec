@@ -1,9 +1,14 @@
 
 function getPlatform() {
   source /etc/os-release
-  if [ -n "$ALT_BRANCH_ID" ]
+  if [ -n "$ALT_BRANCH_ID" -n ]
   then
-    export U7S_PLATFORM="k8s-$ALT_BRANCH_ID"
+    if [ "$ALT_BRANCH_ID"  == 'sisyphus' ]
+    then
+      export U7S_PLATFORM="test_k8s";
+    else
+      export U7S_PLATFORM="k8s-$ALT_BRANCH_ID"
+    fi
   else
     ifs=$IFS
     IFS=:
@@ -21,6 +26,10 @@ function getPlatform() {
       *) export U7S_PLATFORM="k8s-p${version}"; break;;
     esac
   fi
+  case $U7S_PLATFORM in
+    test_k8s|k8s-c10f1|k8s-p10) break;;
+    *) export U7S_PLATFORM="test_k8s";
+  esac
 }
 
 if [ -z "$U7S_PLATFORM" ]
