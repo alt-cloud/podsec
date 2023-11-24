@@ -33,19 +33,22 @@ then
   exit 3
 fi
 
-# if [ -n "$U7S_KUBEVERSION" ]
-# then
-#   ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
-#   if ! $ReplaceKubeCommand
-#   then
-#     exit 1
-#   fi
-# fi
-
 cmd=$1
 
+etcdDataDir='/var/lib/podsec/u7s/etcd'
 case $cmd in
   init | join)
+    if [ -d  $etcdDataDir ]
+    then
+      echo -ne "На сервере обнаружен каталог данных etcd-кластера $etcdDataDir от предыдущего разворачивания. Очистить каталог? y/N: "
+      read reply
+      if [ "$reply" = 'y' ]
+      then
+        rm -rf $etcdDataDir
+      else
+        exit 1
+      fi
+    fi
     echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/90-ipforward.conf
     kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
     apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
