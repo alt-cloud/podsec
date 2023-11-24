@@ -1,7 +1,7 @@
 
 function getPlatform() {
   source /etc/os-release
-  if [ -n "$ALT_BRANCH_ID" -n ]
+  if [ -n "$ALT_BRANCH_ID" ]
   then
     if [ "$ALT_BRANCH_ID"  == 'sisyphus' ]
     then
