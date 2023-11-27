@@ -7,6 +7,49 @@ format() {
   echo -e "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
 
+getopt -n kubeadm \
+  -o v: \
+  --long add-dir-header: \
+  --long log-file: \
+  --long log-file-max-size: \
+  --long one-output: \
+  --long rootfs: \
+  --long skip-headers\
+  --long skip-log-headers \
+  --long apiserver-advertise-address: \
+  --long apiserver-bind-port: \
+  --long cert-dir: \
+  --long certificate-key: \
+  --long config: \
+  --long control-plane-endpoint: \
+  --long control-plane \
+  --long cri-socket: \
+  --long discovery-file: \
+  --long discovery-token: \
+  --long discovery-token-ca-cert-hash: \
+  --long discovery-token-unsafe-skip-ca-verification \
+  --long dry-run \
+  --long feature-gates: \
+  --long help: \
+  -o h: \
+  --long ignore-preflight-errors: \
+  --long image-repository: \
+  --long kubernetes-version: \
+  --long node-name: \
+  --long patches: \
+  --long pod-network-cidr: \
+  --long service-cidr: \
+  --long service-dns-domain: \
+  --long skip-certificate-key-print \
+  --long skip-phases: \
+  --long skip-token-print \
+  --long tls-bootstrap-token: \
+  --long token: \
+  --long token-ttl:\
+  --long upload-certs\
+  "$@"
+
+
 debugLevel=0
 if [ ${1} = '-v' ]
 then
