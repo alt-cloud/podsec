@@ -2,7 +2,7 @@
 
 ## Поддерживаемые подкоманды
 
-Подкоманда init | Подкоманда join | Поддержка 
+Подкоманда init | Подкоманда join | Поддержка
 -------------------|-------------------|-------------
 phase              | phase             |
 
@@ -10,7 +10,7 @@ phase              | phase             |
 
 ### Общесистемные флаги
 
-init-флаг          | join-флаг     | Поддержка 
+init-флаг          | join-флаг     | Поддержка
 -------------------|-------------------|-------------
 -v:                | -v:               | **Y**
 --add-dir-header:  | --add-dir-header: |
@@ -21,13 +21,13 @@ init-флаг          | join-флаг     | Поддержка
 --skip-headers    | --skip-headers
 --skip-log-headers | --skip-log-headers
 
-### kubeadm init | join 
+### kubeadm init | join
 
-init-флаг          | join-флаг     | Поддержка 
+init-флаг          | join-флаг     | Поддержка
 -------------------|-------------------|-------------
 --apiserver-advertise-address: | --apiserver-advertise-address |
 --apiserver-bind-port: | --apiserver-bind-port: |
---cert-dir: | **-** |                                 
+--cert-dir: | **-** |
 --certificate-key: | --certificate-key: |
 --config: | --config: |
 --control-plane-endpoint: | **-**  |
@@ -35,8 +35,8 @@ init-флаг          | join-флаг     | Поддержка
  --cri-socket: | --cri-socket: |
  **-**  | --discovery-file: |
  **-**  | --discovery-token: |
- **-**  | --discovery-token-ca-cert-hash: | 
- **-**  | --discovery-token-unsafe-skip-ca-verification | 
+ **-**  | --discovery-token-ca-cert-hash: |
+ **-**  | --discovery-token-unsafe-skip-ca-verification |
 --dry-run | --dry-run |
 --feature-gates: | **-**  |
 --help: (-h:) | --help: (-h:) |
@@ -55,4 +55,4 @@ init-флаг          | join-флаг     | Поддержка
  --token: | --token: |
  --token-ttl: | **-**  |
  --upload-certs | **-**  |
- 
+
