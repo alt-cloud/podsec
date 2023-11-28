@@ -7,78 +7,329 @@ format() {
   echo -e "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
 
-getopt -n kubeadm \
-  -o v: \
-  --long add-dir-header: \
-  --long log-file: \
-  --long log-file-max-size: \
-  --long one-output: \
-  --long rootfs: \
-  --long skip-headers\
-  --long skip-log-headers \
-  --long apiserver-advertise-address: \
-  --long apiserver-bind-port: \
-  --long cert-dir: \
-  --long certificate-key: \
-  --long config: \
-  --long control-plane-endpoint: \
-  --long control-plane \
-  --long cri-socket: \
-  --long discovery-file: \
-  --long discovery-token: \
-  --long discovery-token-ca-cert-hash: \
-  --long discovery-token-unsafe-skip-ca-verification \
-  --long dry-run \
-  --long feature-gates: \
-  --long help: \
-  -o h: \
-  --long ignore-preflight-errors: \
-  --long image-repository: \
-  --long kubernetes-version: \
-  --long node-name: \
-  --long patches: \
-  --long pod-network-cidr: \
-  --long service-cidr: \
-  --long service-dns-domain: \
-  --long skip-certificate-key-print \
-  --long skip-phases: \
-  --long skip-token-print \
-  --long tls-bootstrap-token: \
-  --long token: \
-  --long token-ttl:\
-  --long upload-certs\
-  "$@"
+infoFlags="
+--help
+-h
+"
 
+globalFlags="
+-v:
+--add-dir-header:
+--log-file:
+--log-file-max-size:
+--one-output:
+--rootfs:
+--skip-headers
+--skip-log-headers
+"
 
-debugLevel=0
-if [ ${1} = '-v' ]
+initJoinFlags="
+--apiserver-advertise-address:
+--apiserver-bind-port:
+--certificate-key:
+--config:
+--cri-socket:
+--dry-run
+--ignore-preflight-errors:
+--node-name:
+--patches:
+--skip-phases:
+--token:
+"
+initFlags="
+--cert-dir:
+--control-plane-endpoint:
+--feature-gates:
+--image-repository:
+--kubernetes-version:
+--pod-network-cidr:
+--service-cidr:
+--service-dns-domain:
+--skip-certificate-key-print
+--skip-token-print
+--token-ttl:
+--upload-certs
+"
+
+joinFlags="
+--control-plane
+--discovery-file:
+--discovery-token:
+--discovery-token-ca-cert-hash:
+--discovery-token-unsafe-skip-ca-verification
+--tls-bootstrap-token:
+"
+
+getoptPars=""
+
+for par in $infoFlags $globalFlags $initJoinFlags $initFlags $joinFlags
+do
+  if [ ${par:0:2} = '--' ]
+  then
+    getoptPars+="--long ${par:2} "
+  else
+    getoptPars+="-o ${par:1} "
+  fi
+done
+
+opts=$(getopt -n kubeadm $getoptPars -- "$@" 2>&1)
+if [ ! $? ]  # Анализ параметров обнаружил ошибки
 then
-  if [ $# -lt 2 ]
-  then
-    echo "Неверное число параметров"
-    format
-    exit 3
-  fi
-  debugLevel=$2
-  if [ "$debugLevel" -lt 0 -o "$debugLevel" -ge 10 ] 2>/dev/null
-  then
-    echo "Неверный уровень отладки"
-    format
-    exit 3
-  fi
-  shift;shift
+  echo $opts >&2
+  exit 1
 fi
 
+set -- $opts
+pars=""
+haveHelpFlag=
+while [ $# -gt 0 ]
+do
+  if [ $1 = '--' ]; then break; fi
+  pars+=" $1"
+  if [ $1 = '-h' -o $1 = '--help' ]
+  then
+    haveHelpFlag='y'
+  fi
+  shift
+done
+shift
+
+nativeCommand=  # Команда передаваемая "родному" kubeadm
 if [ $# -eq 0 ]
 then
-  echo "Неверное число параметров"
-  format
-  exit 3
+  nativeCommand="/usr/bin/kubeadm"
+fi
+eval cmd=$1
+if [ -n "$haveHelpFlag" ]
+then
+  nativeCommand="/usr/bin/kubeadm $cmd -h"
 fi
 
-cmd=$1
+if [ $cmd != 'init' -a $cmd != 'join' ] # Команда ни init ни join
+then
+  nativeCommand="/usr/bin/kubeadm $cmd $pars"
+fi
 
-etcdDataDir='/var/lib/podsec/u7s/etcd'
+if [ -n "$nativeCommand" ]  # Команда вывода параметров?
+then
+  machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s $nativeCommand
+  exit 0
+fi
+
+ifs=$IFS
+controlPlane=
+token=
+caCertHash=
+extIP=
+serviceCidr=
+apiServer=
+debugLevel=0
+# Новые флаги
+apiServerBindPort=6443
+nodeRegistrationName=
+patches=
+skipPhases=
+certificatesDir=
+dnsDomain='cluster.local'
+tokenTTL=
+FileDiscovery=
+bootstrapToken=
+tlsBootstrapToken=
+
+kubeadmFlags=
+
+# КОМАНДА init ИЛИ join
+shift
+if [ $# -gt 0 ]
+then
+  subcommand="$1"
+  if [ $subcommand != 'phase' ]
+  then
+    if [ $cmd = 'join' ]
+    then
+      eval apiServer=$1
+      shift
+      if [ $# -gt 0 ]
+      then
+        echo "Команда join имеет дополнительные параметры: $@"
+        exit 1
+      fi
+    else
+      echo "Для команды $cmd обнаружена подкоманда $subcommand. Допустима только одна подкоманда phase" >&2
+      exit 1
+    fi
+  else
+    shift
+    phase=$1
+    if [ $# -gt 1 ]
+    then
+      echo "Неверный формат опмсания фазы: $@"
+      exit 1
+    fi
+  fi
+fi
+
+set -- $pars
+while [ $# -gt 0 ]
+do
+  case $1 in
+  # globalFlags
+  '-v')
+    eval debugLevel=$2
+    shift;shift
+    continue;;
+  '--add-dir-header'|'--log-file'|'--log-file-max-size'|'--one-output'|'--rootfs')
+    eval kubeadmFlags+=\"$1 $2 \"
+    shift;shift
+    continue;;
+  '--skip-headers'|'--skip-log-headers')
+    eval kubeadmFlags+=\"$1 \"
+    shift
+    continue;;
+  # initJoinFlags
+  '--apiserver-advertise-address')
+    eval extIP=$2
+    extDev=$(getExtDev $extIP)
+    if [ -z "$extDev" ]
+    then
+      echo "Для IP-адреса '$extIP' нет интерфейса" >&2
+      exit
+    fi
+    shift;shift
+    continue;;
+  '--apiserver-bind-port')
+    eval apiServerBindPort=$2
+    shift;shift
+    continue;;
+  '--certificate-key')
+    eval certificateKey=$2
+    shift;shift
+    continue;;
+  '--config'| '--cri-socket')
+    echo "Флаг ${1:0:-1} не поддерживается"
+    shift;shift
+    continue;;
+  '--ignore-preflight-errors')
+    eval kubeadmFlags+=\"$1 $2 \"
+    shift;shift
+    continue;;
+  '--dry-run')
+    eval kubeadmFlags+=\"$1 \"
+    shift
+    continue;;
+  '--node-name')
+    eval nodeRegistrationName=$2
+    shift;shift
+    continue;;
+  '--patches')
+    eval patches=$2
+    shift;shift
+    continue;;
+  '--skip-phases')
+    eval skipPhases=$2
+    shift;shift
+    continue;;
+  '--token')
+    eval token=$2
+    shift;shift
+    continue;;
+  esac
+  if [ $cmd = 'init' ]
+  then
+    controlPlane="initMaster"
+    case $1 in
+    '--cert-dir')
+      eval certificatesDir=$2
+      shift;shift
+      continue;;
+    '--control-plane-endpoint')
+      eval apiServer=$2
+      shift;shift
+      continue;;
+    '--feature-gates'|'--image-repository'|'--kubernetes-version') # Последние два замещены переменными среды - TODO: Россамотреть возможность замены
+      echo "Флаг $1 не поддерживается"
+      shift;shift
+      continue;;
+    '--pod-network-cidr')
+      eval podNetworkCidr=$2
+      getCidr $podNetworkCidr
+      case $podNetworkCidr in
+        '10.244.0.0/16') : ${U7S_CNI_PLUGIN:=flannel};;
+        '192.168.0.0/16') : ${U7S_CNI_PLUGIN:=calico};;
+        *) ${U7S_CNI_PLUGIN:=flannel};;
+      esac
+      podNetworkCidrIP=$CIDRIP
+      podNetworkMask=$CIDRMASK
+      shift;shift
+      continue;;
+    '--service-cidr')
+      eval serviceCidr=$2
+      getCidr $serviceCidr
+      serviceCidrIP=$CIDRIP
+      serviceMask=$CIDRMASK
+      shift;shift
+      continue;;
+    '--service-dns-domain')
+      eval dnsDomain=$2
+      shift;shift
+      continue;;
+    '--token-ttl')
+      eval tokenTTL=$2
+      shift;shift
+      continue;;
+    '--skip-certificate-key-print'|'--skip-token-print'|'--upload-certs')
+      kubeadmFlags+=\" $1\"
+      shift
+      continue;;
+      *)
+      echo "Неизвестный параметр $1"
+      shift
+      continue;;
+    esac
+  fi
+  if [ $cmd = 'join' ]
+  then
+    case $1 in
+    '--control-plane')
+      controlPlane="master"
+      shift
+      continue;;
+    '--discovery-file')
+      eval FileDiscovery=$2
+      shift;shift
+      continue;;
+    '--discovery-token')
+      eval bootstrapToken=$2
+      shift;shift
+      continue;;
+    '--discovery-token-ca-cert-hash')
+      eval caCertHash=$2
+      shift;shift
+      continue;;
+    '--discovery-token-unsafe-skip-ca-verification')
+      kubeadmFlags+=\" $1\"
+      shift
+      continue;;
+    '--tls-bootstrap-token')
+      eval tlsBootstrapToken=$2
+      shift;shift
+      continue;;
+    *)
+      echo "Неизвестный параметр $1"
+      shift
+      continue;;
+    esac
+  fi
+  echo "Неизвестный параметр $1"
+  shift
+done
+
+if [ $cmd = 'init' ]
+then
+  controlPlane="initMaster"
+fi
+
+etcdDataDir='/var/lib/podsec/u7s/etcd/member'
 case $cmd in
   init | join)
     if [ -d  $etcdDataDir ]
@@ -96,164 +347,163 @@ case $cmd in
     kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
     apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
     ;;
-  update)
+  upgrade)
     CurrentKubeVersion=$(currentKubeVersion)
     if [ $CurrentKubeVersion != $U7S_KUBEVERSION ]
     then
-      echo "UPDATE"
+      echo "UPGRADE"
       exit 0
     fi
     ;;
 
 esac
 
-shift
-controlPlane=
-token=
-caCertHash=
-extIP=
-serviceCidr=
-apiServer=
-ifs=$IFS
-pars=$@
-case $cmd in
-  init)
-    controlPlane="initMaster"
-    while [ $# -gt 0 ]
-    do
-      par=$1
-      if [ "${par:0:2}" != '--' ]
-      then
-        echo "Подкоманда init '$par' не поддерживается" >&2
-        echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
-        machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
-        exit $?
-      fi
-      par=${par:2}
-      case $par in
-        'apiserver-advertise-address')
-          extIP=$2
-          shift; shift
-          extDev=$(getExtDev $extIP)
-          if [ -z "$extDev" ]
-          then
-            echo "Для IP-адреса '$extIP' нет интерфейса" >&2
-            exit
-          fi
-        ;;
-        'control-plane-endpoint')
-          apiServer=$2
-          shift;shift
-        ;;
-        'service-cidr')
-          serviceCidr=$2
-          shift;shift
-          getCidr $serviceCidr
-          serviceCidrIP=$CIDRIP
-          serviceMask=$CIDRMASK
-        ;;
-        'pod-network-cidr')
-          podNetworkCidr=$2
-          shift;shift
-          getCidr $podNetworkCidr
-          case $podNetworkCidr in
-            '10.244.0.0/16') : ${U7S_CNI_PLUGIN:=flannel};;
-            '192.168.0.0/16') : ${U7S_CNI_PLUGIN:=calico};;
-            *) ${U7S_CNI_PLUGIN:=flannel};;
-          esac
-          podNetworkCidrIP=$CIDRIP
-          podNetworkMask=$CIDRMASK
-        ;;
-        *)
-          echo "Параметр '$par' команды '$cmd' не поддерживается" >&2
-          echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
-          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
-          exit $?
-          ;;
-      esac
-    done
-    ;;
-  join)
-    if [ $# -eq 0 ]
-    then
-      echo "Команда join не имеет параметров" >&2
-      format
-      exit 1
-    fi
-    apiServer=$1
-    shift
-    while [ $# -gt 0 ]
-    do
-      par=$1
-      if [ "${par:0:2}" != '--' ]
-      then
-        echo "Неверный параметр '--$par' в операции 'join'" >&1
-        exit
-      fi
-      par=${par:2}
-      case $par in
-        'control-plane')
-          controlPlane="master"
-          shift
-          ;;
-        'token')
-          token=$2
-          shift;shift
-          ;;
-        'discovery-token-ca-cert-hash')
-          caCertHash=$2
-          shift;shift
-          ;;
-        'apiserver-advertise-address')
-          extIP=$2
-          shift; shift
-          extDev=$(getExtDev $extIP)
-          if [ -z "$extDev" ]
-          then
-            echo "Для IP-адреса '$extIP' нет интерфейса" >&2
-            exit
-          fi
-          ;;
-        'certificate-key')
-          certificateKey=$2
-          shift;shift
-          ;;
-        'service-cidr')
-          serviceCidr=$2
-          shift;shift
-          getCidr $serviceCidr
-          serviceCidrIP=$CIDRIP
-          serviceMask=$CIDRMASK
-          ;;
-        config|version)
-          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
-          exit $?
-          ;;
-        *)
-          echo "Параметр '$par' команды '$cmd' не поддерживается" >&2
-          echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
-          machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
-          exit $?
-          ;;
-      esac
-    done
-    if [ -z "$token" ]
-    then
-      echo "В операции join отсутствуют флаг token";
-      exit 1
-    fi
-    if [ -z "$caCertHash" ]
-    then
-      echo "В операции join отсутствуют флаг discovery-token-ca-cert-hash";
-      exit 1
-    fi
-    ;;
-  *)
-    echo "Команда '$cmd' не поддерживается" >&2
-    echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
-    machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
-    exit $?
-esac
+# shift
+
+# pars=$@
+# case $cmd in
+#   init)
+#     controlPlane="initMaster"
+#     while [ $# -gt 0 ]
+#     do
+#       par=$1
+#       if [ "${par:0:2}" != '--' ]
+#       then
+#         echo "Подкоманда init '$par' не поддерживается" >&2
+#         echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+#         machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+#         exit $?
+#       fi
+#       par=${par:2}
+#       case $par in
+#         'apiserver-advertise-address')
+#           extIP=$2
+#           shift; shift
+#           extDev=$(getExtDev $extIP)
+#           if [ -z "$extDev" ]
+#           then
+#             echo "Для IP-адреса '$extIP' нет интерфейса" >&2
+#             exit
+#           fi
+#         ;;
+#         'control-plane-endpoint')
+#           apiServer=$2
+#           shift;shift
+#         ;;
+#         'service-cidr')
+#           serviceCidr=$2
+#           shift;shift
+#           getCidr $serviceCidr
+#           serviceCidrIP=$CIDRIP
+#           serviceMask=$CIDRMASK
+#         ;;
+#         'pod-network-cidr')
+#           podNetworkCidr=$2
+#           shift;shift
+#           getCidr $podNetworkCidr
+#           case $podNetworkCidr in
+#             '10.244.0.0/16') : ${U7S_CNI_PLUGIN:=flannel};;
+#             '192.168.0.0/16') : ${U7S_CNI_PLUGIN:=calico};;
+#             *) ${U7S_CNI_PLUGIN:=flannel};;
+#           esac
+#           podNetworkCidrIP=$CIDRIP
+#           podNetworkMask=$CIDRMASK
+#         ;;
+#         *)
+#           echo "  *)
+#     echo "Команда '$cmd' не поддерживается" >&2
+#     echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+#     machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+#     exit $?
+# esacПараметр '$par' команды '$cmd' не поддерживается" >&2
+#           echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+#           machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+#           exit $?
+#           ;;
+#       esac
+#     done
+#     ;;
+#   join)
+#     if [ $# -eq 0 ]
+#     then
+#       echo "Команда join не имеет параметров" >&2
+#       format
+#       exit 1
+#     fi
+#     apiServer=$1
+#     shift
+#     while [ $# -gt 0 ]
+#     do
+#       par=$1
+#       if [ "${par:0:2}" != '--' ]
+#       then
+#         echo "Неверный параметр '--$par' в операции 'join'" >&1
+#         exit
+#       fi
+#       par=${par:2}
+#       case $par in
+#         'control-plane')
+#           controlPlane="master"
+#           shift
+#           ;;
+#         'token')
+#           token=$2
+#           shift;shift
+#           ;;
+#         'discovery-token-ca-cert-hash')
+#           caCertHash=$2
+#           shift;shift
+#           ;;
+#         'apiserver-advertise-address')
+#           extIP=$2
+#           shift; shift
+#           extDev=$(getExtDev $extIP)
+#           if [ -z "$extDev" ]
+#           then
+#             echo "Для IP-адреса '$extIP' нет интерфейса" >&2
+#             exit
+#           fi
+#           ;;
+#         'certificate-key')
+#           certificateKey=$2
+#           shift;shift
+#           ;;
+#         'service-cidr')
+#           serviceCidr=$2
+#           shift;shift
+#           getCidr $serviceCidr
+#           serviceCidrIP=$CIDRIP
+#           serviceMask=$CIDRMASK
+#           ;;
+#         config|version)
+#           machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+#           exit $?
+#           ;;
+#         *)
+#           echo "Параметр '$par' команды '$cmd' не поддерживается" >&2
+#           echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+#           machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+#           exit $?
+#           ;;
+#       esac
+#     done
+#     if [ -z "$token" ]
+#     then
+#       echo "В операции join отсутствуют флаг token";
+#       exit 1
+#     fi
+#     if [ -z "$caCertHash" ]
+#     then
+#       echo "В операции join отсутствуют флаг discovery-token-ca-cert-hash";
+#       exit 1
+#     fi
+#     ;;
+#   *)
+#     echo "Команда '$cmd' не поддерживается" >&2
+#     echo "Попытка выполнить ее в команде kubeadm kubernetes..." >&2
+#     machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/kubeadm $cmd $pars
+#     exit $?
+# esac
 
 uid=`id -u u7s-admin`
 
