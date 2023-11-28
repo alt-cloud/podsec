@@ -17,7 +17,7 @@ init-флаг          | join-флаг     | Поддержка
 --log-file:         | --log-file:       |
 --log-file-max-size:| --log-file-max-size: |
 --one-output:       | --one-output:    |
---rootfs:           | --skip-log-headers: |
+--rootfs:           | --rootfs: |
 --skip-headers    | --skip-headers
 --skip-log-headers | --skip-log-headers
 
