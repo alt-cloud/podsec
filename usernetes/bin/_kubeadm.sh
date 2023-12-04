@@ -84,14 +84,12 @@ cat $KUBEADM_CONFIGS_DIR/KubeProxyConfiguration.yaml
 mkdir -p /run/crio/ || :;
 /bin/ln -sf /run/user/${uid}/usernetes/crio/crio.sock  /run/crio/crio.sock || :;
 
-pars=
 
 if [ $cmd = 'init' ]
 then
-  pars='--upload-certs'
+  U7S_KUBEADFLAGS='--upload-certs'
 fi
 
 /usr/bin/kubeadm $cmd \
-  -v $U7S_DEBUGLEVEL \
-   $pars \
+   $U7S_KUBEADFLAGS \
   --config $configFile
