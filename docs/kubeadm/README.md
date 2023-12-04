@@ -62,13 +62,19 @@ apply-флаг          | diff-флаг     | node-флаг | plan-флаг
 --------------------|---------------|-------------|---------------
 --allow-experimental-upgrades | **-** | **-** | --allow-experimental-upgrades 
 --allow-release-candidate-upgrades | **-** | **-** | --allow-release-candidate-upgrades
-**-** | --api-server-manifest | **-** |  
+**-** | --api-server-manifest: | **-** |  
 **-** | --certificate-renewal | --certificate-renewal | 
-**-** | -context-lines (-c) | **-** | 
-**-** | --controller-manager-manifest **-** | 
+**-** | -context-lines: (-c:) | **-** | 
+**-** | --controller-manager-manifest: **-** | 
 --etcd-upgrade | **-** | --etcd-upgrade |
 **-** | **-** | **-** | --output (-o)
 **-** | **-** | **-** | --print-config
 **-** | **-** | **-** | --show-managed-fields
-**-** | --scheduler-manifest | **-** | 
+**-** | --scheduler-manifest: | **-** | 
+
+### kubeadm reset
+
+Flag |
+-----|
+--cleanup-tmp-dir |
 
