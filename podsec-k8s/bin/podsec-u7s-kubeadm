@@ -1,77 +1,78 @@
 #!/bin/sh
 source podsec-u7s-functions
 source /etc/podsec/u7s/env/u7s_platform
+source /etc/podsec/u7s/env/u7s_flags
 
 
 format() {
   echo -e "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
 
-infoFlags="
---help
--h
-"
+# infoFlags="
+# --help
+# -h
+# "
+#
+# globalFlags="
+# -v:
+# --add-dir-header:
+# --log-file:
+# --log-file-max-size:
+# --one-output:
+# --rootfs:
+# --skip-headers
+# --skip-log-headers
+# "
+#
+# initJoinFlags="
+# --apiserver-advertise-address:
+# --apiserver-bind-port:
+# --certificate-key:
+# --config:
+# --cri-socket:
+# --dry-run
+# --ignore-preflight-errors:
+# --node-name:
+# --patches:
+# --skip-phases:
+# --token:
+# "
+# initFlags="
+# --cert-dir:
+# --control-plane-endpoint:
+# --feature-gates:
+# --image-repository:
+# --kubernetes-version:
+# --pod-network-cidr:
+# --service-cidr:
+# --service-dns-domain:
+# --skip-certificate-key-print
+# --skip-token-print
+# --token-ttl:
+# --upload-certs
+# "
+#
+# joinFlags="
+# --control-plane
+# --discovery-file:
+# --discovery-token:
+# --discovery-token-ca-cert-hash:
+# --discovery-token-unsafe-skip-ca-verification
+# --tls-bootstrap-token:
+# "
 
-globalFlags="
--v:
---add-dir-header:
---log-file:
---log-file-max-size:
---one-output:
---rootfs:
---skip-headers
---skip-log-headers
-"
+# getoptPars=""
+# for par in $infoFlags $globalFlags $initJoinFlags $initFlags $joinFlags
+# do
+#   if [ ${par:0:2} = '--' ]
+#   then
+#     getoptPars+="--long ${par:2} "
+#   else
+#     getoptPars+="-o ${par:1} "
+#   fi
+# done
 
-initJoinFlags="
---apiserver-advertise-address:
---apiserver-bind-port:
---certificate-key:
---config:
---cri-socket:
---dry-run
---ignore-preflight-errors:
---node-name:
---patches:
---skip-phases:
---token:
-"
-initFlags="
---cert-dir:
---control-plane-endpoint:
---feature-gates:
---image-repository:
---kubernetes-version:
---pod-network-cidr:
---service-cidr:
---service-dns-domain:
---skip-certificate-key-print
---skip-token-print
---token-ttl:
---upload-certs
-"
-
-joinFlags="
---control-plane
---discovery-file:
---discovery-token:
---discovery-token-ca-cert-hash:
---discovery-token-unsafe-skip-ca-verification
---tls-bootstrap-token:
-"
-
-getoptPars=""
-
-for par in $infoFlags $globalFlags $initJoinFlags $initFlags $joinFlags
-do
-  if [ ${par:0:2} = '--' ]
-  then
-    getoptPars+="--long ${par:2} "
-  else
-    getoptPars+="-o ${par:1} "
-  fi
-done
-
+getoptPars=$(formGetoptPars)
 opts=$(getopt -n kubeadm $getoptPars -- "$@" 2>&1)
 if [ ! $? ]  # Анализ параметров обнаружил ошибки
 then
@@ -103,42 +104,41 @@ eval subcommand=$@
 eval cmd=$1
 if [ -n "$haveHelpFlag" ]
 then
-  nativeCommand="/usr/bin/kubeadm $cmd -h"
+  nativeCommand="/usr/bin/kubeadm $subcommand -h"
 fi
 
+set -- $pars
 U7S_KUBEADFLAGS=
 # Обработать общесистемные параметры
 while [ $# -gt 0 ]
 do
-  case $1 in
-  # globalFlags
-  '-v'|'--add-dir-header'|'--log-file'|'--log-file-max-size'|'--one-output'|'--rootfs')
-    eval U7S_KUBEADFLAGS+=\"$1 $2 \"
-    shift;shift
-    continue;;
-  '--skip-headers'|'--skip-log-headers')
-    eval U7S_KUBEADFLAGS+=\"$1 \"
-    shift
-    continue;;
-  esac
+  par=${1:1}
+  if [ ${par:0:1} == '-' ]
+  then # long-параметр
+    par=${par:1}
+  fi
+  eval ${KFLAGS[$par]}  # Установить переменную FLAG_xxxx
+  shift
+  if [ -z ${KFLAGSBOOLEAN[$par]} ]; then shift; fi  # LONG PARS - shift value
 done
 
 if [ $cmd != 'init' -a $cmd != 'join' ] # Команда ни init ни join
 then
-  nativeCommand="/usr/bin/kubeadm $cmd $pars $subcommand"
+#   nativeCommand="/usr/bin/kubeadm $cmd $pars $subcommand"
+  nativeCommand="/usr/bin/kubeadm $subcommand $pars"
 fi
 
 if [ -n "$nativeCommand" ]  # Команда вывода параметров?
 then
   machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s $nativeCommand
-  exit 0
+  exit $?
 fi
 
 ifs=$IFS
 controlPlane=
-token=
+U7S_TOKEN=
 caCertHash=
-extIP=
+U7S_EXTIP=
 serviceCidr=
 apiServer=
 debugLevel=0
@@ -146,7 +146,7 @@ debugLevel=0
 apiServerBindPort=6443
 nodeRegistrationName=
 patches=
-skipPhases=
+U7S_SKIP_PHASES=
 certificatesDir=
 dnsDomain='cluster.local'
 tokenTTL=
@@ -156,6 +156,7 @@ tlsBootstrapToken=
 
 
 # КОМАНДА init ИЛИ join
+set -- $subcommand
 shift
 if [ $# -gt 0 ]
 then
@@ -189,14 +190,18 @@ fi
 set -- $pars
 while [ $# -gt 0 ]
 do
+  par=$1
+
+
+
   case $1 in
   # initJoinFlags
   '--apiserver-advertise-address')
-    eval extIP=$2
-    extDev=$(getExtDev $extIP)
+    eval U7S_EXTIP=$2
+    extDev=$(getExtDev $U7S_EXTIP)
     if [ -z "$extDev" ]
     then
-      echo "Для IP-адреса '$extIP' нет интерфейса" >&2
+      echo "Для IP-адреса '$U7S_EXTIP' нет интерфейса" >&2
       exit
     fi
     shift;shift
@@ -230,11 +235,11 @@ do
     shift;shift
     continue;;
   '--skip-phases')
-    eval skipPhases=$2
+    eval U7S_SKIP_PHASES=$2
     shift;shift
     continue;;
   '--token')
-    eval token=$2
+    eval U7S_TOKEN=$2
     shift;shift
     continue;;
   esac
@@ -386,15 +391,15 @@ fi
 
 : ${U7S_CNI_PLUGIN:=flannel}
 
-if [ -z "$extIP" ]
+if [ -z "$U7S_EXTIP" ]
 then
-  extIP=$(getExtIP)
-  extDev=$(getExtDev $extIP)
+  U7S_EXTIP=$(getExtIP)
+  extDev=$(getExtDev $U7S_EXTIP)
 fi
 
 if [ -z "$apiServer" ]
 then
-  apiServer="$extIP:$apiServerBindPort"
+  apiServer="$U7S_EXTIP:$apiServerBindPort"
 fi
 
 kubernetesClusterIP=$(getKubernetesClusterIP $serviceCidr)
@@ -425,14 +430,14 @@ U7S_REGISTRY=$U7S_REGISTRY
 U7S_REGISTRY_PLATFORM=$U7S_REGISTRY_PLATFORM
 U7S_IMAGES='$U7S_IMAGES'
 U7S_UID=$uid
-U7S_EXTIP=$extIP
+U7S_EXTIP=$U7S_EXTIP
 U7S_EXTDEV=$extDev
 U7S_DEBUGLEVEL=$debugLevel
 U7S_CONTROLPLANE=$controlPlane
 U7S_APISERVER=$apiServer
 U7S_APISERVERIP=$apiServerIP
 U7S_APISERVERPORT=$apiServerPort
-U7S_TOKEN=$token
+U7S_TOKEN=$U7S_TOKEN
 U7S_CACERTHASH=$caCertHash
 U7S_CERIFICATEKEY=$certificateKey
 U7S_SERVICECIDR=$serviceCidr
@@ -447,6 +452,7 @@ U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
 U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
 U7S_SLIRP4IP=$slirp4IP
 U7S_CONTROLPLANEENDPOINT=$controlPlaneEndpoint
+U7S_SKIP_PHASES=$U7S_SKIP_PHASES
 _CONTAINERS_ROOTLESS_UID=$uid
 _CONTAINERS_USERNS_CONFIGURED=1
 " >> /etc/podsec/u7s/config/env

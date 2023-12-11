@@ -31,7 +31,7 @@ else
           .controlPlane.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'" |
           .controlPlane.certificateKey |= "'$U7S_CERIFICATEKEY'"
           ' $KUBEADM_CONFIGS_DIR/JoinControlPlaneConfijuration.yaml
-  else
+  else # WORKER
    yq -y '
           .discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
           .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |

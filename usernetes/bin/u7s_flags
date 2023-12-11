@@ -1,0 +1,172 @@
+#!/bin/sh
+# Flags functions
+
+
+export infoFlags='
+	help
+	h
+'
+
+export globalFlags='
+	v
+	add-dir-header
+	log-file
+	log-file-max-size
+	one-output
+	rootfs
+	skip-headers
+	skip-log-headers
+'
+
+export initJoinFlags='
+	apiserver-advertise-address
+	apiserver-bind-port
+	certificate-key
+	config
+	cri-socket
+	dry-run
+	ignore-preflight-errors
+	node-name
+	patches
+	skip-phases
+	token
+'
+
+export initFlags='
+	cert-dir
+	control-plane-endpoint
+	feature-gates
+	image-repository
+	kubernetes-version
+	pod-network-cidr
+	service-cidr
+	service-dns-domain
+	skip-certificate-key-print
+	skip-token-print
+	token-ttl
+	upload-certs
+'
+
+export joinFlags='
+	control-plane
+	discovery-file
+	discovery-token
+	discovery-token-ca-cert-hash
+	discovery-token-unsafe-skip-ca-verification
+	tls-bootstrap-token
+'
+
+export upgradeFlags='
+	allow-experimental-upgrades
+	allow-release-candidate-upgrades
+	api-server-manifest
+	certificate-renewal
+	context-lines
+	c
+	controller-manager-manifest
+	etcd-upgrade
+	output
+	o
+	print-config
+	show-managed-fields
+	scheduler-manifest
+'
+
+export resetFlags='
+	cleanup-tmp-dir
+'
+declare -A KFLAGS=(
+	[help]='FLAG_help=1;'
+	[h]='FLAG_h=1;'
+	[v]='FLAG_v=$2;'
+	[add-dir-header]='FLAG_add_dir-header=$2;'
+	[log-file]='FLAG_log_file=$2;'
+	[log-file-max-size]='FLAG_log_file-max-size=$2;'
+	[one-output]='FLAG_one_output=$2;'
+	[rootfs]='FLAG_rootfs=$2;'
+	[skip-headers]='FLAG_skip_headers=1;'
+	[skip-log-headers]='FLAG_skip_log-headers=1;'
+	[apiserver-advertise-address]='FLAG_apiserver_advertise-address=$2;'
+	[apiserver-bind-port]='FLAG_apiserver_bind-port=$2;'
+	[certificate-key]='FLAG_certificate_key=$2;'
+	[config]='FLAG_config=$2;'
+	[cri-socket]='FLAG_cri_socket=$2;'
+	[dry-run]='FLAG_dry_run=1;'
+	[ignore-preflight-errors]='FLAG_ignore_preflight-errors=$2;'
+	[node-name]='FLAG_node_name=$2;'
+	[patches]='FLAG_patches=$2;'
+	[skip-phases]='FLAG_skip_phases=$2;'
+	[token]='FLAG_token=$2;'
+	[cert-dir]='FLAG_cert_dir=$2;'
+	[control-plane-endpoint]='FLAG_control_plane-endpoint=$2;'
+	[feature-gates]='FLAG_feature_gates=$2;'
+	[image-repository]='FLAG_image_repository=$2;'
+	[kubernetes-version]='FLAG_kubernetes_version=$2;'
+	[pod-network-cidr]='FLAG_pod_network-cidr=$2;'
+	[service-cidr]='FLAG_service_cidr=$2;'
+	[service-dns-domain]='FLAG_service_dns-domain=$2;'
+	[skip-certificate-key-print]='FLAG_skip_certificate-key-print=1;'
+	[skip-token-print]='FLAG_skip_token-print=1;'
+	[token-ttl]='FLAG_token_ttl=$2;'
+	[upload-certs]='FLAG_upload_certs=1;'
+	[control-plane]='FLAG_control_plane=1;'
+	[discovery-file]='FLAG_discovery_file=$2;'
+	[discovery-token]='FLAG_discovery_token=$2;'
+	[discovery-token-ca-cert-hash]='FLAG_discovery_token-ca-cert-hash=$2;'
+	[discovery-token-unsafe-skip-ca-verification]='FLAG_discovery_token-unsafe-skip-ca-verification=1;'
+	[tls-bootstrap-token]='FLAG_tls_bootstrap-token=$2;'
+	[allow-experimental-upgrades]='FLAG_allow_experimental-upgrades=1;'
+	[allow-release-candidate-upgrades]='FLAG_allow_release-candidate-upgrades=1;'
+	[api-server-manifest]='FLAG_api_server-manifest=$2;'
+	[certificate-renewal]='FLAG_certificate_renewal=1;'
+	[context-lines]='FLAG_context_lines=$2;'
+	[c]='FLAG_c=$2;'
+	[controller-manager-manifest]='FLAG_controller_manager-manifest=$2;'
+	[etcd-upgrade]='FLAG_etcd_upgrade=1;'
+	[output]='FLAG_output=1;'
+	[o]='FLAG_o=1;'
+	[print-config]='FLAG_print_config=1;'
+	[show-managed-fields]='FLAG_show_managed-fields=1;'
+	[scheduler-manifest]='FLAG_scheduler_manifest=$2;'
+	[cleanup-tmp-dir]='FLAG_cleanup_tmp-dir=1;'
+)
+declare -A KFLAGSBOOLEAN=(
+	[help]=1
+	[h]=1
+	[skip-headers]=1
+	[skip-log-headers]=1
+	[dry-run]=1
+	[skip-certificate-key-print]=1
+	[skip-token-print]=1
+	[upload-certs]=1
+	[control-plane]=1
+	[discovery-token-unsafe-skip-ca-verification]=1
+	[allow-experimental-upgrades]=1
+	[allow-release-candidate-upgrades]=1
+	[certificate-renewal]=1
+	[etcd-upgrade]=1
+	[output]=1
+	[o]=1
+	[print-config]=1
+	[show-managed-fields]=1
+	[cleanup-tmp-dir]=1
+)
+
+
+# Сформировать список параметров для getopt --long par -o par ...
+formGetoptPars() {
+  for flag in ${!KFLAGS[@]}
+  do
+		haveParSym=
+		if [ -z ${KFLAGSBOOLEAN[$flag]} ]; then haveParSym=':'; fi
+		if [ ${#flag} -gt 1 ]
+		then
+			echo "--long $flag$haveParSym"
+		else
+			echo "-o $flag$haveParSym"
+		fi
+  done
+
+}
+
+# formGetoptPars
