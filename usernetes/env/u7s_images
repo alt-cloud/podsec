@@ -28,7 +28,7 @@ fi
 
 if [ -z "$U7S_CERTMANAGER_TAG" ]
 then
-  U7S_CERTMANAGER_TAG="v1.11.0"
+  U7S_CERTMANAGER_TAG="v1.9.1"
 fi
 
 longImageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
