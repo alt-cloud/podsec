@@ -28,10 +28,10 @@ fi
 
 if [ -z "$U7S_CERTMANAGER_TAG" ]
 then
-  U7S_CERTMANAGER_TAG="v1.11.0"
+  U7S_CERTMANAGER_TAG="v1.9.1"
 fi
 
-longImageList=$(/usr/bin/kubeadm --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
+longImageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
 let lenRegistry=${#U7S_REGISTRY}+1
 let lenRegistryPlatform=${#U7S_REGISTRY_PLATFORM}+1
 ifs=$IFS
@@ -40,7 +40,7 @@ for longImage in $longImageList
 do
   image=${longImage:lenRegistry}
   shortImage=${longImage:lenRegistryPlatform}
-  U7S_IMAGES+=" shortImage"
+  U7S_IMAGES+=" $image"
   IFS=:
   set -- $shortImage
   IFS=$ifs

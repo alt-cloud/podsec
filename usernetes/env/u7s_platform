@@ -21,11 +21,12 @@ function getPlatform() {
     IFS=$ifs
     version=$1
     case $platform in
-      spserver) export U7S_PLATFORM="k8s-c${bersion}f1"; break;;
+      spserver) export U7S_PLATFORM="k8s-c${version}f1"; break;;
       sisyphus) export U7S_PLATFORM="test_k8s"; break;;
       *) export U7S_PLATFORM="k8s-p${version}"; break;;
     esac
   fi
+  if [ $U7S_PLATFORM = 'k8s-c10f2' ]; then export U7S_PLATFORM='k8s-c10f1'; fi
   case $U7S_PLATFORM in
     test_k8s|k8s-c10f1|k8s-p10) break;;
     *) export U7S_PLATFORM="test_k8s";

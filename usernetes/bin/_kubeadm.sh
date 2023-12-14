@@ -87,9 +87,9 @@ mkdir -p /run/crio/ || :;
 
 if [ $cmd = 'init' ]
 then
-  U7S_KUBEADFLAGS='--upload-certs'
+  U7S_KUBEADMFLAGS='--upload-certs'
 fi
 
 /usr/bin/kubeadm $cmd \
-   $U7S_KUBEADFLAGS \
+   $U7S_KUBEADMFLAGS \
   --config $configFile
