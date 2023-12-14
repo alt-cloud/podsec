@@ -19,23 +19,24 @@ TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
 (
 if [ "$cmd" = 'init' ]
 then
-  yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'"' $KUBEADM_CONFIGS_DIR/InitConfiguration.yaml
+  yq -y '.localAPIEndpoint.advertiseAddress |="'$U7S_APISERVER_ADVERTISE_ADDRESS'"' $KUBEADM_CONFIGS_DIR/InitConfiguration.yaml
 else
   if [ -n "$U7S_CONTROLPLANE" ]
   then
     yq -y '
           .discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
           .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |
-          .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'" |
+          .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVERENDPOINT'" |
           .nodeRegistration.name |= "'$host'" |
-          .controlPlane.localAPIEndpoint.advertiseAddress |="'$U7S_EXTIP'" |
+          .controlPlane.localAPIEndpoint.advertiseAddress |="'$U7S_APISERVER_ADVERTISE_ADDRESS'" |
+          .controlPlane.localAPIEndpoint.bindPort |="'$U7S_APISERVER_BIND_PORT'" |
           .controlPlane.certificateKey |= "'$U7S_CERIFICATEKEY'"
           ' $KUBEADM_CONFIGS_DIR/JoinControlPlaneConfijuration.yaml
-  else # WORKER
+  else # WORKERU7S_APISERVER_ADVERTISE_ADDRESS
    yq -y '
           .discovery.bootstrapToken.token |= "'$U7S_TOKEN'" |
           .discovery.bootstrapToken.caCertHashes |= ["'$U7S_CACERTHASH'"] |
-          .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVER'" |
+          .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVERENDPOINT'" |
           .nodeRegistration.name |= "'$host'"
          ' $KUBEADM_CONFIGS_DIR/JoinConfiguration.yaml
   fi
@@ -45,32 +46,32 @@ if [ -n "$U7S_CONTROLPLANE" ]
 then
   if [ "$U7S_CONTROLPLANE" =  'initMaster' ]
   then
-    yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
+    yq -y '.controlPlaneEndpoint |="'$U7S_APISERVER_ADVERTISE_ADDRESS'" |
           .kubernetesVersion |= "'${U7S_KUBEVERSION:1}'" |
          .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
-         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'", "127.0.0.1"] |
-         .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
-         .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
+         .etcd.local.serverCertSANs |= ["'$U7S_APISERVER_ADVERTISE_ADDRESS'", "127.0.0.1"] |
+         .etcd.local.peerCertSANs |= ["'$U7S_APISERVER_ADVERTISE_ADDRESS'"] |
+         .apiServer.extraArgs."advertise-address"="'$U7S_APISERVER_ADVERTISE_ADDRESS'" |
          .controllerManager.extraArgs."cluster-cidr" |= "'$U7S_PODNETWORKCIDR'" |
          .controllerManager.extraArgs."service-cluster-ip-range" |= "'$U7S_SERVICECIDR'" |
          .networking.podSubnet |= "'$U7S_PODNETWORKCIDR'" |
          .networking.serviceSubnet |= "'$U7S_SERVICECIDR'" |
-         .controlPlaneEndpoint = "'${U7S_APISERVER}'"
+         .controlPlaneEndpoint = "'${U7S_APISERVERENDPOINT}'"
         ' $KUBEADM_CONFIGS_DIR/InitClusterConfiguration.yaml
   else
-    yq -y '.controlPlaneEndpoint |="'$U7S_EXTIP'" |
+    yq -y '.controlPlaneEndpoint |="'$U7S_APISERVER_ADVERTISE_ADDRESS'" |
           .kubernetesVersion |= "'${U7S_KUBEVERSION:1}'" |
          .imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
          .etcd.local.imageRepository|="'$U7S_REGISTRY_PLATFORM'" |
-         .etcd.local.serverCertSANs |= ["'$U7S_EXTIP'", "127.0.0.1"] |
-         .etcd.local.peerCertSANs |= ["'$U7S_EXTIP'"] |
-         .apiServer.extraArgs."advertise-address"="'$U7S_EXTIP'" |
+         .etcd.local.serverCertSANs |= ["'$U7S_APISERVER_ADVERTISE_ADDRESS'", "127.0.0.1"] |
+         .etcd.local.peerCertSANs |= ["'$U7S_APISERVER_ADVERTISE_ADDRESS'"] |
+         .apiServer.extraArgs."advertise-address"="'$U7S_APISERVER_ADVERTISE_ADDRESS'" |
          .controllerManager.extraArgs."cluster-cidr" |= "'$U7S_PODNETWORKCIDR'" |
          .controllerManager.extraArgs."service-cluster-ip-range" |= "'$U7S_SERVICECIDR'" |
          .networking.podSubnet |= "'$U7S_PODNETWORKCIDR'" |
          .networking.serviceSubnet |= "'$U7S_SERVICECIDR'" |
-         .controlPlaneEndpoint = "'${U7S_APISERVER}'"
+         .controlPlaneEndpoint = "'${U7S_APISERVERENDPOINT}'"
         ' $KUBEADM_CONFIGS_DIR/JoinClusterConfiguration.yaml
   fi
 
@@ -87,7 +88,7 @@ mkdir -p /run/crio/ || :;
 
 if [ $cmd = 'init' ]
 then
-  U7S_KUBEADMFLAGS='--upload-certs'
+  U7S_KUBEADMFLAGS+=' --upload-certs'
 fi
 
 /usr/bin/kubeadm $cmd \

@@ -8,146 +8,15 @@ format() {
   echo -e "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
 
-# <<<<<<< HEAD
-# infoFlags="
-# --help
-# -h
-# "
-#
-# globalFlags="
-# -v:
-# --add-dir-header:
-# --log-file:
-# --log-file-max-size:
-# --one-output:
-# --rootfs:
-# --skip-headers
-# --skip-log-headers
-# "
-#
-# initJoinFlags="
-# --apiserver-advertise-address:
-# --apiserver-bind-port:
-# --certificate-key:
-# --config:
-# --cri-socket:
-# --dry-run
-# --ignore-preflight-errors:
-# --node-name:
-# --patches:
-# --skip-phases:
-# --token:
-# "
-# initFlags="
-# --cert-dir:
-# --control-plane-endpoint:
-# --feature-gates:
-# --image-repository:
-# --kubernetes-version:
-# --pod-network-cidr:
-# --service-cidr:
-# --service-dns-domain:
-# --skip-certificate-key-print
-# --skip-token-print
-# --token-ttl:
-# --upload-certs
-# "
-#
-# joinFlags="
-# --control-plane
-# --discovery-file:
-# --discovery-token:
-# --discovery-token-ca-cert-hash:
-# --discovery-token-unsafe-skip-ca-verification
-# --tls-bootstrap-token:
-# "
-
-# getoptPars=""
-# for par in $infoFlags $globalFlags $initJoinFlags $initFlags $joinFlags
-# do
-#   if [ ${par:0:2} = '--' ]
-#   then
-#     getoptPars+="--long ${par:2} "
-#   else
-#     getoptPars+="-o ${par:1} "
-#   fi
-# done
-
+ifs=$IFS
 getoptPars=$(formGetoptPars)
-# =======
-# infoFlags="
-# --help
-# -h
-# "
-#
-# globalFlags="
-# -v:
-# --add-dir-header:
-# --log-file:
-# --log-file-max-size:
-# --one-output:
-# --rootfs:
-# --skip-headers
-# --skip-log-headers
-# "
-#
-# initJoinFlags="
-# --apiserver-advertise-address:
-# --apiserver-bind-port:
-# --certificate-key:
-# --config:
-# --cri-socket:
-# --dry-run
-# --ignore-preflight-errors:
-# --node-name:
-# --patches:
-# --skip-phases:
-# --token:
-# "
-# initFlags="
-# --cert-dir:
-# --control-plane-endpoint:
-# --feature-gates:
-# --image-repository:
-# --kubernetes-version:
-# --pod-network-cidr:
-# --service-cidr:
-# --service-dns-domain:
-# --skip-certificate-key-print
-# --skip-token-print
-# --token-ttl:
-# --upload-certs
-# "
-#
-# joinFlags="
-# --control-plane
-# --discovery-file:
-# --discovery-token:
-# --discovery-token-ca-cert-hash:
-# --discovery-token-unsafe-skip-ca-verification
-# --tls-bootstrap-token:
-# "
-#
-# getoptPars=""
-#
-# for par in $infoFlags $globalFlags $initJoinFlags $initFlags $joinFlags
-# do
-#   if [ ${par:0:2} = '--' ]
-#   then
-#     getoptPars+="--long ${par:2} "
-#   else
-#     getoptPars+="-o ${par:1} "
-#   fi
-# done
-#
-# >>>>>>> master
+
 opts=$(getopt -n kubeadm $getoptPars -- "$@" 2>&1)
 if [ ! $? ]  # Анализ параметров обнаружил ошибки
 then
   echo $opts >&2
   exit 1
 fi
-# <<<<<<< HEAD
 
 set -- $opts
 pars=""
@@ -203,92 +72,10 @@ then
   exit $?
 fi
 
-ifs=$IFS
-controlPlane=
+# controlPlane=
 U7S_TOKEN=
 caCertHash=
-U7S_EXTIP=
-# =======
-#
-# set -- $opts
-# pars=""
-# haveHelpFlag=
-# while [ $# -gt 0 ]
-# do
-#   if [ $1 = '--' ]; then break; fi
-#   eval pars+="' $1'"
-#   if [ $1 = '-h' -o $1 = '--help' ]
-#   then
-#     haveHelpFlag='y'
-#   fi
-#   shift
-# done
-# shift
-#
-# nativeCommand=  # Команда передаваемая "родному" kubeadm
-# if [ $# -eq 0 ]
-# then
-#   nativeCommand="/usr/bin/kubeadm"
-# fi
-#
-# eval cmd=$1
-# shift
-# subcommand="$cmd "
-# while [ $# -gt 0 ]; do eval subcommand+="'$1 '";shift; done
-#
-# if [ -n "$haveHelpFlag" ]
-# then
-#   nativeCommand="/usr/bin/kubeadm $cmd -h"
-# fi
-#
-# U7S_KUBEADMFLAGS=
-# # Обработать общесистемные параметры
-# set -- $pars
-# while [ $# -gt 0 ]
-# do
-#   case $1 in
-#   # globalFlags
-#   '-v'|'--add-dir-header'|'--log-file'|'--log-file-max-size'|'--one-output'|'--rootfs')
-#     eval U7S_KUBEADMFLAGS+=\"$1 $2 \"
-#     shift;shift
-#     continue;;
-#   '--help'|'--skip-headers'|'--skip-log-headers')
-#     eval U7S_KUBEADMFLAGS+=\"$1 \"
-#     shift
-#     continue;;
-#   *) shift;;
-#   esac
-# done
-#
-# if [ $cmd != 'init' -a $cmd != 'join' ] # Команда ни init ни join
-# then
-#   nativeCommand="/usr/bin/kubeadm $subcommand $U7S_KUBEADMFLAGS"
-# fi
-#
-# if [ -n "$nativeCommand" ]  # Команда вывода параметров?
-# then
-#   machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s $nativeCommand
-#   exit 0
-# fi
-#
-# ifs=$IFS
-# controlPlane=
-# token=
-# caCertHash=
-# extIP=
-# >>>>>>> master
-serviceCidr=
-apiServer=
-debugLevel=0
-# Новые флаги
-apiServerBindPort=6443
-nodeRegistrationName=
-patches=
-# <<<<<<< HEAD
-U7S_SKIP_PHASES=
-# =======
-# skipPhases=
-# >>>>>>> master
+# U7S_EXTIP=$FLAG_apiserver_advertise_address
 certificatesDir=
 dnsDomain='cluster.local'
 tokenTTL=
@@ -296,152 +83,171 @@ FileDiscovery=
 bootstrapToken=
 tlsBootstrapToken=
 
+# Сформировать не поддержиывемые в kubeconf флаги
+nonKubeconfFlags='
+  v
+  dry-run
+  ignore-preflight-errors
+  skip-certificate-key-print
+  skip-token-print
+  upload-certs
+  discovery-token-unsafe-skip-ca-verification
+'
 
-# КОМАНДА init ИЛИ join
-# <<<<<<< HEAD
-set -- $subcommand
-# =======
-# >>>>>>> master
-shift
-if [ $# -gt 0 ]
-then
-  subcommand="$1"
-  if [ $subcommand != 'phase' ]
-# <<<<<<< HEAD
+for flag in $nonKubeconfFlags
+do
+  var="FLAG_$(echo $flag | sed -e 's/-/_/g')"
+  eval "val=\$$var"
+  if [ -n $val ] # Флаг $flag указан в параметрах
   then
-    if [ $cmd = 'join' ]
+    if [ ${#flag} -gt 1 ]
     then
-      eval apiServer=$1
-      shift
-      if [ $# -gt 0 ]
-      then
-        echo "Команда join имеет дополнительные параметры: $@"
-        exit 1
-      fi
+      Flag="--$flag"
     else
-      echo "Для команды $cmd обнаружена подкоманда $subcommand. Допустима только одна подкоманда phase" >&2
-      exit 1
+      Flag="-$flag"
     fi
-  else
-    shift
-    phase=$1
-    if [ $# -gt 1 ]
+    if [ -n ${KFLAGSBOOLEAN[$flag]} ] # булевый флаг (есть-нет)
     then
-      echo "Неверный формат опмсания фазы: $@"
-      exit 1
+      U7S_KUBEADMFLAGS+=" $Flag"
+    else
+      U7S_KUBEADMFLAGS+=" $Flag $val"
     fi
+  fi
+done
+if [ -z "$FLAG_apiserver_advertise_address" ]
+then
+  FLAG_apiserver_advertise_address=$(getExtIP)
+fi
+extDev=$(getExtDev $FLAG_apiserver_advertise_address)
+
+# Обработать флаги init, join
+if [ $cmd == 'init' ]
+then
+  controlPlane="initMaster"
+else # cmd = 'join'
+  U7S_TOKEN=$FLAG_token
+  caCertHash=$FLAG_discovery_token_ca_cert_hash
+  if [ -n "$FLAG_control_plane" ]
+  then
+    controlPlane="master"
+    certificateKey=$FLAG_certificate_key
   fi
 fi
 
-set -- $pars
-while [ $# -gt 0 ]
-do
-  par=$1
+if [ -z "$FLAG_apiserver_bind_port" ]
+then
+  FLAG_apiserver_bind_port=6443
+fi
 
-
-
-  case $1 in
-  # initJoinFlags
-  '--apiserver-advertise-address')
-    eval U7S_EXTIP=$2
-    extDev=$(getExtDev $U7S_EXTIP)
-    if [ -z "$extDev" ]
-    then
-      echo "Для IP-адреса '$U7S_EXTIP' нет интерфейса" >&2
-      exit
-    fi
-    shift;shift
-    continue;;
-  '--apiserver-bind-port')
-    eval apiServerBindPort=$2
-    shift;shift
-    continue;;
-  '--certificate-key')
-    eval certificateKey=$2
-    shift;shift
-    continue;;
-  '--config'| '--cri-socket')
-    echo "Флаг ${1:0:-1} не поддерживается"
-    shift;shift
-    continue;;
-  '--ignore-preflight-errors')
-    eval U7S_KUBEADMFLAGS+=\"$1 $2 \"
-    shift;shift
-    continue;;
-  '--dry-run')
-    eval U7S_KUBEADMFLAGS+=\"$1 \"
-    shift
-    continue;;
-  '--node-name')
-    eval nodeRegistrationName=$2
-    shift;shift
-    continue;;
-  '--patches')
-    eval patches=$2
-    shift;shift
-    continue;;
-  '--skip-phases')
-    eval U7S_SKIP_PHASES=$2
-    shift;shift
-    continue;;
-  '--token')
-    eval U7S_TOKEN=$2
-    shift;shift
-    continue;;
+if [ -z "$FLAG_control_plane_endpoint" ]
+then
+  FLAG_control_plane_endpoint="$FLAG_apiserver_advertise_address:$FLAG_apiserver_bind_port"
+fi
+if [ -z "$podNetworkCidr" ]
+then
+  : ${U7S_CNI_PLUGIN:=flannel}
+  case $U7S_CNI_PLUGIN in
+  flannel)
+    podNetworkCidrIP='10.244.0.0'
+    podNetworkMask='16';;
+  calico)
+    podNetworkCidrIP='192.168.0.0'
+    podNetworkMask='16';;
   esac
-  if [ $cmd = 'init' ]
-  then
-    controlPlane="initMaster"
-    case $1 in
-    '--cert-dir')
-      eval certificatesDir=$2
-      shift;shift
-      continue;;
-    '--control-plane-endpoint')
-      eval apiServer=$2
-      shift;shift
-      continue;;
-    '--feature-gates'|'--image-repository'|'--kubernetes-version') # Последние два замещены переменными среды - TODO: Россамотреть возможность замены
-      echo "Флаг $1 не поддерживается"
-      shift;shift
-      continue;;
-    '--pod-network-cidr')
-      eval podNetworkCidr=$2
-      getCidr $podNetworkCidr
-      case $podNetworkCidr in
-        '10.244.0.0/16') : ${U7S_CNI_PLUGIN:=flannel};;
-        '192.168.0.0/16') : ${U7S_CNI_PLUGIN:=calico};;
-        *) ${U7S_CNI_PLUGIN:=flannel};;
-      esac
-      podNetworkCidrIP=$CIDRIP
-      podNetworkMask=$CIDRMASK
-      shift;shift
-      continue;;
-    '--service-cidr')
-      eval serviceCidr=$2
-      getCidr $serviceCidr
-      serviceCidrIP=$CIDRIP
-      serviceMask=$CIDRMASK
-      shift;shift
-      continue;;
-    '--service-dns-domain')
-      eval dnsDomain=$2
-      shift;shift
-      continue;;
-    '--token-ttl')
-      eval tokenTTL=$2
-      shift;shift
-      continue;;
-    '--skip-certificate-key-print'|'--skip-token-print'|'--upload-certs')
-      U7S_KUBEADMFLAGS+=\" $1\"
-      shift
-      continue;;
-      *)
-# =======
+  podNetworkCidr="$podNetworkCidrIP/$podNetworkMask"
+fi
+if [ -n "$FLAG_pod_network_cidr" ]
+then
+  getCidr $FLAG_pod_network_cidr
+  podNetworkCidrIP=$CIDRIP
+  podNetworkMask=$CIDRMASK
+else
+  : ${U7S_CNI_PLUGIN:=flannel}
+  case $U7S_CNI_PLUGIN in
+  flannel)
+    podNetworkCidrIP='10.244.0.0'
+    podNetworkMask='16';;
+  calico)
+    podNetworkCidrIP='192.168.0.0'
+    podNetworkMask='16';;
+  esac
+  FLAG_pod_network_cidr="$podNetworkCidrIP/$podNetworkMask"
+fi
+
+if [ -n "$FLAG_pod_service_cidr" ]
+then
+  getCidr $FLAG_pod_service_cidr
+  podNetworkCidrIP=$CIDRIP
+  podNetworkMask=$CIDRMASK
+  getCidr FLAG_pod_service_cidr
+  serviceCidrIP=$CIDRIP
+  serviceMask=$CIDRMASK
+else
+  serviceCidrIP='10.96.0.0'
+  serviceMask='12'
+  FLAG_pod_service_cidr="$serviceCidrIP/$serviceMask"
+fi
+
+uid=`id -u u7s-admin`
+
+cp /etc/podsec/u7s/config/ENV /etc/podsec/u7s/config/env
+envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
+setRegistryName # устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
+
+kubernetesClusterIP=$(getKubernetesClusterIP $serviceCidr)
+kubernetesClusterDNS="${kubernetesClusterIP}0"
+slirp4IP="${kubernetesClusterIP}00"
+
+IFS=:
+set -- $apiServerEndpoint
+IFS=$ifs
+apiServerEndpointIP=$1
+apiServerEndpointPort=$2
+
+echo  "
+U7S_KUBEVERSION=$U7S_KUBEVERSION
+U7S_KUBEADMFLAGS='$U7S_KUBEADMFLAGS'
+U7S_PLATFORM=$U7S_PLATFORM
+U7S_REGISTRY=$U7S_REGISTRY
+U7S_REGISTRY_PLATFORM=$U7S_REGISTRY_PLATFORM
+U7S_IMAGES='$U7S_IMAGES'
+U7S_UID=$uid
+U7S_APISERVER_ADVERTISE_ADDRESS=$FLAG_apiserver_advertise_address
+U7S_APISERVER_BIND_PORT=$FLAG_apiserver_bind_port
+U7S_EXTDEV=$extDev
+U7S_CONTROLPLANE=$controlPlane
+U7S_APISERVERENDPOINT=$FLAG_control_plane_endpoint
+U7S_TOKEN=$FLAG_token
+U7S_CACERTHASH=$FLAG_discovery_token_ca_cert_hash
+U7S_CERIFICATEKEY=$FLAG_certificate_key
+U7S_SERVICECIDR=$FLAG_pod_service_cidr
+U7S_SERVICECIDRIP=$serviceCidrIP
+U7S_SERVICEMASK=$serviceMask
+U7S_PODNETWORKCIDR=$FLAG_pod_network_cidr
+U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
+U7S_PODNETWORKMASK=$podNetworkMask
+U7S_CNI_PLUGIN=$U7S_CNI_PLUGIN
+U7S_ROOTLESSKIT_FLAGS=--cidr=$FLAG_pod_service_cidr
+U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
+U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
+U7S_SLIRP4IP=$slirp4IP
+U7S_CONTROLPLANEENDPOINT=$controlPlaneEndpoint
+U7S_SKIP_PHASES=$U7S_SKIP_PHASES
+_CONTAINERS_ROOTLESS_UID=$uid
+_CONTAINERS_USERNS_CONFIGURED=1
+" >> /etc/podsec/u7s/config/env
+
+#
+# set -- $subcommand
+# shift
+# if [ $# -gt 0 ] # Есть подкоманьды
+# then
+#   subcommand="$1"
+#   if [ $subcommand != 'phase' ]
 #   then
 #     if [ $cmd = 'join' ]
 #     then
-#       eval apiServer=$1
+#       eval apiServerEndpoint=$1
 #       shift
 #       if [ $# -gt 0 ]
 #       then
@@ -462,24 +268,28 @@ do
 #     fi
 #   fi
 # fi
-#
+
 # set -- $pars
 # while [ $# -gt 0 ]
 # do
-#   case $1 in
+#   par=$1
+#   case $1 inif [ -z "$apiServerEndpoint" ]
+# then
+#   apiServerEndpoint="$U7S_EXTIP:$apiServerEndpointBindPort"
+# fi
 #   # initJoinFlags
 #   '--apiserver-advertise-address')
-#     eval extIP=$2
-#     extDev=$(getExtDev $extIP)
+#     eval U7S_EXTIP=$2
+#     extDev=$(getExtDev $U7S_EXTIP)
 #     if [ -z "$extDev" ]
 #     then
-#       echo "Для IP-адреса '$extIP' нет интерфейса" >&2
+#       echo "Для IP-адреса '$U7S_EXTIP' нет интерфейса" >&2
 #       exit
 #     fi
 #     shift;shift
 #     continue;;
 #   '--apiserver-bind-port')
-#     eval apiServerBindPort=$2
+#     eval apiServerEndpointBindPort=$2
 #     shift;shift
 #     continue;;
 #   '--certificate-key')
@@ -507,12 +317,26 @@ do
 #     shift;shift
 #     continue;;
 #   '--skip-phases')
-#     eval skipPhases=$2
+#     eval U7S_SKIP_PHASES=$2
 #     shift;shift
 #     continue;;
 #   '--token')
-#     eval token=$2
+#     eval U7S_TOKEN=$2
 #     shift;shift
+# #   subcommand="$1"
+# #   if [ $subcommand != 'phase' ]
+# #   then
+# #     if [ $cmd = 'join' ]
+# #     then
+# #       eval apiServerEndpoint=$1
+# #       shift
+# #       if [ $# -gt 0 ]
+# #       then
+# #         echo "Команда join имеет дополнительные параметры: $@"
+# #         exit 1
+# #       fi
+# #     else
+# #       echo "Для команды $cmd обнаружена подкоманда $subcommand. Допустима только одна подкоманда phase" >&2
 #     continue;;
 #   esac
 #   if [ $cmd = 'init' ]
@@ -524,7 +348,7 @@ do
 #       shift;shift
 #       continue;;
 #     '--control-plane-endpoint')
-#       eval apiServer=$2
+#       eval apiServerEndpoint=$2
 #       shift;shift
 #       continue;;
 #     '--feature-gates'|'--image-repository'|'--kubernetes-version') # Последние два замещены переменными среды - TODO: Россамотреть возможность замены
@@ -541,6 +365,20 @@ do
 #       esac
 #       podNetworkCidrIP=$CIDRIP
 #       podNetworkMask=$CIDRMASK
+# #   subcommand="$1"
+# #   if [ $subcommand != 'phase' ]
+# #   then
+# #     if [ $cmd = 'join' ]
+# #     then
+# #       eval apiServerEndpoint=$1
+# #       shift
+# #       if [ $# -gt 0 ]
+# #       then
+# #         echo "Команда join имеет дополнительные параметры: $@"
+# #         exit 1
+# #       fi
+# #     else
+# #       echo "Для команды $cmd обнаружена подкоманда $subcommand. Допустима только одна подкоманда phase" >&2
 #       shift;shift
 #       continue;;
 #     '--service-cidr')
@@ -563,11 +401,13 @@ do
 #       shift
 #       continue;;
 #       *)
+#
 #       echo "Неизвестный параметр $1"
 #       shift
 #       continue;;
 #     esac
 #   fi
+# # <<<<<<< HEAD
 #   if [ $cmd = 'join' ]
 #   then
 #     case $1 in
@@ -584,7 +424,7 @@ do
 #       shift;shift
 #       continue;;
 #     '--discovery-token-ca-cert-hash')
-#       eval caCertHash=$2
+#       eval caCertHash=$2U7S_EXTIP
 #       shift;shift
 #       continue;;
 #     '--discovery-token-unsafe-skip-ca-verification')
@@ -596,56 +436,20 @@ do
 #       shift;shift
 #       continue;;
 #     *)
-# >>>>>>> master
-      echo "Неизвестный параметр $1"
-      shift
-      continue;;
-    esac
-  fi
-# <<<<<<< HEAD
-  if [ $cmd = 'join' ]
-  then
-    case $1 in
-    '--control-plane')
-      controlPlane="master"
-      shift
-      continue;;
-    '--discovery-file')
-      eval FileDiscovery=$2
-      shift;shift
-      continue;;
-    '--discovery-token')
-      eval bootstrapToken=$2
-      shift;shift
-      continue;;
-    '--discovery-token-ca-cert-hash')
-      eval caCertHash=$2
-      shift;shift
-      continue;;
-    '--discovery-token-unsafe-skip-ca-verification')
-      U7S_KUBEADMFLAGS+=\" $1\"
-      shift
-      continue;;
-    '--tls-bootstrap-token')
-      eval tlsBootstrapToken=$2
-      shift;shift
-      continue;;
-    *)
-      echo "Неизвестный параметр $1"
-      shift
-      continue;;
-    esac
-  fi
-# =======
-# >>>>>>> master
-  echo "Неизвестный параметр $1"
-  shift
-done
-
-if [ $cmd = 'init' ]
-then
-  controlPlane="initMaster"
-fi
+#       echo "Неизвестный параметр $1"
+#       shift
+#       continue;;
+#     esac
+#   fi
+#
+#   echo "Неизвестный параметр $1"
+#   shift
+# done
+#
+# if [ $cmd = 'init' ]
+# then
+#   controlPlane="initMaster"
+# fi
 
 etcdDataDir='/var/lib/podsec/u7s/etcd/member'
 case $cmd in
@@ -665,114 +469,104 @@ case $cmd in
     kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
     apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
     ;;
-  upgrade)
-    CurrentKubeVersion=$(currentKubeVersion)
-    if [ $CurrentKubeVersion != $U7S_KUBEVERSION ]
-    then
-      echo "UPGRADE"
-      exit 0
-    fi
-    ;;
+#     ;;
+#     if [ -z "$podNetworkCidr" ]
+# then
+#   : ${U7S_CNI_PLUGIN:=flannel}
+#   case $U7S_CNI_PLUGIN in
+#   flannel)
+#     podNetworkCidrIP='10.244.0.0'
+#     podNetworkMask='16';;
+#   calico)
+#     podNetworkCidrIP='192.168.0.0'
+#     podNetworkMask='16';;
+#   esac
+#   podNetworkCidr="$podNetworkCidrIP/$podNetworkMask"
+# fi
+#   upgrade)
+#     CurrentKubeVersion=$(currentKubeVersion)
+#     if [ $CurrentKubeVersion != $U7S_KUBEVERSION ]
+#     then
+#       echo "UPGRADE"
+#       exit 0
+#     fi
+#     ;;
 esac
 
-uid=`id -u u7s-admin`
+#
+# if [ -z "$serviceCidr" ]
+# then
+#   serviceCidrIP='10.96.0.0'
+#   serviceMask='12'
+#   serviceCidr="$serviceCidrIP/$serviceMask"
+# fi
+#
+# if [ -z "$podNetworkCidr" ]
+# then
+#   : ${U7S_CNI_PLUGIN:=flannel}
+#   case $U7S_CNI_PLUGIN in
+#   flannel)
+#     podNetworkCidrIP='10.244.0.0'
+#     podNetworkMask='16';;
+#   calico)
+#     podNetworkCidrIP='192.168.0.0'
+#     podNetworkMask='16';;
+#   esac
+#   podNetworkCidr="$podNetworkCidrIP/$podNetworkMask"
+# fi
+#
+# : ${U7S_CNI_PLUGIN:=flannel}
+#
+# if [ -z "$U7S_EXTIP" ]
+# then
+#   U7S_EXTIP=$(getExtIP)
+#   extDev=$(getExtDev $U7S_EXTIP)
+# fi
+#
+# if [ -z "$apiServerEndpoint" ]
+# then
+#   apiServerEndpoint="$U7S_EXTIP:$apiServerEndpointBindPort"
+# fi
 
-if [ -z "$serviceCidr" ]
-then
-  serviceCidrIP='10.96.0.0'
-  serviceMask='12'
-  serviceCidr="$serviceCidrIP/$serviceMask"
-fi
-
-if [ -z "$podNetworkCidr" ]
-then
-  : ${U7S_CNI_PLUGIN:=flannel}
-  case $U7S_CNI_PLUGIN in
-  flannel)
-    podNetworkCidrIP='10.244.0.0'
-    podNetworkMask='16';;
-  calico)
-    podNetworkCidrIP='192.168.0.0'
-    podNetworkMask='16';;
-  esac
-  podNetworkCidr="$podNetworkCidrIP/$podNetworkMask"
-fi
-
-: ${U7S_CNI_PLUGIN:=flannel}
-
-if [ -z "$U7S_EXTIP" ]
-then
-  U7S_EXTIP=$(getExtIP)
-  extDev=$(getExtDev $U7S_EXTIP)
-fi
-
-if [ -z "$apiServer" ]
-then
-# <<<<<<< HEAD
-  apiServer="$U7S_EXTIP:$apiServerBindPort"
-# =======
-#   apiServer="$extIP:$apiServerBindPort"
-# >>>>>>> master
-fi
-
-kubernetesClusterIP=$(getKubernetesClusterIP $serviceCidr)
-kubernetesClusterDNS="${kubernetesClusterIP}0"
-slirp4IP="${kubernetesClusterIP}00"
-
-ifs=$IFS
-IFS=:
-set -- $apiServer
-IFS=$ifs
-apiServerIP=$1
-apiServerPort=$2
-
-# cp ~u7s-admin/.config/usernetes/ENV ~u7s-admin/.config/usernetes/env
-envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
-setRegistryName # устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
 sed -e "s|image:.*|image: $U7S_FLANNEL_REGISTRY/$U7S_FLANNEL_IMAGE|" </etc/podsec/u7s/manifests/kube-flannel.yml > /etc/kubernetes/manifests/kube-flannel.yml
 mkdir -p /etc/kubernetes/audit
 cp /etc//podsec/u7s/audit/policy.yaml /etc/kubernetes/audit
 chown -R u7s-admin:u7s-admin /etc/kubernetes/audit
 
-cp /etc/podsec/u7s/config/ENV /etc/podsec/u7s/config/env
-echo  "
-U7S_KUBEVERSION=$U7S_KUBEVERSION
-# <<<<<<< HEAD
+# echo  "
+# U7S_KUBEVERSION=$U7S_KUBEVERSION
 # U7S_KUBEADMFLAGS=$U7S_KUBEADMFLAGS
-# =======
-U7S_KUBEADMFLAGS=$U7S_KUBEADMFLAGS
-# >>>>>>> master
-U7S_PLATFORM=$U7S_PLATFORM
-U7S_REGISTRY=$U7S_REGISTRY
-U7S_REGISTRY_PLATFORM=$U7S_REGISTRY_PLATFORM
-U7S_IMAGES='$U7S_IMAGES'
-U7S_UID=$uid
-U7S_EXTIP=$U7S_EXTIP
-U7S_EXTDEV=$extDev
-U7S_DEBUGLEVEL=$debugLevel
-U7S_CONTROLPLANE=$controlPlane
-U7S_APISERVER=$apiServer
-U7S_APISERVERIP=$apiServerIP
-U7S_APISERVERPORT=$apiServerPort
-U7S_TOKEN=$U7S_TOKEN
-U7S_CACERTHASH=$caCertHash
-U7S_CERIFICATEKEY=$certificateKey
-U7S_SERVICECIDR=$serviceCidr
-U7S_SERVICECIDRIP=$serviceCidrIP
-U7S_SERVICEMASK=$serviceMask
-U7S_PODNETWORKCIDR=$podNetworkCidr
-U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
-U7S_PODNETWORKMASK=$podNetworkMask
-U7S_CNI_PLUGIN=$U7S_CNI_PLUGIN
-U7S_ROOTLESSKIT_FLAGS=--cidr=$serviceCidr
-U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
-U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
-U7S_SLIRP4IP=$slirp4IP
-U7S_CONTROLPLANEENDPOINT=$controlPlaneEndpoint
-U7S_SKIP_PHASES=$U7S_SKIP_PHASES
-_CONTAINERS_ROOTLESS_UID=$uid
-_CONTAINERS_USERNS_CONFIGURED=1
-" >> /etc/podsec/u7s/config/env
+# U7S_PLATFORM=$U7S_PLATFORM
+# U7S_REGISTRY=$U7S_REGISTRY
+# U7S_REGISTRY_PLATFORM=$U7S_REGISTRY_PLATFORM
+# U7S_IMAGES='$U7S_IMAGES'
+# U7S_UID=$uid
+# U7S_EXTIP=$U7S_EXTIP
+# U7S_EXTDEV=$extDev
+# U7S_DEBUGLEVEL=$debugLevel
+# U7S_CONTROLPLANE=$controlPlane
+# U7S_APISERVERENDPOINT=$apiServerEndpoint
+# U7S_APISERVERENDPOINTIP=$apiServerEndpointIP
+# U7S_APISERVERENDPOINTPORT=$apiServerEndpointPort
+# U7S_TOKEN=$U7S_TOKEN
+# U7S_CACERTHASH=$caCertHash
+# U7S_CERIFICATEKEY=$certificateKey
+# U7S_SERVICECIDR=$serviceCidr
+# U7S_SERVICECIDRIP=$serviceCidrIP
+# U7S_SERVICEMASK=$serviceMask
+# U7S_PODNETWORKCIDR=$podNetworkCidr
+# U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
+# U7S_PODNETWORKMASK=$podNetworkMask
+# U7S_CNI_PLUGIN=$U7S_CNI_PLUGIN
+# U7S_ROOTLESSKIT_FLAGS=--cidr=$serviceCidr
+# U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
+# U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
+# U7S_SLIRP4IP=$slirp4IP
+# U7S_CONTROLPLANEENDPOINT=$controlPlaneEndpoint
+# U7S_SKIP_PHASES=$U7S_SKIP_PHASES
+# _CONTAINERS_ROOTLESS_UID=$uid
+# _CONTAINERS_USERNS_CONFIGURED=1
+# " >> /etc/podsec/u7s/config/env
 
 if ! /bin/grep u7s-admin /etc/subuid >/dev/null 2>&1
 then
