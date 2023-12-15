@@ -38,7 +38,7 @@ then
   exit 1
 fi
 
-regName=$U7S_REGISTRY
+regName=$U7S_ALTREGISTRY
 
 case $archs in
   'all') archs='amd64 arm64 arm ppc64le 386';;
@@ -75,7 +75,7 @@ do
   do
     echo "  image=$image"
     Image="$regName/$image"
-    podman image rm $Image >/dev/null 2>&1
+    podman image rm $e >/dev/null 2>&1
     skopeo --override-arch $arch copy --remove-signatures --dest-oci-accept-uncompressed-layers docker://$Image containers-storage:$Image
     skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers containers-storage:$Image oci:$ociArchDir:$image
   done
