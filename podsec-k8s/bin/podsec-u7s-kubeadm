@@ -75,7 +75,6 @@ fi
 # controlPlane=
 U7S_TOKEN=
 caCertHash=
-U7S_EXTIP=$FLAG_apiserver_advertise_address
 certificatesDir=
 dnsDomain='cluster.local'
 tokenTTL=
@@ -204,11 +203,13 @@ IFS=$ifs
 apiServerEndpointIP=$1
 apiServerEndpointPort=$2
 
+U7S_EXTIP=$FLAG_apiserver_advertise_address
+
 echo  "
 U7S_KUBEVERSION=$U7S_KUBEVERSION
 U7S_KUBEADMFLAGS='$U7S_KUBEADMFLAGS'
 U7S_PLATFORM=$U7S_PLATFORM
-U7S_ALTREGISTRY=registry.altlinux.org
+U7S_ALTREGISTRY=$U7S_ALTREGISTRY
 U7S_REGISTRY=$U7S_REGISTRY
 U7S_REGISTRY_PLATFORM=$U7S_REGISTRY_PLATFORM
 U7S_IMAGES='$U7S_IMAGES'

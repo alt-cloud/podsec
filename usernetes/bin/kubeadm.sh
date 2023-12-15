@@ -13,6 +13,7 @@ source $envFile
 # set -x
 cmd=$1
 
+rm -f /run/user/${U7S_UID}/usernetes/crio/crio.sock
 until [ -S /run/user/${U7S_UID}/usernetes/crio/crio.sock ]
 do
   /sbin/systemctl --user -T stop rootlesskit.service

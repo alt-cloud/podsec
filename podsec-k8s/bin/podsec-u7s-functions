@@ -281,6 +281,7 @@ function tuneAudit() {
 export U7S_REGISTRY_PLATFORM U7S_REGISTRY
 # Функция устанавливает имя регистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
 function setRegistryName() {
+	export U7S_ALTREGISTRY="registry.altlinux.org"
   if [  ! -z "${U7S_REGISTRY+x}" -a ${#U7S_REGISTRY} -eq 0  ]
   then
 		export U7S_REGISTRY="registry.k8s.io"
@@ -291,7 +292,7 @@ function setRegistryName() {
 		then
 			export U7S_REGISTRY="registry.local"
 		else
-			export U7S_REGISTRY="registry.altlinux.org"
+			export U7S_REGISTRY=$U7S_ALTREGISTRY
 		fi
 	fi
 	U7S_REGISTRY_PLATFORM=$U7S_REGISTRY
