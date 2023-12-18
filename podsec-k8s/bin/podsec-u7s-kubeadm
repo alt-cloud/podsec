@@ -41,7 +41,8 @@ fi
 eval cmd=$1
 shift
 
-subcommand=; while [ $# -gt 0 ]; do subcommand+=" ${1:1:-1}"; shift; done # Убрать лишние кавычки
+subcommand=; while [ $# -gt 0 ]; do subcommand+="${1:1:-1} "; shift; done # Убрать лишние кавычки
+subcommand=${subcommand:0:-1}
 
 if [ -n "$haveHelpFlag" ]
 then
@@ -73,6 +74,22 @@ then
 fi
 
 # Обработать команд init, join
+
+etcdDataDir='/var/lib/podsec/u7s/etcd/member'
+if [ -d  $etcdDataDir ]
+then
+  echo -ne "На сервере обнаружен каталог данных etcd-кластера $etcdDataDir от предыдущего разворачивания. Очистить каталог? y/N: "
+  read reply
+  if [ "$reply" = 'y' ]
+  then
+    rm -rf $etcdDataDir
+  else
+    exit 1
+  fi
+fi
+echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/90-ipforward.conf
+kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
+apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
 
 # controlPlane=
 U7S_TOKEN=
@@ -244,27 +261,6 @@ U7S_SKIP_PHASES=$U7S_SKIP_PHASES
 _CONTAINERS_ROOTLESS_UID=$uid
 _CONTAINERS_USERNS_CONFIGURED=1
 " >> /etc/podsec/u7s/config/env
-
-
-etcdDataDir='/var/lib/podsec/u7s/etcd/member'
-case $cmd in
-  init | join)
-    if [ -d  $etcdDataDir ]
-    then
-      echo -ne "На сервере обнаружен каталог данных etcd-кластера $etcdDataDir от предыдущего разворачивания. Очистить каталог? y/N: "
-      read reply
-      if [ "$reply" = 'y' ]
-      then
-        rm -rf $etcdDataDir
-      else
-        exit 1
-      fi
-    fi
-    echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/90-ipforward.conf
-    kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
-    apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
-    ;;
-esac
 
 sed -e "s|image:.*|image: $U7S_FLANNEL_REGISTRY/$U7S_FLANNEL_IMAGE|" </etc/podsec/u7s/manifests/kube-flannel.yml > /etc/kubernetes/manifests/kube-flannel.yml
 mkdir -p /etc/kubernetes/audit
