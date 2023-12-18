@@ -38,11 +38,12 @@ if [ $# -eq 0 ]
 then
   nativeCommand="/usr/bin/kubeadm"
 fi
-eval subcommand=$@
 eval cmd=$1
+shift
+subcommand=$@
 if [ -n "$haveHelpFlag" ]
 then
-  nativeCommand="/usr/bin/kubeadm $subcommand -h"
+  nativeCommand="/usr/bin/kubeadm $cmd $subcommand -h"
 fi
 
 set -- $pars
@@ -63,7 +64,7 @@ done
 if [ $cmd != 'init' -a $cmd != 'join' ] # Команда ни init ни join
 then
 #   nativeCommand="/usr/bin/kubeadm $cmd $pars $subcommand"
-  nativeCommand="/usr/bin/kubeadm $subcommand $pars"
+  nativeCommand="/usr/bin/kubeadm $cmd $subcommand $pars"
 fi
 
 if [ -n "$nativeCommand" ]  # Команда вывода параметров?
@@ -123,8 +124,13 @@ extDev=$(getExtDev $FLAG_apiserver_advertise_address)
 if [ $cmd == 'init' ]
 then
   controlPlane="initMaster"
+  if [ -z "$FLAG_control_plane_endpoint" ]
+  then
+    FLAG_control_plane_endpoint="$FLAG_apiserver_advertise_address:$FLAG_apiserver_bind_port"
+  fi
 else # cmd = 'join'
   U7S_TOKEN=$FLAG_token
+  FLAG_control_plane_endpoint=$subcommand
   caCertHash=$FLAG_discovery_token_ca_cert_hash
   if [ -n "$FLAG_control_plane" ]
   then
@@ -138,10 +144,7 @@ then
   FLAG_apiserver_bind_port=6443
 fi
 
-if [ -z "$FLAG_control_plane_endpoint" ]
-then
-  FLAG_control_plane_endpoint="$FLAG_apiserver_advertise_address:$FLAG_apiserver_bind_port"
-fi
+
 if [ -z "$podNetworkCidr" ]
 then
   : ${U7S_CNI_PLUGIN:=flannel}

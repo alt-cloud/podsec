@@ -29,7 +29,7 @@ else
           .discovery.bootstrapToken.apiServerEndpoint |= "'$U7S_APISERVERENDPOINT'" |
           .nodeRegistration.name |= "'$host'" |
           .controlPlane.localAPIEndpoint.advertiseAddress |="'$U7S_APISERVER_ADVERTISE_ADDRESS'" |
-          .controlPlane.localAPIEndpoint.bindPort |="'$U7S_APISERVER_BIND_PORT'" |
+          .controlPlane.localAPIEndpoint.bindPort |='$U7S_APISERVER_BIND_PORT' |
           .controlPlane.certificateKey |= "'$U7S_CERIFICATEKEY'"
           ' $KUBEADM_CONFIGS_DIR/JoinControlPlaneConfijuration.yaml
   else # WORKERU7S_APISERVER_ADVERTISE_ADDRESS
