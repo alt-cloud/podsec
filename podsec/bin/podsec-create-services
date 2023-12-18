@@ -17,7 +17,8 @@ sed -i \
   -e 's|root .*|root /var/sigstore;|' \
   -e 's|# autoindex .*|autoindex on;|' \
   -e 's|# autoindex_localtime .*|autoindex_format json;|' \
-  -e 's/listen .*;/listen 0.0.0.0:81;/' ../sites-available.d/default.conf
+  -e 's/listen \(.*\):80;.*/listen \1:81;/' \
+  -e 's/listen.*127.0.0.1:81;/listen 0.0.0.0:81;/' ../sites-available.d/default.conf
 ln -sf ../sites-available.d/default.conf .
 systemctl enable --now nginx
 
