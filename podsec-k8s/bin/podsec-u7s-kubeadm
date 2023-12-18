@@ -40,10 +40,14 @@ then
 fi
 eval cmd=$1
 shift
-subcommand=$@
+
+subcommand=; while [ $# -gt 0 ]; do subcommand+=" ${1:1:-1}"; shift; done # Убрать лишние кавычки
+
 if [ -n "$haveHelpFlag" ]
 then
   nativeCommand="/usr/bin/kubeadm $cmd $subcommand -h"
+  machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s $nativeCommand
+  exit $?
 fi
 
 set -- $pars
@@ -63,15 +67,12 @@ done
 
 if [ $cmd != 'init' -a $cmd != 'join' ] # Команда ни init ни join
 then
-#   nativeCommand="/usr/bin/kubeadm $cmd $pars $subcommand"
   nativeCommand="/usr/bin/kubeadm $cmd $subcommand $pars"
-fi
-
-if [ -n "$nativeCommand" ]  # Команда вывода параметров?
-then
   machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s $nativeCommand
   exit $?
 fi
+
+# Обработать команд init, join
 
 # controlPlane=
 U7S_TOKEN=
@@ -83,7 +84,7 @@ FileDiscovery=
 bootstrapToken=
 tlsBootstrapToken=
 
-# Сформировать не поддержиывемые в kubeconf флаги
+# Сформировать неподдержиывемые в kubeconf флаги и передать их флагами в родной kubeadm в переменной U7S_KUBEADMFLAGS
 nonKubeconfFlags='
   v
   dry-run
@@ -114,6 +115,7 @@ do
     fi
   fi
 done
+
 if [ -z "$FLAG_apiserver_advertise_address" ]
 then
   FLAG_apiserver_advertise_address=$(getExtIP)
