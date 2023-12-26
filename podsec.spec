@@ -68,7 +68,6 @@ Requires: cri-tools
 %filter_from_requires /kubernetes-kubeadm/d
 %filter_from_requires /kubernetes-kubelet/d
 
-
 %description k8s
 This package contains utilities for:
 - deploying a rootless kubernetes cluster
@@ -79,7 +78,8 @@ Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
 Requires: Requires: kubernetes%min_kube_minor_version-client
 Requires: podsec >= %EVR
-
+Requires: openssh-common
+Requires: sh
 
 %description k8s-rbac
 This package contains utilities for
@@ -122,7 +122,6 @@ A set of scripts for developers
 %pre
 groupadd -r -f podman >/dev/null 2>&1 ||:
 groupadd -r -f podman_dev >/dev/null 2>&1 ||:
-
 
 %pre k8s
 groupadd -r -f podman >/dev/null 2>&1 ||:
