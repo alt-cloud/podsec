@@ -76,7 +76,7 @@ This package contains utilities for:
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
-Requires: Requires: kubernetes%min_kube_minor_version-client
+#Requires: Requires: kubernetes%min_kube_minor_version-client
 Requires: podsec >= %EVR
 Requires: openssh-common
 Requires: sh
