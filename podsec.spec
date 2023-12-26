@@ -5,8 +5,6 @@
 %define nagiosdir %_prefix/lib/nagios
 %define nagios_plugdir %nagiosdir/plugins
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
-%define min_kube_version 1.26.10
-%define min_kube_minor_version 1.26
 
 Name: podsec
 Version: 1.0.10
@@ -76,7 +74,6 @@ This package contains utilities for:
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
-#Requires: Requires: kubernetes%min_kube_minor_version-client
 Requires: podsec >= %EVR
 Requires: openssh-common
 Requires: sh
