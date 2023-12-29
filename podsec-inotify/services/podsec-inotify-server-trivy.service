@@ -3,7 +3,9 @@ Description=trivy server
 After=network.service
 
 [Service]
-ExecStart=/usr/bin/trivy server
+ExecStart=/bin/sh -c "if [ -f '/var/lib/trivy/db/trivy.db' ]; then systemctl enable --now trivy;sleep infinity; else /usr/bin/trivy server;fi"
+ExecStop=/bin/sh -c "if [ -f '/var/lib/trivy/db/trivy.db' ]; then systemctl stop trivy; else killall trivy; fi"
 Restart=always
+
 [Install]
 WantedBy=multi-user.target
