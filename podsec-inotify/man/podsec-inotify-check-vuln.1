@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-INOTIFY\-CHECK\-VULN" "1" "July 2023" "" ""
+.TH "PODSEC\-INOTIFY\-CHECK\-VULN" "1" "December 2023" "" ""
 .
 .SH "NAME"
 \fBpodsec\-inotify\-check\-vuln\fR \- скрипт мониторинга docker\-образов узла сканером безопасности trivy
@@ -10,7 +10,7 @@
 \fBpodsec\-inotify\-check\-vuln\fR
 .
 .SH "DESCRIPTION"
-Для корректной работы скрипта необходимо запустить сервис \fBpodsec\-inotify\-server\-trivy\fR: \fBsystemctl enable \-\-now podsec\-inotify\-server\-trivy\fR
+Для корректной работы скрипта необходимо запустить сервис \fBtrivy\fR: \fBsystemctl enable \-\-now trivy\fR
 .
 .P
 Скрипт производит мониторинг \fBdocker\-образов\fR узла сканером безопасности \fBtrivy\fR:

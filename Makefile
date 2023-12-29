@@ -109,8 +109,7 @@ PODSEC_INOTIFY_UNITS= \
 	podsec-inotify-check-policy.service \
 	podsec-inotify-check-policy.timer \
 	podsec-inotify-check-vuln.service \
-	podsec-inotify-check-vuln.timer \
-	podsec-inotify-server-trivy.service
+	podsec-inotify-check-vuln.timer
 
 
 TMPFILE  := $(shell mktemp)

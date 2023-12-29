@@ -92,6 +92,7 @@ Requires: podsec >= %EVR
 Requires: openssh-server
 Requires: mailx
 Requires: trivy
+Requires: trivy-server
 
 %description inotify
 A set of scripts for  security monitoring by systemd timers or
