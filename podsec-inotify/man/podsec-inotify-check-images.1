@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PODSEC\-INOTIFY\-CHECK\-POLICY" "1" "July 2023" "" ""
+.TH "PODSEC\-INOTIFY\-CHECK\-POLICY" "1" "November 2023" "" ""
 .
 .SH "NAME"
 \fBpodsec\-inotify\-check\-policy\fR \- Плугин проверяет образы на предмет их соответствия настройки политикам контейнеризации на узле
@@ -327,7 +327,10 @@ define service {
 В строке \fBservice_description\fR укахите иям сервиска которое будет отображаться в WEB\-интерейсе nagios\. В \fBcheck_command\fR имя команды, из вышеописанного файла \fBnagios\-plugins\-podsec\.cfg\fR каталога \fB/etc/nagios/commands/\fR\. Параметры использумые в команде указываются через символ \fB|\fR\.
 .
 .SS "Запуск сервиса через systemd/Timers"
-Кроме запуска скрипта через \fBnagios\fR скрипт может запускаться через \fBsystemd/Timers\fR\. В состав пакета входит systemd\-файлы \fBpodsec\-inotify\-check\-images\.service\fR, \fBpodsec\-inotify\-check\-images\.timer\fR\. Файл сервисов \fBpodsec\-inotify\-check\-images\.service\fR описывает в параметре \fBExecStart\fR строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-images\fR\. Скрипт запускается с флагами \fB\-vvv \-c 100\fR \- выводить подробную информацию, все сообщения имеют уровень \fBc\fR \- критический\. Если во время работы скрипта обнаружены некорректные настройки политики, они выводятся в системный лог и передаются почтой системному администратору (\fBroot\fR)\.
+Кроме запуска скрипта через \fBnagios\fR скрипт может запускаться через \fBsystemd/Timers\fR\.
+.
+.P
+В состав пакета входит systemd\-файлы \fBpodsec\-inotify\-check\-images\.service\fR, \fBpodsec\-inotify\-check\-images\.timer\fR\. Файл сервисов \fBpodsec\-inotify\-check\-images\.service\fR описывает в параметре \fBExecStart\fR строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-images\fR\. Скрипт запускается с флагами \fB\-vvv \-c 100\fR \- выводить подробную информацию, все сообщения имеют уровень \fBc\fR \- критический\. Если во время работы скрипта обнаружены некорректные настройки политики, они выводятся в системный лог и передаются почтой системному администратору (\fBroot\fR)\.
 .
 .P
 Расписание запуска сервиса \fBpodsec\-inotify\-check\-images\.service\fR описывается в параметре \fBOnCalendar\fR файла расписания \fBpodsec\-inotify\-check\-images\.timer\fR\. Сервис вызывается ежечасно\.
