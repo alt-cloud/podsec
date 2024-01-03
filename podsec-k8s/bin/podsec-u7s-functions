@@ -321,6 +321,16 @@ function kubeVersionToMinorVersion() {
 	echo "$1.$2"
 }
 
+function decreaseMinorVersion() {
+	ifs=$IFS
+	IFS=.
+	set -- $1
+	IFS=$ifs
+	minor=$2
+	let minor-=1
+	echo "$1.$minor"
+}
+
 
 
 # Функция выводит команду apt-get install использую механизм удаения (${packege}-) и добавления (${packege}-+) пакетов
