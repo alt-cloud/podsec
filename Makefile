@@ -165,7 +165,14 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/log/kubeapi/
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/etcd
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
-	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.cache
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.config
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
+		cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
+
+	ls -laR $(DESTDIR)$(localstatedir)/u7s-admin/
+
 	# bin
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
 	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)$(libexecdir)/podsec/u7s/; tar xvzf $(TMPFILE);
