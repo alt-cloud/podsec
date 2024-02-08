@@ -64,6 +64,7 @@ Requires: cri-tools
 %filter_from_requires /kubernetes-client/d
 %filter_from_requires /kubernetes-kubeadm/d
 %filter_from_requires /kubernetes-kubelet/d
+%filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
 %description k8s
 This package contains utilities for:
