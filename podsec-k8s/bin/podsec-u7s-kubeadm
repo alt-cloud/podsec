@@ -42,7 +42,10 @@ eval cmd=$1
 shift
 
 subcommand=; while [ $# -gt 0 ]; do subcommand+="${1:1:-1} "; shift; done # Убрать лишние кавычки
-subcommand=${subcommand:0:-1}
+if [ -n "$subcommand" ]
+then
+  subcommand=${subcommand:0:-1}
+fi
 
 if [ -n "$haveHelpFlag" ]
 then

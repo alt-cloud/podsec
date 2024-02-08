@@ -1,5 +1,5 @@
 #!/bin/sh
-# Скрипт производит архивацию образов kubernetes версии v1.26.3
+# Скрипт производит архивацию образов kubernetes указанных версий
 # в указанный первым параметром каталог
 # Второй параметры задает через запятую архивируемые архитектуры.
 # Если второй параметр имеет значение all архивируются все архитектуры: amd64 arm64 arm ppc64le 386
@@ -29,7 +29,7 @@ fi
 
 ociDir=$1
 archs=$2
-
+shift;shift
 source podsec-u7s-functions
 if [ -n "$U7S_KUBEVERSION" ]
 then
@@ -42,9 +42,10 @@ fi
 
 setRegistryName
 
-if [ $# -gt 2 ]
+if [ $# -gt 0 ]
 then
-  platform=$3
+  platform=$1
+  shift
   if [ "$platform" != "$U7S_PLATFORM" ]
   then
     echo "Текущая платформа $U7S_PLATFORM не совпадает с загружаемой"
@@ -55,7 +56,8 @@ then
       exit 1
     fi
   fi
-  U7S_PLATFORM=$platform
+  export U7S_PLATFORM=$platform
 fi
 
+U7S_IMAGES+=" $@"
 podsec-save-oci $ociDir $archs $U7S_IMAGES
