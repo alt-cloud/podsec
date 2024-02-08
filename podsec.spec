@@ -125,6 +125,7 @@ groupadd -r -f podman >/dev/null 2>&1 ||:
 groupadd -r -f %u7s_admin_grp  2>&1 ||:
 useradd -r -m -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
     -c 'usernet user account' %u7s_admin_usr  2>&1 ||:
+chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 rm -rf %u7s_admin_homedir/.lpoptions \
   %u7s_admin_homedir/.mutt \
   %u7s_admin_homedir/.rpmmacros \
