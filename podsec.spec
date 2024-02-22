@@ -8,7 +8,7 @@
 
 Name: podsec
 Version: 1.0.10
-Release: alt2
+Release: alt3
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -93,6 +93,9 @@ Requires: openssh-server
 Requires: mailx
 Requires: trivy
 Requires: trivy-server
+Requires: nagios-plugins-network
+%filter_from_requires /\/usr\/lib\/nagios\/plugins\/podsec-inotify-check-images/d
+%filter_from_requires /\/usr\/lib\/nagios\/plugins\/podsec-inotify-check-policy/d
 
 %description inotify
 A set of scripts for  security monitoring by systemd timers or
@@ -137,6 +140,8 @@ rm -rf %u7s_admin_homedir/.lpoptions \
 %post inotify
 %post_systemd podsec-inotify-check-containers.service
 %post_systemd podsec-inotify-check-kubeapi.service
+ln -sf %_bindir/podsec-inotify-check-policy %nagios_plugdir/
+ln -sf %_bindir/podsec-inotify-check-images %nagios_plugdir/
 
 %preun inotify
 %preun_systemd podsec-inotify-check-containers.service
@@ -197,15 +202,10 @@ rm -rf %u7s_admin_homedir/.lpoptions \
 %_mandir/man?/podsec-k8s-rbac-*
 
 %files inotify
-%exclude %nagiosdir
-%exclude %nagios_plugdir
-%nagios_plugdir/podsec-inotify-*
 %_bindir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*
 %_unitdir/podsec-inotify-*
 %exclude %_unitdir/u7s.service
-# %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %nagiosdir
-# %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %nagios_plugdir
 
 %files dev
 %_bindir/podsec-save-oci
@@ -214,8 +214,12 @@ rm -rf %u7s_admin_homedir/.lpoptions \
 %_mandir/man?/podsec-save-oci*
 
 %changelog
-* Wed Jan 31 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt2
+* Fri Feb 23 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt3
 - 1.0.10
+
+* Fri Feb 23 2024 Alexey Kostarev <kaf@altlinux.org> podsec.1.0.10-alt3
+- podsec.1.0.10
+
 
 * Wed Jan 31 2024 Alexey Kostarev <kaf@altlinux.org> 10.0.10-alt2
 - 10.0.10
