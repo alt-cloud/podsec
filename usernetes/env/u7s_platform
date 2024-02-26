@@ -42,7 +42,7 @@ if [ -z "$U7S_KUBEVERSION" ]
 then
   case $U7S_PLATFORM in
     'test_k8s') export U7S_KUBEVERSION="v1.27.7";break;;
-    'k8s-c10f1') export U7S_KUBEVERSION="v1.26.10";break;;
+    'k8s-c10f1') export U7S_KUBEVERSION="v1.26.11";break;;
     *) export U7S_KUBEVERSION="v1.26.9";break;;
   esac
 fi

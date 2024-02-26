@@ -173,7 +173,16 @@ fi
 
 source podsec-functions
 source podsec-u7s-functions
+
+if [ -z "$U7S_KUBEVERSION" ]
+then
+  export U7S_KUBEVERSION="v1.26.11"
+fi
+
+installKubeadm
+
 setRegistryName
+
 
 # Настройка использования образа registry.local/U7S_PAUSE_IMAGE при запуска pod'ов в podman (podman pod init)
 pause_image="registry.local/$U7S_PAUSE_IMAGE"

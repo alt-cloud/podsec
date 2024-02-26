@@ -91,17 +91,8 @@ then
   fi
 fi
 echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/90-ipforward.conf
-kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
-minorDelta=0
-until apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
-do
-  kubeVersion=$(decreaseMinorVersion $kubeVersion)
-  let minorDelta+=1
-done
-if [ $minorDelta -gt 1 ]
-then
-  echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
-fi
+
+installKubeadm
 
 # controlPlane=
 U7S_TOKEN=
