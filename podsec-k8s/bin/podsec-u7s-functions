@@ -5,9 +5,9 @@
 # * $U7S_DEBUG: enable debug mode if set to "1"
 
 # Environment variables set by this script:
-# * $XDG_DATA_HOME: ~u7s-admin/.local/share if not set
-# * $XDG_CONFIG_HOME: ~u7s-admin/.config if not set
-# * $XDG_CACHE_HOME: ~u7s-admin/.cache if not set
+# * $XDG_DATA_HOME: $HOME/.local/share if not set
+# * $XDG_CONFIG_HOME: $HOME/.config if not set
+# * $XDG_CACHE_HOME: $HOME/.cache if not set
 
 USERNAME='u7s-admin'
 
@@ -331,9 +331,33 @@ function decreaseMinorVersion() {
 	echo "$1.$minor"
 }
 
+function installKubeadm() {
+	kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
+  if [ -f '/usr/bin/kubeadm' ]
+  then
+		echo "Предупреждение: команда kubeadm уже установлена"
+		echo $kubeVersion
+		return
+  fi
+	minorDelta=0
+	until apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
+	do
+		kubeVersion=$(decreaseMinorVersion $kubeVersion)
+		if [ $kubeVersion -lt '1.22' ]
+		then
+			echo "Отсутствует версия kubeadm"
+			exit 1
+		fi
+		let minorDelta+=1
+	done
+	if [ $minorDelta -gt 1 ]
+	then
+		echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
+	fi
+	echo $kubeVersion
+}
 
-
-# Функция выводит команду apt-get install использую механизм удаения (${packege}-) и добавления (${packege}-+) пакетов
+# Функция выводит команду apt-get install использую механизм удаления (${packege}-) и добавления (${packege}-+) пакетов
 # обновляет пакеты kubernetes и cri-o до указанной версии с сохранением пакетов podsec
 function replaceKubeCommand() {
 	IFS=.
@@ -370,8 +394,10 @@ function replaceKubeCommand() {
 
 
 # export XDG_{DATA,CONFIG,CACHE}_HOME
-: ${XDG_DATA_HOME=~u7s-admin/.local/share}
-: ${XDG_CONFIG_HOME=~u7s-admin/.config}
-: ${XDG_CACHE_HOME=~u7s-admin/.cache}
+if [ -z "$USER" ]; then USER=$USERNAME; fi
+HOME=$(eval echo ~$USER)
+: ${XDG_DATA_HOME=$HOME/.local/share}
+: ${XDG_CONFIG_HOME=$HOME/.config}
+: ${XDG_CACHE_HOME=$HOME/.cache}
 envFile="${XDG_CONFIG_HOME}/usernetes/env"
 export XDG_DATA_HOME XDG_CONFIG_HOME XDG_CACHE_HOME envFile

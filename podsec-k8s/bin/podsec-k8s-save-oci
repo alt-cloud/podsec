@@ -27,6 +27,11 @@ then
   exit 1
 fi
 
+if [ -z "$U7S_KUBEVERSION" ]
+then
+  export U7S_KUBEVERSION="v1.26.11"
+fi
+
 ociDir=$1
 archs=$2
 shift;shift
@@ -34,7 +39,7 @@ source podsec-u7s-functions
 if [ -n "$U7S_KUBEVERSION" ]
 then
   ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
-  if ! $ReplaceKubeCommand
+  if ! su - -c "$ReplaceKubeCommand"
   then
     exit 1
   fi

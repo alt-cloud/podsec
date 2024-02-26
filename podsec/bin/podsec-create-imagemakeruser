@@ -8,7 +8,7 @@ createImageMaker() {
   IFS=$ifs
   user=$1 regPath=$2
 #   linkedPolicyFile=$linkedPolicyFile
-  adduser $user -g podman -G podman_dev
+  adduser $user -g podman -G podman_dev,wheel
   echo "Введите пароль пользователя $user - разработчика  образов контейнеров"
   passwd $user
 
