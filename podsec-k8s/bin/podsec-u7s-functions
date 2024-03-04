@@ -287,7 +287,7 @@ function setRegistryName() {
 		export U7S_REGISTRY="registry.k8s.io"
 		U7S_PLATFORM=
   else
-		source /etc/podsec/u7s/env/u7s_platform
+		source podsec-get-platform
 		if grep registry.local /etc/hosts >/dev/null 2>&1
 		then
 			export U7S_REGISTRY="registry.local"

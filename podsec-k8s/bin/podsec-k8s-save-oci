@@ -45,6 +45,8 @@ then
   fi
 fi
 
+installKubeadm
+
 setRegistryName
 
 if [ $# -gt 0 ]

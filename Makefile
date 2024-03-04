@@ -30,7 +30,8 @@ PODSEC_PROGRAMMS = \
 
 PODSEC_FUNCTIONS = \
 	podsec-functions \
-	podsec-policy-functions
+	podsec-policy-functions \
+	podsec-get-platform
 
 PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
@@ -64,7 +65,6 @@ USERNETES_CONFIGS= \
 	ENV
 
 USERNETES_ENVS = \
-	u7s_platform \
 	u7s_images \
 	u7s_flags
 
