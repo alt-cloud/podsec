@@ -287,19 +287,20 @@ function setRegistryName() {
 		export U7S_REGISTRY="registry.k8s.io"
 		U7S_PLATFORM=
   else
-		source podsec-get-platform
 		if grep registry.local /etc/hosts >/dev/null 2>&1
 		then
 			export U7S_REGISTRY="registry.local"
 		else
 			export U7S_REGISTRY=$U7S_ALTREGISTRY
 		fi
+		source podsec-get-platform
 	fi
 	U7S_REGISTRY_PLATFORM=$U7S_REGISTRY
 	if [ -n "$U7S_PLATFORM" ]
 	then
 		U7S_REGISTRY_PLATFORM+="/$U7S_PLATFORM"
 	fi
+	getKuberLastPatchVersion
 	source /etc/podsec/u7s/env/u7s_images
 	export U7S_REGISTRY_PLATFORM
 }
@@ -332,20 +333,37 @@ function decreaseMinorVersion() {
 }
 
 function installKubeadm() {
-	kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
   if [ -f '/usr/bin/kubeadm' ]
   then
 		echo "Предупреждение: команда kubeadm уже установлена"
 		echo $kubeVersion
 		return
   fi
+	if [ -z "$U7S_KUBEVERSION" ]
+	then
+		minorKubeVersion=$(getlastKubeAdmVersion)
+		export U7S_KUBEVERSION=$(getKuberLastPatchVersion $minorKubeVersion)
+		if [ -z "$U7S_KUBEVERSION" ]
+		then
+			echo "Репозиторий $U7S_REGISTRY платформы $U7S_PLATFORM не содержит образов версии $minorKubeVersion" >&2
+			exit 1
+		fi
+	fi
+	kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
+	if [[ "$kubeVersion" < '1.26' ]]
+	then
+		echo "Минорная версия kubeadm $kubeVersion менее 1.26 не поддерживается"
+		exit 1
+	fi
 	minorDelta=0
 	until apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
 	do
+		echo "Версия kubernetes$kubeVersion-kubeadm недоступна"
 		kubeVersion=$(decreaseMinorVersion $kubeVersion)
-		if [ $kubeVersion -lt '1.22' ]
+		echo "Пытаемся установить версию kubernetes$kubeVersion-kubeadm"
+		if [[ "$kubeVersion" < '1.26' ]]
 		then
-			echo "Отсутствует версия kubeadm"
+			echo "Минорная версия kubeadm $kubeVersion менее 1.26 не поддерживается"
 			exit 1
 		fi
 		let minorDelta+=1
@@ -388,6 +406,61 @@ function replaceKubeCommand() {
 	done
 	echo $cmd
 	)
+}
+
+function getlastKubeAdmVersion() {
+	apt-cache search kubernetes | grep kubernetes | grep kubeadm |
+	(
+	ret=
+	while read version tail
+	do
+		if [ "${version:0:10}" = 'kubernetes' ]
+		then
+			version=${version:10:-8}
+			if [[ "$ret" < $version ]]
+			then
+				ret=$version
+			fi
+		fi
+	done
+	echo $ret
+  )
+}
+
+function getKubernetesPatchVersions() {
+  platform=$U7S_PLATFORM
+  if [ -n "$platform" ]
+  then
+    platform+='/'
+  fi
+  versions=$(curl -ks https://$U7S_REGISTRY/v2/${platform}kube-apiserver/tags/list | jq -r  '.tags | sort | .[]')
+  echo $versions
+}
+
+function getKuberLastPatchVersion() {
+  minorVersion=$1
+	versions=$(getKubernetesPatchVersions)
+	set -- $versions
+	l=$(echo ${#minorVersion})
+	while [ $# -gt 0 ]
+	do
+		if [ ${1:0:$l} = $minorVersion ]
+		then
+			break
+		fi
+		shift
+	done
+  ret=$1
+  while [ $# -gt 0 ]
+  do
+		if [ ${1:0:$l} != $minorVersion ]
+		then
+			break
+		fi
+		ret=$1
+		shift
+  done
+  echo $ret
 }
 
 # replaceKubeCommand v1.23.5

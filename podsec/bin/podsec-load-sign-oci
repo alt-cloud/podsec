@@ -115,7 +115,7 @@ IFS=$ifs
 platform=$1
 if [ "$platform" != "$U7S_PLATFORM" ]
 then
-  echo "Текущая платформа $U7S_PLATFORM не совпадает c устанавлиаемой $platform"
+  echo "Текущая платформа $U7S_PLATFORM не совпадает c устанавливаемой $platform"
   echo "Продолжать (y/N)?"
   read answer
   if [ "$answer" != "y" ]

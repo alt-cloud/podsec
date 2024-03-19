@@ -32,6 +32,11 @@ then
 fi
 
 longImageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
+if [ -z "$longImageList" ]
+then
+  echo "Kubernet-версия $U7S_KUBEVERSION не поддерживается"
+  exit 1
+fi
 let lenRegistry=${#U7S_REGISTRY}+1
 let lenRegistryPlatform=${#U7S_REGISTRY_PLATFORM}+1
 ifs=$IFS

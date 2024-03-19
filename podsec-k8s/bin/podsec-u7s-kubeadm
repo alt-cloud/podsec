@@ -1,6 +1,7 @@
 #!/bin/sh
 source podsec-u7s-functions
-source podsec-get-platform
+setRegistryName # устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
+# source podsec-get-platform
 source /etc/podsec/u7s/env/u7s_flags
 
 
@@ -216,7 +217,6 @@ uid=`id -u u7s-admin`
 
 cp /etc/podsec/u7s/config/ENV /etc/podsec/u7s/config/env
 envDir="$XDG_CONFIG_HOME=/var/lib/u7s-admin/.config/usernetes"
-setRegistryName # устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
 # Настройка использования образа $U7S_REGISTRY/U7S_PAUSE_IMAGE при запуска pod'ов в podman (podman pod init)
 pause_image="$U7S_REGISTRY/$U7S_PAUSE_IMAGE"
 echo "Настройка использования образа $pause_image при запуска pod'ов в podman (podman pod init)"

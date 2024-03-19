@@ -155,6 +155,7 @@ declare -A KFLAGSBOOLEAN=(
 
 # Сформировать список параметров для getopt --long par -o par ...
 formGetoptPars() {
+	oflags=
   for flag in ${!KFLAGS[@]}
   do
 		haveParSym=
@@ -163,10 +164,13 @@ formGetoptPars() {
 		then
 			echo "--long $flag$haveParSym"
 		else
-			echo "-o $flag$haveParSym"
+			oflags+=$flag$haveParSym
 		fi
   done
-
+  if [ -n "$oflags" ]
+  then
+		echo -o $oflags
+	fi
 }
 
 # formGetoptPars
