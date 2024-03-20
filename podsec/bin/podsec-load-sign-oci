@@ -3,6 +3,8 @@
 source podsec-functions
 source podsec-get-platform
 
+getPlatform
+
 mes=$(isSigstoreServer)
 if [ -n "$mes" ]
 then

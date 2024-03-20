@@ -293,7 +293,7 @@ function setRegistryName() {
 		else
 			export U7S_REGISTRY=$U7S_ALTREGISTRY
 		fi
-		source podsec-get-platform
+# 		source podsec-get-platform
 	fi
 	U7S_REGISTRY_PLATFORM=$U7S_REGISTRY
 	if [ -n "$U7S_PLATFORM" ]
@@ -322,6 +322,15 @@ function kubeVersionToMinorVersion() {
 	echo "$1.$2"
 }
 
+function getMinorVersion() {
+	ifs=$IFS
+	IFS=.
+	set -- $1
+	IFS=$ifs
+	echo "$1.$2"
+}
+
+
 function decreaseMinorVersion() {
 	ifs=$IFS
 	IFS=.
@@ -332,38 +341,44 @@ function decreaseMinorVersion() {
 	echo "$1.$minor"
 }
 
+function getKubeVersionByKubeadm() {
+	ret=$(/usr/bin/kubeadm version -o json | jq -r .clientVersion.gitVersion)
+	echo $ret
+}
+
+# Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
 function installKubeadm() {
-  if [ -f '/usr/bin/kubeadm' ]
+	aptgetLogFile="/tmp/aptget.log"
+  if [ -f '/usr/bin/kubeadm' -o -f '/usr/bin/crio' ]
   then
-		echo "Предупреждение: команда kubeadm уже установлена"
-		echo $kubeVersion
-		return
+		kubeVersionByKubeadm=$(getKubeVersionByKubeadm)
+		kubeMinorVersionByKubeadm=$(getMinorVersion $kubeVersionByKubeadm)
+		echo "Предупреждение: команды kubeadm и crio версии $kubeVersionByKubeadm уже установлены"
+		pkgNames="kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm kubernetes${kubeMinorVersionByKubeadm:1}-crio"
+		echo "Удаление пакетов $pkgNames"
+		apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1
   fi
 	if [ -z "$U7S_KUBEVERSION" ]
 	then
-		minorKubeVersion=$(getlastKubeAdmVersion)
-		export U7S_KUBEVERSION=$(getKuberLastPatchVersion $minorKubeVersion)
-		if [ -z "$U7S_KUBEVERSION" ]
-		then
-			echo "Репозиторий $U7S_REGISTRY платформы $U7S_PLATFORM не содержит образов версии $minorKubeVersion" >&2
-			exit 1
-		fi
+		kubeMinorVersion=$(getlastKubeAdmVersion)
 	fi
-	kubeVersion=$(kubeVersionToMinorVersion ${U7S_KUBEVERSION:1})
-	if [[ "$kubeVersion" < '1.26' ]]
+	if [[ "$kubeMinorVersion" < '1.26' ]]
 	then
-		echo "Минорная версия kubeadm $kubeVersion менее 1.26 не поддерживается"
+		echo "Минорная версия kubeadm $kubeMinorVersion менее 1.26 не поддерживается"
 		exit 1
 	fi
 	minorDelta=0
-	until apt-get install -y kubernetes$kubeVersion-kubeadm  kubernetes$kubeVersion-crio
+	pkgNames="kubernetes$kubeMinorVersion-kubeadm  kubernetes$kubeMinorVersion-crio"
+	echo "Установка пакетов $pkgNames"
+	until apt-get install -y $pkgNames >>$aptgetLogFile 2>&1
 	do
-		echo "Версия kubernetes$kubeVersion-kubeadm недоступна"
-		kubeVersion=$(decreaseMinorVersion $kubeVersion)
-		echo "Пытаемся установить версию kubernetes$kubeVersion-kubeadm"
-		if [[ "$kubeVersion" < '1.26' ]]
+		echo "Версия $kubeMinorVersion пакетов $pkgNames недоступна"
+		kubeMinorVersion=$(decreaseMinorVersion $kubeMinorVersion)
+		pkgNames="kubernetes$kubeMinorVersion-kubeadm  kubernetes$kubeMinorVersion-crio"
+		echo "Пытаемся установить предыдущую минорную версию $kubeMinorVersion пакетов $pkgNames"
+		if [[ "$kubeMinorVersion" < '1.26' ]]
 		then
-			echo "Минорная версия kubeadm $kubeVersion менее 1.26 не поддерживается"
+			echo "Минорная версия kubeadm $kubeMinorVersion менее 1.26 не поддерживается"
 			exit 1
 		fi
 		let minorDelta+=1
@@ -372,7 +387,7 @@ function installKubeadm() {
 	then
 		echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
 	fi
-	echo $kubeVersion
+	U7S_KUBEVERSION=$(getKubeVersionByKubeadm)
 }
 
 # Функция выводит команду apt-get install использую механизм удаления (${packege}-) и добавления (${packege}-+) пакетов
@@ -427,39 +442,51 @@ function getlastKubeAdmVersion() {
   )
 }
 
+# Получить из регистратора список доступных тrгов образа
 function getKubernetesPatchVersions() {
-  platform=$U7S_PLATFORM
-  if [ -n "$platform" ]
-  then
-    platform+='/'
-  fi
-  versions=$(curl -ks https://$U7S_REGISTRY/v2/${platform}kube-apiserver/tags/list | jq -r  '.tags | sort | .[]')
+	image=$1
+  versions=$(curl -ks https://$U7S_REGISTRY/v2/$image/tags/list | jq -r  '.tags | sort | .[]')
   echo $versions
 }
 
-function getKuberLastPatchVersion() {
+# Проверить наличие на регистраторе образа с указанным тегом
+function checkKubernetesPatchVersions() {
   minorVersion=$1
-	versions=$(getKubernetesPatchVersions)
+  if [ ${#minorVersion} -gt 0 -a "${minorVersion:0:1}" != 'v' ]; then minorVersion="v$minorVersion"; fi
+	image=$2
+	tag=$3
+	versions=$(getKubernetesPatchVersions $image)
 	set -- $versions
-	l=$(echo ${#minorVersion})
 	while [ $# -gt 0 ]
 	do
-		if [ ${1:0:$l} = $minorVersion ]
+		if [ "$tag" = "${1}" ]
 		then
-			break
+			return 0
 		fi
 		shift
 	done
-  ret=$1
-  while [ $# -gt 0 ]
-  do
-		if [ ${1:0:$l} != $minorVersion ]
+  return 1
+}
+
+
+# Получить из регистратора последнюю доступную версию образа в указанной минорной версии
+function getKuberLastPatchVersion() {
+  minorVersion=$1
+  if [ ${#minorVersion} -gt 0 -a "${minorVersion:0:1}" != 'v' ]; then minorVersion="v$minorVersion"; fi
+	image=$2
+	versions=$(getKubernetesPatchVersions $image)
+	set -- $versions
+	l=${#minorVersion}
+	ret=
+	while [ $# -gt 0 ]
+	do
+		if [ "$1" = 'latest' ]; then shift; continue; fi
+		if [ ${1:0:$l} = $minorVersion ]
 		then
-			break
+			ret=$1
 		fi
-		ret=$1
 		shift
-  done
+	done
   echo $ret
 }
 

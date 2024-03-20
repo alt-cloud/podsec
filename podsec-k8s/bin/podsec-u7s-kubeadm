@@ -1,13 +1,18 @@
 #!/bin/sh
 source podsec-u7s-functions
-setRegistryName # устанавливает имя рягистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
-# source podsec-get-platform
-source /etc/podsec/u7s/env/u7s_flags
+source podsec-get-platform
+
+getPlatform # Устанавливает переменную U7S_PLATFORM
+installKubeadm # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
+setRegistryName # устанавливает имя регистратора образов в переменнную U7S_REGISTRY_PLATFORM
+
 
 
 format() {
   echo -e "Формат:\n$0 [-v [0-9]] [init|join] [<init|join-параметр> ...]" >&2
 }
+
+source /etc/podsec/u7s/env/u7s_flags
 
 ifs=$IFS
 getoptPars=$(formGetoptPars)
@@ -93,7 +98,6 @@ then
 fi
 echo "net.ipv4.ip_forward = 1" > /etc/sysctl.d/90-ipforward.conf
 
-installKubeadm
 
 # controlPlane=
 U7S_TOKEN=
@@ -242,6 +246,7 @@ U7S_ALTREGISTRY=$U7S_ALTREGISTRY
 U7S_REGISTRY=$U7S_REGISTRY
 U7S_REGISTRY_PLATFORM=$U7S_REGISTRY_PLATFORM
 U7S_IMAGES='$U7S_IMAGES'
+U7S_PAUSE_IMAGE='$U7S_PAUSE_IMAGE'
 U7S_UID=$uid
 U7S_EXTIP=$U7S_EXTIP
 U7S_APISERVER_ADVERTISE_ADDRESS=$FLAG_apiserver_advertise_address

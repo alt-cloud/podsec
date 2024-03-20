@@ -2,7 +2,7 @@
 # needs to be called inside the namespaces
 
 source podsec-u7s-functions
-setRegistryName
+source $envFile
 
 export _CRIO_ROOTLESS=1
 export User='u7s-admin'

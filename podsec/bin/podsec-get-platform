@@ -1,5 +1,10 @@
-
+# Устанавливает переменную U7S_PLATFORM
 function getPlatform() {
+  if [ -n "$U7S_PLATFORM" ]
+  then
+    echo "Версия платформы $U7S_PLATFORM преопределена переменной U7S_PLATFORM. Принимается это значение." >&2
+    return
+  fi
   source /etc/os-release
   if [ -n "$ALT_BRANCH_ID" ]
   then
@@ -26,31 +31,10 @@ function getPlatform() {
       *) export U7S_PLATFORM="k8s-p${version}"; break;;
     esac
   fi
-  if [ $U7S_PLATFORM = 'k8s-c10f2' ]; then export U7S_PLATFORM='k8s-c10f1'; fi
   case $U7S_PLATFORM in
     test_k8s|k8s-c10f1|k8s-p10) break;;
     *) export U7S_PLATFORM="k8s-sisyphus";
   esac
 }
 
-if [ -z "$U7S_PLATFORM" ]
-then
-  getPlatform
-fi
-
-if [ -z "$U7S_KUBEVERSION" ]
-then
-  minorKubeVersion=$(getlastKubeAdmVersion)
-  export U7S_KUBEVERSION=$(getKuberLastPatchVersion $minorKubeVersion)
-  if [ -z "$U7S_KUBEVERSION" ]
-  then
-    echo "Репозиторий $U7S_REGISTRY платформы $U7S_PLATFORM не содержит образов версии $minorKubeVersion" >&2
-    exit 1
-  fi
-  #case $U7S_PLATFORM in
-  #  'k8s-sisyphus') export U7S_KUBEVERSION="v1.27.7";break;;
-  #  'k8s-c10f1') export U7S_KUBEVERSION="v1.26.11";break;;
-  #  *) export U7S_KUBEVERSION="v1.26.9";break;;
-  #esac
-fi
 
