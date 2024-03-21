@@ -346,21 +346,39 @@ function getKubeVersionByKubeadm() {
 	echo $ret
 }
 
+function getKubeVersionByCrio() {
+	ret=$(/usr/bin/crio version --json 2>/dev/null | jq -r .version)
+	echo $ret
+}
+
 # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
 function installKubeadm() {
 	aptgetLogFile="/tmp/aptget.log"
+	pkgNames=
   if [ -f '/usr/bin/kubeadm' -o -f '/usr/bin/crio' ]
   then
-		kubeVersionByKubeadm=$(getKubeVersionByKubeadm)
-		kubeMinorVersionByKubeadm=$(getMinorVersion $kubeVersionByKubeadm)
-		echo "Предупреждение: команды kubeadm и crio версии $kubeVersionByKubeadm уже установлены"
-		pkgNames="kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm kubernetes${kubeMinorVersionByKubeadm:1}-crio"
+		if [ -f '/usr/bin/kubeadm' ]
+		then
+			kubeVersionByKubeadm=$(getKubeVersionByKubeadm)
+			kubeMinorVersionByKubeadm=$(getMinorVersion $kubeVersionByKubeadm)
+			echo "Предупреждение: команда kubeadm и crio версии $kubeVersionByKubeadm уже установлена"
+			pkgNames+="kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm"
+		fi
+		if [ -f '/usr/bin/crio' ]
+		then
+			kubeVersionByCrio=$(getKubeVersionByCrio)
+			kubeMinorVersionByCrio=$(getMinorVersion $kubeVersionByCrio)
+			echo "Предупреждение: команда crio версии kubeMinorVersionByCrio уже установлена"
+			pkgNames+="kubernetes${kubeMinorVersionByKubeadm:1}-crio cri-o${kubeMinorVersionByKubeadm:1} cri-tools${kubeMinorVersionByKubeadm:1}"
+		fi
 		echo "Удаление пакетов $pkgNames"
 		apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1
   fi
 	if [ -z "$U7S_KUBEVERSION" ]
 	then
 		kubeMinorVersion=$(getlastKubeAdmVersion)
+	else
+		kubeMinorVersion=$(getMinorVersion $U7S_KUBEVERSION)
 	fi
 	if [[ "$kubeMinorVersion" < '1.26' ]]
 	then
@@ -368,7 +386,7 @@ function installKubeadm() {
 		exit 1
 	fi
 	minorDelta=0
-	pkgNames="kubernetes$kubeMinorVersion-kubeadm  kubernetes$kubeMinorVersion-crio"
+	pkgNames="kubernetes$kubeMinorVersion-kubeadm kubernetes$kubeMinorVersion-crio cri-tools$kubeMinorVersion"
 	echo "Установка пакетов $pkgNames"
 	until apt-get install -y $pkgNames >>$aptgetLogFile 2>&1
 	do

@@ -57,10 +57,6 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-Requires: kubernetes-common
-Requires: kubernetes-crio
-Requires: cri-o
-Requires: cri-tools
 %filter_from_requires /\/usr\/bin\/kubeadm/d
 %filter_from_requires /kubernetes-client/d
 %filter_from_requires /kubernetes-kubeadm/d
