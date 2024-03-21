@@ -362,14 +362,14 @@ function installKubeadm() {
 			kubeVersionByKubeadm=$(getKubeVersionByKubeadm)
 			kubeMinorVersionByKubeadm=$(getMinorVersion $kubeVersionByKubeadm)
 			echo "Предупреждение: команда kubeadm и crio версии $kubeVersionByKubeadm уже установлена"
-			pkgNames+="kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm"
+			pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm"
 		fi
 		if [ -f '/usr/bin/crio' ]
 		then
 			kubeVersionByCrio=$(getKubeVersionByCrio)
 			kubeMinorVersionByCrio=$(getMinorVersion $kubeVersionByCrio)
 			echo "Предупреждение: команда crio версии kubeMinorVersionByCrio уже установлена"
-			pkgNames+="kubernetes${kubeMinorVersionByKubeadm:1}-crio cri-o${kubeMinorVersionByKubeadm:1} cri-tools${kubeMinorVersionByKubeadm:1}"
+			pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-crio cri-o${kubeMinorVersionByKubeadm:1} cri-tools${kubeMinorVersionByKubeadm:1}"
 		fi
 		echo "Удаление пакетов $pkgNames"
 		apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1
