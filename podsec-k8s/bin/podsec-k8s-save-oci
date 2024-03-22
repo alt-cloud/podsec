@@ -27,15 +27,21 @@ then
   exit 1
 fi
 
-if [ -z "$U7S_KUBEVERSION" ]
-then
-  export U7S_KUBEVERSION="v1.26.11"
-fi
+# if [ -z "$U7S_KUBEVERSION" ]
+# then
+#   export U7S_KUBEVERSION="v1.26.11"
+# fi
 
 ociDir=$1
 archs=$2
 shift;shift
 source podsec-u7s-functions
+source podsec-get-platform
+
+getPlatform # Устанавливает переменную U7S_PLATFORM
+installKubeadm # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
+setRegistryName # устанавливает имя регистратора образов в переменнную U7S_REGISTRY_PLATFORM
+
 if [ -n "$U7S_KUBEVERSION" ]
 then
   ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
@@ -44,10 +50,6 @@ then
     exit 1
   fi
 fi
-
-installKubeadm
-
-setRegistryName
 
 if [ $# -gt 0 ]
 then

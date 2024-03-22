@@ -341,71 +341,107 @@ function decreaseMinorVersion() {
 	echo "$1.$minor"
 }
 
-function getKubeVersionByKubeadm() {
+function getKubePatchVersionByKubeadm() {
 	ret=$(/usr/bin/kubeadm version -o json | jq -r .clientVersion.gitVersion)
 	echo $ret
 }
 
-function getKubeVersionByCrio() {
+function getKubePatchVersionByCrio() {
 	ret=$(/usr/bin/crio version --json 2>/dev/null | jq -r .version)
 	echo $ret
 }
 
 # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
 function installKubeadm() {
+	lastKubeAdmMinorVersion=$(getLastKubeAdmMinorVersion)
+	lastKubeAdmPatchVersion=$(getPacketPatchVersion "kubernetes${lastKubeAdmMinorVersion}-kubeadm")
+	if [ -z "$U7S_KUBEVERSION" ]
+	then
+		kubeMinorVersion=$lastKubeAdmMinorVersion
+		U7S_KUBEVERSION="v$lastKubeAdmPatchVersion"
+	else
+		kubeMinorVersion=$(getMinorVersion $U7S_KUBEVERSION)
+	fi
+	if [ "${U7S_KUBEVERSION:0:1}" != 'v' ]
+	then
+		echo "Значение переменной U7S_KUBEVERSION должно начитаться с символа 'v'"
+		exit
+	fi
 	aptgetLogFile="/tmp/aptget.log"
 	pkgNames=
   if [ -f '/usr/bin/kubeadm' -o -f '/usr/bin/crio' ]
   then
 		if [ -f '/usr/bin/kubeadm' ]
 		then
-			kubeVersionByKubeadm=$(getKubeVersionByKubeadm)
-			kubeMinorVersionByKubeadm=$(getMinorVersion $kubeVersionByKubeadm)
-			echo "Предупреждение: команда kubeadm и crio версии $kubeVersionByKubeadm уже установлена"
-			pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm"
+			kubePatchVersionByKubeadm=$(getKubePatchVersionByKubeadm)
+			echo "Предупреждение: команда kubeadm версии $kubePatchVersionByKubeadm уже установлена"
+			if [ "$kubePatchVersionByKubeadm" != "$U7S_KUBEVERSION" ]
+			then
+				kubeMinorVersionByKubeadm=$(getMinorVersion $kubePatchVersionByKubeadm)
+				pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm"
+			else
+				echo "Версия $U7S_KUBEVERSION kubeadm совпадает с устанавливаемой"
+			fi
 		fi
 		if [ -f '/usr/bin/crio' ]
 		then
-			kubeVersionByCrio=$(getKubeVersionByCrio)
-			kubeMinorVersionByCrio=$(getMinorVersion $kubeVersionByCrio)
-			echo "Предупреждение: команда crio версии kubeMinorVersionByCrio уже установлена"
-			pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-crio cri-o${kubeMinorVersionByKubeadm:1} cri-tools${kubeMinorVersionByKubeadm:1}"
+			kubePatchVersionByCrio=$(getKubePatchVersionByCrio)
+			echo "Предупреждение: команда crio версии $kubePatchVersionByCrio уже установлена"
+			if [ "$kubePatchVersionByKubeadm" != "$U7S_KUBEVERSION" ]
+			then
+				kubeMinorVersionByCrio=$(getMinorVersion $kubePatchVersionByCrio)
+				pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-crio cri-o${kubeMinorVersionByKubeadm:1} cri-tools${kubeMinorVersionByKubeadm:1}"
+			else
+				echo "Версия $U7S_KUBEVERSION crio совпадает с устанавливаемой"
+			fi
 		fi
-		echo "Удаление пакетов $pkgNames"
-		apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1
+		if [ -n "$pkgNames" ]
+		then
+			echo "Удаление пакетов $pkgNames"
+			apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1
+		fi
   fi
-	if [ -z "$U7S_KUBEVERSION" ]
-	then
-		kubeMinorVersion=$(getlastKubeAdmVersion)
-	else
-		kubeMinorVersion=$(getMinorVersion $U7S_KUBEVERSION)
-	fi
+
 	if [[ "$kubeMinorVersion" < '1.26' ]]
 	then
 		echo "Минорная версия kubeadm $kubeMinorVersion менее 1.26 не поддерживается"
 		exit 1
 	fi
 	minorDelta=0
-	pkgNames="kubernetes$kubeMinorVersion-kubeadm kubernetes$kubeMinorVersion-crio cri-tools$kubeMinorVersion"
-	echo "Установка пакетов $pkgNames"
-	until apt-get install -y $pkgNames >>$aptgetLogFile 2>&1
+	pkgNames="kubernetes$kubeMinorVersion-kubeadm kubernetes$kubeMinorVersion-kubelet kubernetes$kubeMinorVersion-crio "
+	kuberPkgList=$(rpm -qa | grep -e "^kubernetes")
+	installPkgNames=
+	for pkgName in $pkgNames
 	do
-		echo "Версия $kubeMinorVersion пакетов $pkgNames недоступна"
-		kubeMinorVersion=$(decreaseMinorVersion $kubeMinorVersion)
-		pkgNames="kubernetes$kubeMinorVersion-kubeadm  kubernetes$kubeMinorVersion-crio"
-		echo "Пытаемся установить предыдущую минорную версию $kubeMinorVersion пакетов $pkgNames"
-		if [[ "$kubeMinorVersion" < '1.26' ]]
-		then
-			echo "Минорная версия kubeadm $kubeMinorVersion менее 1.26 не поддерживается"
-			exit 1
+		fullPkgName="$pkgName-${U7S_KUBEVERSION:1}"
+		if echo "$kuberPkgList" | grep $fullPkgName >/dev/null
+		then :;
+		else
+			installPkgNames+=" $pkgName"
 		fi
-		let minorDelta+=1
 	done
-	if [ $minorDelta -gt 1 ]
+	if [ -n "$installPkgNames" ]
 	then
-		echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
+		installPkgNames+=" cri-tools$kubeMinorVersion"
+		echo "Установка пакетов $installPkgNames"
+		until apt-get install -y $installPkgNames >>$aptgetLogFile 2>&1
+		do
+			echo "Версия $kubeMinorVersion пакетов $installPkgNames недоступна"
+			kubeMinorVersion=$(decreaseMinorVersion $kubeMinorVersion)
+			installPkgNames="kubernetes$kubeMinorVersion-kubeadm  kubernetes$kubeMinorVersion-crio kubernetes$kubeMinorVersion-kubelet"
+			echo "Пытаемся установить предыдущую минорную версию $kubeMinorVersion пакетов $installPkgNames"
+			if [[ "$kubeMinorVersion" < '1.26' ]]
+			then
+				echo "Минорная версия kubeadm $kubeMinorVersion менее 1.26 не поддерживается"
+				exit 1
+			fi
+			let minorDelta+=1
+		done
+		if [ $minorDelta -gt 1 ]
+		then
+			echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
+		fi
 	fi
-	U7S_KUBEVERSION=$(getKubeVersionByKubeadm)
 }
 
 # Функция выводит команду apt-get install использую механизм удаления (${packege}-) и добавления (${packege}-+) пакетов
@@ -441,8 +477,19 @@ function replaceKubeCommand() {
 	)
 }
 
-function getlastKubeAdmVersion() {
-	apt-cache search kubernetes | grep kubernetes | grep kubeadm |
+function getPacketPatchVersion() {
+	package=$1
+	set -- $(apt-cache show $package | grep "^Version:")
+	version=$2
+	ifs=$IFS
+	IFS=-
+	set -- $version
+	IFS=$ifs
+	echo $1
+}
+
+function getLastKubeAdmMinorVersion() {
+	apt-cache search kubernetes-kubeadm |
 	(
 	ret=
 	while read version tail
@@ -450,6 +497,7 @@ function getlastKubeAdmVersion() {
 		if [ "${version:0:10}" = 'kubernetes' ]
 		then
 			version=${version:10:-8}
+			if [ -z "$version" ]; then continue; fi
 			if [[ "$ret" < $version ]]
 			then
 				ret=$version
