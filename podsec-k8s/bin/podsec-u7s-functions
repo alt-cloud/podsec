@@ -301,7 +301,7 @@ function setRegistryName() {
 		U7S_REGISTRY_PLATFORM+="/$U7S_PLATFORM"
 	fi
 	getKuberLastPatchVersion
-	source /etc/podsec/u7s/env/u7s_images
+# 	source /etc/podsec/u7s/env/u7s_images
 	export U7S_REGISTRY_PLATFORM
 }
 
@@ -386,11 +386,11 @@ function installKubeadm() {
 		if [ -f '/usr/bin/crio' ]
 		then
 			kubePatchVersionByCrio=$(getKubePatchVersionByCrio)
+			kubeMinorVersionByCrio=$(getMinorVersion $kubePatchVersionByCrio)
 			echo "Предупреждение: команда crio версии $kubePatchVersionByCrio уже установлена"
-			if [ "$kubePatchVersionByKubeadm" != "$U7S_KUBEVERSION" ]
+			if [ "$kubeMinorVersionByCrio" != "$kubeMinorVersion" ]
 			then
-				kubeMinorVersionByCrio=$(getMinorVersion $kubePatchVersionByCrio)
-				pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-crio cri-o${kubeMinorVersionByKubeadm:1} cri-tools${kubeMinorVersionByKubeadm:1}"
+				pkgNames+=" kubernetes${kubeMinorVersionByCrio:1}-crio cri-o${kubeMinorVersionByCrio:1} cri-tools${kubeMinorVersionByCrio:1}"
 			else
 				echo "Версия $U7S_KUBEVERSION crio совпадает с устанавливаемой"
 			fi
@@ -398,7 +398,7 @@ function installKubeadm() {
 		if [ -n "$pkgNames" ]
 		then
 			echo "Удаление пакетов $pkgNames"
-			apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1
+			apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1 || :
 		fi
   fi
 
@@ -556,7 +556,192 @@ function getKuberLastPatchVersion() {
   echo $ret
 }
 
-# replaceKubeCommand v1.23.5
+# Параметры:
+# - архитектура процессора
+# - каталог размещения образов относительно ~$user/.local
+# - пользователь для которого размещается образы
+# - группа пользователя
+function getKuberImages() {
+  arch=$1
+	storage=$2
+	user=$3
+	if [ $# -eq 3 ]
+	then
+		group=$user
+	else
+		group=$4
+	fi
+
+	case $arch in
+		'x86_64') arch='amd64';break;;
+	esac
+
+	eval storage="~$user/.local/$storage"
+
+  minorVersion=$(getMinorVersion $U7S_KUBEVERSION)
+
+  case $U7S_REGISTRY in
+    registry.altlinux.org | registry.local) # Образы ALTLINUX
+      prefix="$U7S_PLATFORM/"
+      U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
+      ;;
+    *)
+      prefix=''
+      U7S_FLANNEL_REGISTRY="docker.io/flannel"
+      ;;
+  esac
+
+  skopeoLogFile="/tmp/skopeo.log"
+
+#   storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
+  if [ -z "$U7S_FLANNEL_TAG" ]
+  then
+    # U7S_FLANNEL_TAG="v0.21.4"
+    U7S_FLANNEL_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
+    if [ -z "$U7S_FLANNEL_TAG" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+    flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
+    skopeo --override-arch $arch copy \
+			docker://$flannelImage\
+			containers-storage:[$storage]$flannelImage >>$skopeoLogFile 2>&1
+  fi
+
+  if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
+  then
+    # U7S_FLANNELCNIPLUGIN_TAG="v1.1.2"
+    U7S_FLANNELCNIPLUGIN_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel-cni-plugin")
+    if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+    flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
+    skopeo --override-arch $arch copy \
+			docker://$flannelCNIImage\
+			containers-storage:[$storage]$flannelCNIImage >>$skopeoLogFile 2>&1
+
+  fi
+
+  if [ -z "$U7S_CERTMANAGER_TAG" ]
+  then
+    # U7S_CERTMANAGER_TAG="v1.9.1"
+    U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
+    if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
+    skopeo --override-arch $arch copy\
+			docker://$certManagesImage\
+			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
+    skopeo --override-arch $arch copy\
+			docker://$certManagesImage\
+			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+    certManagesImage="${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+    skopeo --override-arch $arch copy\
+			docker://$U7S_REGISTRY/$certManagesImage\
+			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+  fi
+
+  imageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
+  if [ -z "$imageList" ]
+  then
+    echo "Kubernet-версия $U7S_KUBEVERSION не поддерживается"
+    exit 1
+  fi
+  let lenRegistry=${#U7S_REGISTRY}+1
+  let lenRegistryPlatform=${#U7S_REGISTRY_PLATFORM}+1
+  ifs=$IFS
+  U7S_IMAGES=
+
+  for image in $imageList
+  do
+    fullImage=$image
+    IFS=:
+    set -- $image
+    IFS=$ifs
+    imageWithoutTag=$1
+    imageTag=$2
+    imageWithoutRegistry=${image:lenRegistry}
+    imageWithoutRegistryAndTag=${imageWithoutTag:lenRegistry}
+    shortImageName=${imageWithoutTag:$lenRegistryPlatform}
+
+    if checkKubernetesPatchVersions $minorVersion $imageWithoutRegistryAndTag $imageTag
+    then
+      echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag доступна. Загружаем... " >&2
+      skopeo --override-arch $arch copy\
+				docker://$fullImage\
+				containers-storage:[$storage]$fullImage >>$skopeoLogFile 2>&1
+    else
+      echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag недоступна" >&2
+      if [ "$U7S_SETAVAILABLEIMAGES" != 'yes' ]
+      then
+        echo "Для установки последних patch-версий образов установите переменнyю среды: U7S_SETAVAILABLEIMAGES=yes" >&2
+        exit 1
+      else
+        mVersion=
+        if [ "${shortImageName:0:5}" = 'kube-' ]
+        then
+          mVersion=$minorVersion
+        fi
+        repoImageLastTag=$(getKuberLastPatchVersion "$mVersion" $imageWithoutRegistryAndTag)
+        imageWithNewTag="$imageWithoutTag:$repoImageLastTag"
+        echo "Выбран доступный на регистраторе $U7S_REGISTRY последний тег :$repoImageLastTag" >&2
+        # Загрузка образа в rootless каталог образов
+        skopeo --override-arch $arch\
+					copy docker://$imageWithNewTag\
+					containers-storage:[$storage]$imageWithNewTag >>$skopeoLogFile 2>&1
+        # Навешивание тега
+        skopeo --override-arch $arch copy\
+					containers-storage:[$storage]$imageWithNewTag\
+					containers-storage:[$storage]$fullImage>>$skopeoLogFile 2>&1
+      fi
+    fi
+    eval chown -R $user:$user ~$user/.local
+#     chown -R u7s-admin:u7s-admin /var/lib/u7s-admin/.local
+
+    U7S_IMAGES+=" $imageWithoutRegistry"
+    case $shortImageName in
+      coredns)
+        export U7S_COREDNS_IMAGE=$imageWithoutRegistry
+        ;;
+      pause)
+        export U7S_PAUSE_IMAGE=$imageWithoutRegistry
+        ;;
+      etcd)
+        export U7S_ETCD_IMAGE=$imageWithoutRegistry
+        ;;
+      kube-controller-manager)
+        export U7S_KUBECONTROLLER_IMAGE=$imageWithoutRegistry
+        ;;
+      kube-apiserver)
+        export U7S_KUBEAPISERVER_IMAGE=$imageWithoutRegistry
+        ;;
+      kube-proxy)
+        export U7S__KUBEPROXY_IMAGE=$imageWithoutRegistry
+        ;;
+      kube-scheduler)
+        export U7S_KUBESCHEDULER_IMAGE=$imageWithoutRegistry
+        ;;
+    esac
+  done
+
+  echo "Для образа flannel выбран образ с тегом $U7S_FLANNEL_TAG"
+  export U7S_FLANNEL_IMAGE="${prefix}flannel:$U7S_FLANNEL_TAG"
+
+  echo "Для образа flannel-cni-plugin выбран образ с тегом $U7S_FLANNELCNIPLUGIN_TAG"
+  export U7S_FLANNEL_CNI_IMAGE="${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
+
+  echo "Для образа cert-manager-controller выбран образ с тегом $U7S_CERTMANAGER_TAG"
+  export U7S_CERTMANAGER_CONTROLLER_IMAGE="$U7S_PLATFORM/cert-manager-controller:$U7S_CERTMANAGER_TAG"
+
+  echo "Для образа cert-manager-cainjector выбран образ с тегом $U7S_CERTMANAGER_TAG"
+  export U7S_CERTMANAGER_CAINJECTOR_IMAGE="$U7S_PLATFORM/cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
+
+  echo "Для образа cert-manager-webhook выбран образ с тегом $U7S_CERTMANAGER_TAG"
+  export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+
+  export U7S_IMAGES+="
+  $U7S_FLANNEL_IMAGE
+  $U7S_FLANNEL_CNI_IMAGE
+  $U7S_CERTMANAGER_CONTROLLER_IMAGE
+  $U7S_CERTMANAGER_CAINJECTOR_IMAGE
+  $U7S_CERTMANAGER_WEBHOOK_IMAGE
+  "
+}
 
 
 # export XDG_{DATA,CONFIG,CACHE}_HOME
