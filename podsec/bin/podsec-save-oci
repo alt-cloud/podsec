@@ -63,6 +63,15 @@ case $archs in
 esac
 
 mkdir $ociDir
+if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
+then
+  storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
+  if [ ! -d $storage ]
+  then
+    echo "Каталог $storage отсутствует. Копирование существующих образов  пользователя u7s-admin невозможно."
+  fi
+fi
+
 for arch in $archs
 do
   echo $arch
@@ -73,12 +82,28 @@ do
   fi
   for image in $images
   do
-    echo "  image=$image"
+    echo -ne "\n------------------------\nАрхивация образа $image\n"
     Image="$regName/$image"
     podman image rm $image >/dev/null 2>&1
-    skopeo --override-arch $arch copy --remove-signatures --dest-oci-accept-uncompressed-layers docker://$Image containers-storage:$Image
-    skopeo --override-arch $arch copy --dest-oci-accept-uncompressed-layers containers-storage:$Image oci:$ociArchDir:$image
+    if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
+    then
+      skopeo --override-arch $arch copy\
+        --remove-signatures --dest-oci-accept-uncompressed-layers\
+        containers-storage:[$storage]$Image\
+        containers-storage:$Image 2>/dev/null
+    else
+      skopeo --override-arch $arch copy \
+      --remove-signatures\
+      --dest-oci-accept-uncompressed-layers\
+      docker://$Image \
+      containers-storage:$Image 2>/dev/null
+    fi
+    skopeo --override-arch $arch copy \
+      --dest-oci-accept-uncompressed-layers \
+      containers-storage:$Image\
+      oci:$ociArchDir:$image  2>/dev/null
   done
+  echo -ne "\n------------------------\nАрхивания и сжатие образов\n"
   tar cvCf $ociDir -  $arch | xz -9v > $ociArchDir.tar.xz
   rm -rf $ociArchDir
 done
