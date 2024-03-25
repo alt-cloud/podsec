@@ -511,7 +511,15 @@ function getLastKubeAdmMinorVersion() {
 # Получить из регистратора список доступных тrгов образа
 function getKubernetesPatchVersions() {
 	image=$1
-  versions=$(curl -ks https://$U7S_REGISTRY/v2/$image/tags/list | jq -r  '.tags | sort | .[]')
+	if [ "$U7S_REGISTRY" == 'registry.local' ]
+	then
+		flags="-s"
+		url="http://$U7S_REGISTRY/v2/$image/tags/list"
+	else
+		flags="-ks"
+		url="https://$U7S_REGISTRY/v2/$image/tags/list"
+	fi
+  versions=$(curl $flags $url | jq -r  '.tags | sort | .[]')
   echo $versions
 }
 
@@ -591,7 +599,7 @@ function getKuberImages() {
       ;;
   esac
 
-  skopeoLogFile="/tmp/skopeo.log"
+  skopeoLogFile="/dev/stdout"
 
 #   storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
   if [ -z "$U7S_FLANNEL_TAG" ]
@@ -600,9 +608,10 @@ function getKuberImages() {
     U7S_FLANNEL_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
     if [ -z "$U7S_FLANNEL_TAG" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
     flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $flannelImage\n" >>$skopeoLogFile
     skopeo --override-arch $arch copy \
 			docker://$flannelImage\
-			containers-storage:[$storage]$flannelImage >>$skopeoLogFile 2>&1
+			containers-storage:[$storage]$flannelImage >>$skopeoLogFile || :
   fi
 
   if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
@@ -611,9 +620,10 @@ function getKuberImages() {
     U7S_FLANNELCNIPLUGIN_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel-cni-plugin")
     if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
     flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $flannelCNIImage\n" >>$skopeoLogFile
     skopeo --override-arch $arch copy \
 			docker://$flannelCNIImage\
-			containers-storage:[$storage]$flannelCNIImage >>$skopeoLogFile 2>&1
+			containers-storage:[$storage]$flannelCNIImage >>$skopeoLogFile || :
 
   fi
 
@@ -623,17 +633,20 @@ function getKuberImages() {
     U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
     if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" >>$skopeoLogFile || :
     skopeo --override-arch $arch copy\
 			docker://$certManagesImage\
-			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile || :
     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" >>$skopeoLogFile
     skopeo --override-arch $arch copy\
 			docker://$certManagesImage\
-			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile || :
+    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" >>$skopeoLogFile
     certManagesImage="${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
     skopeo --override-arch $arch copy\
 			docker://$U7S_REGISTRY/$certManagesImage\
-			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile || :
   fi
 
   imageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
@@ -664,7 +677,7 @@ function getKuberImages() {
       echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag доступна. Загружаем... " >&2
       skopeo --override-arch $arch copy\
 				docker://$fullImage\
-				containers-storage:[$storage]$fullImage >>$skopeoLogFile 2>&1
+				containers-storage:[$storage]$fullImage >>$skopeoLogFile || :
     else
       echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag недоступна" >&2
       if [ "$U7S_SETAVAILABLEIMAGES" != 'yes' ]
@@ -683,13 +696,19 @@ function getKuberImages() {
         # Загрузка образа в rootless каталог образов
         skopeo --override-arch $arch\
 					copy docker://$imageWithNewTag\
-					containers-storage:[$storage]$imageWithNewTag >>$skopeoLogFile 2>&1
+					containers-storage:[$storage]$imageWithNewTag >>$skopeoLogFile || :
         # Навешивание тега
         skopeo --override-arch $arch copy\
 					containers-storage:[$storage]$imageWithNewTag\
-					containers-storage:[$storage]$fullImage>>$skopeoLogFile 2>&1
+					containers-storage:[$storage]$fullImage>>$skopeoLogFile || :
       fi
     fi
+    TMPFILE=/tmp/$$.json
+    indexJSON="$storage/overlay-images/images.json"
+    cat  $indexJSON |
+    jq '.[].names[]|= sub("docker.io"; "registry.altlinux.org")' |
+    jq '.[]."names-history"[]|= sub("docker.io"; "registry.altlinux.org")' > $TMPFILE
+    mv $TMPFILE $indexJSON
     eval chown -R $user:$user ~$user/.local
 #     chown -R u7s-admin:u7s-admin /var/lib/u7s-admin/.local
 

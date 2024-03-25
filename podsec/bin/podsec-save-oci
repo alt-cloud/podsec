@@ -28,6 +28,12 @@ fi
 
 ociDir=$1
 archs=$2
+transport=$3
+if [ -z "$transport" ]
+then
+  transport="docker://"
+fi
+shift
 shift
 shift
 images=$*
@@ -55,11 +61,10 @@ case $archs in
         *)
           echo "Неизвестная архитектура $arch";
           echo "Допустимые: amd64, arm64, arm, ppc64le, 386"
-          echo -ne "Формат:\n\t$0 каталог_разворачивания_врхивов [архитектура ...]\n"
+          echo -ne "Формат:\n\t$0 каталог_разворачивания_архивов [архитектура ...] [транспорт]  [образ] ...\n"
           exit 2
       esac
     done
-
 esac
 
 mkdir $ociDir
@@ -85,19 +90,19 @@ do
     echo -ne "\n------------------------\nАрхивация образа $image\n"
     Image="$regName/$image"
     podman image rm $image >/dev/null 2>&1
-    if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
-    then
+#     if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
+#     then
       skopeo --override-arch $arch copy\
         --remove-signatures --dest-oci-accept-uncompressed-layers\
-        containers-storage:[$storage]$Image\
+        ${transport}${Image}\
         containers-storage:$Image 2>/dev/null
-    else
-      skopeo --override-arch $arch copy \
-      --remove-signatures\
-      --dest-oci-accept-uncompressed-layers\
-      docker://$Image \
-      containers-storage:$Image 2>/dev/null
-    fi
+#     else
+#       skopeo --override-arch $arch copy \
+#         --remove-signatures\
+#         --dest-oci-accept-uncompressed-layers\
+#         docker://$Image \
+#         containers-storage:$Image 2>/dev/null
+#     fi
     skopeo --override-arch $arch copy \
       --dest-oci-accept-uncompressed-layers \
       containers-storage:$Image\
