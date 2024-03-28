@@ -57,12 +57,9 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-%filter_from_requires /\/usr\/bin\/kubeadm/d
-%filter_from_requires /cri-o/d
-%filter_from_requires /kubernetes-client/d
-%filter_from_requires /kubernetes-kubeadm/d
-%filter_from_requires /kubernetes-kubelet/d
-%filter_from_requires /\/etc\/kubernetes\/kubelet/d
+Requires: kubernetes-kubeadm
+Requires: kubernetes-crio
+Requires: cri-tools
 
 %description k8s
 This package contains utilities for:

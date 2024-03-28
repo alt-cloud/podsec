@@ -11,7 +11,7 @@
 
 USERNAME='u7s-admin'
 
-set -eo pipefail
+# set -eo pipefail
 
 # logging utilities
 debug_enabled() {
@@ -354,13 +354,17 @@ function getKubePatchVersionByCrio() {
 # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
 function installKubeadm() {
 	lastKubeAdmMinorVersion=$(getLastKubeAdmMinorVersion)
+	LastKubeAdmMinorVersion="v$lastKubeAdmMinorVersion"
 	lastKubeAdmPatchVersion=$(getPacketPatchVersion "kubernetes${lastKubeAdmMinorVersion}-kubeadm")
+	LastKubeAdmPatchVersion="v$lastKubeAdmPatchVersion"
 	if [ -z "$U7S_KUBEVERSION" ]
 	then
 		kubeMinorVersion=$lastKubeAdmMinorVersion
-		U7S_KUBEVERSION="v$lastKubeAdmPatchVersion"
+		U7S_KUBEVERSION=$LastKubeAdmPatchVersion
+		KubeMinorVersion="v$kubeMinorVersion"
 	else
-		kubeMinorVersion=$(getMinorVersion $U7S_KUBEVERSION)
+		KubeMinorVersion=$(getMinorVersion $U7S_KUBEVERSION)
+		kubeMinorVersion=${KubeMinorVersion:1}
 	fi
 	if [ "${U7S_KUBEVERSION:0:1}" != 'v' ]
 	then
@@ -373,11 +377,13 @@ function installKubeadm() {
   then
 		if [ -f '/usr/bin/kubeadm' ]
 		then
-			kubePatchVersionByKubeadm=$(getKubePatchVersionByKubeadm)
+			KubePatchVersionByKubeadm=$(getKubePatchVersionByKubeadm)
+			kubePatchVersionByKubeadm=${KubePatchVersionByKubeadm:1}
 			echo "Предупреждение: команда kubeadm версии $kubePatchVersionByKubeadm уже установлена"
-			if [ "$kubePatchVersionByKubeadm" != "$U7S_KUBEVERSION" ]
+			if [ "$KubePatchVersionByKubeadm" != "${U7S_KUBEVERSION}" ]
 			then
 				kubeMinorVersionByKubeadm=$(getMinorVersion $kubePatchVersionByKubeadm)
+				KubeMinorVersionByKubeadm="vkubeMinorVersionByKubeadm"
 				pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm"
 			else
 				echo "Версия $U7S_KUBEVERSION kubeadm совпадает с устанавливаемой"
@@ -386,11 +392,13 @@ function installKubeadm() {
 		if [ -f '/usr/bin/crio' ]
 		then
 			kubePatchVersionByCrio=$(getKubePatchVersionByCrio)
+			KubePatchVersionByCrio="v$kubePatchVersionByCrio"
 			kubeMinorVersionByCrio=$(getMinorVersion $kubePatchVersionByCrio)
+			KubeMinorVersionByCrio="v$kubeMinorVersionByCrio"
 			echo "Предупреждение: команда crio версии $kubePatchVersionByCrio уже установлена"
-			if [ "$kubeMinorVersionByCrio" != "$kubeMinorVersion" ]
+			if [ "${kubeMinorVersionByCrio}" != "$kubeMinorVersion" ]
 			then
-				pkgNames+=" kubernetes${kubeMinorVersionByCrio:1}-crio cri-o${kubeMinorVersionByCrio:1} cri-tools${kubeMinorVersionByCrio:1}"
+				pkgNames+=" kubernetes${kubeMinorVersionByCrio}-crio cri-o${kubeMinorVersionByCrio} cri-tools${kubeMinorVersionByCrio}"
 			else
 				echo "Версия $U7S_KUBEVERSION crio совпадает с устанавливаемой"
 			fi
@@ -398,7 +406,7 @@ function installKubeadm() {
 		if [ -n "$pkgNames" ]
 		then
 			echo "Удаление пакетов $pkgNames"
-			apt-get remove -y $pkgNames >>$aptgetLogFile 2>&1 || :
+			apt-get remove -y $pkgNames >>$aptgetLogFile 2>/dev/null || :
 		fi
   fi
 
@@ -424,7 +432,7 @@ function installKubeadm() {
 	then
 		installPkgNames+=" cri-tools$kubeMinorVersion"
 		echo "Установка пакетов $installPkgNames"
-		until apt-get install -y $installPkgNames >>$aptgetLogFile 2>&1
+		until apt-get install -y $installPkgNames 2>/dev/null
 		do
 			echo "Версия $kubeMinorVersion пакетов $installPkgNames недоступна"
 			kubeMinorVersion=$(decreaseMinorVersion $kubeMinorVersion)
@@ -437,6 +445,7 @@ function installKubeadm() {
 			fi
 			let minorDelta+=1
 		done
+		usermod -G kube u7s-admin
 		if [ $minorDelta -gt 1 ]
 		then
 			echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
@@ -520,7 +529,30 @@ function getKubernetesPatchVersions() {
 		url="https://$U7S_REGISTRY/v2/$image/tags/list"
 	fi
   versions=$(curl $flags $url | jq -r  '.tags | sort | .[]')
-  echo $versions
+  ret=
+  for version in $versions
+  do
+		if [ "$version" = 'latest' ]; then continue; fi
+		ret+=" $version"
+  done
+  echo $ret
+}
+
+# Получить из регистратора список доступных минорных версий
+function getKubernetesMinorVersions() {
+	versions=$(getKubernetesPatchVersions $1)
+	ret=
+	lastVersion=
+	for version in $versions
+	do
+		minorVersion=$(getMinorVersion $version)
+		if [ "$minorVersion" != "$lastVersion" ]
+		then
+			ret+=" $minorVersion"
+			lastVersion=$minorVersion
+		fi
+	done
+	echo $ret
 }
 
 # Проверить наличие на регистраторе образа с указанным тегом
@@ -541,7 +573,6 @@ function checkKubernetesPatchVersions() {
 	done
   return 1
 }
-
 
 # Получить из регистратора последнюю доступную версию образа в указанной минорной версии
 function getKuberLastPatchVersion() {
@@ -588,67 +619,6 @@ function getKuberImages() {
 
   minorVersion=$(getMinorVersion $U7S_KUBEVERSION)
 
-  case $U7S_REGISTRY in
-    registry.altlinux.org | registry.local) # Образы ALTLINUX
-      prefix="$U7S_PLATFORM/"
-      U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
-      ;;
-    *)
-      prefix=''
-      U7S_FLANNEL_REGISTRY="docker.io/flannel"
-      ;;
-  esac
-
-  skopeoLogFile="/dev/stdout"
-
-#   storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
-  if [ -z "$U7S_FLANNEL_TAG" ]
-  then
-    # U7S_FLANNEL_TAG="v0.21.4"
-    U7S_FLANNEL_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
-    if [ -z "$U7S_FLANNEL_TAG" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
-    flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $flannelImage\n" >>$skopeoLogFile
-    skopeo --override-arch $arch copy \
-			docker://$flannelImage\
-			containers-storage:[$storage]$flannelImage >>$skopeoLogFile || :
-  fi
-
-  if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
-  then
-    # U7S_FLANNELCNIPLUGIN_TAG="v1.1.2"
-    U7S_FLANNELCNIPLUGIN_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel-cni-plugin")
-    if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
-    flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $flannelCNIImage\n" >>$skopeoLogFile
-    skopeo --override-arch $arch copy \
-			docker://$flannelCNIImage\
-			containers-storage:[$storage]$flannelCNIImage >>$skopeoLogFile || :
-
-  fi
-
-  if [ -z "$U7S_CERTMANAGER_TAG" ]
-  then
-    # U7S_CERTMANAGER_TAG="v1.9.1"
-    U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
-    if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
-    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" >>$skopeoLogFile || :
-    skopeo --override-arch $arch copy\
-			docker://$certManagesImage\
-			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile || :
-    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" >>$skopeoLogFile
-    skopeo --override-arch $arch copy\
-			docker://$certManagesImage\
-			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile || :
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" >>$skopeoLogFile
-    certManagesImage="${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
-    skopeo --override-arch $arch copy\
-			docker://$U7S_REGISTRY/$certManagesImage\
-			containers-storage:[$storage]$certManagesImage >>$skopeoLogFile || :
-  fi
-
   imageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
   if [ -z "$imageList" ]
   then
@@ -677,12 +647,23 @@ function getKuberImages() {
       echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag доступна. Загружаем... " >&2
       skopeo --override-arch $arch copy\
 				docker://$fullImage\
-				containers-storage:[$storage]$fullImage >>$skopeoLogFile || :
+				containers-storage:[$storage]$fullImage 2>/dev/null  || :
     else
       echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag недоступна" >&2
       if [ "$U7S_SETAVAILABLEIMAGES" != 'yes' ]
       then
-        echo "Для установки последних patch-версий образов установите переменнyю среды: U7S_SETAVAILABLEIMAGES=yes" >&2
+				lastPatchVerison=$(getKuberLastPatchVersion $minorVersion $imageWithoutRegistryAndTag)
+				if [ -z "$lastPatchVerison" ]
+				then
+					echo "В рамках указанной минорной версии $minorVersion нет доступных образов"
+					echo -ne "Доступны следующие минорные версии: "
+					getKubernetesMinorVersions $imageWithoutRegistryAndTag
+					echo -ne "и следующие patch-версии образов: "
+					getKubernetesPatchVersions $imageWithoutRegistryAndTag
+					echo -ne "Для установки одной из указанных версий образов укажите выбранную версию образа в переменной среды:\nexport U7S_KUBEVERSION=...\n"
+				else
+					echo -ne "Для установки последних patch-версий $lastPatchVerison образов установите переменнyю среды:\nexport U7S_SETAVAILABLEIMAGES=yes\n" >&2
+				fi
         exit 1
       else
         mVersion=
@@ -691,26 +672,23 @@ function getKuberImages() {
           mVersion=$minorVersion
         fi
         repoImageLastTag=$(getKuberLastPatchVersion "$mVersion" $imageWithoutRegistryAndTag)
+        if [ -z "$repoImageLastTag" ]
+        then
+					echo "В рамках миновной версии $mVersion образы $imageWithoutRegistryAndTag отсутсвуют"
+					exit 1
+        fi
         imageWithNewTag="$imageWithoutTag:$repoImageLastTag"
         echo "Выбран доступный на регистраторе $U7S_REGISTRY последний тег :$repoImageLastTag" >&2
         # Загрузка образа в rootless каталог образов
         skopeo --override-arch $arch\
 					copy docker://$imageWithNewTag\
-					containers-storage:[$storage]$imageWithNewTag >>$skopeoLogFile || :
+					containers-storage:[$storage]$imageWithNewTag 2>/dev/null  || :
         # Навешивание тега
         skopeo --override-arch $arch copy\
 					containers-storage:[$storage]$imageWithNewTag\
-					containers-storage:[$storage]$fullImage>>$skopeoLogFile || :
+					containers-storage:[$storage]$fullImage 2>/dev/null || :
       fi
     fi
-    TMPFILE=/tmp/$$.json
-    indexJSON="$storage/overlay-images/images.json"
-    cat  $indexJSON |
-    jq '.[].names[]|= sub("docker.io"; "registry.altlinux.org")' |
-    jq '.[]."names-history"[]|= sub("docker.io"; "registry.altlinux.org")' > $TMPFILE
-    mv $TMPFILE $indexJSON
-    eval chown -R $user:$user ~$user/.local
-#     chown -R u7s-admin:u7s-admin /var/lib/u7s-admin/.local
 
     U7S_IMAGES+=" $imageWithoutRegistry"
     case $shortImageName in
@@ -738,6 +716,63 @@ function getKuberImages() {
     esac
   done
 
+  case $U7S_REGISTRY in
+    registry.altlinux.org | registry.local) # Образы ALTLINUX
+      prefix="$U7S_PLATFORM/"
+      U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
+      ;;
+    *)
+      prefix=''
+      U7S_FLANNEL_REGISTRY="docker.io/flannel"
+      ;;
+  esac
+
+#   storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
+  if [ -z "$U7S_FLANNEL_TAG" ]
+  then
+    # U7S_FLANNEL_TAG="v0.21.4"
+    U7S_FLANNEL_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
+    if [ -z "$U7S_FLANNEL_TAG" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+    flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $flannelImage\n"
+    skopeo --override-arch $arch copy \
+			docker://$flannelImage\
+			containers-storage:[$storage]$flannelImage  2>/dev/null || :
+  fi
+
+  if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
+  then
+    # U7S_FLANNELCNIPLUGIN_TAG="v1.1.2"
+    U7S_FLANNELCNIPLUGIN_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel-cni-plugin")
+    if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+    flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $flannelCNIImage\n"
+    skopeo --override-arch $arch copy \
+			docker://$flannelCNIImage\
+			containers-storage:[$storage]$flannelCNIImage  2>/dev/null || :
+  fi
+  if [ -z "$U7S_CERTMANAGER_TAG" ]
+  then
+    # U7S_CERTMANAGER_TAG="v1.9.1"
+    U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
+    if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"  || :
+    skopeo --override-arch $arch copy\
+			docker://$certManagesImage\
+			containers-storage:[$storage]$certManagesImage  || :
+    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
+    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" 2>/dev/null
+    skopeo --override-arch $arch copy\
+			docker://$certManagesImage\
+			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
+    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"
+    certManagesImage="${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+    skopeo --override-arch $arch copy\
+			docker://$U7S_REGISTRY/$certManagesImage\
+			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
+  fi
+
   echo "Для образа flannel выбран образ с тегом $U7S_FLANNEL_TAG"
   export U7S_FLANNEL_IMAGE="${prefix}flannel:$U7S_FLANNEL_TAG"
 
@@ -752,6 +787,14 @@ function getKuberImages() {
 
   echo "Для образа cert-manager-webhook выбран образ с тегом $U7S_CERTMANAGER_TAG"
   export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+
+	TMPFILE=/tmp/$$.json
+	indexJSON="$storage/overlay-images/images.json"
+	cat  $indexJSON |
+	jq '.[].names[]|= sub("docker.io"; "'$U7S_REGISTRY'")' |
+	jq '.[]."names-history"[]|= sub("docker.io"; "'$U7S_REGISTRY'")' > $TMPFILE
+	mv $TMPFILE $indexJSON
+	eval chown -R $user:$user ~$user/.local
 
   export U7S_IMAGES+="
   $U7S_FLANNEL_IMAGE
