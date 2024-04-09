@@ -60,6 +60,11 @@ Requires: systemd-container
 Requires: kubernetes-kubeadm
 Requires: kubernetes-crio
 Requires: cri-tools
+%filter_from_requires /\/usr\/bin\/crio/d
+%filter_from_requires /\/usr\/bin\/kubeadm/d
+%filter_from_requires /\/usr\/bin\/kubectl/d
+%filter_from_requires /\/usr\/bin\/kubelet/d
+%filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
 %description k8s
 This package contains utilities for:
@@ -200,8 +205,9 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-save-oci*
 
 %changelog
-* Tue Mar 12 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt6
+* Tue Apr 09 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt6
 - 1.0.10
+
 
 * Fri Mar 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt5
 - 1.0.10

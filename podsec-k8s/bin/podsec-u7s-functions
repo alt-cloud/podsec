@@ -662,7 +662,7 @@ function getKuberImages() {
 					getKubernetesPatchVersions $imageWithoutRegistryAndTag
 					echo -ne "Для установки одной из указанных версий образов укажите выбранную версию образа в переменной среды:\nexport U7S_KUBEVERSION=...\n"
 				else
-					echo -ne "Для установки последних patch-версий $lastPatchVerison образов установите переменнyю среды:\nexport U7S_SETAVAILABLEIMAGES=yes\n" >&2
+					echo -ne "Для установки последних patch-версий $lastPatchVerison образов установите переменнyю среды:\nexport U7S_KUBEVERSION=$lastPatchVerison\nили\nexport U7S_SETAVAILABLEIMAGES=yes\n" >&2
 				fi
         exit 1
       else
@@ -756,21 +756,25 @@ function getKuberImages() {
     # U7S_CERTMANAGER_TAG="v1.9.1"
     U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
     if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+
     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"  || :
     skopeo --override-arch $arch copy\
 			docker://$certManagesImage\
 			containers-storage:[$storage]$certManagesImage  || :
+
     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" 2>/dev/null
     skopeo --override-arch $arch copy\
 			docker://$certManagesImage\
 			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
+
     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"
-    certManagesImage="${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
     skopeo --override-arch $arch copy\
-			docker://$U7S_REGISTRY/$certManagesImage\
+			docker://$certManagesImage\
 			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
+
   fi
 
   echo "Для образа flannel выбран образ с тегом $U7S_FLANNEL_TAG"
@@ -788,12 +792,6 @@ function getKuberImages() {
   echo "Для образа cert-manager-webhook выбран образ с тегом $U7S_CERTMANAGER_TAG"
   export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
 
-	TMPFILE=/tmp/$$.json
-	indexJSON="$storage/overlay-images/images.json"
-	cat  $indexJSON |
-	jq '.[].names[]|= sub("docker.io"; "'$U7S_REGISTRY'")' |
-	jq '.[]."names-history"[]|= sub("docker.io"; "'$U7S_REGISTRY'")' > $TMPFILE
-	mv $TMPFILE $indexJSON
 	eval chown -R $user:$user ~$user/.local
 
   export U7S_IMAGES+="
