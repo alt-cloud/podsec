@@ -27,10 +27,11 @@ then
   exit 1
 fi
 
-# if [ -z "$U7S_KUBEVERSION" ]
-# then
-#   export U7S_KUBEVERSION="v1.26.11"
-# fi
+if [ $USER != 'root' -o $(id -u) != 0 -o $(id -g) != 0 ]
+then
+  echo "Скрипт $0 должен запускаться от пользователя root"
+  exit 1
+fi
 
 ociDir=$1
 arch=$2
@@ -43,16 +44,6 @@ installKubeadm # Устанавливает требуемую доступну�
 setRegistryName # устанавливает имя регистратора образов в переменнную U7S_REGISTRY_PLATFORM
 U7S_REGISTRY=$U7S_ALTREGISTRY
 U7S_REGISTRY_PLATFORM="$U7S_REGISTRY/$U7S_PLATFORM"
-
-
-# if [ -n "$U7S_KUBEVERSION" ]
-# then
-#   ReplaceKubeCommand=$(replaceKubeCommand $U7S_KUBEVERSION)
-#   if ! su - -c "$ReplaceKubeCommand"
-#   then
-#     exit 1
-#   fi
-# fi
 
 if [ $# -gt 0 ]
 then

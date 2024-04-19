@@ -52,11 +52,8 @@ groupadd -r podman_dev >/dev/null 2>&1
 echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf
 sysctl -w kernel.unprivileged_userns_clone=1
 
-# ЭТО НАДО БУДЕТ ИЗМЕНИТЬ НА control ПОСЛЕ ВНЕЧЕНИЯ ИЗМЕНЕНИ В ПАКЕТ shadow
-chown root:podman /usr/bin/newuidmap /usr/bin/newgidmap
-chmod 6750 /usr/bin/newuidmap /usr/bin/newgidmap
-# setcap cap_setgid,cap_setuid=ep  /usr/bin/newuidmap
-# setcap cap_setgid,cap_setuid=ep  /usr/bin/newgidmap
+control newgidmap public
+control newuidmap public
 
 localIP=
 if ip a  | grep $regIP >/dev/null 2>&1

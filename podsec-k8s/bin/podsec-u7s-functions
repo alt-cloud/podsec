@@ -371,7 +371,6 @@ function installKubeadm() {
 		echo "Значение переменной U7S_KUBEVERSION должно начитаться с символа 'v'"
 		exit
 	fi
-	aptgetLogFile="/tmp/aptget.log"
 	pkgNames=
   if [ -f '/usr/bin/kubeadm' -o -f '/usr/bin/crio' ]
   then
@@ -379,14 +378,14 @@ function installKubeadm() {
 		then
 			KubePatchVersionByKubeadm=$(getKubePatchVersionByKubeadm)
 			kubePatchVersionByKubeadm=${KubePatchVersionByKubeadm:1}
+			kubeMinorVersionByKubeadm=$(getMinorVersion $kubePatchVersionByKubeadm)
+			KubeMinorVersionByKubeadm="v$kubeMinorVersionByKubeadm"
 			echo "Предупреждение: команда kubeadm версии $kubePatchVersionByKubeadm уже установлена"
-			if [ "$KubePatchVersionByKubeadm" != "${U7S_KUBEVERSION}" ]
+			if [ "$KubeMinorVersionByKubeadm" != "$KubeMinorVersion" ]
 			then
-				kubeMinorVersionByKubeadm=$(getMinorVersion $kubePatchVersionByKubeadm)
-				KubeMinorVersionByKubeadm="vkubeMinorVersionByKubeadm"
-				pkgNames+=" kubernetes${kubeMinorVersionByKubeadm:1}-kubeadm"
+				pkgNames+=" kubernetes${KubeMinorVersionByKubeadm:1}-kubeadm"
 			else
-				echo "Версия $U7S_KUBEVERSION kubeadm совпадает с устанавливаемой"
+				echo "Минорная версия $U7S_KUBEVERSION kubeadm совпадает с устанавленной $KubeMinorVersionByKubeadm"
 			fi
 		fi
 		if [ -f '/usr/bin/crio' ]
@@ -400,14 +399,14 @@ function installKubeadm() {
 			then
 				pkgNames+=" kubernetes${kubeMinorVersionByCrio}-crio cri-o${kubeMinorVersionByCrio} cri-tools${kubeMinorVersionByCrio}"
 			else
-				echo "Версия $U7S_KUBEVERSION crio совпадает с устанавливаемой"
+				echo "Минорная версия ${kubeMinorVersionByCrio} crio совпадает с устанавливаемой"
 			fi
 		fi
-		if [ -n "$pkgNames" ]
-		then
-			echo "Удаление пакетов $pkgNames"
-			apt-get remove -y $pkgNames >>$aptgetLogFile 2>/dev/null || :
-		fi
+# 		if [ -n "$pkgNames" ]
+# 		then
+# 			echo "Удаление пакетов $pkgNames"
+# 			apt-get remove -y $pkgNames || :
+# 		fi
   fi
 
 	if [[ "$kubeMinorVersion" < '1.26' ]]
@@ -421,8 +420,8 @@ function installKubeadm() {
 	installPkgNames=
 	for pkgName in $pkgNames
 	do
-		fullPkgName="$pkgName-${U7S_KUBEVERSION:1}"
-		if echo "$kuberPkgList" | grep $fullPkgName >/dev/null
+# 		fullPkgName="$pkgName"
+		if echo "$kuberPkgList" | grep $pkgName >/dev/null
 		then :;
 		else
 			installPkgNames+=" $pkgName"

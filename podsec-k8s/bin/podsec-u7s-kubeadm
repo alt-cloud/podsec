@@ -1,4 +1,11 @@
 #!/bin/sh
+
+if [ $USER != 'root' -o $(id -u) != 0 -o $(id -g) != 0 ]
+then
+  echo "Скрипт $0 должен запускаться от пользователя root"
+  exit 1
+fi
+
 source podsec-u7s-functions
 source podsec-get-platform
 
@@ -7,7 +14,6 @@ installKubeadm # Устанавливает требуемую доступну�
 setRegistryName # устанавливает имя регистратора образов в переменнную U7S_REGISTRY_PLATFORM
 # getKuberLastPatchVersion # Получить из регистратора последнюю доступную версию образа в указанной минорной версии
 getKuberImages $(uname -m ) '/share/usernetes/containers/storage/' u7s-admin
-
 
 
 format() {

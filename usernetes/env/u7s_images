@@ -12,8 +12,6 @@ case $U7S_REGISTRY in
     ;;
 esac
 
-skopeoLogFile="/tmp/skopeo.log"
-
 storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
 if [ -z "$U7S_FLANNEL_TAG" ]
 then
@@ -21,7 +19,7 @@ then
   U7S_FLANNEL_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
   if [ -z "$U7S_FLANNEL_TAG" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
   flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
-  skopeo copy docker://$flannelImage containers-storage:[$storage]$flannelImage >>$skopeoLogFile 2>&1
+  skopeo copy docker://$flannelImage containers-storage:[$storage]$flannelImage
 fi
 
 if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
@@ -30,7 +28,7 @@ then
   U7S_FLANNELCNIPLUGIN_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel-cni-plugin")
   if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
   flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
-  skopeo copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage >>$skopeoLogFile 2>&1
+  skopeo copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage
 
 fi
 
@@ -40,11 +38,11 @@ then
   U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
   if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
   certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
-  skopeo copy docker://$certManagesImage containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+  skopeo copy docker://$certManagesImage containers-storage:[$storage]$certManagesImage
   certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
-  skopeo copy docker://$certManagesImage containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+  skopeo copy docker://$certManagesImage containers-storage:[$storage]$certManagesImage
   certManagesImage="${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
-  skopeo copy docker://$U7S_REGISTRY/$certManagesImage containers-storage:[$storage]$certManagesImage >>$skopeoLogFile 2>&1
+  skopeo copy docker://$U7S_REGISTRY/$certManagesImage containers-storage:[$storage]$certManagesImage
 fi
 
 imageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
@@ -73,7 +71,7 @@ do
   if checkKubernetesPatchVersions $minorVersion $imageWithoutRegistryAndTag $imageTag
   then
     echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag доступна. Загружаем... " >&2
-    skopeo copy docker://$fullImage containers-storage:[$storage]$fullImage >>$skopeoLogFile 2>&1
+    skopeo copy docker://$fullImage containers-storage:[$storage]$fullImage
   else
      echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag недоступна" >&2
     if [ "$U7S_SETAVAILABLEIMAGES" != 'yes' ]
@@ -90,9 +88,9 @@ do
       imageWithNewTag="$imageWithoutTag:$repoImageLastTag"
       echo "Выбран доступный на регистраторе $U7S_REGISTRY последний тег :$repoImageLastTag" >&2
       # Загрузка образа в rootless каталог образов
-      skopeo copy docker://$imageWithNewTag containers-storage:[$storage]$imageWithNewTag >>$skopeoLogFile 2>&1
+      skopeo copy docker://$imageWithNewTag containers-storage:[$storage]$imageWithNewTag
       # Навешивание тега
-      skopeo copy containers-storage:[$storage]$imageWithNewTag containers-storage:[$storage]$fullImage>>$skopeoLogFile 2>&1
+      skopeo copy containers-storage:[$storage]$imageWithNewTag containers-storage:[$storage]$fullImage
     fi
   fi
   chown -R u7s-admin:u7s-admin /var/lib/u7s-admin/.local
