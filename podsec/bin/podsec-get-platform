@@ -31,10 +31,6 @@ function getPlatform() {
       *) export U7S_PLATFORM="k8s-p${version}"; break;;
     esac
   fi
-  case $U7S_PLATFORM in
-    test_k8s|k8s-c10f1|k8s-p10) break;;
-    *) export U7S_PLATFORM="k8s-sisyphus";
-  esac
 }
 
 

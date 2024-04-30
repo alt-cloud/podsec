@@ -13,7 +13,6 @@ getPlatform # Устанавливает переменную U7S_PLATFORM
 installKubeadm # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
 setRegistryName # устанавливает имя регистратора образов в переменнную U7S_REGISTRY_PLATFORM
 # getKuberLastPatchVersion # Получить из регистратора последнюю доступную версию образа в указанной минорной версии
-getKuberImages $(uname -m ) '/share/usernetes/containers/storage/' u7s-admin
 
 
 format() {
@@ -91,6 +90,8 @@ then
 fi
 
 # Обработать команд init, join
+
+getKuberImages $(uname -m ) '/share/usernetes/containers/storage/' u7s-admin
 
 etcdDataDir='/var/lib/podsec/u7s/etcd/member'
 if [ -d  $etcdDataDir ]

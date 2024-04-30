@@ -353,6 +353,7 @@ function getKubePatchVersionByCrio() {
 
 # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
 function installKubeadm() {
+	apt-get update
 	lastKubeAdmMinorVersion=$(getLastKubeAdmMinorVersion)
 	LastKubeAdmMinorVersion="v$lastKubeAdmMinorVersion"
 	lastKubeAdmPatchVersion=$(getPacketPatchVersion "kubernetes${lastKubeAdmMinorVersion}-kubeadm")

@@ -123,6 +123,9 @@ then
   if [ "$answer" != "y" ]
   then
     exit 1
+  else
+   base="$platform/"
+   baselen=${#base}
   fi
 fi
 
