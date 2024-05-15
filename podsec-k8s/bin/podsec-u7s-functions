@@ -803,6 +803,53 @@ function getKuberImages() {
   "
 }
 
+function getCniVersion {
+	ifs=$IFS
+	IFS=-
+	set -- $(rpm -qa cni-plugins)
+	cniVersion=$3
+	echo $cniVersion
+}
+
+function checkNetCrossing {
+	ifs=$IFS
+	for netName in U7S_CNINET U7S_PODNETWORKCIDR U7S_SERVICECIDR
+	do
+		eval net=\$${netName}
+		IFS=/
+		set -- $net
+		IFS=$ifs
+		netAddr=$1
+		netMask=$2
+		ip a | grep 'inet ' |
+		(
+		ifs=$IFS
+		while read inet
+		do
+			set -- $inet
+			dev=${@:$#}
+			AddrMask=$2
+			IFS=/
+			set -- $AddrMask
+			IFS=$ifs
+			addr=$1
+			mask=$2
+			if [ $netMask -lt $mask ]; then minMask=$netMask; else minMask=$mask; fi
+			maskedNet=$(maskAddr $netAddr $minMask)
+			maskedAddr=$(maskAddr $addr $minMask)
+			if [ "$maskedAddr" = "$maskedNet" ]
+			then
+				echo "Интерфейс $dev поддерживает сеть $AddrMask пересекающуюся с внутренней сетью $net kubernetes кластера"
+				exit 1
+			fi
+		done
+		exit 0
+		)
+		if [ $? -ne 0 ]; then exit 1; fi
+	done
+	return $?
+}
+
 
 # export XDG_{DATA,CONFIG,CACHE}_HOME
 if [ -z "$USER" ]; then USER=$USERNAME; fi
