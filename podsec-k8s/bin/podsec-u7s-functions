@@ -803,14 +803,6 @@ function getKuberImages() {
   "
 }
 
-function getCniVersion {
-	ifs=$IFS
-	IFS=-
-	set -- $(rpm -qa cni-plugins)
-	cniVersion=$3
-	echo $cniVersion
-}
-
 function checkNetCrossing {
 	ifs=$IFS
 	for netName in U7S_CNINET U7S_PODNETWORKCIDR U7S_SERVICECIDR
