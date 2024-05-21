@@ -727,30 +727,31 @@ function getKuberImages() {
       ;;
   esac
 
-#   storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
-  if [ -z "$U7S_FLANNEL_TAG" ]
-  then
-    # U7S_FLANNEL_TAG="v0.21.4"
-    U7S_FLANNEL_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
-    if [ -z "$U7S_FLANNEL_TAG" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
-    flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $flannelImage\n"
-    skopeo --override-arch $arch copy \
-			docker://$flannelImage\
-			containers-storage:[$storage]$flannelImage  2>/dev/null || :
-  fi
+if [ -z "$U7S_FLANNEL_TAG" ]
+then
+  flannelTag=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
+  if [ -z "$flannelTag" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+  U7S_FLANNEL_TAG=$flannelTag
+  flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$flannelTag"
+else
+  flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
+fi
+skopeo copy docker://$flannelImage containers-storage:[$storage]$flannelImage
 
-  if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
-  then
-    # U7S_FLANNELCNIPLUGIN_TAG="v1.1.2"
-    U7S_FLANNELCNIPLUGIN_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel-cni-plugin")
-    if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
-    flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $flannelCNIImage\n"
-    skopeo --override-arch $arch copy \
-			docker://$flannelCNIImage\
-			containers-storage:[$storage]$flannelCNIImage  2>/dev/null || :
-  fi
+set -- $(getFlannelCniPluginName $U7S_FLANNEL_TAG)
+flannelCniPluginRegistry=$1
+flannelCniPluginImage=$2
+flannelCniPluginTag=$3
+if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
+then
+  U7S_FLANNELCNIPLUGIN_TAG=$(getFlannelCniPluginName $U7S_FLANNEL_TAG)
+  if [ -z "$flannelCniPluginTag" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+  flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$flannelCniPluginTag"
+else
+  flannelCNIImage="$flannelCniPluginRegistry/$flannelCniPluginImage:$flannelCniPluginTag"
+fi
+skopeo copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage
+
   if [ -z "$U7S_CERTMANAGER_TAG" ]
   then
     # U7S_CERTMANAGER_TAG="v1.9.1"
@@ -805,7 +806,7 @@ function getKuberImages() {
 
 function checkNetCrossing {
 	ifs=$IFS
-	for netName in U7S_CNINET U7S_PODNETWORKCIDR U7S_SERVICECIDR
+	for netName in U7S_PODNETWORKCIDR U7S_SERVICECIDR
 	do
 		eval net=\$${netName}
 		IFS=/
@@ -842,6 +843,72 @@ function checkNetCrossing {
 	return $?
 }
 
+function getKubeFlannelFile() {
+  flannelTag=$1
+  ifs=$IFS
+  IFS=.
+  set -- $flannelTag
+  IFS=$ifs
+  Major=$1
+  if [ ${Major:0:1} = 'v' ]; then Major=${Major:1}; fi
+  Minor=$2
+  Patch=$3
+  file="/etc/podsec/u7s/manifests/kube-flannel/$Major/$Minor/$Patch/kube-flannel.yml"
+  echo $file
+}
+
+function getFlannelCniPluginName() {
+	kubeFlannelFile=$(getKubeFlannelFile $1)
+	cniPluginImage=$(yq -y 'select(.kind=="DaemonSet").spec.template.spec.initContainers[0]' $kubeFlannelFile |  yq -r '.image')
+	ifs=$IFS IFS=:
+	set -- $cniPluginImage
+	IFS=$ifs
+	tag=$2
+	Image=$1
+	image=$(basename $Image)
+	registry=$(dirname $Image)
+	echo $registry $image $tag
+}
+
+function FlannelNameToAlt() {
+	image=$1
+	ifs=$IFS
+	IFS=:
+	set -- $image
+	image=$1
+	tag=$2
+  if [[ $1 =~ "flannel-cni-plugin" ]]
+  then
+		echo "$U7S_PLATFORM/flannel-cni-plugin:$tag"
+  else
+		echo "$U7S_PLATFORM/flannel:$tag"
+  fi
+}
+
+function kubeflannelYMLToALT() {
+	registry=$1
+	flannelTag=$2
+	kubeFlannelFile=$(getKubeFlannelFile $flannelTag)
+  initCount=$(cat $kubeFlannelFile |
+  yq -y 'select(.kind=="DaemonSet").spec.template.spec.initContainers' |
+  yq 'length')
+  q='.' i=0
+  while [ $i -lt $initCount ]
+  do
+		image=$(cat $kubeFlannelFile |
+			yq -y 'select(.kind=="DaemonSet").spec.template.spec.initContainers['$i']' |
+			yq -r '.image')
+			altImage="$registry/$(FlannelNameToAlt $image)"
+		q+='| select(.kind=="DaemonSet").spec.template.spec.initContainers['$i'].image="'$altImage'"'
+		let i=$i+1
+  done
+	image=$(cat $kubeFlannelFile |
+		yq -y 'select(.kind=="DaemonSet").spec.template.spec.containers[0]' |
+		yq -r '.image')
+	altImage="$registry/$(FlannelNameToAlt $image)"
+	q+='| select(.kind=="DaemonSet").spec.template.spec.containers[0].image="'$altImage'"'
+	yq -y "$q" $kubeFlannelFile
+}
 
 # export XDG_{DATA,CONFIG,CACHE}_HOME
 if [ -z "$USER" ]; then USER=$USERNAME; fi

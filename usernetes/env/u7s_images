@@ -4,33 +4,40 @@ minorVersion=$(getMinorVersion $U7S_KUBEVERSION)
 case $U7S_REGISTRY in
   registry.altlinux.org | registry.local) # Образы ALTLINUX
     prefix="$U7S_PLATFORM/"
-    U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
+    export U7S_FLANNEL_REGISTRY=$U7S_REGISTRY
     ;;
   *)
     prefix=''
-    U7S_FLANNEL_REGISTRY="docker.io/flannel"
+    export U7S_FLANNEL_REGISTRY="docker.io/flannel"
     ;;
 esac
 
+export U7S_FLANNEL_TAG
 storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
 if [ -z "$U7S_FLANNEL_TAG" ]
 then
-  # U7S_FLANNEL_TAG="v0.21.4"
-  U7S_FLANNEL_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
-  if [ -z "$U7S_FLANNEL_TAG" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+  flannelTag=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
+  if [ -z "$flannelTag" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+  U7S_FLANNEL_TAG=$flannelTag
+  flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$flannelTag"
+else
   flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
-  skopeo copy docker://$flannelImage containers-storage:[$storage]$flannelImage
 fi
+skopeo copy docker://$flannelImage containers-storage:[$storage]$flannelImage
 
+set -- $(getFlannelCniPluginName $flannelImage)
+flannelCniPluginRegistry=$1
+flannelCniPluginImage=$2
+flannelCniPluginTag=$3
 if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
 then
-  # U7S_FLANNELCNIPLUGIN_TAG="v1.1.2"
-  U7S_FLANNELCNIPLUGIN_TAG=$(getKuberLastPatchVersion 'v' "${prefix}flannel-cni-plugin")
-  if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
-  flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
-  skopeo copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage
-
+  U7S_FLANNELCNIPLUGIN_TAG=$(getFlannelCniPluginName $U7S_FLANNEL_TAG)
+  if [ -z "$flannelCniPluginTag" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+  flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$flannelCniPluginTag"
+else
+  flannelCNIImage="$flannelCniPluginRegistry/$flannelCniPluginImage:$flannelCniPluginTag"
 fi
+skopeo copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage
 
 if [ -z "$U7S_CERTMANAGER_TAG" ]
 then

@@ -187,7 +187,7 @@ install: all
 	cd usernetes/env; $(INSTALL) -m644 $(USERNETES_ENVS) $(DESTDIR)$(sysconfdir)/podsec/u7s/env
 	# USERNETES_MANIFESTS
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/manifests
-	cd ./usernetes/manifests/; $(INSTALL) -m644 $(USERNETES_MANIFESTS) $(DESTDIR)$(sysconfdir)/podsec/u7s/manifests
+	cd ./usernetes/manifests/;  tar cvzf $(TMPFILE) .;  cd $(DESTDIR)$(sysconfdir)/podsec/u7s/manifests; tar xvzf $(TMPFILE);
 	# USERNETES_KUBEADM_CONFIGS
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
 	cd ./usernetes/kubeadm-configs/; $(INSTALL) -m644 $(USERNETES_KUBEADM_CONFIGS) $(DESTDIR)$(sysconfdir)/podsec/u7s/config/kubeadm-configs
