@@ -93,9 +93,6 @@ Requires: openssh-server
 Requires: mailx
 Requires: trivy
 Requires: trivy-server
-Requires: nagios-plugins-network
-%filter_from_requires /\/usr\/lib\/nagios\/plugins\/podsec-inotify-check-images/d
-%filter_from_requires /\/usr\/lib\/nagios\/plugins\/podsec-inotify-check-policy/d
 
 %description inotify
 A set of scripts for  security monitoring by systemd timers or
