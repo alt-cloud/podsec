@@ -247,10 +247,8 @@ apiServerEndpointPort=$2
 
 U7S_EXTIP=$FLAG_apiserver_advertise_address
 
-if [ -z "$U7S_CNINET" ]
-then
-  U7S_CNINET='10.88.0.0/16'
-fi
+export U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
+export U7S_SERVICECIDR=$FLAG_pod_service_cidr
 
 checkNetCrossing
 
@@ -275,14 +273,14 @@ U7S_APISERVERENDPOINT=$FLAG_control_plane_endpoint
 U7S_TOKEN=$FLAG_token
 U7S_CACERTHASH=$FLAG_discovery_token_ca_cert_hash
 U7S_CERIFICATEKEY=$FLAG_certificate_key
-U7S_SERVICECIDR=$FLAG_pod_service_cidr
+U7S_SERVICECIDR=$U7S_SERVICECIDR
 U7S_SERVICECIDRIP=$serviceCidrIP
 U7S_SERVICEMASK=$serviceMask
 U7S_PODNETWORKCIDR=$FLAG_pod_network_cidr
-U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
+U7S_PODNETWORKCIDRIP=$U7S_PODNETWORKCIDRIP
 U7S_PODNETWORKMASK=$podNetworkMask
 U7S_CNI_PLUGIN=$U7S_CNI_PLUGIN
-U7S_ROOTLESSKIT_FLAGS=--cidr=$FLAG_pod_service_cidr
+U7S_ROOTLESSKIT_FLAGS=--cidr=$U7S_SERVICECIDR
 U7S_KUBERNETESCLUSTERIP=$kubernetesClusterIP
 U7S_KUBERNETESCLUSTERDNS=$kubernetesClusterDNS
 U7S_SLIRP4IP=$slirp4IP
