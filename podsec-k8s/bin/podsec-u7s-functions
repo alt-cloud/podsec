@@ -124,7 +124,7 @@ maskAddr() {
 	set +e
   addr=$1
   mask=$2
-  if [ $mask -eq 0 -o $mask -gt 32 ]
+  if [ $mask -eq 0 -o $mask -gt 32 ] 2>/dev/null
   then
     echo "Неверная маска $mask" >&2
     exit
@@ -134,7 +134,7 @@ maskAddr() {
   IFS=.
   set -- $addr
   IFS=$ifs
-  if [ $# -ne 4 ]
+  if [ $# -ne 4 ] 2>/dev/null
   then
     echo "Неверный адрес $addr" >&2
     exit
@@ -176,8 +176,8 @@ getExtIP() {
     IFS=$ifs
     addr=$1
     mask=$2
-    maskedAddr=$(maskAddr $addr $mask)
-    maskedRoute=$(maskAddr $router $mask)
+    maskedAddr=$(maskAddr "$addr" "$mask")
+    maskedRoute=$(maskAddr "$router" "$mask")
     if [ "$maskedAddr" = "$maskedRoute" ]
     then
       echo $addr
@@ -744,7 +744,7 @@ flannelCniPluginImage=$2
 flannelCniPluginTag=$3
 if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
 then
-  U7S_FLANNELCNIPLUGIN_TAG=$(getFlannelCniPluginName $U7S_FLANNEL_TAG)
+  U7S_FLANNELCNIPLUGIN_TAG=$flannelCniPluginTag
   if [ -z "$flannelCniPluginTag" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
   flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$flannelCniPluginTag"
 else
@@ -809,6 +809,7 @@ function checkNetCrossing {
 	for netName in U7S_PODNETWORKCIDR U7S_SERVICECIDR
 	do
 		eval net=\$${netName}
+		if [ -z "$net" ]; then continue; fi
 		IFS=/
 		set -- $net
 		IFS=$ifs
@@ -828,8 +829,8 @@ function checkNetCrossing {
 			addr=$1
 			mask=$2
 			if [ $netMask -lt $mask ]; then minMask=$netMask; else minMask=$mask; fi
-			maskedNet=$(maskAddr $netAddr $minMask)
-			maskedAddr=$(maskAddr $addr $minMask)
+			maskedNet=$(maskAddr "$netAddr" "$minMask")
+			maskedAddr=$(maskAddr "$addr" "$minMask")
 			if [ "$maskedAddr" = "$maskedNet" ]
 			then
 				echo "Интерфейс $dev поддерживает сеть $AddrMask пересекающуюся с внутренней сетью $net kubernetes кластера"
