@@ -9,7 +9,7 @@
 
 Name: podsec
 Version: 1.0.10
-Release: alt9
+Release: alt10
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -202,6 +202,9 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+* Tue May 28 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt10
+- 1.0.10
+
 * Wed May 22 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt9
 - 1.0.10
 

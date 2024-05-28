@@ -736,7 +736,7 @@ then
 else
   flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$U7S_FLANNEL_TAG"
 fi
-skopeo copy docker://$flannelImage containers-storage:[$storage]$flannelImage
+skopeo --override-arch $arch copy docker://$flannelImage containers-storage:[$storage]$flannelImage
 
 set -- $(getFlannelCniPluginName $U7S_FLANNEL_TAG)
 flannelCniPluginRegistry=$1
@@ -750,7 +750,7 @@ then
 else
   flannelCNIImage="$flannelCniPluginRegistry/$flannelCniPluginImage:$flannelCniPluginTag"
 fi
-skopeo copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage
+skopeo --override-arch $arch copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage
 
   if [ -z "$U7S_CERTMANAGER_TAG" ]
   then
