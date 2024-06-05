@@ -15,7 +15,7 @@ apiVersion: audit.k8s.io/v1
 kind: Policy
 omitManagedFields: true
 rules:
-# do not log requests to the following 
+# do not log requests to the following
 - level: None
   nonResourceURLs:
   - "/healthz*"
@@ -71,11 +71,11 @@ rules:
 - level: Metadata
   omitStages:
   - RequestReceived
-</pre> 
+</pre>
 
 Текущие настройки производят логирование всех обращений "несистемных" пользователей (в том числе анонимных) к ресурсам `kubernetes`.
 
-Скрипт производит выборку всех обращений, в ответ на которые был сформирован код более `400` - запрет доступа. 
+Скрипт производит выборку всех обращений, в ответ на которые был сформирован код более `400` - запрет доступа.
 Все эти факты записываются в системный журнал и накапливаются в файле логов `/var/lib/podsec/u7s/log/kubeapi/forbidden.log`, который периодически передается через посту системному адмиристратору.
 
 ## OPTIONS
@@ -87,7 +87,7 @@ rules:
 В состав пакета кроме этого скрипта входят:
 
 - файл описания сервиса `/lib/systemd/system/podsec-inotify-check-kubeapi.service`. Для его запуска необходимо выполнить команды:
-  <pre> 
+  <pre>
   # systemctl enable  podsec-inotify-check-kubeapi.service
   # systemctl start  podsec-inotify-check-kubeapi.service
   </pre>
@@ -112,7 +112,7 @@ rules:
 
 ## SECURITY CONSIDERATIONS
 
-Кроме мониторинга фактов запрета доступа возможен мониторинг других фактов подозрительной активности.  
+Кроме мониторинга фактов запрета доступа возможен мониторинг других фактов подозрительной активности.
 
 ## SEE ALSO
 

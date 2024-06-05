@@ -2,7 +2,7 @@
 # Плугин проверяет политики настройки контейнеризации на сервере
 export LANG=C
 
-export adminmail=root
+export MAILTO=
 
 if [ $EUID -ne 0 ]
 then
@@ -362,7 +362,10 @@ then
   then
     echo -ne $outMessage
   else  # Вызов через cron
-    echo -ne $outMessage | mail -s "$subject" $adminmail
+    if [ -n "$MAILTO" ]
+      then
+        echo -ne $outMessage | mail -s "$subject" $MAILTO
+    fi
   fi
   exit $priority
 fi

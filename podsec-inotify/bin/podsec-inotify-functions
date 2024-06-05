@@ -94,6 +94,13 @@ parseIntervalParameters() {
       if [ "$VERBOSELEVEL" -gt 3 ]; then VERBOSELEVEL=3; fi
       shift
       continue
+    else
+      if [ "${par:0:1}" == 'M' ];
+      then
+        MAILTO=$2
+        shift; shift
+        continue
+      fi
     fi
     par=${par:0:1}
     # echo "PAR=$par JOURNALPLUGINPARS=${JOURNALPLUGINPARS[$par]}"
