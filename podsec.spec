@@ -3,13 +3,11 @@
 %define u7s_admin_grp u7s-admin
 %define kubernetes_grp kube
 %define _libexecdir %_prefix/libexec
-%define nagiosdir %_prefix/lib/nagios
-%define nagios_plugdir %nagiosdir/plugins
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.10
-Release: alt9
+Version: 1.0.11
+Release: alt1
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -95,8 +93,7 @@ Requires: trivy
 Requires: trivy-server
 
 %description inotify
-A set of scripts for  security monitoring by systemd timers or
-called from the nagios server side via check_ssh plugin
+A set of scripts for  security monitoring by systemd timers
 to monitor and identify security threats
 
 %package dev
@@ -116,8 +113,6 @@ A set of scripts for developers
 
 %install
 %makeinstall_std
-ln -r -s %buildroot%_bindir/podsec-inotify-check-policy %buildroot%nagios_plugdir/
-ln -r -s %buildroot%_bindir/podsec-inotify-check-images %buildroot%nagios_plugdir/
 
 %pre
 groupadd -r -f podman >/dev/null 2>&1 ||:
@@ -173,7 +168,8 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_unitdir/u7s.service
 %_userunitdir/*
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
+%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_home>>>>>>> master
+dir
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.cache
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.config
@@ -190,7 +186,6 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 
 %files inotify
 %_bindir/podsec-inotify-*
-%nagios_plugdir/podsec-inotify-*
 %_mandir/man?/podsec-inotify-*
 %_unitdir/podsec-inotify-*
 %exclude %_unitdir/u7s.service
@@ -202,6 +197,13 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+
+* Wed Jun 05 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.11-alt1
+- 1.0.11
+
+* Tue May 28 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt10
+- 1.0.10
+
 * Wed May 22 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.10-alt9
 - 1.0.10
 

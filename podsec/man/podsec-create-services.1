@@ -1,34 +1,22 @@
-.\" generated with Ronn/v0.7.3
-.\" http://github.com/rtomayko/ronn/tree/0.7.3
-.
-.TH "PODSEC\-CREATE\-SERVICES" "1" "July 2023" "" ""
-.
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-CREATE\-SERVICES" "1" "February 2024" ""
 .SH "NAME"
 \fBpodsec\-create\-services\fR \- создание сервисов для поддержки регистратора докер образов и сервера подписей образов
-.
 .SH "SYNOPSIS"
 \fBpodsec\-create\-services\fR
-.
 .SH "DESCRIPTION"
 Скрипт поднимает сервисы \fBdocker\-registry\fR и \fBnginx\fR для поддержки регистратора докер образов и сервера подписей образов\.
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 регистратор образов принимает запросы по адресу \fBhttp://registry\.local\fR и хранит образы в каталоге \fB/var/lib/containers/storage/volumes/registry/_data/\fR;
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 сервис подписей образов принимает запросы по адресу \fBhttp://sigstore\.local:81\fR, хранит подписи образов в каталоге \fB/var/sigstore/sigstore/\fR, открытые ключи в каталоге \fB/var/sigstore/keys/\fR
-.
 .IP "" 0
-.
 .SH "SECURITY CONSIDERATIONS"
 Данный скрипт должен запускаться только на узле с доменами \fBregistry\.local\fR, \fBsigstore\-local\fR, где располагаются пользователи создающие и подписывающие образы\. Если это не так, скрипт прекращает свою работу не запуская сервисы\.
-.
 .SH "SEE ALSO"
-.
-.IP "\(bu" 4
+.IP "\[ci]" 4
 Описание периодического контроля целостности образов контейнеров и параметров настройки средства контейнеризации \fIhttps://github\.com/alt\-cloud/podsec/tree/master/ImageSignatureVerification\fR
-.
 .IP "" 0
-.
 .SH "AUTHOR"
 Костарев Алексей, Базальт СПО kaf@basealt\.ru

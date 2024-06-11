@@ -1,5 +1,5 @@
 [Unit]
-Description=Monitoring of unauthorized access to kune api
+Description=Monitoring of unauthorized access to kubeapi
 Requires=podsec-inotify-check-kubeapi-mail.service
 
 [Timer]

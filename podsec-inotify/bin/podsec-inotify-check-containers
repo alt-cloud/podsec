@@ -26,7 +26,7 @@ run_logger () {
     else
 	level="INFO"
     fi
-    
+
     #create event on journal
     if [ "$level" == "INFO" ] && [ "$INFO_LOG" == "YES" ]; then
         logger -t inotify-overlays "$level: $edge_log_string"
@@ -44,3 +44,4 @@ if [ -s $TMP ]; then
         run_logger
     done
 fi
+exit 0
