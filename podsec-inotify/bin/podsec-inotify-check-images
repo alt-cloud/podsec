@@ -18,7 +18,7 @@ fi
 . podsec-policy-functions
 . podsec-inotify-functions
 
-setTraps
+# setTraps
 
 # Проанализировать описание уровня интервалов во входных парамаетрах
 parseIntervalParameters $*
@@ -32,7 +32,7 @@ checkUsersImages=$(checkUsersImages)
 notSignedRegistriesJSON=$(echo $checkUsersImages | jq '[.[] | select(.notSignedRegistries | length > 0) | {key:.user, value:.notSignedRegistries | join(", ")}]')
 # echo "$notSignedRegistriesJSON"
 # exit
-if [ -n "$notSignedRegistriesJSON" ]
+if [ -n "$notSignedRegistriesJSON" -a "$notSignedRegistriesJSON" != '[]' ]
 then
   # Получение списка пользователей
   notSignedRegistriesUsers=$(echo $notSignedRegistriesJSON | jq '[.[].key] | join (", ")')
@@ -136,7 +136,7 @@ then
         subject="POLICY $prefix($metricWeight): Пользователи $users имеют образы нарушающие установленные политики"
         outMessage=$subject
       else
-        subject="POLICY $prefix($metricWeight): Users $users have images that violate established policies"
+        subjsetTrapsect="POLICY $prefix($metricWeight): Users $users have images that violate established policies"
         outMessage=$subject
       fi
       ;;
@@ -160,13 +160,14 @@ then
   if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
   then
     echo -ne $outMessage
+    exit $priority
   else  # Вызов через cron
     if [ -n "$MAILTO" ]
       then
         echo -ne $outMessage | mail -s "$subject" $MAILTO
     fi
   fi
-  exit $priority
+  exit 0
 fi
 if [ "$LANG" == 'ru_RU.UTF-8' ]
 then

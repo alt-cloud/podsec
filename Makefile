@@ -132,7 +132,7 @@ man1dir ?= $(mandir)/man1
 localstatedir ?= /var/lib
 userunitdir ?= $(prefix)/lib/systemd/user
 unitdir ?= /lib/systemd/system
-nagios_plugdir ?= $(prefix)/lib/nagios/plugins
+# unitdir ?= /usr/lib/systemd/system
 
 CP = cp -L
 INSTALL = install
@@ -206,8 +206,7 @@ install: all
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
-	# PODSEC-NAGIOS
-	$(MKDIR_P) -m755 $(DESTDIR)$(nagios_plugdir)
+	# PODSEC-INOTIFY
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/

@@ -73,7 +73,7 @@ podsec-inotify-check-policy(1) -- Плугин проверяет настрой
     отладочный  |    1    | Debug      | `-d` | не указывать
 </pre>
 
-- для сервера `nagios`:
+- для сервера `icigna`:
 <pre>
     Имя уровня     | Уровень | Префикс    | Флаг | Рекомендуемое значение интервала
     ---------------|---------|------------|------|-----------------------
@@ -123,29 +123,29 @@ podsec-inotify-check-policy(1) -- Плугин проверяет настрой
 # logger -p приоритет -t тег "тег: сообщение"
 </pre>
 
-Кроме основного сообщения для `nagios` формируются:
+Кроме основного сообщения для `icigna` формируются:
 
 - список пользователей нарушителей;
 - укороченные сообщения для уровня детализации `1`.
 
 
-### Логи nagios
+### Логи icigna
 
 Форматы сообщений и кодов завершения плугина описаны в [Plugin Output for Nagios](https://nagios-plugins.org/doc/guidelines.html#PLUGOUTPUT).
 
-Уровень опасности для логов nagios определяется СУММАРНОЙ метрике.
+Уровень опасности для логов icigna определяется СУММАРНОЙ метрике.
 Суммарная метрика определяется для определения уровня сравнивается с интервалами, задаваемыми флагами
 
 * `-c` - `Critical`
 * `-w` - `Warning`
 
-Если соответствие не найдено, в `nagios` выводится сообщение:
+Если соответствие не найдено, в `icigna` выводится сообщение:
 <pre>
 POLICY OK: Политики контейнеризации не нарушены
 </pre>
-Код завершение программы (которое обрабатывается на стороне сервера `nagios`) - `0`.
+Код завершение программы (которое обрабатывается на стороне сервера `icigna`) - `0`.
 
-Формат логов для `nagios` зависит от уровня детализации,  задаваемый флагом `-v[vv]` (см. [Verbose Output](https://nagios-plugins.org/doc/guidelines.html#AEN41)):
+Формат логов для `icigna` зависит от уровня детализации,  задаваемый флагом `-v[vv]` (см. [Verbose Output](https://nagios-plugins.org/doc/guidelines.html#AEN41)):
 <pre>
 Флаг        | Уровень
 ------------|--------
@@ -193,38 +193,6 @@ POLICY $prefix: Нарушение политик контейнеризации
 - `Critical` - `2`
 - `Warning` - `1`
 
-#### Настройка nagios на запуск плагинов через check_ssh
-
-##### Настройка комманды (command) в /etc/nagios/commands/
-
-- создайте в `/etc/nagios/commands/` конфигурационный файл  `nagios-plugins-podsec.cfg` для всех podsec планинов
-<pre>
-define command{
-        command_name    podsec-inotify-check-policy
-        command_line    $USER1$/check_by_ssh -H $HOSTADDRESS$ -l root -C '/usr/lib/nagios/plugins/podsec-inotify-check-policy -vvv -w $ARG1$ -l $ARG1$ -c $ARG2$ '
-        }
-...
-</pre>
-
-В `command_name` надо указать имя плагина которое будет использоваться в секции `define service` файла конфигурации в каталоге `/etc/nagios/objects`.
-В `command_line` не забудьте если в этом есть необходимость указать флаг `-l root` для запуска скрипта под пользователем root на удаленной машине.
-Если для плагина достаточно прав обыкновенного пользователя `nagios`, флаг `-l` не нужен.
-
-Переменныe `$ARG1`, `$ARG2`, ... берутся из командной строки описания сервиса в каталоге `/etc/nagios/objects`.
-
-##### Настройка сервиса в /etc/nagios/objects
-
-<pre>
-define service {
-        use generic-service
-        host_name       &lt;host&gt;
-        service_description     Check containers policy
-        check_command podsec-inotify-check-policy!0!100
-        }
-</pre>
-В строке `service_description` укахите  иям сервиска которое будет отображаться в WEB-интерейсе nagios.
-В `check_command` имя команды,  из вышеописанного файла  `nagios-plugins-podsec.cfg` каталога `/etc/nagios/commands/`.
-Параметры использумые в команде указываются через символ `|`.
 
 ### Запуск сервиса через systemd/Timers
 

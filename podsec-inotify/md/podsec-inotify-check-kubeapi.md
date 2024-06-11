@@ -82,7 +82,7 @@ rules:
 
 - `-d` - скирпт запускается в режиме демона, производящего онлайн мониторинг файла `/etc/kubernetes/audit/audit.log` и записывающего факты запросов с запретом доступа в системный журнал и файл логов `/var/lib/podsec/u7s/log/kubeapi/forbidden.log`.
 
-- при запуске без параметров скрипт посылает файл логов `/var/lib/podsec/u7s/log/kubeapi/forbidden.log` почтой системному администратору (пользователь `root`) и обнуляет файл логов.
+- `-m` - скрипт посылает файл логов `/var/lib/podsec/u7s/log/kubeapi/forbidden.log` почтой системному администратору (пользователь `root`) и обнуляет файл логов.
 
 В состав пакета кроме этого скрипта входят:
 
@@ -92,22 +92,20 @@ rules:
   # systemctl start  podsec-inotify-check-kubeapi.service
   </pre>
 
-- Файл сервисов `podsec-inotify-check-kubeapi.service` описывает в параметре `ExecStart` строку с описанием режима запуска скрипта `podsec-inotify-check-kubeapi` для анализа логов, обнаружения нарушений, записи их в системный лог и передачи их почтой системному администратору.
-
-- Файла расписания `podsec-inotify-check-kubeapi.timer`, задающий в параметре `OnCalendar` расписание запуска сервиса `podsec-inotify-check-kubeapi.service`. Сервис вызывается ежечасно.
+- Файла расписания `/lib/systemd/system/podsec-inotify-check-kubeapi-mail.timer`, задающий в параметре `OnCalendar` расписание запуска сервиса `/lib/systemd/system/podsec-inotify-check-kubeapi-mail.timer`. Таймер вызывается ежечасно.
 
 По умолчанию таймер запуска сервиса выключен. Для его включения наберите команду:
 <pre>
-#  systemctl enable --now podsec-inotify-check-kubeapi.timer
+#  systemctl enable --now podsec-inotify-check-kubeapi-mail.timer
 </pre>
-Если необходимо изменить режим запуска скрипта отредактируйте параметр `OnCalendar` файла расписания `podsec-inotify-check-kubeapi.timer`.
+Если необходимо изменить режим запуска скрипта отредактируйте параметр `OnCalendar` файла расписания `podsec-inotify-check-kubeapi-mail.timer`.
 
 
 ## EXAMPLE
 
 `podsec-inotify-check-kubeapi -d`
 
-`podsec-inotify-check-kubeapi`
+`podsec-inotify-check-kubeapi -m`
 
 
 ## SECURITY CONSIDERATIONS

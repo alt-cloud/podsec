@@ -18,7 +18,7 @@ fi
 . podsec-policy-functions
 . podsec-inotify-functions
 
-setTraps
+# setTraps
 
 # Проанализировать описание уровня интервалов во входных парамаетрах
 if [ $# -eq 0 ]
@@ -92,7 +92,7 @@ then
       message="$prefix($metricWeight): Пользователи $incorrectPolicyUsers имеют в policy.json defaultPolicy!=reject, но не входят в группу 'podman_dev'"
     else
       nagiosHeads+="\ncapable of receiving any image"
-      message="$prefix($metricWeight): users $incorrectPolicyUsers have 'defaultPolicy!=reject' in policy.json but are not in the 'podman_dev' group"
+      message="$prefix($metricWeight): Users $incorrectPolicyUsers have 'defaultPolicy!=reject' in policy.json but are not in the 'podman_dev' group"
     fi
     logger -p $priority -t "check-policy:$prefix" $message
     messages+="\n$message"
@@ -361,13 +361,14 @@ then
   if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
   then
     echo -ne $outMessage
+    exit $priority
   else  # Вызов через cron
     if [ -n "$MAILTO" ]
       then
         echo -ne $outMessage | mail -s "$subject" $MAILTO
     fi
   fi
-  exit $priority
+  exit 0
 fi
 if [ "$LANG" == 'ru_RU.UTF-8' ]
 then

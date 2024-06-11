@@ -4,7 +4,7 @@ Wants=podsec-inotify-check-kubeapi-mail.timer
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/podsec-inotify-check-kubeapi  >/dev/null 2>&1
+ExecStart=/usr/bin/podsec-inotify-check-kubeapi -m >/dev/null 2>&1
 
 [Install]
 WantedBy=multi-user.target

@@ -13,37 +13,34 @@ LASTEVENTTIMEFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
 
 AUDITFILE='/etc/kubernetes/audit/audit.log'
 
-if [ $# -gt 1 ]
+if [ $# -ne 1 ]
 then
   echo "Неверное число параметров" >&2
+  echo "Формат:
+$0 [-d | -m]"
   exit 1
 fi
 
-if [ $# -eq 1 ]
+if [ $1 = '-d' ]
 then
-  if [ $1 = '-d' ]
+  # Мониторинг
+  if [ -s $LASTEVENTTIMEFILE ]
   then
-    # Мониторинг
-    if [ -s $LASTEVENTTIMEFILE ]
-    then
-      lastTime=$(cat $LASTEVENTTIMEFILE)
-      filtr="select(.[0]>$lastTime)"
-    else
-      filtr="."
-    fi
-
-    tail -n 1000000 -f $AUDITFILE |
-    jq --unbuffered -c '. |
-      select(.responseStatus.code >= 400) |
-      [.requestReceivedTimestamp,.sourceIPs[0],.responseStatus.message] |
-      '$filtr''  |
-    tee -a $EVENTFILE |
-    logger -t "check-kubeapi"
+    lastTime=$(cat $LASTEVENTTIMEFILE)
+    filtr="select(.[0]>$lastTime)"
   else
-    echo "Неверный параметр '$1'" >&2
-    exit 1
+    filtr="."
   fi
-else
+
+  tail -n 1000000 -f $AUDITFILE |
+  jq --unbuffered -c '. |
+    select(.responseStatus.code >= 400) |
+    [.requestReceivedTimestamp,.sourceIPs[0],.responseStatus.message] |
+    '$filtr''  |
+  tee -a $EVENTFILE |
+  logger -t "check-kubeapi"
+elif [ $1 = '-m' ]
+then
   # Передача почты
   if [ -s $EVENTFILE ]
   then
@@ -51,6 +48,13 @@ else
     tail -1 $EVENTFILE | jq '.[0]' > $LASTEVENTTIMEFILE
     > $EVENTFILE
   fi
+else
+  echo "Неверное значение 1-го параметра" >&2
+  echo "Формат:
+$0 [-d | -m]"
+  exit 1
 fi
+
+exit 0
 
 

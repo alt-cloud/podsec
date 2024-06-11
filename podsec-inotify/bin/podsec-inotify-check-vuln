@@ -6,7 +6,8 @@ getimagelist() {
 
 trivyUserImages() {
   user=$1
-  images=$(getimagelist registry.local)
+  shift
+  images=$@
   TMP=/tmp/trivy.$$
   trivy_options="--scanners vuln,config --server http://127.0.0.1:4954"
   for image in $images
@@ -35,23 +36,23 @@ fi
 
 if [ $(id -u) -eq 0 ]
 then
-  trivyUserImages root
+  imagesJSON='/var/lib/containers/storage/overlay-images/images.json'
+  images=$(jq -r .[].names[] $imagesJSON)
+  trivyUserImages root $images
   for dir in /home/*
   do
-    imagesJSON="$dir/.local/share/containers/storage/overlay-images/images.json/"
-    if [ -f $imagesJSON ]
-    then
-      user=${dir:6}
-      machinectl shell ${user}@ $0
-    fi
+    user=${dir:6}
+    machinectl shell ${user}@ $0
   done
 else
   user=$(id -u -n)
   dir="/home/$user"
-  imagesJSON="$dir/.local/share/containers/storage/overlay-images/images.json/"
-  if [ -f $imagesJSON ]
-  then
-    trivyUserImages $user
-  fi
+  imagesJSONs=$(find .local/share/ -name images.json 2>/dev/null)
+  for imagesJSON in $imagesJSONs
+  do
+    images=$(jq -r .[].names[] $imagesJSON)
+    trivyUserImages $user $images
+  done
 fi
+exit 0
 
