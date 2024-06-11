@@ -168,8 +168,7 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_unitdir/u7s.service
 %_userunitdir/*
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_home>>>>>>> master
-dir
+%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.cache
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.config
