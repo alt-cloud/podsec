@@ -6,7 +6,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.11
+Version: 1.0.12
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -18,6 +18,7 @@ BuildArch: noarch
 Source: %name-%version.tar
 
 BuildRequires(pre): rpm-macros-systemd
+BuildRequires(pre): libsystemd-devel
 Requires: podman >= 4.4.2
 Requires: shadow-submap >= 4.5
 Requires: nginx >= 1.22.1
@@ -112,7 +113,8 @@ A set of scripts for developers
 %make_build
 
 %install
-%makeinstall_std
+unitDir=$(pkg-config --variable=systemdsystemunitdir systemd)
+%makeinstall_std unitdir=$unitDir
 
 %pre
 groupadd -r -f podman >/dev/null 2>&1 ||:
@@ -126,6 +128,7 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %post inotify
 %post_systemd podsec-inotify-check-containers.service
 %post_systemd podsec-inotify-check-kubeapi.service
+
 %preun inotify
 %preun_systemd podsec-inotify-check-containers.service
 %preun_systemd podsec-inotify-check-kubeapi.service
@@ -196,6 +199,9 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+* Mon Jun 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.12-alt1
+- 1.0.12
+
 
 * Wed Jun 05 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.11-alt1
 - 1.0.11
