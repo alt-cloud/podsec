@@ -1,0 +1,104 @@
+#!/bin/bash
+
+function format() {
+  echo -ne "Формат:\n$0 <имя_образа> [ <docker_файл> [ <каталог_контекста> [ <параметры_podman_build> ] ] ]"
+  exit 1
+}
+
+if [ $# -eq 0 ]
+then
+    format
+fi
+
+prog_name='build-invulnerable-image'
+container_name=$1
+
+if [ $# -gt 1 ]
+then
+    dockerfile=$2
+    shift; shift
+    if [ $# -gt 2 ]
+    then
+        context=$3
+        shift
+    else
+        context='.'
+    fi
+    # Создание контейнера из Dockerfile, в $@ список переданных параметров для podman build
+    if podman build $@ -f $dockerfile -t ${container_name} $context; then :;
+    else
+        message="Построение образа ${container_name} закончилось неуспешно. Анализ образа пропускается."
+        echo $message >&2
+        priority=6
+        prefix='Fatal'
+        logger -p $priority -t "${prog_name}:$prefix" $message
+        exit 2
+    fi
+fi
+
+TMPFILE="/tmp/$prog_name.$$"
+# Проверка контейнера с помощью инструмента Trivy
+vulnerabilities=$(trivy image --exit-code 0 --server http://127.0.0.1:4954 --severity HIGH,CRITICAL ${container_name} 2> $TMPFILE)
+
+if [ $? -gt 0 ]
+then
+    message="Команда анализа уязвимостей trivy закончилась неуспешно:"
+    cat $TMPFILE
+    if [ -n "$dockerfile" ]
+    then
+        podman rmi ${container_name}
+        echo "Образ ${container_name} удален ." >&2
+    fi
+    priority=6
+    prefix='Fatal'
+    logger -p $priority -t "${prog_name}:$prefix" $message
+    exit 3
+fi
+rm -f $TMPFILE
+
+# Извлечение значения Total из вывода
+total_count=$(echo "$vulnerabilities" | grep -oE "Total: [0-9]+" | grep -oE "[0-9]+")
+
+# Проверка наличия уязвимостей
+if [ "$total_count" -eq 0 ]
+then
+    message="Уязвимости не обнаружены."
+else
+    high_count=$(echo "$vulnerabilities" | grep -oE "HIGH: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
+    critical_count=$(echo "$vulnerabilities" | grep -oE "CRITICAL: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
+
+    if [[ $high_count -gt 0 || $critical_count -gt 0 ]]
+    then
+        if [ $critical_count -gt 0 ]
+        then
+            if [[ $high_count -gt 0 && $critical_count -gt 0 ]]
+            then
+                message="Обнаружены критические и высокие уязвимости."
+            else
+                message="Обнаружены критические уязвимости."
+            fi
+            priority=2
+            prefix='Critical'
+            code=5
+        else
+            message="Обнаружены высокие уязвимости."
+            priority=3
+            prefix='High'
+            code=4
+        fi
+        podman rmi ${container_name}
+        echo $vulnerabilitie >&2
+        echo $message >&2
+        echo "Образ ${container_name} удален ." >&2
+        logger -p $priority -t "${prog_name}:$prefix" $message
+        exit $code
+    else
+        message="Найдены уязвимости, но нет высоких или критических. Образ ${container_name} принят."
+        priority=2
+        prefix='Low'
+        logger -p $priority -t "${prog_name}:$prefix" $message
+    fi
+fi
+echo $vulnerabilitie >&2
+echo $message >&2
+exit 0
