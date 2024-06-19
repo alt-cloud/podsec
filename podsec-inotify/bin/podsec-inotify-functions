@@ -69,7 +69,7 @@ declare -A LEVELSNAMES=( [a]=Crash [f]=Fatal [c]=Critical [h]=High [m]=Middle [w
 # Уровни опасности для логирования в системный журнал отсортированный в порядке уменьшения
 declare -A JOURNALPLUGINPARS=( [a]=- [f]=- [c]=- [h]=- [m]=- [l]=- [d]=- )
 # Номера уровней опасности для логирования JOURNAL
-declare -A JOURNALPRIORITY=( [a]=7 [f]=6 [c]=5 [h]=4 [m]=3 [l]=2 [d]=1 )
+declare -A JOURNALPRIORITY=( [a]=0 [f]=1 [c]=2 [h]=3 [m]=4 [l]=5 [d]=6 )
 
 # Уровни опасности для логирования nagios отсортированный в порядке уменьшения
 declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
