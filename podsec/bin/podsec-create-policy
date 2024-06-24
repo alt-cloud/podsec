@@ -1,8 +1,6 @@
 #!/bin/sh
 # Скрипт создает
 
-
-
 if [ $# -lt 1 ]
 then
   echo -ne "Не указан IP-адрес регистратора и сервера подписей\n"
@@ -69,16 +67,16 @@ then
   shift
   for domain
   do
-    if [ "$domain" = 'registry.local' ] || [ "$domain" = 'sigstore.local' ]
+    if [ "$domain" = 'registry.local' ] || [ "$domain" = 'sigstore.local' ] || [ "$domain" = 'trivy.local'  ]
     then
-      echo "Домены registry.local sigstore.local уже привязаны к IP-адресу $ip" >&2
+      echo "Домены registry.local sigstore.local trivy.local уже привязаны к IP-адресу $ip" >&2
       echo "Удалите привязку и запустите скрипт заново" >&2
       exit 1
     fi
   done
 else
   echo "Добавление привязки доменов registry.local sigstore.local к IP-адресу $regIP"
-  echo "$regIP registry.local sigstore.local" >> /etc/hosts
+  echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts
 fi
 
 # Создание группы podman
