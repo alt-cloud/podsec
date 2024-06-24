@@ -32,3 +32,6 @@ then
   systemctl disable --now httpd2
 fi
 systemctl enable --now docker-registry
+
+# Настройка trivy-server
+systemctl enable --now trivy
