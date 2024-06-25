@@ -14,14 +14,13 @@ trivyUserImages() {
   shift
   for image
   do
-    $message=$(trivyCheckImage "podsec-inotify-check-vuln" $image )
+    message=$(trivyCheckImage "podsec-inotify-check-vuln" $image )
     if [ "$?" -gt 0  -a -n "$MAILTO" ]
     then
       echo "$message" |
       mail -s "Vulnerabilities found in image '$image'  of user $user" "$MAILTO"
     fi
   done
-  rm -f $TMP
 }
 
 export MAILTO=
@@ -36,7 +35,7 @@ fi
 if [ "$(id -u)" -eq 0 ]
 then
   imagesJSON='/var/lib/containers/storage/overlay-images/images.json'
-  images=$(jq -r .[].names[] $imagesJSON)
+  images=$(jq -r '.[].names[]' $imagesJSON)
   prog=$(which $0)
   trivyUserImages root $images
   imagesJSONs="
@@ -47,11 +46,12 @@ then
   awk -F: '$0=$1" "$6' /etc/passwd |
   while read user homeDir
   do
-  for imagesJSON in $imagesJSONs
-  do
+    if [ -z "$user" ]; then continue; fi
+    for imagesJSON in $imagesJSONs
+    do
       if [ -f "$homeDir/$imagesJSON" ]
       then
-        machinectl shell ${user}@ $prog
+        machinectl -q shell ${user}@ $prog </dev/null
         break
       fi
     done
@@ -66,7 +66,7 @@ else
   do
     if [ -f $imagesJSON ]
     then
-      images=$(jq -r .[].names[] "$imagesJSON")
+      images=$(jq -r '.[].names[]' $imagesJSON)
       trivyUserImages "$user" $images
     fi
   done

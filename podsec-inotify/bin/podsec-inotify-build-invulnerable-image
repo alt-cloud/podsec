@@ -5,7 +5,7 @@ source podsec-inotify-functions
 getTrivyServer
 
 function format() {
-  echo -ne "Формат:\n$0 <имя_образа> [ <docker_файл> [ <каталог_контекста> [ <параметры_podman_build> ] ] ]"
+  echo -ne "Формат:\n$0 <имя_образа> [ <docker_файл> [ <каталог_контекста> [ <параметры_podman_build> ] ] ]\n"
   exit 1
 }
 
@@ -22,9 +22,9 @@ if [ $# -gt 1 ]
 then
     dockerfile=$2
     shift; shift
-    if [ $# -gt 2 ]
+    if [ $# -gt 0 ]
     then
-        context=$3
+        context=$1
         shift
     else
         context='.'
@@ -42,6 +42,7 @@ then
 fi
 
 trivyCheckImage ${prog_name} ${container_name} $dockerfile
-exit $?
+retCode=$?
+exit $retCode
 
 

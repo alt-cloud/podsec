@@ -12,7 +12,14 @@ trivyCheckImage() {
   prog_name="$1"
   container_name="$2"
   forceRemove="$3"
+  user=$(id -un)
   TMPFILE="/tmp/${prog_name}.$$"
+  if [ "$user" = 'root' ]
+  then
+    systemctl enable --now podman.socket
+  else
+    systemctl --user enable --now podman.socket
+  fi
   # Проверка контейнера с помощью инструмента Trivy
   vulnerabilities=$(trivy image --exit-code 0 --server http://$U7S_TRIVY_SERVER:4954 --severity HIGH,CRITICAL "${container_name}" 2> $TMPFILE)
 
@@ -23,7 +30,7 @@ trivyCheckImage() {
       if [ -n "$forceRemove" ]
       then
           podman rmi "${container_name}" >/dev/null 2>&1
-          echo "Образ ${container_name} удален ." >&2
+          echo "Образ ${container_name} пользователя $user удален ." >&2
       fi
       priority=6
       prefix='Fatal'
@@ -33,12 +40,12 @@ trivyCheckImage() {
   rm -f $TMPFILE
 
   # Извлечение значения Total из вывода
-  total_count=$(echo "$vulnerabilities" | grep -oE "Total: [0-9]+" | grep -oE "[0-9]+")
+  total_count=$(echo "$vulnerabilities" | grep -oE "Total: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
 
   # Проверка наличия уязвимостей
   if [ "$total_count" -eq 0 ]
   then
-      message="Уязвимости не обнаружены."
+      message="В образе ${container_name} пользователя $user уязвимости не обнаружены."
   else
       high_count=$(echo "$vulnerabilities" | grep -oE "HIGH: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
       critical_count=$(echo "$vulnerabilities" | grep -oE "CRITICAL: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
@@ -49,27 +56,30 @@ trivyCheckImage() {
           then
               if [[ $"high_count" -gt 0 && "$critical_count" -gt 0 ]]
               then
-                  message="Обнаружены критические и высокие уязвимости."
+                  message="В образе ${container_name} пользователя $user обнаружены критические и высокие уязвимости."
               else
-                  message="Обнаружены критические уязвимости."
+                  message="В образе ${container_name} пользователя $user обнаружены критические уязвимости."
               fi
               priority=2
               prefix='Critical'
               code=5
           else
-              message="Обнаружены высокие уязвимости."
+              message="В образе ${container_name} пользователя $user обнаружены высокие уязвимости."
               priority=3
               prefix='High'
               code=4
           fi
-          podman rmi "${container_name}"
           echo "$vulnerabilities" >&2
           echo "$message" >&2
-          echo "Образ ${container_name} удален ." >&2
+          if [ -n "$forceRemove" ]
+          then
+            podman rmi "${container_name}"
+            echo "Образ ${container_name} пользователя $user удален ." >&2
+          fi
           logger -p "$priority" -t "${prog_name}:$prefix" "$message"
           return $code
       else
-          message="Найдены уязвимости, но нет высоких или критических. Образ ${container_name} принят."
+          message="В образе ${container_name} пользователя $user найдены уязвимости, но нет высоких или критических."
           priority=2
           prefix='Low'
           logger -p "$priority" -t "${prog_name}:$prefix" "$message"
