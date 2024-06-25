@@ -94,6 +94,7 @@ PODSEC_INOTIFY_PLUGINS = \
 PODSEC_INOTIFY_PROGRAMMS = \
 	podsec-inotify-check-containers \
 	podsec-inotify-check-kubeapi \
+	podsec-inotify-build-invulnerable-image \
 	podsec-inotify-check-vuln
 
 PODSEC_INOTIFY_FUNCTIONS = \
