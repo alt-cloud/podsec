@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Скрипт работает в двух режимах:
 #
 # - Мониторинг событий поступающих в файл  /etc/kubernete/audit/audit.log
@@ -21,7 +21,7 @@ $0 [-d | -m]"
   exit 1
 fi
 
-if [ $1 = '-d' ]
+if [ "$1" = '-d' ]
 then
   # Мониторинг
   if [ -s $LASTEVENTTIMEFILE ]
@@ -38,15 +38,15 @@ then
     [.requestReceivedTimestamp,.sourceIPs[0],.responseStatus.message] |
     '$filtr''  |
   tee -a $EVENTFILE |
-  logger -t "check-kubeapi"
-elif [ $1 = '-m' ]
+  logger -t "podsec-inotify-check-kubeapi"
+elif [ "$1" = '-m' ]
 then
   # Передача почты
   if [ -s $EVENTFILE ]
   then
     mail -s "Detected requests to the kubernetes cluster with excess authority" root < $EVENTFILE
     tail -1 $EVENTFILE | jq '.[0]' > $LASTEVENTTIMEFILE
-    > $EVENTFILE
+    true > $EVENTFILE
   fi
 else
   echo "Неверное значение 1-го параметра" >&2

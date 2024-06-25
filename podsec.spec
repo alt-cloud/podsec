@@ -6,8 +6,8 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.12
-Release: alt2
+Version: 1.0.13
+Release: alt1
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -199,6 +199,9 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-save-oci*
 
 %changelog
+* Tue Jun 25 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.13-alt1
+- 1.0.13
+
 * Wed Jun 19 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.12-alt2
 - 1.0.12
 

@@ -1,12 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 # Плугин проверяет хранимые на узле образы
 export LANG=C
 
 export MAILTO=
 
-if [ $EUID -ne 0 ]
+if [ "$EUID" -ne 0 ]
 then
-  if [ "$LANG" == 'ru_RU.UTF-8' ]
+  if [ "$LANG" = 'ru_RU.UTF-8' ]
   then
     echo "POLICY Unknown plugin должен запускаться с правами пользователя root"
   else
@@ -21,7 +21,7 @@ fi
 # setTraps
 
 # Проанализировать описание уровня интервалов во входных парамаетрах
-parseIntervalParameters $*
+parseIntervalParameters "$@"
 
 checkUsersImages=$(checkUsersImages)
 # checkUsersImages=$(cat "/tmp/out")
@@ -29,14 +29,14 @@ checkUsersImages=$(checkUsersImages)
 # exit
 
 # JSON пользователей имеющих неподписанный образы в формате [{key: <user>, value:"<registries>"},{key: <user>, value:"<registries>"...]
-notSignedRegistriesJSON=$(echo $checkUsersImages | jq '[.[] | select(.notSignedRegistries | length > 0) | {key:.user, value:.notSignedRegistries | join(", ")}]')
+notSignedRegistriesJSON=$(echo "$checkUsersImages" | jq '[.[] | select(.notSignedRegistries | length > 0) | {key:.user, value:.notSignedRegistries | join(", ")}]')
 # echo "$notSignedRegistriesJSON"
 # exit
 if [ -n "$notSignedRegistriesJSON" -a "$notSignedRegistriesJSON" != '[]' ]
 then
   # Получение списка пользователей
-  notSignedRegistriesUsers=$(echo $notSignedRegistriesJSON | jq '[.[].key] | join (", ")')
-  notSignedRegistriesImages=$(echo $notSignedRegistriesJSON | jq '[.[] | join(":")] | join(", ")')
+  notSignedRegistriesUsers=$(echo "$notSignedRegistriesJSON" | jq '[.[].key] | join (", ")')
+  notSignedRegistriesImages=$(echo "$notSignedRegistriesJSON" | jq '[.[] | join(":")] | join(", ")')
 #   echo "notSignedRegistriesUsers=$notSignedRegistriesUsers"
   metricWeight=101
   key=$(getJournalKeyByMetric $metricWeight);
@@ -45,27 +45,27 @@ then
     users+=$notSignedRegistriesUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    if [ "$LANG" = 'ru_RU.UTF-8' ]
     then
       nagiosHeads+="\nимеют регистраторы не поддерживающие электронную подпись"
-      message="$prefix($metricWeight): Пользователи $notSignedRegistriesUsers имеют регистраторы не поддерживающие электронную подпись: $notSignedRegistriesImages"
+      message="$metricWeight: Пользователи $notSignedRegistriesUsers имеют регистраторы не поддерживающие электронную подпись: $notSignedRegistriesImages"
     else
       nagiosHeads+="\nhave unsigned registries,"
-      message="$prefix($metricWeight): $notSignedRegistriesUsers users have unsigned registries:$notSignedRegistriesImages"
+      message="$metricWeight:: $notSignedRegistriesUsers users have unsigned registries:$notSignedRegistriesImages"
     fi
-    logger -p $priority -t $prefix $message
+    logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
 fi
 
 # JSON пользователей со списком неподписанных образов в формате [{key: <user>, value:"<images>"},{key: <user>, value:"<images>"...]
-notSignedImagesJSON=$(echo $checkUsersImages | jq '.[] | select(.notSignedImagesTree | length > 0) | ([{key:.user,value:([.notSignedImagesTree | to_entries[] | .value[]])}])')
+notSignedImagesJSON=$(echo "$checkUsersImages" | jq '.[] | select(.notSignedImagesTree | length > 0) | ([{key:.user,value:([.notSignedImagesTree | to_entries[] | .value[]])}])')
 if [ -n "$notSignedImagesJSON" ]
 then
   # Получение списка пользователей
-  notSignedRegistriesUsers=$(echo $notSignedImagesJSON | jq '[.[].key] | join (", ")')
-  notSignedRegistriesImages=$(echo $notSignedImagesJSON | jq '[[.[]][] | (.key, ": ", (.value | sort | unique | join(", ") ))] | join("")')
+  notSignedImagesUsers=$(echo "$notSignedImagesJSON" | jq '[.[].key] | join (", ")')
+  notSignedImagesImages=$(echo "$notSignedImagesJSON" | jq '[[.[]][] | (.key, ": ", (.value | sort | unique | join(", ") ))] | join("")')
 #   echo "notSignedImagesUsers=$notSignedImagesUsers"
   metricWeight=102
   key=$(getJournalKeyByMetric $metricWeight);
@@ -74,15 +74,15 @@ then
     users+=$notSignedImagesUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    if [ "$LANG" = 'ru_RU.UTF-8' ]
     then
       nagiosHeads+="\nимеют неподписанные образы"
-      message="$prefix($metricWeight): Пользователи $notSignedImagesUsers имеют неподписанные образы: $notSignedImagesImages"
+      message="$metricWeight:: Пользователи $notSignedImagesUsers имеют неподписанные образы: $notSignedImagesImages"
     else
       nagiosHeads+="\nhave unsigned images,"
-      message="$prefix($metricWeight): $notSignedImagesUsers users have unsigned images: $notSignedImagesImages"
+      message="$metricWeight:: $notSignedImagesUsers users have unsigned images: $notSignedImagesImages"
     fi
-    logger -p $priority -t $prefix $message
+    logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -91,14 +91,14 @@ fi
 # jq '.[] | select(.outPolicyImagesTree | length > 0) | ([{key:.user,value:([.outPolicyImagesTree | to_entries[] | .value[]] | sort | unique)}])'
 
 # JSON пользователей  списком неподписанных образов в формате [{key: <user>, value:"<images>"},{key: <user>, value:"<images>"...]
-outPolicyImagesJSON=$(echo $checkUsersImages | jq '.[] | select(.outPolicyImagesTree | length > 0) | ([{key:.user,value:([.outPolicyImagesTree | to_entries[] | .value[]] | sort | unique)}])')
+outPolicyImagesJSON=$(echo "$checkUsersImages" | jq '.[] | select(.outPolicyImagesTree | length > 0) | ([{key:.user,value:([.outPolicyImagesTree | to_entries[] | .value[]] | sort | unique)}])')
 if [ -n "$outPolicyImagesJSON" ]
 then
   # Получение списка пользователей
 #   outPolicyImagesUsers=$(echo $outPolicyImagesJSON | jq '.[].key' | tr "\n" ' ')
 #   outPolicyImages=$(echo $outPolicyImagesJSON | jq '.[] | join(":")' | tr "\n" ' ')
-  outPolicyImagesUsers=$(echo $outPolicyImagesJSON | jq '[.[].key] | join (", ")')
-  outPolicyImages=$(echo $outPolicyImagesJSON | jq '[[.[]][] | (.key, ": ", (.value | sort | unique | join(", ") ))] | join("")')
+  outPolicyImagesUsers=$(echo "$outPolicyImagesJSON" | jq '[.[].key] | join (", ")')
+  outPolicyImages=$(echo "$outPolicyImagesJSON" | jq '[[.[]][] | (.key, ": ", (.value | sort | unique | join(", ") ))] | join("")')
 #   echo "outPolicyImagesUsers=$outPolicyImagesUsers"
   metricWeight=103
   key=$(getJournalKeyByMetric $metricWeight);
@@ -107,15 +107,15 @@ then
     users+=$outPolicyImagesUsers
     prefix=${LEVELSNAMES[$key]};
     priority=${JOURNALPRIORITY[$key]}
-    if [ "$LANG" == 'ru_RU.UTF-8' ]
+    if [ "$LANG" = 'ru_RU.UTF-8' ]
     then
       nagiosHeads+="\nимеют образы вне поддерживаемых политик"
-      message="$prefix($metricWeight): Пользователи $outPolicyImagesUsers имеют образы вне поддерживаемых политик:  $outPolicyImages"
+      message="$metricWeight:: Пользователи $outPolicyImagesUsers имеют образы вне поддерживаемых политик:  $outPolicyImages"
     else
       nagiosHeads+="\nhave unsigned images,"
-      message="$prefix($metricWeight): $outPolicyImagesUsers users have images outside of supported policies: $outPolicyImages"
+      message="$metricWeight:: $outPolicyImagesUsers users have images outside of supported policies: $outPolicyImages"
     fi
-    logger -p $priority -t $prefix $message
+    logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -131,45 +131,45 @@ then
   subject=
   case $VERBOSELEVEL in
     0)
-      if [ "$LANG" == 'ru_RU.UTF-8' ]
+      if [ "$LANG" = 'ru_RU.UTF-8' ]
       then
-        subject="POLICY $prefix($metricWeight): Пользователи $users имеют образы нарушающие установленные политики"
+        subject="POLICY $metricWeight:: Пользователи $users имеют образы нарушающие установленные политики"
         outMessage=$subject
       else
-        subjsetTrapsect="POLICY $prefix($metricWeight): Users $users have images that violate established policies"
+        subjset="POLICY $metricWeight:: Users $users have images that violate established policies"
         outMessage=$subject
       fi
       ;;
     1|2|3)
-      if [ "$LANG" == 'ru_RU.UTF-8' ]
+      if [ "$LANG" = 'ru_RU.UTF-8' ]
       then
-        subject="POLICY $prefix($metricWeight): Пользователи $users имеют образы нарушающие установленные политики"
+        subject="POLICY $metricWeight:: Пользователи $users имеют образы нарушающие установленные политики"
         outMessage="$subject | Есть пользователи:"
       else
-        subject="POLICY $prefix($metricWeight): Users $users have images that violate established policies "
+        subject="POLICY $metricWeight:: Users $users have images that violate established policies "
         outMessage="$subject | There are users:"
       fi
       outMessage+="$nagiosHeads"
-      if [ $VERBOSELEVEL -gt 1 ]
+      if [ "$VERBOSELEVEL" -gt 1 ]
       then
         outMessage+=" | $messages"
       fi
       ;;
   esac
   outMessage+="\n"
-  if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
-  then
-    echo -ne $outMessage
-    exit $priority
-  else  # Вызов через cron
-    if [ -n "$MAILTO" ]
-      then
-        echo -ne $outMessage | mail -s "$subject" $MAILTO
-    fi
+#   if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
+#   then
+#     echo -ne "$outMessage"
+#     exit "$priority"
+#   else  # Вызов через cron
+  if [ -n "$MAILTO" ]
+    then
+      echo -ne "$outMessage" | mail -s "$subject" "$MAILTO"
   fi
+#   fi
   exit 0
 fi
-if [ "$LANG" == 'ru_RU.UTF-8' ]
+if [ "$LANG" = 'ru_RU.UTF-8' ]
 then
   echo "POLICY OK: Политики контейнеризации не нарушены"
 else

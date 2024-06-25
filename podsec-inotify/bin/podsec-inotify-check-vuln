@@ -1,5 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 # Функция возвращает список образов в кеше podman rootfull
+export U7S_TRIVY_SERVER
+
+source podsec-inotify-functions
+getTrivyServer
+
 getimagelist() {
   podman images --format="{{.Repository}}:{{.Tag}}"
 }
@@ -7,19 +12,13 @@ getimagelist() {
 trivyUserImages() {
   user=$1
   shift
-  images=$@
-  TMP=/tmp/trivy.$$
-  trivy_options="--scanners vuln,config --server http://127.0.0.1:4954"
-  for image in $images
+  for image
   do
-    if trivy image $trivy_options $image 2>/dev/null | tee $TMP | logger -t "check-images-trivy:$user"
-    then :;
-    fi
-    if [ -n "$MAILTO" ]
+    $message=$(trivyCheckImage "podsec-inotify-check-vuln" $image )
+    if [ "$?" -gt 0  -a -n "$MAILTO" ]
     then
-      if grep 'Total:.*HIGH: [1-9].*' $TMP >/dev/null 2>&1 ; then
-        mail -s "Vulnerabilities found in image '$image'  of user $user" $MAILTO < $TMP
-      fi
+      echo "$message" |
+      mail -s "Vulnerabilities found in image '$image'  of user $user" "$MAILTO"
     fi
   done
   rm -f $TMP
@@ -34,24 +33,42 @@ then
   fi
 fi
 
-if [ $(id -u) -eq 0 ]
+if [ "$(id -u)" -eq 0 ]
 then
   imagesJSON='/var/lib/containers/storage/overlay-images/images.json'
   images=$(jq -r .[].names[] $imagesJSON)
+  prog=$(which $0)
   trivyUserImages root $images
-  for dir in /home/*
+  imagesJSONs="
+  .local/share/containers/storage/overlay-images/images.json
+  .local/share/usernetes/containers/storage/overlay-images/images.json
+  "
+  prog=$(which $0)
+  awk -F: '$0=$1" "$6' /etc/passwd |
+  while read user homeDir
   do
-    user=${dir:6}
-    machinectl shell ${user}@ $0
+  for imagesJSON in $imagesJSONs
+  do
+      if [ -f "$homeDir/$imagesJSON" ]
+      then
+        machinectl shell ${user}@ $prog
+        break
+      fi
+    done
   done
 else
   user=$(id -u -n)
-  dir="/home/$user"
-  imagesJSONs=$(find .local/share/ -name images.json 2>/dev/null)
+  imagesJSONs="
+  $HOME/.local/share/containers/storage/overlay-images/images.json
+  $HOME/.local/share/usernetes/containers/storage/overlay-images/images.json
+  "
   for imagesJSON in $imagesJSONs
   do
-    images=$(jq -r .[].names[] $imagesJSON)
-    trivyUserImages $user $images
+    if [ -f $imagesJSON ]
+    then
+      images=$(jq -r .[].names[] "$imagesJSON")
+      trivyUserImages "$user" $images
+    fi
   done
 fi
 exit 0

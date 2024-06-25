@@ -3,6 +3,7 @@ Description=Monitoring host docker images with trivy security scanner
 Wants=podsec-inotify-check-vuln.timer
 
 [Service]
+nvironment="U7S_TRIVY_SERVER=trivy.local"
 Type=oneshot
 ExecStart=/usr/bin/podsec-inotify-check-vuln  -vvv -c 100 >/dev/null 2>&1
 

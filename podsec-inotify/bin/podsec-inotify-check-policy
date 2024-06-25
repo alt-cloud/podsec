@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Плугин проверяет политики настройки контейнеризации на сервере
 export LANG=C
 
@@ -64,7 +64,7 @@ then
       nagiosHeads+="\noutside the podman group,"
       message="$prefix($metricWeight): Users $notPodmanUsers have images but are not in the 'podman' group"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p $priority -t "podsec-inotify-check-policy:$prefix" $message
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -94,7 +94,7 @@ then
       nagiosHeads+="\ncapable of receiving any image"
       message="$prefix($metricWeight): Users $incorrectPolicyUsers have 'defaultPolicy!=reject' in policy.json but are not in the 'podman_dev' group"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p $priority -t "podsec-inotify-check-policy:$prefix" $message
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -123,7 +123,7 @@ then
       nagiosHeads+="\ncapable of getting a local image without a signature"
       message="$prefix($metricWeight): Users $nonRegistryLocalUsers do not have registry.local in the list of registries for which the presence of digital image signature is checked"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p $priority -t "podsec-inotify-check-policy:$prefix" $message
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -152,7 +152,7 @@ then
       nagiosHeads+="\ncapable of receiving any image without a signature"
       message="$prefix($metricWeight): Users $notSignedRegistriesUsers have registries in the policy for which the presence of an electronic image signature is not checked"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p $priority -t "podsec-inotify-check-policy:$prefix" $message
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -181,7 +181,7 @@ then
       nagiosHeads+="\ncapable of receiving any image via prohibited transport"
       message="$prefix($metricWeight): Users $forbiddenTransportsUsers have transports other than docker in the list of supported transports"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p $priority -t "podsec-inotify-check-policy:$prefix" $message
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -210,7 +210,7 @@ then
       nagiosHeads+="\nnot using a local signature store"
       message="$prefix($metricWeight): Users $incorrectDefaultDockerUsers do not use the signature store http://sigstore.local:81/sigstore/ as the default signature store"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p $priority -t "podsec-inotify-check-policy:$prefix" $message
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -220,7 +220,7 @@ fi
 # имеющих каталог .config/containers/ открытым на запись и изменения
 # не имеющих файла конфигурации .config/containers/storage.conf
 # входящих в группу wheel
-notConfigUsers= editableConfigUsers= podmanWheelUsers=
+notConfigUsers='' editableConfigUsers='' podmanWheelUsers=''
 for dir in /home/*
 do
   user=$(basename $dir)
@@ -266,7 +266,7 @@ then
       nagiosHeads+="\nincluded in the wheel group"
       message="$prefix($metricWeight): The $podmanWheelUsers users are members of the 'podman' and 'wheel' groups"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p "$priority" -t "podsec-inotify-check-policy:$prefix" "$message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -277,7 +277,7 @@ if [ -n "$notConfigUsers" ]
 then
   users+=$notConfigUsers
   set -- $notConfigUsers
-  let metricWeight=(90*$#)/$nOnlyPodmanUsers
+  let metricWeight="(90*$#)/$nOnlyPodmanUsers"
   key=$(getJournalKeyByMetric $metricWeight);
   if [ -n "$key" ]
   then
@@ -291,7 +291,7 @@ then
       nagiosHeads+="\nwithout a config file"
       message="$prefix($metricWeight): $notConfigUsers users do not have config file .config/containers/storage.conf"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p "$priority" -t "podsec-inotify-check-policy:$prefix" "$message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -301,7 +301,7 @@ fi
 if [ -n "$editableConfigUsers" ]
 then
   set -- $editableConfigUsers
-  let metricWeight=(90*$#)/$nOnlyPodmanUsers
+  let metricWeight="(90*$#)/$nOnlyPodmanUsers"
   key=$(getJournalKeyByMetric $metricWeight);
   if [ -n "$key" ]
   then
@@ -316,7 +316,7 @@ then
       nagiosHeads+="\nable to change configuration"
       message="$prefix($metricWeight): $editableConfigUsers users have writable configuration directory .config/containers"
     fi
-    logger -p $priority -t "check-policy:$prefix" $message
+    logger -p "$priority" -t "podsec-inotify-check-policy:$prefix" "$message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -358,16 +358,16 @@ then
       ;;
   esac
   outMessage+="\n"
-  if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
-  then
-    echo -ne $outMessage
-    exit $priority
-  else  # Вызов через cron
-    if [ -n "$MAILTO" ]
-      then
-        echo -ne $outMessage | mail -s "$subject" $MAILTO
-    fi
+#   if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
+#   then
+#     echo -ne $outMessage
+#     exit $priority
+#   else  # Вызов через cron
+  if [ -n "$MAILTO" ]
+    then
+      echo -ne $outMessage | mail -s "$subject" $MAILTO
   fi
+#   fi
   exit 0
 fi
 if [ "$LANG" == 'ru_RU.UTF-8' ]

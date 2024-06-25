@@ -1,3 +1,85 @@
+
+
+export U7S_TRIVY_SERVER
+getTrivyServer() {
+  if [ -z "$U7S_TRIVY_SERVER" ]
+  then
+    U7S_TRIVY_SERVER='trivy.local'
+  fi
+}
+
+trivyCheckImage() {
+  prog_name="$1"
+  container_name="$2"
+  forceRemove="$3"
+  TMPFILE="/tmp/${prog_name}.$$"
+  # Проверка контейнера с помощью инструмента Trivy
+  vulnerabilities=$(trivy image --exit-code 0 --server http://$U7S_TRIVY_SERVER:4954 --severity HIGH,CRITICAL "${container_name}" 2> $TMPFILE)
+
+  if [ $? -gt 0 ]
+  then
+      message="Команда анализа уязвимостей trivy закончилась неуспешно:"
+      cat $TMPFILE
+      if [ -n "$forceRemove" ]
+      then
+          podman rmi "${container_name}" >/dev/null 2>&1
+          echo "Образ ${container_name} удален ." >&2
+      fi
+      priority=6
+      prefix='Fatal'
+      logger -p $priority -t "${prog_name}:$prefix" "$message"
+      return 3
+  fi
+  rm -f $TMPFILE
+
+  # Извлечение значения Total из вывода
+  total_count=$(echo "$vulnerabilities" | grep -oE "Total: [0-9]+" | grep -oE "[0-9]+")
+
+  # Проверка наличия уязвимостей
+  if [ "$total_count" -eq 0 ]
+  then
+      message="Уязвимости не обнаружены."
+  else
+      high_count=$(echo "$vulnerabilities" | grep -oE "HIGH: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
+      critical_count=$(echo "$vulnerabilities" | grep -oE "CRITICAL: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
+
+      if [[ "$high_count" -gt 0 || "$critical_count" -gt 0 ]]
+      then
+          if [ "$critical_count" -gt 0 ]
+          then
+              if [[ $"high_count" -gt 0 && "$critical_count" -gt 0 ]]
+              then
+                  message="Обнаружены критические и высокие уязвимости."
+              else
+                  message="Обнаружены критические уязвимости."
+              fi
+              priority=2
+              prefix='Critical'
+              code=5
+          else
+              message="Обнаружены высокие уязвимости."
+              priority=3
+              prefix='High'
+              code=4
+          fi
+          podman rmi "${container_name}"
+          echo "$vulnerabilities" >&2
+          echo "$message" >&2
+          echo "Образ ${container_name} удален ." >&2
+          logger -p "$priority" -t "${prog_name}:$prefix" "$message"
+          return $code
+      else
+          message="Найдены уязвимости, но нет высоких или критических. Образ ${container_name} принят."
+          priority=2
+          prefix='Low'
+          logger -p "$priority" -t "${prog_name}:$prefix" "$message"
+      fi
+  fi
+  echo "$vulnerabilities" >&2
+  echo "$message" >&2
+  return 0
+}
+
 ################################################
 # Набор функций для работы с nagios плугинами
 
@@ -26,30 +108,30 @@ metricaInInterval() {
   IFS=$ifs
   case $# in
     1)
-      if [ ${interval: -1} == ':' ]
+      if [ "${interval: -1}" == ':' ]
       then
-        start=$(printf "%d" $1 2>/dev/null)
-        ret=$([ $metrica -ge $start ] && echo 0 || echo 1) # start - ∞
+        start=$(printf "%d" "$1" 2>/dev/null)
+        ret=$([ "$metrica" -ge "$start" ] && echo 0 || echo 1) # start - ∞
       else
         start=0
         end=$(printf "%d" $1 2>/dev/null)
-        ret=$([ $metrica -ge $start -a $metrica -le $end ] && echo 0 || echo 1) # 0 - end
+        ret=$([ "$metrica" -ge "$start" -a "$metrica" -le "$end" ] && echo 0 || echo 1) # 0 - end
       fi
       break;;
     2)
       if [ -n "$minusInfinity" ]
       then
-        end=$(printf "%d" $2 2>/dev/null)
-        ret=$([ $metrica -le $end ] && echo 0 || echo 1) #  ∞ - end
+        end=$(printf "%d" "$2" 2>/dev/null)
+        ret=$([ "$metrica" -le "$end" ] && echo 0 || echo 1) #  ∞ - end
       else
         if [ -z "$1" ]
         then
           start=0
         else
-          start=$(printf "%d" $1 2>/dev/null)
+          start=$(printf "%d" "$1" 2>/dev/null)
         fi
-        end=$(printf "%d" $2 2>/dev/null)
-        ret=$([ $metrica -ge $start -a $metrica -le $end ] && echo 0 || echo 1) # start - end
+        end=$(printf "%d" "$2" 2>/dev/null)
+        ret=$([ "$metrica" -ge "$start" -a "$metrica" -le "$end" ] && echo 0 || echo 1) # start - end
       fi
       break;;
     *) # Ошибка но мы ее игнорируем
@@ -58,7 +140,7 @@ metricaInInterval() {
 
   if [ -n "$invert" ]
   then
-    if [ $ret -eq 0 ]; then ret=1; else ret=0; fi
+    if [ "$ret" -eq 0 ]; then ret=1; else ret=0; fi
   fi
   return $ret
 }
@@ -86,7 +168,7 @@ parseIntervalParameters() {
   VERBOSELEVEL=0
   while [ $# -gt 0 ]
   do
-    if [ ${1:0:1} != '-' ]; then shift; continue; fi
+    if [ "${1:0:1}" != '-' ]; then shift; continue; fi
     par=${1:1}
     if [ "${par:0:1}" == 'v' ];
     then
@@ -119,9 +201,9 @@ getJournalKeyByMetric() {
   do
     interval="${JOURNALPLUGINPARS[$key]}";
     if [ "$interval" == '-' ]; then continue; fi
-    if ! metricaInInterval $interval $metrica
+    if ! metricaInInterval "$interval" "$metrica"
     then
-      echo $key
+      echo "$key"
       return
     fi
   done
@@ -136,9 +218,9 @@ getNagiosKeyByMetric() {
   do
     interval="${NAGIIOSPLUGINPARS[$key]}";
     if [ "$interval" == '-' ]; then continue; fi
-    if ! metricaInInterval $interval $metrica
+    if ! metricaInInterval "$interval" "$metrica"
     then
-      echo $key
+      echo "$key"
       return
     fi
   done

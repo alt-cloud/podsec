@@ -29,9 +29,9 @@ run_logger () {
 
     #create event on journal
     if [ "$level" == "INFO" ] && [ "$INFO_LOG" == "YES" ]; then
-        logger -t inotify-overlays "$level: $edge_log_string"
+        logger -t "podsec-inotify-check-containers:$level" "$edge_log_string"
     elif [ "$level" == "CRITICAL" ]; then
-        logger -t inotify-overlays "$level: $edge_log_string"
+        logger -t "podsec-inotify-check-containers:$level" "$edge_log_string"
     fi
 }
 

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $USER != 'root' -o $(id -u) != 0 -o $(id -g) != 0 ]
 then
