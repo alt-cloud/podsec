@@ -106,7 +106,7 @@ nameserver 192.168.122.1
 - файл `/etc/host` должен содержать строку:
 <pre>
 ...
-192.168.122.70 registry.local sigstore.local
+192.168.122.70 registry.local sigstore.local trivy.local
 </pre>
 
 - файл `/etc/containers/policy.json`, являющийся `symlink'ом` к файлу `/etc/containers/policy_YYYY-MM-DD_HH:mm:SS`
@@ -152,6 +152,8 @@ Proto Recv-Q Send-Q Local Address               Foreign Address             Stat
 tcp        0      0 0.0.0.0:81                  0.0.0.0:*                   LISTEN      14996/nginx -g daem
 ...
 tcp        0      0 :::80                       :::*                        LISTEN      15044/docker-regist
+...
+tcp        0      0 :::4954                     :::*                        LISTEN      30864/trivy
 ...
 </pre>
 
@@ -256,7 +258,7 @@ $ podsec-load-sign-oci amd64_c10f1.tar.xz amd64 &lt;E-mail_подписанта>
 }
 </pre>
 
-И наличие подписей в каталоге `/var/sigstore/sigstore/k8s-c10f1`:
+И наличие подписей в каталоге `/var/sigstore/sigstore/k8s-c10f2`:
 <pre>
 └── k8s-c10f1
     ├── cert-manager-cainjector@sha256=36a19269312740daa04ea77e4edb87983230d6c4e6e5dd95b9c3640e5fa300b5

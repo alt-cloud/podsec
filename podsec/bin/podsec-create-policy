@@ -75,7 +75,7 @@ then
     fi
   done
 else
-  echo "Добавление привязки доменов registry.local sigstore.local к IP-адресу $regIP"
+  echo "Добавление привязки доменов registry.local sigstore.local trivy.local к IP-адресу $regIP"
   echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts
 fi
 
