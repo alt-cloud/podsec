@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Вспомогательные функции
 #
@@ -39,11 +39,11 @@ imagesTree() {
 getDefaultPolicy() {
   configPolicyFile=$1
 #   configPolicyFile="$configPolicyFile"
-  if [ ! -f $configPolicyFile ]
+  if [ ! -f "$configPolicyFile" ]
   then
     return
   fi
-  defaultPolicy=$(jq '.default[].type' $configPolicyFile)
+  defaultPolicy=$(jq '.default[].type' "$configPolicyFile")
   defaultPolicy=${defaultPolicy:1:-1}
   if [ -z "$defaultPolicy" ]
   then
@@ -64,7 +64,7 @@ getRegistries() {
   then
     req+=" | .[]"
   fi
-  jq "$req" $configPolicyFile
+  jq "$req" "$configPolicyFile"
 }
 
 # Получить список регистраторов требующих подписи (type == signedBy)
@@ -79,7 +79,7 @@ getSignedRegistries() {
   then
     req+=" | .[]"
   fi
-  jq "$req" $configPolicyFile
+  jq "$req" "$configPolicyFile"
 }
 
 # Получить список регистраторов не требующих подписи (type == signedBy)
@@ -94,7 +94,7 @@ getNotSignedRegistries() {
   then
     req+=" | .[]"
   fi
-  jq "$req" $configPolicyFile
+  jq "$req" "$configPolicyFile"
 }
 
 # Поолучить список траспортов, отличных от docker
@@ -109,7 +109,7 @@ getForbiddenTransports() {
   then
     req+=" | .[]"
   fi
-  jq  "$req" $configPolicyFile
+  jq  "$req" "$configPolicyFile"
 }
 
 # Проверка конфигурацию policy.json
@@ -117,10 +117,10 @@ checkPolicyConfig() {
   configPolicyFile=$1
   tab="\t"
 
-  configDir=$(dirname $configPolicyFile)
+  configDir=$(dirname "$configPolicyFile")
   ret="\"configDir\":\"$configDir\""
 
-  defaultPolicy=$(getDefaultPolicy $configPolicyFile)
+  defaultPolicy=$(getDefaultPolicy "$configPolicyFile")
   ret+="\n,$tab\"defaultPolicy\":\"$defaultPolicy\""
   if [ -n "$DEBUG" ]
   then
@@ -136,9 +136,9 @@ checkPolicyConfig() {
     fi
   fi
 
-  joinedSigStories=$(joinSigStories $configDir)
+  joinedSigStories=$(joinSigStories "$configDir")
   ret+="\n$tab,\"joinedSigStories\":$joinedSigStories\n"
-  defaultSigStore=$(getDefaultSigStore $configDir)
+  defaultSigStore=$(getDefaultSigStore "$configDir")
   if [ -z "$defaultSigStore" ]
   then
     ret+="\n$tab,\"noDefaultSigStore\":\"true\"\n"
@@ -148,21 +148,21 @@ checkPolicyConfig() {
     fi
   fi
 
-  signedRegistries=$(getSignedRegistries $configPolicyFile json)
+  signedRegistries=$(getSignedRegistries "$configPolicyFile" json)
   if [ -n "$DEBUG" ]
   then
     echo "signedRegistries=$signedRegistries" >&2
   fi
   ret+="\n,$tab\"signedRegistries\":$signedRegistries"
 
-  notSignedRegistries=$(getNotSignedRegistries $configPolicyFile json)
+  notSignedRegistries=$(getNotSignedRegistries "$configPolicyFile" json)
   if [ -n "$DEBUG" ]
   then
     echo "notSignedRegistries=$notSignedRegistries" >&2
   fi
   ret+="\n,$tab\"notSignedRegistries\":$notSignedRegistries"
 
-  forbiddenTransports=$(getForbiddenTransports $configPolicyFile json)
+  forbiddenTransports=$(getForbiddenTransports "$configPolicyFile" json)
   if [ -n "$DEBUG" ]
   then
     echo "forbiddenTransports=$forbiddenTransports" >&2
@@ -174,14 +174,14 @@ checkPolicyConfig() {
 checkUserImages() {
   user=$1
   configPolicyFile=$2
-  configDir=$(dirname $configPolicyFile)
+  configDir=$(dirname "$configPolicyFile")
 #   configDir=$2
   tab="\\t\\t"
   policyFile="$configDir/policy.json"
   ret="\n$tab\"user\": \"$user\"\n"
-  userPolicyConfig=$(checkPolicyConfig $policyFile)
+  userPolicyConfig=$(checkPolicyConfig "$policyFile")
   ret+=",$userPolicyConfig"
-  registries=$(getRegistries $policyFile)
+  registries=$(getRegistries "$policyFile")
   if [ -z "$registries" ]
   then
     registries='""'
@@ -198,7 +198,7 @@ checkUserImages() {
       in="$in    or \n    (. | startswith(\"$registry/\"))\n"
       out="$out    and \n    (. | startswith(\"$registry/\") | not)\n"
     fi
-    let n=$n+1$notSigned
+    (( n+=1 )) ||:
   done
 
   in="su - -c 'podman images --format json' $user 2>/dev/null |
@@ -253,7 +253,7 @@ $out  )
     ret+="\n,\"inPolicyImagesTree\": $inPolicyImagesTree"
   fi
 
-  inCorrectImages=
+#  inCorrectImages=
   images=$in
   if [ -n "$CHECKALLIMAGES" ]
   then
@@ -280,15 +280,15 @@ $out  )
 
   notSignedImages=
   signedImages=
-  for image in $(echo $images | jq '.[]')
+  for image in $(echo "$images" | jq '.[]')
   do
-    sigStoreURL=$(getSigStoreURLForImage $configDir ${image:1:-1})
+    sigStoreURL=$(getSigStoreURLForImage "$configDir" "${image:1:-1}")
     sigStoreURL="$sigStoreURL/signature-1"
-    if wget -q -O $TMPFILE $sigStoreURL 2>/dev/null
+    if wget -q -O "$TMPFILE" "$sigStoreURL" 2>/dev/null
     then
-      signedImages+=$(echo ${signedImages:+,}$image)
+      signedImages+="${signedImages:+,}$image"
     else
-      notSignedImages+=$(echo ${notSignedImages:+,}$image)
+      notSignedImages+="${notSignedImages:+,}$image"
     fi
   done
   rm -f $TMPFILE
@@ -296,8 +296,8 @@ $out  )
   notSignedImages="[$notSignedImages]"
 #   ret+="\n,\"signedImages\": $signedImages"
 #   ret+="\n,\"notSignedImages\": $notSignedImages"
-  signedImagesTree=$(echo $signedImages | imagesTree)
-  notSignedImagesTree=$(echo $notSignedImages | imagesTree)
+  signedImagesTree=$(echo "$signedImages" | imagesTree)
+  notSignedImagesTree=$(echo "$notSignedImages" | imagesTree)
   ret+="\n,\"signedImagesTree\": $signedImagesTree"
   ret+="\n,\"notSignedImagesTree\": $notSignedImagesTree"
 
@@ -312,7 +312,7 @@ $out  )
 joinSigStories() {
   ret=
   configDir="${1}/registries.d"
-  yamlFiles=$(echo $configDir/*.yaml)
+  yamlFiles="$configDir/*.yaml"
   if [ "$yamlFiles" == "$configDir/*.yaml" ]
   then
     echo "{}"
@@ -320,20 +320,20 @@ joinSigStories() {
   fi
   for yamlFile in $yamlFiles
   do
-    yaml=$(yq . $yamlFile)
+    yaml=$(yq . "$yamlFile")
     ret="${ret}${ret:+,}$yaml"
   done
   ret="[$ret]"
-  echo $ret | jq 'reduce .[] as $item ({}; . *= $item)'
+  echo "$ret" | jq 'reduce .[] as $item ({}; . *= $item)'
 }
 
 getDefaultSigStore()  {
   configDir=$1
-  joinSigStories=$(joinSigStories $configDir)
-  lookaside=$(echo $joinSigStories | yq '."default-docker".lookaside')
+  joinSigStories=$(joinSigStories "$configDir")
+  lookaside=$(echo "$joinSigStories" | yq '."default-docker".lookaside')
   if [ "$lookaside" != 'null' ]
   then
-    echo $lookaside
+    echo "$lookaside"
   fi
 }
 
@@ -348,9 +348,9 @@ getSigStoreList() {
   configDir=$1
   image=$2
   # Объединить описания в файлах $configDir/registries.d/*.yaml
-  joinSigStories=$(joinSigStories $configDir)
+  joinSigStories=$(joinSigStories "$configDir")
   # Отсортировать .docker.key по уменьшению длины ключа, выбрать первый соотвествующий $image
-  echo $joinSigStories | yq "if .docker then [.docker | to_entries | sort_by(.key|(-length))[] | select(.key == \"$image\"[0:.key|length])][0].value else empty end"
+  echo "$joinSigStories" | yq "if .docker then [.docker | to_entries | sort_by(.key|(-length))[] | select(.key == \"$image\"[0:.key|length])][0].value else empty end"
 }
 
 
@@ -359,27 +359,27 @@ getSigStoreList() {
 getSigStoreURLForImage() {
   configDir=$1
   image=$2
-  joinSigStories=$(joinSigStories $configDir)
-  registry=$(echo \"$image\" | jq '. | split("/")[0]')
-  url=$(echo \"$image\" | jq '. | split("/")[1:] | join("/")' | tr ':' '=')
+  joinSigStories=$(joinSigStories "$configDir")
+  registry=$(echo "\"$image\"" | jq '. | split("/")[0]')
+  url=$(echo "\"$image\"" | jq '. | split("/")[1:] | join("/")' | tr ':' '=')
   if [ -n "$registry" ]
   then
-    lookaside=$(getSigStoreList $configDir $image | jq '.lookaside | rtrimstr("/")')
+    lookaside=$(getSigStoreList "$configDir" "$image" | jq '.lookaside | rtrimstr("/")')
   else
-    lookaside=$(getDefaultSigStore $configDir)
+    lookaside=$(getDefaultSigStore "$configDir")
   fi
   url=$(echo "$lookaside/$url" | tr -d '"')
-  echo $url
+  echo "$url"
 }
 
 getGroup() {
-  echo $(id -g -n $1)
+  id -g -n "$1"
 }
 
 # Функция выводит список групп позователя включая основную группу
 getGroups() {
-  ret="\"$(id -g -n $1)\""
-  for group in $(id -G -n $1)
+  ret="\"$(id -g -n "$1")\""
+  for group in $(id -G -n "$1")
   do
     ret+=",\"$group\""
   done
@@ -402,14 +402,14 @@ checkUsersConfig() {
       continue
     fi
     policyFile="$userDir/.config/containers/policy.json"
-    if [ ! -f $policyFile ];
+    if [ ! -f "$policyFile" ];
     then
       policyFile="/etc/containers/policy.json"
     fi
-    checkPolicyResult=$(checkPolicyConfig $policyFile)
-    user=$(basename $userDir)
-    checkPolicyResult+=",\"group\":\"$(getGroup $user)\""
-    checkPolicyResult+=",\"groups\":$(getGroups $user)"
+    checkPolicyResult=$(checkPolicyConfig "$policyFile")
+    user=$(basename "$userDir")
+    checkPolicyResult+=",\"group\":\"$(getGroup "$user")\""
+    checkPolicyResult+=",\"groups\":$(getGroups "$user")"
     ret+="\n,{\"user\":\"$user\",$checkPolicyResult}"
 #       echo "RET=$ret"
   done
@@ -432,14 +432,14 @@ checkUsersImages() {
       continue
     fi
     policyFile="$userDir/.config/containers/policy.json"
-    if [ ! -f $policyFile ];
+    if [ ! -f "$policyFile" ];
     then
       policyFile="/etc/containers/policy.json"
     fi
-    user=$(basename $userDir)
-    userImages=$(checkUserImages $user $policyFile)
-    userImages+=",\"group\":\"$(getGroup $user)\""
-    userImages+=",\"groups\":$(getGroups $user)"
+    user=$(basename "$userDir")
+    userImages=$(checkUserImages "$user" "$policyFile")
+    userImages+=",\"group\":\"$(getGroup "$user")\""
+    userImages+=",\"groups\":$(getGroups "$user")"
     ret+="\n,{\"user\":\"$user\",$userImages}"
   done
   ret="[$ret]"

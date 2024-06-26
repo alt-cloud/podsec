@@ -44,5 +44,3 @@ fi
 trivyCheckImage ${prog_name} ${container_name} $dockerfile
 retCode=$?
 exit $retCode
-
-

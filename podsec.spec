@@ -6,7 +6,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.13
+Version: 1.0.14
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -106,6 +106,33 @@ Requires: podsec-k8s >= %EVR
 %description dev
 A set of scripts for developers
 
+%package nagwad
+Summary: Podsec security message filters for the Nagwad journal scanner
+Requires: %name-inotify = %version-%release
+Group: Monitoring
+
+%description nagwad
+A set of filters for the Nagwad journal scanner to catch messages
+produced by %name-inotify scripts.
+
+%package nagwad-icinga
+Summary: Nagwad-based %name-inotify monitoring templates for Icinga 2
+Requires: nagwad-icinga-templates >= 0.11.2
+Group: Monitoring
+
+%description nagwad-icinga
+Monitoring templates for Icinga 2 defining services to monitor
+%name-inotify events using Nagwad.
+
+%package nagwad-nagios
+Summary: Nagwad-based %name-inotify monitoring templates for Nagios
+Requires: nagwad-nagios-templates >= 0.11.2
+Group: Monitoring
+
+%description nagwad-nagios
+Monitoring templates for Nagios defining services to monitor
+%name-inotify events using Nagwad.
+
 %prep
 %setup
 
@@ -113,8 +140,10 @@ A set of scripts for developers
 %make_build
 
 %install
-unitDir=$(pkg-config --variable=systemdsystemunitdir systemd)
-%makeinstall_std unitdir=$unitDir
+%makeinstall_std unitdir=%_unitdir modulesloaddir=%_modules_loaddir
+
+# JSON templates are packaged using %%doc:
+rm -f %buildroot%_datadir/doc/podsec/nagwad-podsec-icinga2.json
 
 %pre
 groupadd -r -f podman >/dev/null 2>&1 ||:
@@ -198,7 +227,21 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-k8s-save-oci*
 %_mandir/man?/podsec-save-oci*
 
+%files nagwad
+%config(noreplace) %_sysconfdir/nagwad/*.sed
+
+%files nagwad-icinga
+%doc podsec-inotify/monitoring/podsec-nagwad-icinga2.json
+%config(noreplace) %_sysconfdir/icinga2/conf.d/nagwad-podsec.conf
+
+%files nagwad-nagios
+%config(noreplace) %_sysconfdir/nagios/templates/nagwad-podsec-services.cfg
+%config(noreplace) %_sysconfdir/nagios/nrpe-commands/nagwad-podsec-commands.cfg
+
 %changelog
+* Wed Jun 26 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.14-alt1
+- 1.0.14
+
 * Tue Jun 25 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.13-alt1
 - 1.0.13
 

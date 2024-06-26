@@ -20,7 +20,7 @@ find $ROOTFUL_CONTAINERS -type d -name 'diff' -mindepth 2 \
 run_logger () {
     local level
     #choise log level based on edge string in log file
-    edge_log_string=$(tail -n1 $LOGFILE)
+    edge_log_string=$(tail -n1 "$LOGFILE")
     if [[ "$edge_log_string" =~ "MODIFY" ]]; then
 	level="CRITICAL"
     else
@@ -38,9 +38,12 @@ run_logger () {
 #main
 get_overlays
 if [ -s $TMP ]; then
-    touch $LOGFILE
-    while inotifywait -q -t 15 --recursive --event $EVENTS --fromfile $TMP \
-            --format "File %f was %e in %w" --outfile $LOGFILE; do
+    touch "$LOGFILE"
+    while inotifywait -q -t 15 --recursive --event "$EVENTS" \
+		      --fromfile "$TMP" \
+		      --format "File %f was %e in %w" \
+		      --outfile "$LOGFILE"
+    do
         run_logger
     done
 fi

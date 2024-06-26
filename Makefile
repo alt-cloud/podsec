@@ -112,6 +112,21 @@ PODSEC_INOTIFY_UNITS= \
 	podsec-inotify-check-vuln.service \
 	podsec-inotify-check-vuln.timer
 
+PODSEC_NAGWAD_FILTERS = \
+	podsec-inotify/nagwad/podsec-check-containers.sed \
+	podsec-inotify/nagwad/podsec-check-images.sed \
+	podsec-inotify/nagwad/podsec-check-kubeapi.sed \
+	podsec-inotify/nagwad/podsec-check-policy.sed \
+	podsec-inotify/nagwad/podsec-check-vuln.sed
+
+PODSEC_NAGWAD_ICINGA2_CONF = \
+	podsec-inotify/monitoring/podsec-nagwad-icinga2.conf
+PODSEC_NAGWAD_ICINGA2_JSON = \
+	podsec-inotify/monitoring/podsec-nagwad-icinga2.json
+PODSEC_NAGWAD_NAGIOS_CONF = \
+	podsec-inotify/monitoring/podsec-nagwad-nagios.cfg
+PODSEC_NAGWAD_NRPE_CONF = \
+	podsec-inotify/monitoring/podsec-nagwad-nrpe.cfg
 
 TMPFILE  := $(shell mktemp)
 
@@ -128,12 +143,13 @@ sysconfdir ?= /etc
 bindir ?= $(prefix)/bin
 libexecdir ?= $(prefix)/libexec
 datadir ?= $(prefix)/share
+docdir ?= $(datadir)/doc/podsec
 mandir ?= $(datadir)/man
 man1dir ?= $(mandir)/man1
 localstatedir ?= /var/lib
 userunitdir ?= $(prefix)/lib/systemd/user
 unitdir ?= /lib/systemd/system
-# unitdir ?= /usr/lib/systemd/system
+modulesloaddir ?= /lib/modules-load.d
 
 CP = cp -L
 INSTALL = install
@@ -181,8 +197,8 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config;
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)$(sysconfdir)/podsec/u7s/config;tar xvzf $(TMPFILE);
 	# modules-load.
-	$(MKDIR_P) $(DESTDIR)//lib/modules-load.d/
-	cp usernetes/config/modules-load.d/u7s.conf $(DESTDIR)/lib/modules-load.d/
+	$(MKDIR_P) $(DESTDIR)$(modulesloaddir)
+	cp usernetes/config/modules-load.d/u7s.conf $(DESTDIR)$(modulesloaddir)/
 	# USERNETES_ENVS
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/env
 	cd usernetes/env; $(INSTALL) -m644 $(USERNETES_ENVS) $(DESTDIR)$(sysconfdir)/podsec/u7s/env
@@ -213,6 +229,11 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	cd ./podsec-inotify/services;$(INSTALL) -m644 $(PODSEC_INOTIFY_UNITS) $(DESTDIR)/$(unitdir)/
+	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_ICINGA2_CONF) $(DESTDIR)$(sysconfdir)/icinga2/conf.d/nagwad-podsec.conf
+	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_ICINGA2_JSON) $(DESTDIR)$(docdir)/nagwad-podsec-icinga2.json
+	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_NAGIOS_CONF) $(DESTDIR)$(sysconfdir)/nagios/templates/nagwad-podsec-services.cfg
+	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_NRPE_CONF) $(DESTDIR)$(sysconfdir)/nagios/nrpe-commands/nagwad-podsec-commands.cfg
+	for f in $(PODSEC_NAGWAD_FILTERS); do $(INSTALL) -D -m0644 $$f $(DESTDIR)$(sysconfdir)/nagwad/$${f##*/}; done
 
 clean:
 

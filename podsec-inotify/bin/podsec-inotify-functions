@@ -1,5 +1,3 @@
-
-
 export U7S_TRIVY_SERVER
 getTrivyServer() {
   if [ -z "$U7S_TRIVY_SERVER" ]
@@ -98,7 +96,8 @@ trivyCheckImage() {
 # Формат вызова: metricaInInterval interval metrica
 metricaInInterval() {
   local interval=$1
-  local metrica=$(printf "%d" $2 2>/dev/null)
+  #shellcheck disable=SC2155
+  local metrica=$(printf "%d" "$2" 2>/dev/null)
 #   echo "interval=$interval metrica=$metrica"
   ifs=$IFS
   local invert=
@@ -107,27 +106,30 @@ metricaInInterval() {
     invert=yes
     interval=${interval:1}
   fi
-  local minusInfinity= infinity=
+  local minusInfinity=
+#  local infinity=
   if [ "${interval:0:1}" == '~' ]
   then
     minusInfinity=yes
     interval=${interval:1}
   fi
   IFS=:
+  #shellcheck disable=SC2086
   set -- $interval
   IFS=$ifs
   case $# in
     1)
-      if [ "${interval: -1}" == ':' ]
+      if [ "${interval: -1}" = ':' ]
       then
         start=$(printf "%d" "$1" 2>/dev/null)
         ret=$([ "$metrica" -ge "$start" ] && echo 0 || echo 1) # start - ∞
       else
         start=0
-        end=$(printf "%d" $1 2>/dev/null)
+        end=$(printf "%d" "$1" 2>/dev/null)
+        #shellcheck disable=SC2166
         ret=$([ "$metrica" -ge "$start" -a "$metrica" -le "$end" ] && echo 0 || echo 1) # 0 - end
       fi
-      break;;
+      ;;
     2)
       if [ -n "$minusInfinity" ]
       then
@@ -141,11 +143,13 @@ metricaInInterval() {
           start=$(printf "%d" "$1" 2>/dev/null)
         fi
         end=$(printf "%d" "$2" 2>/dev/null)
+	#shellcheck disable=SC2166
         ret=$([ "$metrica" -ge "$start" -a "$metrica" -le "$end" ] && echo 0 || echo 1) # start - end
       fi
-      break;;
+      ;;
     *) # Ошибка но мы ее игнорируем
-      :;
+      :
+      ;;
   esac
 
   if [ -n "$invert" ]
@@ -156,16 +160,25 @@ metricaInInterval() {
 }
 
 # Описание ассоциативных массивов и переменных для анализа параметров определения интервалов уровней опасности
+
 # Привязка префиксов сообщения к именам параметров
+#shellcheck disable=SC2034
 declare -A LEVELSNAMES=( [a]=Crash [f]=Fatal [c]=Critical [h]=High [m]=Middle [w]=Warning [l]=Low [d]=Debug )
+
 # Уровни опасности для логирования в системный журнал отсортированный в порядке уменьшения
+#shellcheck disable=SC2034
 declare -A JOURNALPLUGINPARS=( [a]=- [f]=- [c]=- [h]=- [m]=- [l]=- [d]=- )
+
 # Номера уровней опасности для логирования JOURNAL
+#shellcheck disable=SC2034
 declare -A JOURNALPRIORITY=( [a]=0 [f]=1 [c]=2 [h]=3 [m]=4 [l]=5 [d]=6 )
 
 # Уровни опасности для логирования nagios отсортированный в порядке уменьшения
+#shellcheck disable=SC2034
 declare -A NAGIIOSPLUGINPARS=( [c]=- [w]=- )
+
 # Номера уровней опасности для логирования NAGIOS
+#shellcheck disable=SC2034
 declare -A NAGIOSPRIORITY=( [c]=2 [w]=1 )
 
 # Уровень отладки -v -> 0, -vv -> 1, -vvv -> 2
@@ -182,13 +195,14 @@ parseIntervalParameters() {
     par=${1:1}
     if [ "${par:0:1}" == 'v' ];
     then
-      let VERBOSELEVEL=${#par}
+      VERBOSELEVEL=${#par}
       if [ "$VERBOSELEVEL" -gt 3 ]; then VERBOSELEVEL=3; fi
       shift
       continue
     else
       if [ "${par:0:1}" == 'M' ];
       then
+	#shellcheck disable=SC2034
         MAILTO=$2
         shift; shift
         continue
@@ -206,7 +220,7 @@ parseIntervalParameters() {
 # Вернуть первый встреченный ключ JOURNALPLUGINPARS
 getJournalKeyByMetric() {
   metrica=$1
-  n=${#JOURNALPLUGINPARS[@]}
+#  n=${#JOURNALPLUGINPARS[@]}
   for key in "${!JOURNALPLUGINPARS[@]}";
   do
     interval="${JOURNALPLUGINPARS[$key]}";
@@ -223,7 +237,7 @@ getJournalKeyByMetric() {
 # Вернуть первый встреченный ключ NAGIIOSPLUGINPARS
 getNagiosKeyByMetric() {
   metrica=$1
-  n=${#NAGIIOSPLUGINPARS[@]}
+#  n=${#NAGIIOSPLUGINPARS[@]}
   for key in "${!NAGIIOSPLUGINPARS[@]}";
   do
     interval="${NAGIIOSPLUGINPARS[$key]}";
@@ -243,8 +257,9 @@ setTraps() {
   list=
   while [ $i -lt 64 ]
   do
-    let i+=1
+    (( i+=1 )) ||:
     list+=" $i"
   done
+  #shellcheck disable=SC2086
   trap 'exit 3' $list
 }

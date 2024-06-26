@@ -32,6 +32,8 @@ checkUsersImages=$(checkUsersImages)
 notSignedRegistriesJSON=$(echo "$checkUsersImages" | jq '[.[] | select(.notSignedRegistries | length > 0) | {key:.user, value:.notSignedRegistries | join(", ")}]')
 # echo "$notSignedRegistriesJSON"
 # exit
+
+#shellcheck disable=SC2166
 if [ -n "$notSignedRegistriesJSON" -a "$notSignedRegistriesJSON" != '[]' ]
 then
   # Получение списка пользователей
@@ -39,11 +41,11 @@ then
   notSignedRegistriesImages=$(echo "$notSignedRegistriesJSON" | jq '[.[] | join(":")] | join(", ")')
 #   echo "notSignedRegistriesUsers=$notSignedRegistriesUsers"
   metricWeight=101
-  key=$(getJournalKeyByMetric $metricWeight);
+  key=$(getJournalKeyByMetric "$metricWeight")
   if [ -n "$key" ]
   then
     users+=$notSignedRegistriesUsers
-    prefix=${LEVELSNAMES[$key]};
+    prefix=${LEVELSNAMES[$key]}
     priority=${JOURNALPRIORITY[$key]}
     if [ "$LANG" = 'ru_RU.UTF-8' ]
     then
@@ -54,9 +56,10 @@ then
       message="$metricWeight:: $notSignedRegistriesUsers users have unsigned registries:$notSignedRegistriesImages"
     fi
     logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
+
     messages+="\n$message"
   fi
-  let summaryMetric+=$metricWeight
+  (( summaryMetric+=metricWeight )) ||:
 fi
 
 # JSON пользователей со списком неподписанных образов в формате [{key: <user>, value:"<images>"},{key: <user>, value:"<images>"...]
@@ -68,11 +71,11 @@ then
   notSignedImagesImages=$(echo "$notSignedImagesJSON" | jq '[[.[]][] | (.key, ": ", (.value | sort | unique | join(", ") ))] | join("")')
 #   echo "notSignedImagesUsers=$notSignedImagesUsers"
   metricWeight=102
-  key=$(getJournalKeyByMetric $metricWeight);
+  key=$(getJournalKeyByMetric "$metricWeight")
   if [ -n "$key" ]
   then
     users+=$notSignedImagesUsers
-    prefix=${LEVELSNAMES[$key]};
+    prefix=${LEVELSNAMES[$key]}
     priority=${JOURNALPRIORITY[$key]}
     if [ "$LANG" = 'ru_RU.UTF-8' ]
     then
@@ -85,7 +88,7 @@ then
     logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
     messages+="\n$message"
   fi
-  let summaryMetric+=$metricWeight
+  (( summaryMetric+=metricWeight )) ||:
 fi
 
 # jq '.[] | select(.outPolicyImagesTree | length > 0) | ([{key:.user,value:([.outPolicyImagesTree | to_entries[] | .value[]] | sort | unique)}])'
@@ -95,17 +98,15 @@ outPolicyImagesJSON=$(echo "$checkUsersImages" | jq '.[] | select(.outPolicyImag
 if [ -n "$outPolicyImagesJSON" ]
 then
   # Получение списка пользователей
-#   outPolicyImagesUsers=$(echo $outPolicyImagesJSON | jq '.[].key' | tr "\n" ' ')
-#   outPolicyImages=$(echo $outPolicyImagesJSON | jq '.[] | join(":")' | tr "\n" ' ')
   outPolicyImagesUsers=$(echo "$outPolicyImagesJSON" | jq '[.[].key] | join (", ")')
   outPolicyImages=$(echo "$outPolicyImagesJSON" | jq '[[.[]][] | (.key, ": ", (.value | sort | unique | join(", ") ))] | join("")')
 #   echo "outPolicyImagesUsers=$outPolicyImagesUsers"
   metricWeight=103
-  key=$(getJournalKeyByMetric $metricWeight);
+  key=$(getJournalKeyByMetric "$metricWeight")
   if [ -n "$key" ]
   then
     users+=$outPolicyImagesUsers
-    prefix=${LEVELSNAMES[$key]};
+    prefix=${LEVELSNAMES[$key]}
     priority=${JOURNALPRIORITY[$key]}
     if [ "$LANG" = 'ru_RU.UTF-8' ]
     then
@@ -118,10 +119,10 @@ then
     logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
     messages+="\n$message"
   fi
-  let summaryMetric+=$metricWeight
+  (( summaryMetric+=metricWeight )) ||:
 fi
 
-key=$(getNagiosKeyByMetric $summaryMetric)
+key=$(getNagiosKeyByMetric "$summaryMetric")
 if [ -n "$key" ]
 then
   users=$(echo "$users" | tr ' ' "\n" | sort -u | tr "\n" ' ')
@@ -129,7 +130,7 @@ then
   priority=${NAGIOSPRIORITY[$key]}
   outMessage=
   subject=
-  case $VERBOSELEVEL in
+  case "$VERBOSELEVEL" in
     0)
       if [ "$LANG" = 'ru_RU.UTF-8' ]
       then
@@ -157,11 +158,6 @@ then
       ;;
   esac
   outMessage+="\n"
-#   if [ "$XDG_SESSION_TYPE" = 'tty' ] # Вызов через nagion shell
-#   then
-#     echo -ne "$outMessage"
-#     exit "$priority"
-#   else  # Вызов через cron
   if [ -n "$MAILTO" ]
     then
       echo -ne "$outMessage" | mail -s "$subject" "$MAILTO"
