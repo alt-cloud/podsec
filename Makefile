@@ -113,11 +113,7 @@ PODSEC_INOTIFY_UNITS= \
 	podsec-inotify-check-vuln.timer
 
 PODSEC_NAGWAD_FILTERS = \
-	podsec-inotify/nagwad/podsec-check-containers.sed \
-	podsec-inotify/nagwad/podsec-check-images.sed \
-	podsec-inotify/nagwad/podsec-check-kubeapi.sed \
-	podsec-inotify/nagwad/podsec-check-policy.sed \
-	podsec-inotify/nagwad/podsec-check-vuln.sed
+	podsec/nagwad/podsec.sed
 
 PODSEC_NAGWAD_ICINGA2_CONF = \
 	podsec-inotify/monitoring/podsec-nagwad-icinga2.conf

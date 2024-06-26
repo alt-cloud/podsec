@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.0.14
-Release: alt1
+Release: alt2
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -106,15 +106,6 @@ Requires: podsec-k8s >= %EVR
 %description dev
 A set of scripts for developers
 
-%package nagwad
-Summary: Podsec security message filters for the Nagwad journal scanner
-Requires: %name-inotify = %version-%release
-Group: Monitoring
-
-%description nagwad
-A set of filters for the Nagwad journal scanner to catch messages
-produced by %name-inotify scripts.
-
 %package nagwad-icinga
 Summary: Nagwad-based %name-inotify monitoring templates for Icinga 2
 Requires: nagwad-icinga-templates >= 0.11.2
@@ -182,6 +173,8 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
 %dir %attr(0755,root,root) %_localstatedir/podsec
+%config(noreplace) %_sysconfdir/nagwad/*.sed
+
 
 %files k8s
 %dir %_sysconfdir/podsec/u7s
@@ -227,8 +220,6 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %_mandir/man?/podsec-k8s-save-oci*
 %_mandir/man?/podsec-save-oci*
 
-%files nagwad
-%config(noreplace) %_sysconfdir/nagwad/*.sed
 
 %files nagwad-icinga
 %doc podsec-inotify/monitoring/podsec-nagwad-icinga2.json
@@ -239,6 +230,9 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/nagwad-podsec-commands.cfg
 
 %changelog
+* Wed Jun 26 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.14-alt2
+- 1.0.14
+
 * Wed Jun 26 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.14-alt1
 - 1.0.14
 
