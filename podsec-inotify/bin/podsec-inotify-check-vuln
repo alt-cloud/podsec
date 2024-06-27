@@ -35,9 +35,12 @@ fi
 if [ "$(id -u)" -eq 0 ]
 then
   imagesJSON='/var/lib/containers/storage/overlay-images/images.json'
-  images=$(jq -r '.[].names[]' $imagesJSON)
-  prog=$(which $0)
-  trivyUserImages root $images
+  if [ -f "$imagesJSON" ]
+  then
+    images=$(jq -r '.[].names[]' $imagesJSON)
+    prog=$(which $0)
+    trivyUserImages root $images
+  fi
   imagesJSONs="
   .local/share/containers/storage/overlay-images/images.json
   .local/share/usernetes/containers/storage/overlay-images/images.json

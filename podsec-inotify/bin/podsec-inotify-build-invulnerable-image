@@ -36,7 +36,7 @@ then
         echo "$message" >&2
         priority=6
         prefix='Fatal'
-        logger -p "$priority" -t "${prog_name}:$prefix" "$message"
+        logger -p "$priority" -t "$prefix" "${prog_name}: $message"
         exit 2
     fi
 fi

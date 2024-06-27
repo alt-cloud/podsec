@@ -1,8 +1,8 @@
 #!/bin/bash
 # Плугин проверяет хранимые на узле образы
 export LANG=C
-
-export MAILTO=
+export MAILTO=''
+prog_name='podsec-inotify-check-images'
 
 if [ "$EUID" -ne 0 ]
 then
@@ -55,8 +55,7 @@ then
       nagiosHeads+="\nhave unsigned registries,"
       message="$metricWeight:: $notSignedRegistriesUsers users have unsigned registries:$notSignedRegistriesImages"
     fi
-    logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
-
+    logger -p "$priority" -t "$prefix" "${prog_name}: $message"
     messages+="\n$message"
   fi
   (( summaryMetric+=metricWeight )) ||:
@@ -85,7 +84,7 @@ then
       nagiosHeads+="\nhave unsigned images,"
       message="$metricWeight:: $notSignedImagesUsers users have unsigned images: $notSignedImagesImages"
     fi
-    logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
+    logger -p "$priority" -t "$prefix" "${prog_name}: $message"
     messages+="\n$message"
   fi
   (( summaryMetric+=metricWeight )) ||:
@@ -116,7 +115,7 @@ then
       nagiosHeads+="\nhave unsigned images,"
       message="$metricWeight:: $outPolicyImagesUsers users have images outside of supported policies: $outPolicyImages"
     fi
-    logger -p "$priority" -t "podsec-inotify-check-images:$prefix" "$message"
+    logger -p "$priority" -t "$prefix" "${prog_name}: $message"
     messages+="\n$message"
   fi
   (( summaryMetric+=metricWeight )) ||:

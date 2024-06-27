@@ -6,8 +6,8 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.0.14
-Release: alt2
+Version: 1.1.0
+Release: alt1
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -230,6 +230,9 @@ useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/nagwad-podsec-commands.cfg
 
 %changelog
+* Thu Jun 27 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.0-alt1
+- 1.1.0
+
 * Wed Jun 26 2024 Alexey Kostarev <kaf@altlinux.org> 1.0.14-alt2
 - 1.0.14
 

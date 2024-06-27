@@ -22,16 +22,19 @@ run_logger () {
     #choise log level based on edge string in log file
     edge_log_string=$(tail -n1 "$LOGFILE")
     if [[ "$edge_log_string" =~ "MODIFY" ]]; then
-	level="CRITICAL"
+        key='c'
     else
-	level="INFO"
+        key='w'
     fi
+    prefix=${LEVELSNAMES[$key]}
+    priority=${JOURNALPRIORITY[$key]}
+    level="$prefix"
 
     #create event on journal
-    if [ "$level" == "INFO" ] && [ "$INFO_LOG" == "YES" ]; then
-        logger -t "podsec-inotify-check-containers:$level" "$edge_log_string"
-    elif [ "$level" == "CRITICAL" ]; then
-        logger -t "podsec-inotify-check-containers:$level" "$edge_log_string"
+    if [ "$level" = "Warning" ] && [ "$INFO_LOG" == "YES" ]; then
+        logger -p "$priority" -t "$prefix" "podsec-inotify-check-containers: $edge_log_string"
+    elif [ "$level" = "Critical" ]; then
+        logger -p "$priority" -t "$prefix" "podsec-inotify-check-containers: $edge_log_string"
     fi
 }
 

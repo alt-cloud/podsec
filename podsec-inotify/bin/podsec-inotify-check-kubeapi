@@ -7,10 +7,10 @@
 #
 # - Передача накопленных в файле событий монтиринга /var/lib/podsec/log/kubeapi/forbidden.log системному админстратору
 
-
+. podsec-policy-functions
+. podsec-inotify-functions
 EVENTFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
 LASTEVENTTIMEFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
-
 AUDITFILE='/etc/kubernetes/audit/audit.log'
 
 if [ $# -ne 1 ]
@@ -32,13 +32,17 @@ then
     filtr="."
   fi
 
+  key='c'
+  prefix=${LEVELSNAMES[$key]}
+  priority=${JOURNALPRIORITY[$key]}
   tail -n 1000000 -f $AUDITFILE |
   jq --unbuffered -c '. |
     select(.responseStatus.code >= 400) |
     [.requestReceivedTimestamp,.sourceIPs[0],.responseStatus.message] |
     '$filtr''  |
   tee -a $EVENTFILE |
-  logger -t "podsec-inotify-check-kubeapi"
+  sed 's/^/podsec-inotify-check-kubeapi: /' |
+  logger -p "$priority" -t "$prefix"
 elif [ "$1" = '-m' ]
 then
   # Передача почты
