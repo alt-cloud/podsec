@@ -41,7 +41,7 @@ trivyCheckImage() {
   total_count=$(echo "$vulnerabilities" | grep -oE "Total: [0-9]+" | grep -oE "[0-9]+" | awk '{ sum += $1 } END { print sum }')
 
   # Проверка наличия уязвимостей
-  if [ "$total_count" -eq 0 ]
+  if [ "$total_count" -eq 0 2>/dev/null ]
   then
       message="В образе ${container_name} пользователя $user уязвимости не обнаружены."
   else

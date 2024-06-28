@@ -12,59 +12,11 @@
             "imports": [
                 "d-nagwad-service"
             ],
-            "notes": "Rootless container changed",
-            "object_name": "d-nagwad-podsec-containers",
+            "notes": "Podsec events monitored with Nagwad",
+            "object_name": "d-nagwad-podsec",
             "object_type": "template",
             "vars": {
-                "nagwad_filter": "podsec-check-containers"
-            }
-        },
-        "d-nagwad-podsec-images": {
-            "fields": [],
-            "imports": [
-                "d-nagwad-service"
-            ],
-            "notes": "Container image violates policy",
-            "object_name": "d-nagwad-podsec-images",
-            "object_type": "template",
-            "vars": {
-                "nagwad_filter": "podsec-check-images"
-            }
-        },
-        "d-nagwad-podsec-policy": {
-            "fields": [],
-            "imports": [
-                "d-nagwad-service"
-            ],
-            "notes": "Container policy errors",
-            "object_name": "d-nagwad-podsec-policy",
-            "object_type": "template",
-            "vars": {
-                "nagwad_filter": "podsec-check-policy"
-            }
-        },
-        "d-nagwad-podsec-kubeapi": {
-            "fields": [],
-            "imports": [
-                "d-nagwad-service"
-            ],
-            "notes": "Kubernetes audit event",
-            "object_name": "d-nagwad-podsec-kubeapi",
-            "object_type": "template",
-            "vars": {
-                "nagwad_filter": "podsec-check-kubeapi"
-            }
-        },
-        "d-nagwad-podsec-vuln": {
-            "fields": [],
-            "imports": [
-                "d-nagwad-service"
-            ],
-            "notes": "Vulnerable container image",
-            "object_name": "d-nagwad-podsec-vuln",
-            "object_type": "template",
-            "vars": {
-                "nagwad_filter": "podsec-check-vuln"
+                "nagwad_filter": "podsec"
             }
         }
     },
@@ -78,41 +30,9 @@
                 {
                     "fields": [],
                     "imports": [
-                        "d-nagwad-podsec-containers"
+                        "d-nagwad-podsec"
                     ],
-                    "object_name": "d-nagwad-podsec-containers",
-                    "object_type": "object"
-                },
-                {
-                    "fields": [],
-                    "imports": [
-                        "d-nagwad-podsec-images"
-                    ],
-                    "object_name": "d-nagwad-podsec-images",
-                    "object_type": "object"
-                },
-                {
-                    "fields": [],
-                    "imports": [
-                        "d-nagwad-podsec-policy"
-                    ],
-                    "object_name": "d-nagwad-podsec-policy",
-                    "object_type": "object"
-                },
-                {
-                    "fields": [],
-                    "imports": [
-                        "d-nagwad-podsec-kubeapi"
-                    ],
-                    "object_name": "d-nagwad-podsec-kubeapi",
-                    "object_type": "object"
-                },
-                {
-                    "fields": [],
-                    "imports": [
-                        "d-nagwad-podsec-vuln"
-                    ],
-                    "object_name": "d-nagwad-podsec-vuln",
+                    "object_name": "d-nagwad-podsec",
                     "object_type": "object"
                 }
             ]
