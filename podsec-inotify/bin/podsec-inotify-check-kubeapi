@@ -10,7 +10,7 @@
 . podsec-policy-functions
 . podsec-inotify-functions
 EVENTFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
-LASTEVENTTIMEFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
+LASTEVENTTIMEFILE=/var/lib/podsec/u7s/log/kubeapi/lastTime.log
 AUDITFILE='/etc/kubernetes/audit/audit.log'
 
 if [ $# -ne 1 ]
@@ -41,14 +41,17 @@ then
     [.requestReceivedTimestamp,.sourceIPs[0],.responseStatus.message] |
     '$filtr''  |
   tee -a $EVENTFILE |
-  sed 's/^/podsec-inotify-check-kubeapi: /' |
+  sed -u 's/^/podsec-inotify-check-kubeapi: /' |
   logger -p "$priority" -t "$prefix"
 elif [ "$1" = '-m' ]
 then
   # Передача почты
   if [ -s $EVENTFILE ]
   then
-    mail -s "Detected requests to the kubernetes cluster with excess authority" root < $EVENTFILE
+    if [ -n "$MAILTO" ]
+    then
+      mail -s "Detected requests to the kubernetes cluster with excess authority" root < $EVENTFILE
+    fi
     tail -1 $EVENTFILE | jq '.[0]' > $LASTEVENTTIMEFILE
     true > $EVENTFILE
   fi
