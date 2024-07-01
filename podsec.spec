@@ -6,7 +6,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.3
+Version: 1.1.4
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -235,6 +235,9 @@ ln -sf usernetes/containers .
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Mon Jul 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.4-alt1
+- 1.1.4
+
 * Mon Jul 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.3-alt1
 - 1.1.3
 
