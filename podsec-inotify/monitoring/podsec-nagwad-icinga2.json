@@ -7,7 +7,7 @@
         }
     },
     "ServiceTemplate": {
-        "d-nagwad-podsec-containers": {
+        "d-nagwad-podsec": {
             "fields": [],
             "imports": [
                 "d-nagwad-service"
