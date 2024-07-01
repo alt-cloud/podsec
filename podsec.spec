@@ -106,23 +106,23 @@ Requires: podsec-k8s >= %EVR
 %description dev
 A set of scripts for developers
 
-%package nagwad-icinga
-Summary: Nagwad-based %name-inotify monitoring templates for Icinga 2
+%package icinga
+Summary: %name-inotify monitoring templates for Icinga 2
 Requires: nagwad-icinga-templates >= 0.11.2
 Group: Monitoring
 
-%description nagwad-icinga
+%description icinga
 Monitoring templates for Icinga 2 defining services to monitor
-%name-inotify events using Nagwad.
+various Podsec events.
 
-%package nagwad-nagios
-Summary: Nagwad-based %name-inotify monitoring templates for Nagios
+%package nagios
+Summary: %name-inotify monitoring templates for Nagios
 Requires: nagwad-nagios-templates >= 0.11.2
 Group: Monitoring
 
-%description nagwad-nagios
+%description nagios
 Monitoring templates for Nagios defining services to monitor
-%name-inotify events using Nagwad.
+various Podsec events.
 
 %prep
 %setup
@@ -134,7 +134,7 @@ Monitoring templates for Nagios defining services to monitor
 %makeinstall_std unitdir=%_unitdir modulesloaddir=%_modules_loaddir
 
 # JSON templates are packaged using %%doc:
-rm -f %buildroot%_datadir/doc/podsec/nagwad-podsec-icinga2.json
+rm -f %buildroot%_datadir/doc/podsec/podsec-icinga2.json
 
 %pre
 groupadd -r -f podman >/dev/null 2>&1 ||:
@@ -226,13 +226,13 @@ ln -sf usernetes/containers .
 %_mandir/man?/podsec-save-oci*
 
 
-%files nagwad-icinga
-%doc podsec-inotify/monitoring/podsec-nagwad-icinga2.json
-%config(noreplace) %_sysconfdir/icinga2/conf.d/nagwad-podsec.conf
+%files icinga
+%doc podsec-inotify/monitoring/podsec-icinga2.json
+%config(noreplace) %_sysconfdir/icinga2/conf.d/podsec.conf
 
-%files nagwad-nagios
-%config(noreplace) %_sysconfdir/nagios/templates/nagwad-podsec-services.cfg
-%config(noreplace) %_sysconfdir/nagios/nrpe-commands/nagwad-podsec-commands.cfg
+%files nagios
+%config(noreplace) %_sysconfdir/nagios/templates/podsec-services.cfg
+%config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
 * Mon Jul 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.3-alt1

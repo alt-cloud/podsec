@@ -115,14 +115,14 @@ PODSEC_INOTIFY_UNITS= \
 PODSEC_NAGWAD_FILTERS = \
 	podsec/nagwad/podsec.sed
 
-PODSEC_NAGWAD_ICINGA2_CONF = \
-	podsec-inotify/monitoring/podsec-nagwad-icinga2.conf
-PODSEC_NAGWAD_ICINGA2_JSON = \
-	podsec-inotify/monitoring/podsec-nagwad-icinga2.json
-PODSEC_NAGWAD_NAGIOS_CONF = \
-	podsec-inotify/monitoring/podsec-nagwad-nagios.cfg
-PODSEC_NAGWAD_NRPE_CONF = \
-	podsec-inotify/monitoring/podsec-nagwad-nrpe.cfg
+PODSEC_ICINGA2_CONF = \
+	podsec-inotify/monitoring/podsec-icinga2.conf
+PODSEC_ICINGA2_JSON = \
+	podsec-inotify/monitoring/podsec-icinga2.json
+PODSEC_NAGIOS_CONF = \
+	podsec-inotify/monitoring/podsec-nagios.cfg
+PODSEC_NRPE_CONF = \
+	podsec-inotify/monitoring/podsec-nrpe.cfg
 
 TMPFILE  := $(shell mktemp)
 
@@ -225,10 +225,10 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
 	cd ./podsec-inotify/services;$(INSTALL) -m644 $(PODSEC_INOTIFY_UNITS) $(DESTDIR)/$(unitdir)/
-	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_ICINGA2_CONF) $(DESTDIR)$(sysconfdir)/icinga2/conf.d/nagwad-podsec.conf
-	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_ICINGA2_JSON) $(DESTDIR)$(docdir)/nagwad-podsec-icinga2.json
-	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_NAGIOS_CONF) $(DESTDIR)$(sysconfdir)/nagios/templates/nagwad-podsec-services.cfg
-	$(INSTALL) -D -m0644 $(PODSEC_NAGWAD_NRPE_CONF) $(DESTDIR)$(sysconfdir)/nagios/nrpe-commands/nagwad-podsec-commands.cfg
+	$(INSTALL) -D -m0644 $(PODSEC_ICINGA2_CONF) $(DESTDIR)$(sysconfdir)/icinga2/conf.d/podsec.conf
+	$(INSTALL) -D -m0644 $(PODSEC_ICINGA2_JSON) $(DESTDIR)$(docdir)/podsec-icinga2.json
+	$(INSTALL) -D -m0644 $(PODSEC_NAGIOS_CONF) $(DESTDIR)$(sysconfdir)/nagios/templates/podsec-services.cfg
+	$(INSTALL) -D -m0644 $(PODSEC_NRPE_CONF) $(DESTDIR)$(sysconfdir)/nagios/nrpe-commands/podsec-commands.cfg
 	for f in $(PODSEC_NAGWAD_FILTERS); do $(INSTALL) -D -m0644 $$f $(DESTDIR)$(sysconfdir)/nagwad/$${f##*/}; done
 
 clean:
