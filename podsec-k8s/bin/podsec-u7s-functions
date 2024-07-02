@@ -612,7 +612,8 @@ function getKuberImages() {
 	fi
 
 	case $arch in
-		'x86_64') arch='amd64';break;;
+		'x86_64') arch='amd64';;
+		#break;;
 	esac
 
 	eval storage="~$user/.local/$storage"

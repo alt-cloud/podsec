@@ -6,7 +6,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.4
+Version: 1.1.5
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -145,10 +145,11 @@ groupadd -r -f %u7s_admin_grp  2>&1 ||:
 useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
     -c 'usernet user account' %u7s_admin_usr  2>&1 ||:
 # merge usernetes & podman graphroot
-mkdir -p %u7s_admin_homedir/.local/share
+mkdir -p %u7s_admin_homedir/.local/share/usernetes/containers 2>&1 ||:
+chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir/.local/share/
 cd %u7s_admin_homedir/.local/share
 if [ -d containers ]; then mv containers containers.std; fi
-ln -sf usernetes/containers .
+ln -sf usernetes/containers . 2>&1 ||:
 
 %post inotify
 %post_systemd podsec-inotify-check-containers.service
@@ -198,6 +199,7 @@ ln -sf usernetes/containers .
 %exclude %_mandir/man?/podsec-k8s-rbac-*
 %_unitdir/u7s.service
 %_userunitdir/*
+%u7s_admin_homedir/.??*
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.cache
@@ -235,6 +237,9 @@ ln -sf usernetes/containers .
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Mon Jul 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.5-alt1
+- 1.1.5
+
 * Mon Jul 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.4-alt1
 - 1.1.4
 

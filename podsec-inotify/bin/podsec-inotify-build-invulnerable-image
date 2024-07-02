@@ -14,7 +14,7 @@ then
     format
 fi
 
-prog_name='podsec-inotify-build-invulnerable-image'
+export PROGNAME=$(basename $0)
 container_name=$1
 dockerfile=''
 
@@ -36,11 +36,11 @@ then
         echo "$message" >&2
         priority=6
         prefix='Fatal'
-        logger -p "$priority" -t "$prefix" "${prog_name}: $message"
+        logger -p "$priority" -t "${PROGNAME}" "$prefix: $message"
         exit 2
     fi
 fi
 
-trivyCheckImage ${prog_name} ${container_name} $dockerfile
+trivyCheckImage ${PROGNAME} ${container_name} $dockerfile
 retCode=$?
 exit $retCode

@@ -12,6 +12,7 @@
 EVENTFILE=/var/lib/podsec/u7s/log/kubeapi/forbidden.log
 LASTEVENTTIMEFILE=/var/lib/podsec/u7s/log/kubeapi/lastTime.log
 AUDITFILE='/etc/kubernetes/audit/audit.log'
+export PROGNAME=$(basename $0)
 
 if [ $# -ne 1 ]
 then
@@ -41,8 +42,8 @@ then
     [.requestReceivedTimestamp,.sourceIPs[0],.responseStatus.message] |
     '$filtr''  |
   tee -a $EVENTFILE |
-  sed -u 's/^/podsec-inotify-check-kubeapi: /' |
-  logger -p "$priority" -t "$prefix"
+  sed -u 's/^/'$prefix': /' |
+  logger -p "$priority" -t "$PROGNAME"
 elif [ "$1" = '-m' ]
 then
   # Передача почты

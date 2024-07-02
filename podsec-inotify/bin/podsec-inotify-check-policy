@@ -3,7 +3,7 @@
 export LANG=C
 export MAILTO=''
 
-prog_name='podsec-inotify-check-policy'
+export PROGNAME=$(basename $0)
 
 if [ $EUID -ne 0 ]
 then
@@ -65,7 +65,7 @@ then
       nagiosHeads+="\noutside the podman group,"
       message="$prefix($metricWeight): Users $notPodmanUsers have images but are not in the 'podman' group"
     fi
-    logger -p $priority -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -95,7 +95,7 @@ then
       nagiosHeads+="\ncapable of receiving any image"
       message="$prefix($metricWeight): Users $incorrectPolicyUsers have 'defaultPolicy!=reject' in policy.json but are not in the 'podman_dev' group"
     fi
-    logger -p $priority -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -124,7 +124,7 @@ then
       nagiosHeads+="\ncapable of getting a local image without a signature"
       message="$prefix($metricWeight): Users $nonRegistryLocalUsers do not have registry.local in the list of registries for which the presence of digital image signature is checked"
     fi
-    logger -p $priority -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -153,7 +153,7 @@ then
       nagiosHeads+="\ncapable of receiving any image without a signature"
       message="$prefix($metricWeight): Users $notSignedRegistriesUsers have registries in the policy for which the presence of an electronic image signature is not checked"
     fi
-    logger -p $priority -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -182,7 +182,7 @@ then
       nagiosHeads+="\ncapable of receiving any image via prohibited transport"
       message="$prefix($metricWeight): Users $forbiddenTransportsUsers have transports other than docker in the list of supported transports"
     fi
-    logger -p $priority -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -211,7 +211,7 @@ then
       nagiosHeads+="\nnot using a local signature store"
       message="$prefix($metricWeight): Users $incorrectDefaultDockerUsers do not use the signature store http://sigstore.local:81/sigstore/ as the default signature store"
     fi
-    logger -p $priority -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -267,7 +267,7 @@ then
       nagiosHeads+="\nincluded in the wheel group"
       message="$prefix($metricWeight): The $podmanWheelUsers users are members of the 'podman' and 'wheel' groups"
     fi
-    logger -p "$priority" -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -292,7 +292,7 @@ then
       nagiosHeads+="\nwithout a config file"
       message="$prefix($metricWeight): $notConfigUsers users do not have config file .config/containers/storage.conf"
     fi
-    logger -p "$priority" -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight
@@ -317,7 +317,7 @@ then
       nagiosHeads+="\nable to change configuration"
       message="$prefix($metricWeight): $editableConfigUsers users have writable configuration directory .config/containers"
     fi
-    logger -p "$priority" -t "$prefix" "${prog_name}: $message"
+    logger -p $priority -t "${PROGNAME}" "$prefix: $message"
     messages+="\n$message"
   fi
   let summaryMetric+=$metricWeight

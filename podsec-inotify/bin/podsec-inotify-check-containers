@@ -32,13 +32,15 @@ run_logger () {
 
     #create event on journal
     if [ "$level" = "Warning" ] && [ "$INFO_LOG" == "YES" ]; then
-        logger -p "$priority" -t "$prefix" "podsec-inotify-check-containers: $edge_log_string"
+        logger -p "$priority" -t "${PROGNAME}" "$prefix: $edge_log_string"
     elif [ "$level" = "Critical" ]; then
-        logger -p "$priority" -t "$prefix" "podsec-inotify-check-containers: $edge_log_string"
+        logger -p "$priority" -t "${PROGNAME}" "$prefix: $edge_log_string"
     fi
 }
 
 #main
+export PROGNAME=$(basename $0)
+
 get_overlays
 if [ -s $TMP ]; then
     touch "$LOGFILE"
