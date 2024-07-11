@@ -5,6 +5,7 @@ Wants=podsec-inotify-check-policy.timer
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/podsec-inotify-check-policy  -vvv -c 100 >/dev/null 2>&1
+SyslogIdentifier=podsec-inotify-check-policy
 
 [Install]
 WantedBy=multi-user.target

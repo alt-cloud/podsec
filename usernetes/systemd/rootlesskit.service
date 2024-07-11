@@ -8,8 +8,8 @@ Description=Usernetes RootlessKit service (crio)
 [Service]
 ExecStart=/usr/libexec/podsec/u7s/bin/rootlesskit.sh /usr/libexec/podsec/u7s/bin/crio.sh
 Delegate=yes
+SyslogIdentifier=rootlesskit
 WorkingDirectory=%h
   EnvironmentFile=%E/usernetes/env
   Restart=on-failure
   LimitNOFILE=65536
-

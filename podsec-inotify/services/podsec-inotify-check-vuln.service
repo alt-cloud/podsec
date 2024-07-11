@@ -6,6 +6,7 @@ Wants=podsec-inotify-check-vuln.timer
 Environment="U7S_TRIVY_SERVER=trivy.local"
 Type=oneshot
 ExecStart=/usr/bin/podsec-inotify-check-vuln  -vvv -c 100 >/dev/null 2>&1
+SyslogIdentifier=podsec-inotify-check-vuln
 
 [Install]
 WantedBy=multi-user.target

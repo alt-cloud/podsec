@@ -6,6 +6,7 @@ After=network.service
 ExecStart=/bin/sh -c "if [ -f '/var/lib/trivy/db/trivy.db' ]; then systemctl enable --now trivy;sleep infinity; else /usr/bin/trivy server;fi"
 ExecStop=/bin/sh -c "if [ -f '/var/lib/trivy/db/trivy.db' ]; then systemctl stop trivy; else killall trivy; fi"
 Restart=always
+SyslogIdentifier=podsec-inotify-server-trivy
 
 [Install]
 WantedBy=multi-user.target

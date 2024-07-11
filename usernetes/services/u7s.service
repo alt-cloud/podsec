@@ -9,6 +9,7 @@ ExecStart=machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/u7s-start-stop
 ExecStop=machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/u7s-start-stop.sh stop
 Restart=on-failure
 KillMode=process
+SyslogIdentifier=u7s
 
 [Install]
 WantedBy=multi-user.target
