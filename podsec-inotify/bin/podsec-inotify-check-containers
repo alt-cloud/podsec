@@ -1,55 +1,105 @@
 #!/bin/bash
 
-EVENTS="modify,move,create,delete"
-TMP="/tmp/inotify_overlays.tmp"
-LOGFILE="/var/log/inotify.log"
-ROOTFUL_CONTAINERS="/var/lib/containers/storage/overlay"
-INFO_LOG="YES"		#if you don't want to log "info" events, \
-			#then change "YES" to "NO"
+export EVENTS="moved_from,create,delete,modify"
+export OVERLAYDIRS="/tmp/inotifyOverlays.tmp"
+export MONITORDIRS="/tmp/inotifyMonitor.tmp"
+export ERRLOGFILE="/tmp/inotifyError.tmp"
 
-#create file with all rootless overlays
-get_overlays () {
-rm -rf $TMP
-find /home -regextype posix-egrep -regex ".*/containers/.*" \
-        -mindepth 8 -maxdepth 9 -type d -name 'diff' > $TMP 2>/dev/null
-find $ROOTFUL_CONTAINERS -type d -name 'diff' -mindepth 2 \
-        -maxdepth 3 >> $TMP 2>/dev/null
-}
-
-#send event to syslog
-run_logger () {
-    local level
-    #choise log level based on edge string in log file
-    edge_log_string=$(tail -n1 "$LOGFILE")
-    if [[ "$edge_log_string" =~ "MODIFY" ]]; then
-        key='c'
-    else
-        key='w'
-    fi
-    prefix=${LEVELSNAMES[$key]}
-    priority=${JOURNALPRIORITY[$key]}
-    level="$prefix"
-
-    #create event on journal
-    if [ "$level" = "Warning" ] && [ "$INFO_LOG" == "YES" ]; then
-        logger -p "$priority" -t "${PROGNAME}" "$prefix: $edge_log_string"
-    elif [ "$level" = "Critical" ]; then
-        logger -p "$priority" -t "${PROGNAME}" "$prefix: $edge_log_string"
-    fi
-}
-
-#main
+export ROOTFUL_CONTAINERS="/var/lib/containers/storage/overlay"
 export PROGNAME=$(basename $0)
 
-get_overlays
-if [ -s $TMP ]; then
-    touch "$LOGFILE"
-    while inotifywait -q -t 15 --recursive --event "$EVENTS" \
-		      --fromfile "$TMP" \
-		      --format "File %f was %e in %w" \
-		      --outfile "$LOGFILE"
+# Set max watches files
+echo 1048576  > /proc/sys/fs/inotify/max_user_watches
+
+get_monitor_dirs() {
+  ls -1d $ROOTFUL_CONTAINERS\
+  /home\
+  /home/*/.local/share/\
+  /home/*/.local/share/containers/storage/overlay/ \
+  /var/lib/u7s-admin/.local/share/usernetes/containers/storage/overlay/
+}
+
+# Create file with all rootless overlays
+get_overlays () {
+  dirs=$(ls -1d \
+    $ROOTFUL_CONTAINERS/*/diff \
+    /home/*/.local/share/containers/storage/overlay/*/diff \
+    /var/lib/u7s-admin/.local/share/usernetes/containers/storage/overlay/*/diff
+    )
+  for dir in $dirs
+  do
+    echo $dir
+    for exclude in var proc tmp run
     do
-        run_logger
+      echo "@$dir/$exclude"
     done
-fi
-exit 0
+  done
+}
+
+get_overlays > $OVERLAYDIRS
+get_monitor_dirs > $MONITORDIRS
+(
+set -o pipefail
+while :;
+do
+  inotifywait -q --event "$EVENTS" --fromfile $MONITORDIRS  >/dev/null
+  get_overlays > $OVERLAYDIRS
+  get_monitor_dirs > $MONITORDIRS
+  fuser -vk $ERRLOGFILE
+done
+) &
+
+logevent() {
+  file=$1
+  event=$2
+  dir=$3
+  # echo "FILE=$file EVENT=$event DIR=$dir"
+  ifs=$IFS IFS=/
+  set -- $dir
+  IFS=$ifs
+  while [ $# -gt 2 -a "$2" != 'diff' ]; do shift; done
+  container=$1
+  shift; shift
+  dir=
+  while [ $# -gt 0 ]
+  do
+    dir+="/$1"
+    shift
+  done
+  dir+='/'
+  # echo "CONTAINER=$container DIR=$dir"
+  homedir=${dir:0:6}
+  priority=5
+  if [ "$homedir" = '/home/' -o "$homedir" = '/root/' ]
+  then
+    mes='in home directory'
+    prefix='Warning'
+  elif [ "${dir:0:5}" = '/etc/' ]
+  then
+    mes='in configuration directory'
+    prefix='Warning'
+  else
+    mes=''
+    priority=2
+    prefix='Critical'
+  fi
+  File="$dir$file"
+  message="An event $event occurred in the container $container $mes on the file $File"
+  logger -p $priority -t "${PROGNAME}" "$prefix: $message"
+}
+
+set -o pipefail
+while :;
+do
+#  -t 10 \
+  inotifywait -q -m --recursive \
+    --event "$EVENTS"  \
+    --fromfile $OVERLAYDIRS \
+    --format "'%f' '%e'  '%w'" 2>$ERRLOGFILE |
+    (
+    while read str
+    do
+      eval logevent $str
+    done
+    )
+done

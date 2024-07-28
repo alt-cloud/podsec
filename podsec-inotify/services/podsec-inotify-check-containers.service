@@ -2,7 +2,7 @@
 Description=Run inotifywatch for podman containers
 
 [Service]
-ExecStart=/usr/bin/podsec-inotify-check-containers
+ExecStart=/usr/bin/podsec-inotify-check-containers 2>/dev/null
 Restart=always
 RestartSec=1s
 RuntimeMaxSec=100
