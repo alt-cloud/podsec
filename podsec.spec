@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.6
-Release: alt1
+Release: alt2
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -238,6 +238,9 @@ ln -sf usernetes/containers . 2>&1 ||:
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Tue Aug 06 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.6-alt2
+- 1.1.6
+
 * Sun Jul 28 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.6-alt1
 - 1.1.6
 
