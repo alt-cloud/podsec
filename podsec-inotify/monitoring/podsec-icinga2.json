@@ -7,16 +7,86 @@
         }
     },
     "ServiceTemplate": {
-        "d-nagwad-podsec": {
+        "d-podsec-inotify-check-vuln": {
             "fields": [],
             "imports": [
                 "d-nagwad-service"
             ],
-            "notes": "Podsec events monitored with Nagwad",
-            "object_name": "d-nagwad-podsec",
+            "display_name": "Vulnerability detected in a registered Docker image",
+            "object_name": "d-podsec-inotify-check-vuln",
             "object_type": "template",
             "vars": {
-                "nagwad_filter": "podsec"
+                "nagwad_filter": "podsec-inotify-check-vuln"
+            }
+        }
+    },
+    "ServiceTemplate": {
+        "d-podsec-inotify-build-invulnerable-image": {
+            "fields": [],
+            "imports": [
+                "d-nagwad-service"
+            ],
+            "display_name": "Vulnerability detected in a building Docker image",
+            "object_name": "d-podsec-inotify-build-invulnerable-image",
+            "object_type": "template",
+            "vars": {
+                "nagwad_filter": "podsec-inotify-build-invulnerable-image"
+            }
+        }
+    },
+    "ServiceTemplate": {
+        "d-podsec-inotify-check-policy": {
+            "fields": [],
+            "imports": [
+                "d-nagwad-service"
+            ],
+            "display_name": "Containering policy error detected",
+            "object_name": "d-podsec-inotify-check-policy",
+            "object_type": "template",
+            "vars": {
+                "nagwad_filter": "podsec-inotify-check-policy"
+            }
+        }
+    },
+    "ServiceTemplate": {
+        "d-podsec-inotify-check-images": {
+            "fields": [],
+            "imports": [
+                "d-nagwad-service"
+            ],
+            "display_name": "Docker image violates containering policy",
+            "object_name": "d-podsec-inotify-check-images",
+            "object_type": "template",
+            "vars": {
+                "nagwad_filter": "podsec-inotify-check-images"
+            }
+        }
+    },
+    "ServiceTemplate": {
+        "d-podsec-inotify-check-containers": {
+            "fields": [],
+            "imports": [
+                "d-nagwad-service"
+            ],
+            "display_name": "Modified files detected in a running container",
+            "object_name": "d-podsec-inotify-check-containers",
+            "object_type": "template",
+            "vars": {
+                "nagwad_filter": "podsec-inotify-check-containers"
+            }
+        }
+    },
+    "ServiceTemplate": {
+        "d-podsec-inotify-check-kubeapi": {
+            "fields": [],
+            "imports": [
+                "d-"
+            ],
+            "display_name": "Alerts detected via Kubernetes audit API",
+            "object_name": "d-podsec-inotify-check-kubeapi",
+            "object_type": "template",
+            "vars": {
+                "nagwad_filter": "podsec-inotify-check-kubeapi"
             }
         }
     },
@@ -30,9 +100,49 @@
                 {
                     "fields": [],
                     "imports": [
-                        "d-nagwad-podsec"
+                        "d-podsec-inotify-check-vuln"
                     ],
-                    "object_name": "d-nagwad-podsec",
+                    "object_name": "d-podsec-inotify-check-vuln",
+                    "object_type": "object"
+                },
+                {
+                    "fields": [],
+                    "imports": [
+                        "d-podsec-inotify-build-invulnerable-image"
+                    ],
+                    "object_name": "d-podsec-inotify-build-invulnerable-image",
+                    "object_type": "object"
+                },
+                {
+                    "fields": [],
+                    "imports": [
+                        "d-podsec-inotify-check-policy"
+                    ],
+                    "object_name": "d-podsec-inotify-check-policy",
+                    "object_type": "object"
+                },
+                {
+                    "fields": [],
+                    "imports": [
+                        "d-podsec-inotify-check-images"
+                    ],
+                    "object_name": "d-podsec-inotify-check-images",
+                    "object_type": "object"
+                },
+                {
+                    "fields": [],
+                    "imports": [
+                        "d-podsec-inotify-check-containers"
+                    ],
+                    "object_name": "d-podsec-inotify-check-containers",
+                    "object_type": "object"
+                },
+                {
+                    "fields": [],
+                    "imports": [
+                        "d-podsec-inotify-check-kubeapi"
+                    ],
+                    "object_name": "d-podsec-inotify-check-kubeapi",
                     "object_type": "object"
                 }
             ]
