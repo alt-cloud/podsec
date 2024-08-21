@@ -1,8 +1,8 @@
 .\" generated with Ronn-NG/v0.9.1
 .\" http://github.com/apjanke/ronn-ng/tree/0.9.1
-.TH "PODSEC\-INOTIFY\-CHECK\-CONTAINERS" "1" "July 2024" ""
+.TH "PODSEC\-INOTIFY\-CHECK\-CONTAINERS" "1" "August 2024" ""
 .SH "NAME"
-\fBpodsec\-inotify\-check\-containers\fR \- проверка наличия изменений файлов в директориях rootless контейнерах
+\fBpodsec\-inotify\-check\-containers\fR \- проверка наличия изменений критических файлов rootfull и rootless контейнеров
 .SH "SYNOPSIS"
 \fBpodsec\-inotify\-check\-containers\fR
 .SH "DESCRIPTION"
@@ -31,9 +31,9 @@
 Сообщения в системный лог имеют формат: \fBAn event <event> occurred in the container <container> [in home directory|in configuration directory] on the file <file>\fR
 .SH "SECURITY CONSIDERATIONS"
 .IP "\[ci]" 4
-Данный скрипт запускается сервисом inotify\-overlays\.service\.
+Данный скрипт запускается сервисом \fBpodsec\-inotify\-check\-containers\.service\fR\.
 .IP "" 0
 .SH "EXAMPLES"
-Если в системе развернуты контейнеры, и требуется следить за модификацией файлов внутри этих контейнеров, запустите сервис \fBinotify\-overlays\.service\fR: \fB# systemctl enable \-\-now inotify\-overlays\.service\fR
+Если в системе развернуты контейнеры, и требуется следить за модификацией файлов внутри этих контейнеров, запустите сервис \fBpodsec\-inotify\-check\-containers\.service\fR: \fB# systemctl enable \-\-now podsec\-inotify\-check\-containers\.service\fR
 .SH "AUTHOR"
 Burykin Nikolay, ALT Linux Team, bne@altlinux\.org Kostarev Alexey, ALT Linux Team, kaf@basealt\.ru

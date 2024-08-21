@@ -1,49 +1,18 @@
 .\" generated with Ronn-NG/v0.9.1
 .\" http://github.com/apjanke/ronn-ng/tree/0.9.1
-.TH "PODSEC\-INOTIFY\-CHECK\-VULN" "1" "July 2024" ""
+.TH "PODSEC\-INOTIFY\-BUILD\-INVULNERABLE\-IMAGE" "1" "August 2024" ""
 .SH "NAME"
-\fBpodsec\-inotify\-check\-vuln\fR \- скрипт мониторинга docker\-образов узла сканером безопасности trivy
+\fBpodsec\-inotify\-build\-invulnerable\-image\fR \- скрипт создания docker\-образов и проверки их сканером безопасности trivy
 .SH "SYNOPSIS"
-\fBpodsec\-inotify\-check\-vuln [\-m EMail]\fR
+\fBpodsec\-inotify\-build\-invulnerable\-image <имя_образа> [ <docker_файл> [ <каталог_контекста> [ <параметры_podman_build>\fR
 .SH "DESCRIPTION"
 Для корректной работы скрипта необходимо запустить сервис \fBtrivy\fR: \fBsystemctl enable \-\-now trivy\fR
 .P
-Скрипт производит мониторинг \fBdocker\-образов\fR узла сканером безопасности \fBtrivy\fR:
-.IP "\[ci]" 4
-Если скрипт запускается от имени пользователя \fBroot\fR скрипт:
-.IP "\[ci]" 4
-проверяет сканером \fBtrivy\fR \fBrootfull\fR образы;
-.IP "\[ci]" 4
-для всех пользователей каталога \fB/home/\fR проверяется наличие \fBrootless\fR\-образов\. При их наличии проверяет сканером \fBtrivy\fR эти образы\.
-.IP "" 0
-
-.IP "\[ci]" 4
-Если скрипт запускается от имени обычного пользователя проверяется наличие \fBrootless\fR\-образов\. При их наличии проверяет сканером \fBtrivy\fR эти образы\.
-.IP "" 0
+Скрипт производит создание docker\-образа \fBимя_образа\fR, описанного в \fBdocker_файл\fR (по умолчанию \fBDockerfile\fR) в каталоге \fBкаталог_контекста\fR (по умолчанию текущий) с параметрами сборки \fBпараметры_podman_build\fR\.
 .P
-Результат анализа посылается в системный лог\. Если при анализе образа число обнаруженных угроз уровня \fBHIGH\fR больше 0, результат посылается почтой системному администратору (\fBroot\fR)\.
-.SH "OPTIONS"
-При указании флага \fB\-m EMail\fR при наличии уязвимостей уровня \'HIGH\' сообщение отсылается указанному пользователю\.
-.P
-В состав пакета кроме этого скрипта входят:
-.IP "\[ci]" 4
-Файл сервисов \fBpodsec\-inotify\-check\-vuln\.service\fR описывает в параметре \fBExecStart\fR строку с описанием режима запуска скрипта \fBpodsec\-inotify\-check\-vuln\fR для обнаружения уязвимостей, записи их в системный лог и передачи их почтой системному администратору\.
-.IP "\[ci]" 4
-Файла расписания \fBpodsec\-inotify\-check\-vuln\.timer\fR, задающий в параметре \fBOnCalendar\fR расписание запуска сервиса \fBpodsec\-inotify\-check\-vuln\.service\fR\. Сервис вызывается ежечасно\.
-.IP "" 0
-.P
-По умолчанию таймер запуска сервиса выключен\. Для его включения наберите команду:
-.IP "" 4
-.nf
-#  systemctl enable \-\-now podsec\-inotify\-check\-vuln\.timer
-.fi
-.IP "" 0
-.P
-Если необходимо изменить режим запуска скрипта отредактируйте параметр \fBOnCalendar\fR файла расписания \fBpodsec\-inotify\-check\-vuln\.timer\fR\.
+После создание образа он проверяется на наличие уязвимостей сервисом \fBtrivy\fR\.
 .SH "EXAMPLES"
-\fBpodsec\-inotify\-check\-vuln\fR
-.SH "SECURITY CONSIDERATIONS"
-\-
+\fBpodsec\-inotify\-build\-invulnerable\-image my\-first\-image\fR
 .SH "SEE ALSO"
 The all\-in\-one open source security scanner \fIhttps://trivy\.dev/\fR
 .SH "AUTHOR"

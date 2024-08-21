@@ -1,4 +1,4 @@
-podsec-inotify-check-containers(1) -- проверка наличия изменений файлов в директориях rootless контейнерах
+podsec-inotify-check-containers(1) -- проверка наличия изменений критических файлов rootfull и rootless контейнеров
 ================================
 
 ## SYNOPSIS
@@ -37,13 +37,13 @@ An event <event> occurred in the container <container> [in home directory|in con
 
 ## SECURITY CONSIDERATIONS
 
-- Данный скрипт запускается сервисом inotify-overlays.service.
+- Данный скрипт запускается сервисом `podsec-inotify-check-containers.service`.
 
 ## EXAMPLES
 
-Если в системе развернуты контейнеры, и требуется следить за модификацией файлов внутри этих контейнеров, запустите сервис `inotify-overlays.service`:
+Если в системе развернуты контейнеры, и требуется следить за модификацией файлов внутри этих контейнеров, запустите сервис `podsec-inotify-check-containers.service`:
 ```
-# systemctl enable --now inotify-overlays.service
+# systemctl enable --now podsec-inotify-check-containers.service
 ```
 
 ## AUTHOR
