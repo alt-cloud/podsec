@@ -18,9 +18,7 @@
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-vuln"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-build-invulnerable-image": {
             "fields": [],
             "imports": [
@@ -32,9 +30,7 @@
             "vars": {
                 "nagwad_filter": "podsec-inotify-build-invulnerable-image"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-policy": {
             "fields": [],
             "imports": [
@@ -46,9 +42,7 @@
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-policy"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-images": {
             "fields": [],
             "imports": [
@@ -60,9 +54,7 @@
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-images"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-containers": {
             "fields": [],
             "imports": [
@@ -74,13 +66,11 @@
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-containers"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-kubeapi": {
             "fields": [],
             "imports": [
-                "d-"
+                "d-nagwad-service"
             ],
             "display_name": "Alerts detected via Kubernetes audit API",
             "object_name": "d-podsec-inotify-check-kubeapi",
