@@ -18,37 +18,31 @@
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-vuln"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-build-invulnerable-image": {
             "fields": [],
             "imports": [
                 "d-nagwad-service"
             ],
-            "display_name": "Vulnerability detected in a building Docker image",
+            "display_name": "Vulnerability detected in a locally built Docker image",
             "object_name": "d-podsec-inotify-build-invulnerable-image",
             "object_type": "template",
             "vars": {
                 "nagwad_filter": "podsec-inotify-build-invulnerable-image"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-policy": {
             "fields": [],
             "imports": [
                 "d-nagwad-service"
             ],
-            "display_name": "Containering policy error detected",
+            "display_name": "Containering policy misconfiguration detected",
             "object_name": "d-podsec-inotify-check-policy",
             "object_type": "template",
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-policy"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-images": {
             "fields": [],
             "imports": [
@@ -60,27 +54,23 @@
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-images"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-containers": {
             "fields": [],
             "imports": [
                 "d-nagwad-service"
             ],
-            "display_name": "Modified files detected in a running container",
+            "display_name": "Modified critical files detected in a running container",
             "object_name": "d-podsec-inotify-check-containers",
             "object_type": "template",
             "vars": {
                 "nagwad_filter": "podsec-inotify-check-containers"
             }
-        }
-    },
-    "ServiceTemplate": {
+        },
         "d-podsec-inotify-check-kubeapi": {
             "fields": [],
             "imports": [
-                "d-"
+                "d-nagwad-service"
             ],
             "display_name": "Alerts detected via Kubernetes audit API",
             "object_name": "d-podsec-inotify-check-kubeapi",
