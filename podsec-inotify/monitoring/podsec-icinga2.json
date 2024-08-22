@@ -26,7 +26,7 @@
             "imports": [
                 "d-nagwad-service"
             ],
-            "display_name": "Vulnerability detected in a building Docker image",
+            "display_name": "Vulnerability detected in a locally built Docker image",
             "object_name": "d-podsec-inotify-build-invulnerable-image",
             "object_type": "template",
             "vars": {
@@ -40,7 +40,7 @@
             "imports": [
                 "d-nagwad-service"
             ],
-            "display_name": "Containering policy error detected",
+            "display_name": "Containering policy misconfiguration detected",
             "object_name": "d-podsec-inotify-check-policy",
             "object_type": "template",
             "vars": {
@@ -68,7 +68,7 @@
             "imports": [
                 "d-nagwad-service"
             ],
-            "display_name": "Modified files detected in a running container",
+            "display_name": "Modified critical files detected in a running container",
             "object_name": "d-podsec-inotify-check-containers",
             "object_type": "template",
             "vars": {
