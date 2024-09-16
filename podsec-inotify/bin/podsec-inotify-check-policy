@@ -1,5 +1,7 @@
 #!/bin/bash
 # Плугин проверяет политики настройки контейнеризации на сервере
+set +o noglob
+
 export LANG=C
 export MAILTO=''
 

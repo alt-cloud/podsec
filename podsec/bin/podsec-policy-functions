@@ -304,25 +304,21 @@ $out  )
   echo -ne "$ret";
 }
 
-
-
 #######################
 # SIGSTORE functions
 #  Объединить все yaml-файлы в директории ${1}/registries.d и олучить единый JSON
 joinSigStories() {
+  set +o noglob
   ret=
   configDir="${1}/registries.d"
-  yamlFiles="$configDir/*.yaml"
-  if [ "$yamlFiles" == "$configDir/*.yaml" ]
+  yamlFile="$configDir/default.yaml"
+  if [ ! -f "$yamlFile" ]
   then
     echo "{}"
     return
   fi
-  for yamlFile in $yamlFiles
-  do
-    yaml=$(yq . "$yamlFile")
-    ret="${ret}${ret:+,}$yaml"
-  done
+  yaml=$(yq . "$yamlFile")
+  ret="${ret}${ret:+,}$yaml"
   ret="[$ret]"
   echo "$ret" | jq 'reduce .[] as $item ({}; . *= $item)'
 }
@@ -388,6 +384,7 @@ getGroups() {
 
 #########################################################
 checkUsersConfig() {
+  set +o noglob
   ret=
   user="root"
   policyFile="/etc/containers/policy.json"
@@ -418,6 +415,7 @@ checkUsersConfig() {
 }
 
 checkUsersImages() {
+  set +o noglob
   ret=
   user="root"
   policyFile="/etc/containers/policy.json"
@@ -437,6 +435,10 @@ checkUsersImages() {
       policyFile="/etc/containers/policy.json"
     fi
     user=$(basename "$userDir")
+    if id -G -n $user | grep podman_dev >/dev/null 2>&1
+    then
+      continue
+    fi
     userImages=$(checkUserImages "$user" "$policyFile")
     userImages+=",\"group\":\"$(getGroup "$user")\""
     userImages+=",\"groups\":$(getGroups "$user")"
