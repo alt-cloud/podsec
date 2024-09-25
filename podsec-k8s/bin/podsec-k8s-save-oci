@@ -74,6 +74,7 @@ esac
 echo "Загрузка kubernetes-образов архитектуры $arch платформы $U7S_PLATFORM"
 storage="share/usernetes/images/$U7S_PLATFORM/$arch"
 eval mkdir -p ~$USER/.local/$storage
+
 getKuberImages $arch $storage $USER
 
 

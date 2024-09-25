@@ -601,6 +601,7 @@ function getKuberLastPatchVersion() {
 # - пользователь для которого размещается образы
 # - группа пользователя
 function getKuberImages() {
+  export U7S_ARCHIMAGES
   arch=$1
 	storage=$2
 	user=$3
@@ -626,6 +627,7 @@ function getKuberImages() {
     echo "Kubernet-версия $U7S_KUBEVERSION не поддерживается"
     exit 1
   fi
+  imageList+=" $U7S_ARCHIMAGES"
   let lenRegistry=${#U7S_REGISTRY}+1
   let lenRegistryPlatform=${#U7S_REGISTRY_PLATFORM}+1
   ifs=$IFS

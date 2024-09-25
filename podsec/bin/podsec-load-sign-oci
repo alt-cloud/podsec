@@ -134,17 +134,18 @@ ImageList=""
 for image in $imagesList
 do
   image=${image:1:-1}
+  echo "Разворачивание образа $image в локальную систему"
   if [ "${image:0:$baselen}" == "$base" ]
   then
-    echo "Разворачивание образа $image в локальную систему"
     image=${image:$baselen}
+    ociImage="$base$image"
     Image="$regName/$image"
-    skopeo --override-arch $arch copy oci:$archDir:$base$image containers-storage:$Image
-    ImageList+=" $Image"
   else
-    echo "Префикс образа $image не совпадает с тропой $base"
+    ociImage=$image
+    Image="registry.local/$image"
   fi
-
+  skopeo --override-arch $arch copy oci:$archDir:$ociImage containers-storage:$Image
+  ImageList+=" $Image"
 done
 
 for Image in $ImageList
