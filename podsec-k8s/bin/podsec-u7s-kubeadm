@@ -249,6 +249,7 @@ U7S_EXTIP=$FLAG_apiserver_advertise_address
 
 export U7S_PODNETWORKCIDRIP=$podNetworkCidrIP
 export U7S_SERVICECIDR=$FLAG_pod_service_cidr
+unset U7S_ARCHIMAGES
 
 checkNetCrossing
 
