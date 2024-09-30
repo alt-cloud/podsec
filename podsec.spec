@@ -214,6 +214,7 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_mandir/man1/podsec-u7s-kubeadm.1.xz
 %_userunitdir/kubelet.service
 %_userunitdir/rootlesskit.service
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s
 %config %_sysconfdir/podsec/u7s/audit/policy.yaml
 %config %_sysconfdir/podsec/u7s/config/cni_net.d/99-loopback.conf
 %config %_sysconfdir/podsec/u7s/config/env
