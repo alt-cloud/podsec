@@ -194,6 +194,7 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_bindir/podsec-u7s-kubeadm
 %_unitdir/u7s.service
 %_unitdir/user@.service.d/delegate.conf
+%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin
 %_libexecdir/podsec/u7s/bin/crio.sh
 %_libexecdir/podsec/u7s/bin/init-crio.sh
 %_libexecdir/podsec/u7s/bin/kubeadm
@@ -207,7 +208,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_libexecdir/podsec/u7s/bin/systemctl
 %_libexecdir/podsec/u7s/bin/u7sinit.sh
 %_libexecdir/podsec/u7s/bin/u7s-start-stop.sh
+%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
+%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
 %_localstatedir/podsec/u7s/log/kubeapi
 %_modules_loaddir/u7s.conf
 %_mandir/man1/podsec-k8s-create-master.1.xz
@@ -215,12 +218,19 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_userunitdir/kubelet.service
 %_userunitdir/rootlesskit.service
 %dir %attr(0755, root, root) %_sysconfdir/podsec/u7s
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/audit
 %config %_sysconfdir/podsec/u7s/audit/policy.yaml
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/config/cni_net.d
 %config %_sysconfdir/podsec/u7s/config/cni_net.d/99-loopback.conf
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/config
 %config %_sysconfdir/podsec/u7s/config/env
 %config %_sysconfdir/podsec/u7s/config/ENV
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/config/flannel
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/config/flannel/cni_net.d
 %config %_sysconfdir/podsec/u7s/config/flannel/cni_net.d/10-flannel.conflist
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/config/flannel/etcd
 %config %_sysconfdir/podsec/u7s/config/flannel/etcd/coreos.com_network_config
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/config/kubeadm-configs
 %config %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitClusterConfiguration.yaml
 %config %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitConfiguration.yaml
 %config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinClusterConfiguration.yaml
@@ -228,9 +238,15 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinControlPlaneConfijuration.yaml
 %config %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeletConfiguration.yaml
 %config %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeProxyConfiguration.yaml
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/env
 %config %_sysconfdir/podsec/u7s/env/u7s_flags
 %config %_sysconfdir/podsec/u7s/env/u7s_images
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/manifests/
 %config %_sysconfdir/podsec/u7s/manifests/coredns.yaml
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/manifests/kube-flannel
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*
+%dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*
 %config %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*/kube-flannel.yml
 
 %files k8s-rbac
@@ -288,6 +304,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Mon Sep 30 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt2
+- Added owners to /etc/podsec/u7s
+
 * Mon Sep 30 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt1
 - Added podsec-inotify-build-.* template to /etc/nagwad/podsec.sed (thnx gritsynin@ivk.ru)
 
