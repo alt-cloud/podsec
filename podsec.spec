@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.7
-Release: alt2
+Release: alt3
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -143,14 +143,16 @@ groupadd -r -f podman_dev >/dev/null 2>&1 ||:
 
 %pre k8s
 groupadd -r -f %u7s_admin_grp  2>&1 ||:
-useradd -r -M -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
-    -c 'usernet user account' %u7s_admin_usr  2>&1 ||:
+useradd -m -r -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
+    -c 'usernet user account' --skel /etc/skel %u7s_admin_usr  2>&1 ||:
 # merge usernetes & podman graphroot
 mkdir -p %u7s_admin_homedir/.local/share/usernetes/containers 2>&1 ||:
 chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir/.local/share/
 cd %u7s_admin_homedir/.local/share
 if [ -d containers ]; then mv containers containers.std; fi
 ln -sf usernetes/containers . 2>&1 ||:
+# Add path to kubeadm shell script
+echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bashrc
 
 %post inotify
 %post_systemd podsec-inotify-check-containers.service
@@ -167,67 +169,114 @@ ln -sf usernetes/containers . 2>&1 ||:
 %preun_systemd u7s.service
 
 %files
-%_bindir/podsec*
-%exclude %_bindir/podsec-save-oci
-%exclude %_bindir/podsec-u7s-*
-%exclude %_bindir/podsec-k8s-*
-%exclude %_bindir/podsec-inotify-*
-%_mandir/man?/podsec*
-%exclude %_mandir/man?/podsec-k8s-*
-%exclude %_mandir/man?/podsec-u7s-*
-%exclude %_mandir/man?/podsec-save-oci*
-%exclude %_mandir/man?/podsec-inotify-*
+%_bindir/podsec-create-imagemakeruser
+%_bindir/podsec-create-podmanusers
+%_bindir/podsec-create-policy
+%_bindir/podsec-create-services
+%_bindir/podsec-functions
+%_bindir/podsec-get-platform
+%_bindir/podsec-load-sign-oci
+%_bindir/podsec-policy-functions
+%_mandir/man1/podsec-create-imagemakeruser.1.xz
+%_mandir/man1/podsec-create-podmanusers.1.xz
+%_mandir/man1/podsec-create-policy.1.xz
+%_mandir/man1/podsec-create-services.1.xz
+%_mandir/man1/podsec-load-sign-oci.1.xz
+%config(noreplace) %_sysconfdir/nagwad/podsec.sed
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
 %dir %attr(0755,root,root) %_localstatedir/podsec
-%config(noreplace) %_sysconfdir/nagwad/*.sed
 
 
 %files k8s
-%dir %_sysconfdir/podsec/u7s
-%config(noreplace) %_sysconfdir/podsec/u7s/*
-%_unitdir/user@.service.d/*
-%_libexecdir/podsec/u7s
-%_localstatedir/podsec/u7s/*
-%_modules_loaddir/u7s.conf
-%_bindir/podsec-k8s-*
-%_bindir/podsec-u7s-*
-%exclude %_bindir/podsec-k8s-rbac-*
-%exclude %_bindir/podsec-k8s-save-oci
-%_mandir/man?/podsec-k8s-*
-%exclude %_mandir/man?/podsec-k8s-save-oci*
-%_mandir/man?/podsec-u7s-*
-%exclude %_mandir/man?/podsec-k8s-rbac-*
+%_bindir/podsec-k8s-create-master
+%_bindir/podsec-u7s-functions
+%_bindir/podsec-u7s-kubeadm
 %_unitdir/u7s.service
-%_userunitdir/*
-%u7s_admin_homedir/.??*
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.cache
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.config
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.ssh
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
+%_unitdir/user@.service.d/delegate.conf
+%_libexecdir/podsec/u7s/bin/crio.sh
+%_libexecdir/podsec/u7s/bin/init-crio.sh
+%_libexecdir/podsec/u7s/bin/kubeadm
+%_libexecdir/podsec/u7s/bin/_kubeadm.sh
+%_libexecdir/podsec/u7s/bin/kubeadm.sh
+%_libexecdir/podsec/u7s/bin/_kubelet.sh
+%_libexecdir/podsec/u7s/bin/kubelet.sh
+%_libexecdir/podsec/u7s/bin/nsenter_u7s
+%_libexecdir/podsec/u7s/bin/rootlessctl
+%_libexecdir/podsec/u7s/bin/rootlesskit.sh
+%_libexecdir/podsec/u7s/bin/systemctl
+%_libexecdir/podsec/u7s/bin/u7sinit.sh
+%_libexecdir/podsec/u7s/bin/u7s-start-stop.sh
 %dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
-%config(noreplace) %attr(0640,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.bashrc
-%config(noreplace) %attr(0640,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.bash_profile
-%config(noreplace) %attr(0640,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.bash_logout
+%_localstatedir/podsec/u7s/log/kubeapi
+%_modules_loaddir/u7s.conf
+%_mandir/man1/podsec-k8s-create-master.1.xz
+%_mandir/man1/podsec-u7s-kubeadm.1.xz
+%_userunitdir/kubelet.service
+%_userunitdir/rootlesskit.service
+%config %_sysconfdir/podsec/u7s/audit/policy.yaml
+%config %_sysconfdir/podsec/u7s/config/cni_net.d/99-loopback.conf
+%config %_sysconfdir/podsec/u7s/config/env
+%config %_sysconfdir/podsec/u7s/config/ENV
+%config %_sysconfdir/podsec/u7s/config/flannel/cni_net.d/10-flannel.conflist
+%config %_sysconfdir/podsec/u7s/config/flannel/etcd/coreos.com_network_config
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitClusterConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinClusterConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinControlPlaneConfijuration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeletConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeProxyConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/env/u7s_flags
+%config %_sysconfdir/podsec/u7s/env/u7s_images
+%config %_sysconfdir/podsec/u7s/manifests/coredns.yaml
+%config %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*/kube-flannel.yml
 
 %files k8s-rbac
-%_bindir/podsec-k8s-rbac-*
-%_mandir/man?/podsec-k8s-rbac-*
+%_bindir/podsec-k8s-rbac-bindrole
+%_bindir/podsec-k8s-rbac-create-kubeconfig
+%_bindir/podsec-k8s-rbac-create-remoteplace
+%_bindir/podsec-k8s-rbac-create-user
+%_bindir/podsec-k8s-rbac-functions
+%_bindir/podsec-k8s-rbac-get-userroles
+%_bindir/podsec-k8s-rbac-unbindrole
+%_mandir/man1/podsec-k8s-rbac-bindrole.1.xz
+%_mandir/man1/podsec-k8s-rbac-create-kubeconfig.1.xz
+%_mandir/man1/podsec-k8s-rbac-create-remoteplace.1.xz
+%_mandir/man1/podsec-k8s-rbac-create-user.1.xz
+%_mandir/man1/podsec-k8s-rbac-get-userroles.1.xz
+%_mandir/man1/podsec-k8s-rbac-unbindrole.1.xz
 
 %files inotify
-%_bindir/podsec-inotify-*
-%_mandir/man?/podsec-inotify-*
-%_unitdir/podsec-inotify-*
-%exclude %_unitdir/u7s.service
+%_bindir/podsec-inotify-build-invulnerable-image
+%_bindir/podsec-inotify-check-containers
+%_bindir/podsec-inotify-check-images
+%_bindir/podsec-inotify-check-kubeapi
+%_bindir/podsec-inotify-check-policy
+%_bindir/podsec-inotify-check-vuln
+%_bindir/podsec-inotify-functions
+%_mandir/man1/podsec-inotify-build-invulnerable-image.1.xz
+%_mandir/man1/podsec-inotify-check-containers.1.xz
+%_mandir/man1/podsec-inotify-check-images.1.xz
+%_mandir/man1/podsec-inotify-check-kubeapi.1.xz
+%_mandir/man1/podsec-inotify-check-policy.1.xz
+%_mandir/man1/podsec-inotify-check-vuln.1.xz
+%_unitdir/podsec-inotify-check-containers.service
+%_unitdir/podsec-inotify-check-images.service
+%_unitdir/podsec-inotify-check-images.timer
+%_unitdir/podsec-inotify-check-kubeapi-mail.service
+%_unitdir/podsec-inotify-check-kubeapi-mail.timer
+%_unitdir/podsec-inotify-check-kubeapi.service
+%_unitdir/podsec-inotify-check-policy.service
+%_unitdir/podsec-inotify-check-policy.timer
+%_unitdir/podsec-inotify-check-vuln.service
+%_unitdir/podsec-inotify-check-vuln.timer
 
 %files dev
 %_bindir/podsec-save-oci
 %_bindir/podsec-k8s-save-oci
-%_mandir/man?/podsec-k8s-save-oci*
-%_mandir/man?/podsec-save-oci*
-
+%_mandir/man1/podsec-k8s-save-oci.1.xz
+%_mandir/man1/podsec-save-oci.1.xz
 
 %files icinga
 %doc podsec-inotify/monitoring/podsec-icinga2.json
@@ -238,6 +287,12 @@ ln -sf usernetes/containers . 2>&1 ||:
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Mon Sep 30 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.7-alt3
+- Removed user u7s-admin files from spec.
+- Replaced files templates with a list of files.
+- Replaced -M (--no-create-home) flag to -m (--create-home) in command useradd
+- Added flag -k /etc/skel () in command useradd
+
 * Thu Sep 26 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.7-alt2
 - Finished translation records of changelog to past simple.
 

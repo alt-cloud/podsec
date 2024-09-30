@@ -182,9 +182,6 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.cache
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.config
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.ssh
-	cd usernetes; $(INSTALL) -m644 .bashrc $(DESTDIR)$(localstatedir)/u7s-admin/
-	cd usernetes; $(INSTALL) -m644 .bash_profile $(DESTDIR)$(localstatedir)/u7s-admin/
-	cd usernetes; $(INSTALL) -m644 .bash_logout $(DESTDIR)$(localstatedir)/u7s-admin/
 
 	# bin
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
