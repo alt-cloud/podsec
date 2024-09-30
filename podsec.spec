@@ -6,8 +6,8 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.7
-Release: alt3
+Version: 1.1.8
+Release: alt1
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -287,6 +287,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Mon Sep 30 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt1
+- Added podsec-inotify-build-.* template to /etc/nagwad/podsec.sed (thnx gritsynin@ivk.ru)
+
 * Mon Sep 30 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.7-alt3
 - Removed user u7s-admin files from spec.
 - Replaced files templates with a list of files.
