@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.8
-Release: alt2
+Release: alt3
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -305,6 +305,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Tue Oct 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt3
+- Added dir /etc/nagwad to SPEC
+
 * Mon Sep 30 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt2
 - Added owners to /etc/podsec/u7s
 
