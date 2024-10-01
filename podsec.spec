@@ -182,6 +182,7 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_mandir/man1/podsec-create-policy.1.xz
 %_mandir/man1/podsec-create-services.1.xz
 %_mandir/man1/podsec-load-sign-oci.1.xz
+%dir %_sysconfdir/nagwad
 %config(noreplace) %_sysconfdir/nagwad/podsec.sed
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
