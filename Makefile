@@ -179,9 +179,9 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/etcd
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local
-	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.cache
-	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.config
-	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.ssh
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes/containers
 
 	# bin
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
