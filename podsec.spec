@@ -6,8 +6,8 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.8
-Release: alt3
+Version: 1.1.9
+Release: alt1
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -35,6 +35,7 @@ Requires: iproute2
 Requires: iptables
 Requires: openssh-server
 Requires: curl
+Requires: nagwad-service
 
 %description
 This package contains utilities for:
@@ -143,16 +144,16 @@ groupadd -r -f podman_dev >/dev/null 2>&1 ||:
 
 %pre k8s
 groupadd -r -f %u7s_admin_grp  2>&1 ||:
-useradd -m -r -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
-    -c 'usernet user account' --skel /etc/skel %u7s_admin_usr  2>&1 ||:
+useradd -M -r -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
+    -c 'usernet user account'  %u7s_admin_usr  2>&1 ||:
+mkdir -p %u7s_admin_homedir
 # merge usernetes & podman graphroot
 mkdir -p %u7s_admin_homedir/.local/share/usernetes/containers 2>&1 ||:
-chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir/.local/share/
 cd %u7s_admin_homedir/.local/share
-if [ -d containers ]; then mv containers containers.std; fi
+if [ -d containers ]; then mv containers containers.old; rm -rf containers.old; fi
 ln -sf usernetes/containers . 2>&1 ||:
-# Add path to kubeadm shell script
-echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bashrc
+cd %u7s_admin_homedir/.local/share/usernetes/containers
+chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 
 %post inotify
 %post_systemd podsec-inotify-check-containers.service
@@ -182,12 +183,10 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_mandir/man1/podsec-create-policy.1.xz
 %_mandir/man1/podsec-create-services.1.xz
 %_mandir/man1/podsec-load-sign-oci.1.xz
-%dir %_sysconfdir/nagwad
 %config(noreplace) %_sysconfdir/nagwad/podsec.sed
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
 %dir %attr(0755,root,root) %_localstatedir/podsec
-
 
 %files k8s
 %_bindir/podsec-k8s-create-master
@@ -195,7 +194,8 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_bindir/podsec-u7s-kubeadm
 %_unitdir/u7s.service
 %_unitdir/user@.service.d/delegate.conf
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin
+%dir %attr(0755,root,root) %_libexecdir/podsec/u7s
+%dir %attr(0755,root,root) %_libexecdir/podsec/u7s/bin
 %_libexecdir/podsec/u7s/bin/crio.sh
 %_libexecdir/podsec/u7s/bin/init-crio.sh
 %_libexecdir/podsec/u7s/bin/kubeadm
@@ -209,9 +209,14 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %_libexecdir/podsec/u7s/bin/systemctl
 %_libexecdir/podsec/u7s/bin/u7sinit.sh
 %_libexecdir/podsec/u7s/bin/u7s-start-stop.sh
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
-%dir %attr(0750,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/_*.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubeadm.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubelet.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/nsenter_u7s
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/rootlesskit.sh
+%dir %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
+%dir %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
+%dir %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
 %_localstatedir/podsec/u7s/log/kubeapi
 %_modules_loaddir/u7s.conf
 %_mandir/man1/podsec-k8s-create-master.1.xz
@@ -249,6 +254,11 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*
 %dir %attr(0755, root, root) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*
 %config %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*/kube-flannel.yml
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local/share
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local/share/usernetes
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local/share/usernetes/containers
 
 %files k8s-rbac
 %_bindir/podsec-k8s-rbac-bindrole
@@ -305,6 +315,21 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Sat Oct 05 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.9-alt1
+- Moved resetting PATH from profiles to bin/podsec-u7s-functions.
+- Added dirs of u7s-admin user to SPEC.
+- Added dependency on nagwad-service to SPEC.
+- Change access mode to 0700 on ~u7s-admin/.local/... dirs tree.
+- Change access mode to 0700 on /usr/libexec/podsec/u7s/bin/*.sh scripts.
+
+* Sat Oct 05 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt5
+Change access mode 0700 to ~u7s-admin/.local/..., /usr/libexec/podsec/u7s/bin/*.sh  dirs and files.
+
+* Thu Oct 03 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt4
+- Moved resetting PATH from profiles to bin/podsec-u7s-functions.
+- Added dependency on nagwad-service to SPEC.
+- Added to SPEC dirs of u7s-admin user.
+
 * Tue Oct 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt3
 - Added dir /etc/nagwad to SPEC
 
