@@ -6,7 +6,12 @@
 
 Name: podsec
 Version: 1.1.10
+<<<<<<< HEAD
 Release: alt7
+=======
+Release: alt1
+
+>>>>>>> 981277d (podsec-1.1.10-alt1)
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -430,6 +435,12 @@ Change access mode 0700 to ~u7s-admin/.local/..., /usr/libexec/podsec/u7s/bin/*.
 - Moved resetting PATH from profiles to bin/podsec-u7s-functions.
 - Added dependency on nagwad-service to SPEC.
 - Added to SPEC dirs of u7s-admin user.
+
+* Fri Oct 11 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
+- Removed dependencies from the podsec-k8s package since the kubernetes version is determined when deploying the cluster.
+- Changed owners, access right of dirs, executable, configurations and usual files.
+- Moved installation of the kube group for a user u7s-admin from podsec.spec to the installKubeadm function after deploying kubernetes packages.
+- Removed unused script podsec-k8s-create-master.
 
 * Sat Oct 05 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.9-alt1
 - Moved resetting PATH from profiles to bin/podsec-u7s-functions.
