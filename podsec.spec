@@ -5,7 +5,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.9
+Version: 1.1.10
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -309,6 +309,12 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Fri Oct 11 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
+- Removed dependencies from the podsec-k8s package since the kubernetes version is determined when deploying the cluster.
+- Changed owners, access right of dirs, executable, configurations and usual files.
+- Moved installation of the kube group for a user u7s-admin from podsec.spec to the installKubeadm function after deploying kubernetes packages.
+- Removed unused script podsec-k8s-create-master.
+
 * Sat Oct 05 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.9-alt1
 - Moved resetting PATH from profiles to bin/podsec-u7s-functions.
 - Added dirs of u7s-admin user to SPEC.
