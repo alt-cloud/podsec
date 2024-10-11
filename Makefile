@@ -35,7 +35,6 @@ PODSEC_FUNCTIONS = \
 
 PODSEC_K8S_PROGRAMS= \
 	podsec-k8s-save-oci \
- 	podsec-k8s-create-master \
  	podsec-u7s-kubeadm
 
 PODSEC_K8S_FUNCTIONS = \
