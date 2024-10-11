@@ -403,11 +403,6 @@ function installKubeadm() {
 				echo "Минорная версия ${kubeMinorVersionByCrio} crio совпадает с устанавливаемой"
 			fi
 		fi
-# 		if [ -n "$pkgNames" ]
-# 		then
-# 			echo "Удаление пакетов $pkgNames"
-# 			apt-get remove -y $pkgNames || :
-# 		fi
   fi
 
 	if [[ "$kubeMinorVersion" < '1.26' ]]
@@ -445,7 +440,7 @@ function installKubeadm() {
 			fi
 			let minorDelta+=1
 		done
-		usermod -G kube u7s-admin
+		usermod -G kube,systemd-journal,podman u7s-admin
 		if [ $minorDelta -gt 1 ]
 		then
 			echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
