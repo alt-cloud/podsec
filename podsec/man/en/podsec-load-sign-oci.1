@@ -1,0 +1,38 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-LOAD\-SIGN\-OCI" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-load\-sign\-oci\fR \- unpacking images from a compressed \fBxz\-oci\-archive\fR, signing them and placing them on the registry
+.SH "SYNOPSIS"
+\fBpodsec\-load\-sign\-oci archive_file_name signer_mail_architecture [registrar/path]\fR
+.SH "DESCRIPTION"
+Script:
+.IP "\[ci]" 4
+extracts images from a compressed \fBxz\-oci\-archive\fR,
+.IP "\[ci]" 4
+unpacks them in the file system,
+.IP "\[ci]" 4
+signs them and places them on the registrar along the specified path\.
+.IP "" 0
+.SH "OPTIONS"
+.IP "1." 4
+The \fBoci\-file archive\fR passed as the first parameter must be compressed with the \fBxz\fR compressor\.
+.IP "2." 4
+\fBArchitecture name\fR must be in the list \fBamd64\fR, \fBarm64\fR, \fBarm\fR, \fBppc64le\fR, \fB386\fR\.
+.IP "3." 4
+\fBSigner_EMail\fR must be specified in the user signature and is specified without the enclosing \fB<>\fR brackets\.
+.IP "4." 4
+\fBregistrar/path\fR must contain the name of the registrar subdirectory\. The format \fBregistrar\fR is invalid If \fBregistrar/path\fR is not specified, the path \fBregistry\.local/k8s\-c10f1\fR is assumed
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-load\-sign\-oci /mnt/cdrom/containers/amd64\.tar\.xz amd64 immklocal@baseat\.ru registry\.local\fR
+.P
+\fBpodsec\-load\-sign\-oci /mnt/cdrom/containers/amd64\.tar\.xz amd64 immkk8s@baseat\.ru\fR
+.SH "SECURITY CONSIDERATIONS"
+.IP "\[ci]" 4
+This script should only be run on a node with the \fBregistry\.local\fR, \fBsigstore\-local\fR domains\. If this is not the case, the script will stop working\.
+.IP "\[ci]" 4
+The script should be called by a user belonging to the \fBpodman_dev\fR group\.
+.IP "" 0
+.SH "AUTHOR"
+Kostarev Alexey, Basalt SPO kaf@basealt\.ru

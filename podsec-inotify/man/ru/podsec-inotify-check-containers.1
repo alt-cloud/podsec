@@ -1,0 +1,39 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-INOTIFY\-CHECK\-CONTAINERS" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-inotify\-check\-containers\fR \- проверка наличия изменений критических файлов rootfull и rootless контейнеров
+.SH "SYNOPSIS"
+\fBpodsec\-inotify\-check\-containers\fR
+.SH "DESCRIPTION"
+Скрипт:
+.IP "\[ci]" 4
+создаёт список директорий \fBrootless\fR и \fBrootfull\fR контейнеров, существующих в системе,
+.IP "\[ci]" 4
+запускает проверку на добавление,удаление, и изменение файлов в директориях контейнеров,
+.IP "\[ci]" 4
+отсылает уведомление об изменении в системный лог\.
+.IP "" 0
+.P
+Скрипт запускает два процесса мониторинга каталогов:
+.IP "\[ci]" 4
+мониторинг добавления пользователей в каталоге \fB/home/\fR, добавления контейнеров в каталогах \fB*/storage/overlay/\fR \fBrootless\fR и \fBrootfull\fR пользователей (список формируется в файле \fB/tmp/inotifyMonitor\.tmp\fR);
+.IP "\[ci]" 4
+мониторинг изменения файлов в контейнерах \fBrootless\fR и \fBrootfull\fR пользователей (список формируется в файле \fB/tmp/inotifyOverlays\.tmp\fR)\.
+.IP "" 0
+.P
+Первый процесс при изменении отслеживаемых каталогов формирует списки в файлах мониторинга \fB/tmp/inotifyMonitor\.tmp\fR, \fB/tmp/inotifyOverlays\.tmp\fR, перезапускает себя и второй процесс мониторинга изменения файлов в контейнерах\.
+.P
+Второй процесс изменения файлов в контейнерах монитрит все файлы и каталоги за исключением файлов и каталогов в корневых каталогах \fB/var/\fR, \fB/proc/\fR, \fB/tmp/\fR, \fB/run/\fR, которые могут инфенсивно изменяться при работе контейнеров сервисами контейнеров\.
+.P
+Изменения в каталогах \fB/home/\fR, \fB/root/\fR, \fB/etc/\fR логируются в системный лог как предупреждения (уровень \fBWarning\fR)\. Изменения в остальных каталогах логируются в системный лог как критические (уровень \fBCritical\fR)\.
+.P
+Сообщения в системный лог имеют формат: \fBAn event <event> occurred in the container <container> [in home directory|in configuration directory] on the file <file>\fR
+.SH "SECURITY CONSIDERATIONS"
+.IP "\[ci]" 4
+Данный скрипт запускается сервисом \fBpodsec\-inotify\-check\-containers\.service\fR\.
+.IP "" 0
+.SH "EXAMPLES"
+Если в системе развернуты контейнеры, и требуется следить за модификацией файлов внутри этих контейнеров, запустите сервис \fBpodsec\-inotify\-check\-containers\.service\fR: \fB# systemctl enable \-\-now podsec\-inotify\-check\-containers\.service\fR
+.SH "AUTHOR"
+Burykin Nikolay, ALT Linux Team, bne@altlinux\.org Kostarev Alexey, ALT Linux Team, kaf@basealt\.ru

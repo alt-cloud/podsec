@@ -1,0 +1,68 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-CREATE\-IMAGEMAKERUSER" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-create\-imagemakeruser\fR \- создание пользователей разработчиков образов контейнеров
+.SH "SYNOPSIS"
+\fBpodsec\-create\-imagemakeruser [имя_пользователя[@тропа_репозитория]] \|\.\|\.\|\.\fR
+.SH "DESCRIPTION"
+Cкрипт создает пользователей разработчиков образов контейнеров, обладающими правами: \- менять установленный администратором безопасности средства контейнеризации пароль; \- создавать, модифицировать и удалять образы контейнеров\.
+.P
+При создании каждого пользователя необходимо задать:
+.IP "\[ci]" 4
+\fBпароль пользователя\fR;
+.IP "\[ci]" 4
+\fBтип ключа\fR: \fBRSA\fR, \fBDSA и Elgamal\fR, \fBDSA (только для подписи)\fR, \fBRSA (только для подписи)\fR, \fBимеющийся на карте ключ\fR;
+.IP "\[ci]" 4
+\fBсрок действия ключа\fR;
+.IP "\[ci]" 4
+\fBполное имя\fR;
+.IP "\[ci]" 4
+\fBEmail\fR (используется в дальнейшем для подписи образов);
+.IP "\[ci]" 4
+\fBпримечание\fR;
+.IP "\[ci]" 4
+\fBпароль для подписи образов\fR\.
+.IP "" 0
+.P
+Скрипт должен вызываться после вызова скрипта \fBpodsec\-create\-policy\fR
+.SH "OPTIONS"
+Список пользователей и тропы регистратороы для которых они подписывают образы передаются параметрами в формате: \fBимя_пользователя@тропа_репозитория\fR
+.IP "\[ci]" 4
+В списке не должно быть пользователей с одинаковыми тропами\.
+.IP "\[ci]" 4
+Если пользователь единственный и тропа не указана, то принимается тропа \fBregistry\.local\fR
+.IP "\[ci]" 4
+Если имя пользователя не указано первым параметром принимается имя \fBimagemaker@registry\.local\fR\.
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-create\-imagemakeruser immkk8s@registry\.local/k8s\-c10f1 imklocal@registry\.local immkalt@registry\.altlinux\.org\fR
+.P
+Создаются три пользователя с правами на подпись:
+.IP "\[ci]" 4
+\fBimmkk8s\fR \- локальных образов kubernetes с тропой \fBregistry\.local/k8s\-c10f1\fR;
+.IP "\[ci]" 4
+\fBimklocal\fR \- локальных образов \fBregistry\.local\fR за исключением образов kubernetes
+.IP "\[ci]" 4
+\fBimmkalt\fR \- образов регистратора \fBregistry\.altlinux\.org\fR
+.IP "" 0
+.SH "SECURITY CONSIDERATIONS"
+.IP "\[ci]" 4
+Данный скрипт должен запускаться только на узле с доменами \fBregistry\.local\fR, \fBsigstore\-local\fR\. Если это не так, скрипт прекращает свою работу\.
+.IP "\[ci]" 4
+Пользователи разработчики образов должны сами контролировать список подписываемых образов\. Если пользователь \fBimklocal\fR подпишет образ с тропой \fBregistry\.local/k8s\-c10f1\fR, то разворачивание данного образа будет неуспешным, так как при проверке подписи будет использоваться открытый ключ пользователя \fBimmkk8s\fR, а не \fBimklocal\fR\.
+.IP "\[ci]" 4
+Все создаваемые в кластере пользователи должны располагаться на одном сервере с доменом \fBstorage\.local\fR\. Там же должен быть развернут WEB\-сервер подписей образов\.
+.IP "\[ci]" 4
+Все открытые ключи пользователей располагаются в каталоге \fB/var/sigstore/keys/\fR и должны быть скопированы на каждый сервер кластера к каталог \fB/var/sigstore/keys/\fR
+.IP "\[ci]" 4
+Подписи образов хранятся в каталоге \fB/var/sigstore/sigstore/\fR с отброшенными именами регистраторов\. Таким образом, если в системе контролируются подписи образов с разных регистраторов (например: \fBregistry\.altlinux\.org\fR и \fBregistry\.local\fR) и образ \fBregistry\.local/k8s\-c10f1/pause:3\.9\fR c \fB@sha256\e=347a15493d0a38d9ce74f23ea9f081583728a20dbdc11d7c17ef286d9cade3ec\fR подписан, то будут считаться подписанными все образы с данным \fBsha256\fR: \fBregistry\.altlinux\.orh/k8s\-c10f1/pause:3\.9\fR, \|\.\|\.\|\.
+.IP "" 0
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Разработчик образов контейнеров (imagemaker) \fIhttps://github\.com/alt\-cloud/podsec/tree/master/SigningImages\fR\.
+.IP "\[ci]" 4
+Описание периодического контроля целостности образов контейнеров и параметров настройки средства контейнеризации \fIhttps://github\.com/alt\-cloud/podsec/tree/master/ImageSignatureVerification\fR
+.IP "" 0
+.SH "AUTHOR"
+Костарев Алексей, Базальт СПО kaf@basealt\.ru

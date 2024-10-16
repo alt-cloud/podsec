@@ -1,0 +1,89 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-K8S\-RBAC\-GET\-USERROLES" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-k8s\-rbac\-get\-userroles\fR \- get a list of cluster and regular user roles
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-rbac\-get\-userroles username [showRules]\fR
+.SH "DESCRIPTION"
+The script generates a list of cluster and regular roles that are associated with the user\. When the \fBshowRules\fR flag is specified, a list of rules ("rules:[\|\.\|\.\|\.]") that belong to each user role is specified for each role\.
+.P
+The result is returned as a json string of the following format:
+.IP "" 4
+.nf
+{
+  "\fIusername\fR": {
+    "clusterRoles": [\|\.\|\.\|\.],
+    "roles": {
+      "allNamespaces": [\|\.\|\.\|\.],
+      "namespaces": [
+        {
+          "\fInamespace1\fR": [\|\.\|\.\|\.],
+          \|\.\|\.\|\.
+        }
+    }
+  }
+}
+.fi
+.IP "" 0
+.P
+Where \fB[\|\.\|\.\|\.]\fR is an array of objects of the type:
+.IP "" 4
+.nf
+{
+  "bindRoleName": "\fIbindRoleName\fR",
+  "bindedRoleType": "ClusterRole|Role",
+  "bindedRoleName": "\fIbindedRoleName\fR",
+  "unbindCmd": "podsec\-k8s\-rbac\-unbindrole \|\.\|\.\|\."
+}
+.fi
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-rbac\-get\-userroles k8s\-user1 | yq \-y\fR
+.IP "" 4
+.nf
+k8s\-user1:
+  clusterRoles:
+    \- bindName: sysadmin
+      roleType: ClusterRole
+      roleName: edit
+      unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 clusterrole edit sysadmin
+    \- bindName: sysview
+      roleType: ClusterRole
+      roleName: view
+      unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 clusterrole view sysview
+  roles:
+    namespaces:
+      \- default:
+          \- bindName: basic\-user
+            roleType: ClusterRole
+            roleName: system:basic\-user
+            unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 role system:basic\-user
+              basic\-user default
+          \- bindName: sysadmin
+            roleType: ClusterRole
+            roleName: edit
+            unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 role edit sysadmin default
+      \- smf:
+          \- bindName: basic\-user
+            roleType: ClusterRole
+            roleName: system:basic\-user
+            unbindCmd: podsec\-k8s\-rbac\-unbindrole k8s\-user1 role system:basic\-user
+              basic\-user smf
+.fi
+.IP "" 0
+.SH "SECURITY CONSIDERATIONS"
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Generating certificates, creating workstations for the containerization tool security administrator, administrators of the information (automated) system and assigning them RBAC roles \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/README\.md\fR;
+.IP "\[ci]" 4
+Description of the main classes of cluster roles (Roles, ClusterRoles) and mechanisms for binding them to subjects \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/rolesDescribe\.md\fR;
+.IP "\[ci]" 4
+Configuring workstations for administrators of the information (automated) system (ClusterRole) \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+.IP "\[ci]" 4
+Configuring project administrator workstations (Role) \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+.IP "\[ci]" 4
+Configuring other roles \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR\.
+.IP "" 0
+.SH "AUTHOR"
+Kostarev Alexey, Basalt LLC kaf@basealt\.ru

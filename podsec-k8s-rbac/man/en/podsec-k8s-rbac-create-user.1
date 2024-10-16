@@ -1,0 +1,27 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-K8S\-RBAC\-CREATE\-USER" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-k8s\-rbac\-create\-user\fR \- create RBAC user
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-rbac\-create\-user username\fR
+.SH "DESCRIPTION"
+Script:
+.IP "\[ci]" 4
+creates RBAC user
+.IP "\[ci]" 4
+creates \.kube directory in home directory
+.IP "\[ci]" 4
+sets appropriate access rights to directories\.
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-rbac\-create\-user k8s\-user1\fR
+.SH "SECURITY CONSIDERATIONS"
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Generating certificates, creating workstations for the containerization tool security administrator, administrators of the information (automated) system and assigning them RBAC roles \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/README\.md\fR;
+.IP "\[ci]" 4
+Creating workstations and certificates \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR\.
+.IP "" 0
+.SH "AUTHOR"
+Kostarev Alexey, Basealt LLC kaf@basealt\.ru
