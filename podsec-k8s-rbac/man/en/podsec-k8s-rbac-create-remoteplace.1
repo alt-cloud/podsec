@@ -1,0 +1,29 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-K8S\-RBAC\-CREATE\-REMOTEPLACE" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-k8s\-rbac\-create\-remoteplace\fR \- create a remote workstation
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-rbac\-create\-remoteplace ip\-address\fR
+.SH "DESCRIPTION"
+The script configures the user\'s remote workstation by copying its configuration file\.
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-rbac\-create\-remoteplace 192\.168\.122\.234\fR
+.SH "SECURITY CONSIDERATIONS"
+To improve the security of working with the cluster, it makes sense to move user workstations to separate workstations\.
+.P
+The security administrator of the containerization tool copies the \fB\.kube/config\fR configuration file to his workstation using this script and gets the ability to work remotely with the cluster\.
+.P
+When creating workstations, the containerization tool security administrator creates home directories and a configuration file \fB\.kube/config\fR on his workstation using the scripts \fBpodsec\-k8s\-rbac\-create\-user\fR, \fBpodsec\-k8s\-rbac\-create\-kubeconfig\fR, \fBpodsec\-k8s\-rbac\-bindrole\fR, creating the context of the created user\. By switching to the user context, the containerization tool security administrator can test the access rights of the created user\.
+.P
+The user copies the configuration file to himself on his remote workstation using this script\.
+.P
+The home directory of the created user on the containerization tool security administrator\'s workstation is deleted\.
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Generating certificates, creating workstations for the containerization tool security administrator, administrators of the information (automated) system and assigning them RBAC roles \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/README\.md\fR;
+.IP "\[ci]" 4
+Creating a workstation for the containerization tool security administrator \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR\.
+.IP "" 0
+.SH "AUTHOR"
+Kostarev Alexey, Basalt LLC kaf@basealt\.ru

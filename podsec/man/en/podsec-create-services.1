@@ -1,0 +1,22 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-CREATE\-SERVICES" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-create\-services\fR \- create services to support the docker image registrar and image signature server
+.SH "SYNOPSIS"
+\fBpodsec\-create\-services\fR
+.SH "DESCRIPTION"
+The script starts the \fBdocker\-registry\fR and \fBnginx\fR services to support the docker image registrar and image signature server\.
+.IP "\[ci]" 4
+the image registrar accepts requests at \fBhttp://registry\.local\fR and stores images in the \fB/var/lib/containers/storage/volumes/registry/_data/\fR directory;
+.IP "\[ci]" 4
+the image signature service accepts requests at \fBhttp://sigstore\.local:81\fR, stores image signatures in the \fB/var/sigstore/sigstore/\fR directory, public keys in the \fB/var/sigstore/keys/\fR directory
+.IP "" 0
+.SH "SECURITY CONSIDERATIONS"
+This script should only be run on a node with the \fBregistry\.local\fR, \fBsigstore\-local\fR domains, where users creating and signing images are located\. If this is not the case, the script stops its work without starting the services\.
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Description of periodic integrity monitoring of container images and containerization tool settings \fIhttps://github\.com/alt\-cloud/podsec/tree/master/ImageSignatureVerification\fR
+.IP "" 0
+.SH "AUTHOR"
+Aleksey Kostarev, Basalt LLC kaf@basealt\.ru

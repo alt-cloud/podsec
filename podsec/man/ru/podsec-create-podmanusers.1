@@ -1,0 +1,35 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-CREATE\-PODMANUSERS" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-create\-podmanusers\fR \- создание пользователей, запускающих контейнеры подписанных образов
+.SH "SYNOPSIS"
+\fBpodsec\-create\-podmanusers имя_пользователя \|\.\|\.\|\.\fR
+.SH "DESCRIPTION"
+Cкрипт создает пользователей образов контейнеров, обладающих правами на запуск подписанных образов в \fBrootless\fR режиме\.
+.SH "OPTIONS"
+.IP "\[ci]" 4
+Скрипту параметрами передается список создаваемых пользователей\.
+.IP "\[ci]" 4
+Пользователям присваивается группа \fBpodman\fR\. В качестве политик доступа к образам пользователи используют системные файлы \fB/etc/containers/policy\.json\fR, \fB/etc/containers/registries\.d/default\.yaml\fR\.
+.IP "\[ci]" 4
+Сформированные скриптом локальные файлы конфигурации пользователей в каталоге \fB~/\.config/containers/\fR закрываются на изменения\.
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-create\-podmanusers user1 user2 user3\fR
+.SH "SECURITY CONSIDERATIONS"
+.IP "\[ci]" 4
+Для каждого пользователя создается свой namespace\.
+.IP "\[ci]" 4
+Все используемые образы скачиваются только с указанных в файле политик \fB/etc/containers/policy\.json\fR регистраторов и помещаются в локальный кэш пользователя;
+.IP "\[ci]" 4
+Контейнеры запускаются в собственном namespace, хранятся в локальном кэше и недоступны другим пользователям
+.IP "\[ci]" 4
+Для проверки подписи образов используется системый файл \fB/etc/containers/registries\.d/defaylt\.yaml\fR\. Все подписи хранятся в локальном для создаваемого кластера \fBWEB\-сервере по адресу\fR: ` http://sigstore\.local:81/sigstore/`
+.IP "" 0
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Описание периодического контроля целостности образов контейнеров и параметров настройки средства контейнеризации \fIhttps://github\.com/alt\-cloud/podsec/tree/master/ImageSignatureVerification\fR
+.IP "" 0
+.SH "AUTHOR"
+Костарев Алексей, Базальт СПО kaf@basealt\.ru

@@ -1,0 +1,43 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-K8S\-RBAC\-UNBINDROLE" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-k8s\-rbac\-unbindrole\fR \- unbind a user from a cluster or regular role
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-rbac\-unbindrole username role|clusterrole role role_bind_name [namespace]\fR
+.SH "DESCRIPTION"
+The script unbinds a role from a cluster or regular role created by the \fBpodsec\-k8s\-rbac\-bindrole\fR command\. The full text of the command can be found in the output of the \fBpodsec\-k8s\-rbac\-get\-userroles\fR command in the \fBunbindCmd\fR field\. If the specified \fBrole_bind_name\fR object of the \fBrolebindings\fR or \fBclusterrolebindings\fR class still contains users, the object is modified\. If the list becomes empty, the object is deleted\.
+.SH "OPTIONS"
+.IP "\[ci]" 4
+\fBusername\fR must be created by the \fBpodsec\-k8s\-rbac\-create\-user\fR command and configured to access the cluster by the \fBpodsec\-k8s\-rbac\-create\-kubeconfig\fR command;
+.IP "\[ci]" 4
+\fBrole type\fR can have the following values:
+.IP "" 0
+.P
+\~\~\~\~* \fBrole\fR \- the user is bound to a \fBregular role\fR named \fB<role>\fR (the \fBnamespace\fR parameter is required in this case);
+.P
+\~\~\~\~* \fBclusterrole\fR \- the user is bound to a \fBcluster role\fR using a \fBcluster role\fR named \fB<role>\fR (the \fBnamespace\fR parameter must be absent in this case)\.
+.IP "\[ci]" 4
+\fBrole\fR \- the name of a regular or cluster role depending on the previous parameter;
+.IP "\[ci]" 4
+\fBrole_binding_name\fR \- the name of the \fBrolebindings\fR or \fBclusterrolebindings\fR class object depending on the \fBrole type\fR parameter\. Several users can be bound to a cluster or regular role within this object\.
+.IP "\[ci]" 4
+\fBnamespace\fR \- the \fBnamespace\fR name for a regular role\.
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-rbac\-unbindrole k8s\-user1 clusterrole view sysview\fR
+.SH "SECURITY CONSIDERATIONS"
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Generating certificates, creating workstations for a containerization tool security administrator, information (automated) system administrators, and assigning them RBAC roles \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/README\.md\fR;
+.IP "\[ci]" 4
+Description of the main classes of cluster roles (Roles, ClusterRoles) and mechanisms for binding to subjects \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/rolesDescribe\.md\fR;
+.IP "\[ci]" 4
+Configuring workstations of administrators of the information (automated) system (ClusterRole) \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+.IP "\[ci]" 4
+Configuring workstations of project administrators (Role) \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+.IP "\[ci]" 4
+Configuring other roles \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR\.
+.IP "" 0
+.SH "AUTHOR"
+Kostarev Alexey, Basealt LLC kaf@basealt\.ru
