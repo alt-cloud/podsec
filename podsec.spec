@@ -6,12 +6,7 @@
 
 Name: podsec
 Version: 1.1.10
-<<<<<<< HEAD
 Release: alt7
-=======
-Release: alt1
-
->>>>>>> 981277d (podsec-1.1.10-alt1)
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -60,7 +55,6 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-
 # Avoid automatic addition of dependencies on the latest version of kubernetes packages
 # kubernetes1.xx-crio, kubernetes1.xx-kubeadm, kubernetes1.xx-kubectl, kubernetes1.xx-kubelet
 # and their installation during apt-get install podsec-k8s,
@@ -71,6 +65,9 @@ Requires: systemd-container
 %filter_from_requires /\/usr\/bin\/kubectl/d
 %filter_from_requires /\/usr\/bin\/kubelet/d
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
+# Requires: kubernetes-kubeadm
+# Requires: kubernetes-client
+# Requires: kubernetes-kubelet
 
 %description k8s
 This package contains utilities for:
@@ -176,6 +173,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %preun_systemd u7s.service
 
 %files
+%_datadir/locale/ru/LC_MESSAGES/podsec.mo
 %attr(0700,root,root) %_bindir/podsec-create-imagemakeruser
 %attr(0700,root,root) %_bindir/podsec-create-podmanusers
 %attr(0700,root,root) %_bindir/podsec-create-policy
@@ -195,6 +193,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %dir %attr(0755,root,root) %_localstatedir/podsec
 
 %files k8s
+%_datadir/locale/ru/LC_MESSAGES/podsec-k8s.mo
 %attr(0755,root,root) %_bindir/podsec-u7s-kubeadm
 %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_bindir/podsec-u7s-functions
 %_unitdir/u7s.service
@@ -260,6 +259,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local/share/usernetes/containers
 
 %files k8s-rbac
+%_datadir/locale/ru/LC_MESSAGES/podsec-k8s-rbac.mo
 %_bindir/podsec-k8s-rbac-bindrole
 %_bindir/podsec-k8s-rbac-create-kubeconfig
 %_bindir/podsec-k8s-rbac-create-remoteplace
@@ -275,6 +275,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %_mandir/man1/podsec-k8s-rbac-unbindrole.1.xz
 
 %files inotify
+%_datadir/locale/ru/LC_MESSAGES/podsec-inotify.mo
 %_bindir/podsec-inotify-build-invulnerable-image
 %attr(0700,root,root) %_bindir/podsec-inotify-check-containers
 %attr(0700,root,root) %_bindir/podsec-inotify-check-images
