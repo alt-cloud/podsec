@@ -1,0 +1,328 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.1.10-alt1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-10-14 15:21+0500\n"
+"PO-Revision-Date: 2024-10-14 15:21+0500\n"
+"Last-Translator: Kostarev Alexey <kaf@basealt.ru>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+#: podsec-k8s-create-master:24
+msgid "Launching the kubelet service"
+msgstr "Загорузка kubelet сервиса"
+
+#: podsec-k8s-create-master:29
+msgid "Initializing the cluster master node"
+msgstr "Инициализация master-узла кластера"
+
+#: podsec-k8s-create-master:34
+msgid "Configuring root as a cluster administrator"
+msgstr "Настройка root на роль администратора кластера"
+
+#: podsec-k8s-create-master:43
+msgid "Setting"
+msgstr "Настройка"
+
+#: podsec-k8s-create-master:43
+msgid "for the role of cluster administrator"
+msgstr "на роль администратора кластера"
+
+#: podsec-k8s-save-oci:21
+msgid "Image archiving directory not specified"
+msgstr "Не указан каталог архивирования образов"
+
+#: podsec-k8s-save-oci:23 podsec-k8s-save-oci:32 podsec-k8s-save-oci:82
+msgid "Format"
+msgstr "Формат"
+
+#: podsec-k8s-save-oci:23 podsec-k8s-save-oci:32 podsec-k8s-save-oci:82
+msgid "<image_archiving_directory> <architecture>,<architecture>"
+msgstr "<каталог_архивирования_образов> <архитектура>,<архитектура>"
+
+#: podsec-k8s-save-oci:30
+msgid "No list of architectures specified"
+msgstr "Не указан список архитектур"
+
+#: podsec-k8s-save-oci:39 podsec-u7s-kubeadm:8
+msgid "Script"
+msgstr "Скрипт"
+
+#: podsec-k8s-save-oci:39 podsec-u7s-kubeadm:8
+msgid "must be run as root user"
+msgstr "должен запускаться от пользователя root"
+
+#: podsec-k8s-save-oci:62
+msgid "Current platform"
+msgstr "Текущая платформа"
+
+#: podsec-k8s-save-oci:62
+msgid "does not match the downloaded one"
+msgstr "не совпадает с загружаемой"
+
+#: podsec-k8s-save-oci:64
+msgid "Continue"
+msgstr "Продолжать"
+
+#: podsec-k8s-save-oci:78
+msgid "Unknown architecture"
+msgstr "Неизвестная архитектура"
+
+#: podsec-k8s-save-oci:80
+msgid "Acceptable:"
+msgstr "Допустимые:"
+
+#: podsec-k8s-save-oci:87
+msgid "Downloading kubernetes images of architecture"
+msgstr "Загрузка kubernetes-образов архитектуры"
+
+#: podsec-k8s-save-oci:87
+msgid "platforms"
+msgstr "платформы"
+
+#: podsec-u7s-functions:61
+msgid "Entering RootlessKit namespaces"
+msgstr "Вход в RootlessKit namespaces"
+
+#: podsec-u7s-functions:72
+msgid "nsenter failed after"
+msgstr "nsenter упало после"
+
+#: podsec-u7s-functions:72
+msgid "attempts, RootlessKit not running"
+msgstr "попытки, RootlessKit не работает"
+
+#: podsec-u7s-functions:131
+msgid "Incorrect mask"
+msgstr "Некорректная маска"
+
+#: podsec-u7s-functions:142 podsec-u7s-functions:203 podsec-u7s-functions:242
+msgid "Incorrect address"
+msgstr "Некорректный адрес"
+
+#: podsec-u7s-functions:378
+msgid "Variable value"
+msgstr "Значение переменной"
+
+#: podsec-u7s-functions:378
+msgid "must start with a symbol"
+msgstr "должно начитаться с символа"
+
+#: podsec-u7s-functions:391 podsec-u7s-functions:407 podsec-u7s-functions:462
+msgid "Warning"
+msgstr "Предупреждение"
+
+#: podsec-u7s-functions:391
+msgid "version of kubeadm command"
+msgstr "команда kubeadm версии"
+
+#: podsec-u7s-functions:391 podsec-u7s-functions:407
+msgid "already installed"
+msgstr "уже установлена"
+
+#: podsec-u7s-functions:397 podsec-u7s-functions:413 podsec-u7s-functions:421
+msgid "Minor version"
+msgstr "Минорная версия"
+
+#: podsec-u7s-functions:397 podsec-u7s-functions:413
+msgid "matches the established one"
+msgstr "совпадает с устанавленной"
+
+#: podsec-u7s-functions:407
+msgid "command crio version"
+msgstr "команда crio версии"
+
+#: podsec-u7s-functions:421 podsec-u7s-functions:453
+msgid "less than 1.26 is not supported"
+msgstr "менее 1.26 не поддерживается"
+
+#: podsec-u7s-functions:441
+msgid "Installing packages"
+msgstr "Установка пакетов"
+
+#: podsec-u7s-functions:445
+msgid "Version"
+msgstr "Версия"
+
+#: podsec-u7s-functions:445 podsec-u7s-functions:449
+msgid "packages"
+msgstr "пакетов"
+
+#: podsec-u7s-functions:445 podsec-u7s-functions:669 podsec-u7s-functions:760
+#: podsec-u7s-functions:780 podsec-u7s-functions:796
+msgid "unavailable"
+msgstr "недоступна"
+
+#: podsec-u7s-functions:449
+msgid "Trying to install a previous minor version"
+msgstr "Пытаемся установить предыдущую минорную версию"
+
+#: podsec-u7s-functions:453
+msgid "Minor version of kubeadm"
+msgstr "Минорная версия kubeadm"
+
+#: podsec-u7s-functions:462
+msgid ""
+"The kubeadm minor version is more than one release behind the kubernetes "
+"image minor version. Deployment issues may occur"
+msgstr "Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием"
+
+#: podsec-u7s-functions:639
+msgid "Kubernet version"
+msgstr "Kubernet-версия"
+
+#: podsec-u7s-functions:639
+msgid "not supported"
+msgstr "не поддерживается"
+
+#: podsec-u7s-functions:663 podsec-u7s-functions:669
+msgid "Image version"
+msgstr "Версия образа"
+
+#: podsec-u7s-functions:663 podsec-u7s-functions:669
+msgid "with tag"
+msgstr "с тегом"
+
+#: podsec-u7s-functions:663
+msgid "available. Loading..."
+msgstr "доступна. Загружаем..."
+
+#: podsec-u7s-functions:676
+msgid "Within the specified minor version"
+msgstr "В рамках указанной минорной версии"
+
+#: podsec-u7s-functions:676
+msgid "no images available"
+msgstr "нет доступных образов"
+
+#: podsec-u7s-functions:678
+msgid "The following minor versions are available"
+msgstr "Доступны следующие минорные версии"
+
+#: podsec-u7s-functions:681
+msgid "and the following patch versions of images"
+msgstr "и следующие patch-версии образов"
+
+#: podsec-u7s-functions:684
+msgid ""
+"To install one of the specified image versions, specify the selected image "
+"version in the environment variable"
+msgstr "Для установки одной из указанных версий образов укажите выбранную версию образа в переменной среды"
+
+#: podsec-u7s-functions:687
+msgid "To install the latest patch versions"
+msgstr "Для установки последних patch-версий"
+
+#: podsec-u7s-functions:687
+msgid "images set environment variable"
+msgstr "образов установите переменную среды"
+
+#: podsec-u7s-functions:687
+msgid "or"
+msgstr "или"
+
+#: podsec-u7s-functions:700
+msgid "Within the framework of the minor version"
+msgstr "В рамках минорной версии"
+
+#: podsec-u7s-functions:700
+msgid "images"
+msgstr "образы"
+
+#: podsec-u7s-functions:700
+msgid "are absent"
+msgstr "отсутсвуют"
+
+#: podsec-u7s-functions:705
+msgid "Selected available on the registry"
+msgstr "Выбран доступный на регистраторе"
+
+#: podsec-u7s-functions:705
+msgid "last tag"
+msgstr "последний тег"
+
+#: podsec-u7s-functions:760 podsec-u7s-functions:780 podsec-u7s-functions:796
+msgid "Image"
+msgstr "Образ"
+
+#: podsec-u7s-functions:760 podsec-u7s-functions:780 podsec-u7s-functions:796
+msgid "on registry"
+msgstr "на регистраторе"
+
+#: podsec-u7s-functions:808 podsec-u7s-functions:814
+msgid "Loading the image"
+msgstr "Загрузка образа"
+
+#: podsec-u7s-functions:823 podsec-u7s-functions:827 podsec-u7s-functions:831
+#: podsec-u7s-functions:835 podsec-u7s-functions:839
+msgid "For the image"
+msgstr "Для образа"
+
+#: podsec-u7s-functions:823 podsec-u7s-functions:827 podsec-u7s-functions:831
+#: podsec-u7s-functions:835 podsec-u7s-functions:839
+msgid "image with tag selected"
+msgstr "выбран образ с тегом"
+
+#: podsec-u7s-functions:883
+msgid "Interface"
+msgstr "Интерфейс"
+
+#: podsec-u7s-functions:883
+msgid "supports network"
+msgstr "поддерживает сеть"
+
+#: podsec-u7s-functions:883
+msgid "intersecting with the internal network"
+msgstr "пересекающуюся с внутренней сетью"
+
+#: podsec-u7s-functions:883
+msgid "kubernetes cluster"
+msgstr "kubernetes кластера"
+
+#: podsec-u7s-kubeadm:23
+msgid "FORMAT"
+msgstr "Формат"
+
+#: podsec-u7s-kubeadm:104
+msgid "An etcd cluster data directory was found on the server"
+msgstr "На сервере обнаружен каталог данных etcd-кластера"
+
+#: podsec-u7s-kubeadm:104
+msgid "from previous deployment. Clear directory? y/N"
+msgstr "от предыдущего разворачивания. Очистить каталог? y/N"
+
+#: podsec-u7s-kubeadm:242
+msgid "Configuring image usage"
+msgstr "Настройка использования образа"
+
+#: podsec-u7s-kubeadm:242
+msgid "when starting pods in podman (podman pod init)"
+msgstr "при запуска pod'ов в podman (podman pod init)"
+
+#: podsec-u7s-kubeadm:341
+msgid "Cluster deployment failed"
+msgstr "Разворачивание кластера закончилось неудачно"
+
+#: podsec-u7s-kubeadm:343
+msgid "Login as user u7s-admin"
+msgstr "Выполните вход в пользователя u7s-admin"
+
+#: podsec-u7s-kubeadm:346
+msgid "and check the status with the command"
+msgstr "и посмотрите статус командой"
+
+#: podsec-u7s-kubeadm:346
+msgid "and system logs with command"
+msgstr "и системные логи командой"
+
+#: podsec-u7s-kubeadm:369
+msgid "The cluster administrator configuration file is not generated"
+msgstr "Конфигурационный файл администратора кластера не сформирован"

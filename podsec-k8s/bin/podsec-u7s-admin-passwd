@@ -1,4 +1,6 @@
 #!/bin/sh
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s'
 
-echo "Введите пароль пользователя u7s-admin:"
+echo "$gettext('Enter the password for the user u7s-admin')" >&2
 passwd u7s-admin
