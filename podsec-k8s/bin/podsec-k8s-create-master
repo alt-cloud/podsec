@@ -1,4 +1,6 @@
 #!/bin/sh
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s'
 
 source podsec-u7s-functions
 setRegistryName
@@ -19,15 +21,15 @@ then
 fi
 
 # Запуск сервиса kubelet
-echo "Запуск сервиса kubelet"
+echo "$(gettext 'Launching the kubelet service')" >&2
 systemctl enable --now crio kubelet
 
 # Инициализация master-узла кластера
-echo "Инициализация master-узла кластера"
+echo "$(gettext 'Initializing the cluster master node')" >&2
 kubeadm init --pod-network-cidr=10.244.0.0/16 --kubernetes-version=1.26.3 --image-repository="registry.local/$U7S_PLATFORM"
 
 # Настройка root на роль администратора кластера
-echo "Настройка root на роль администратора кластера"
+echo "$(gettext 'Configuring root as a cluster administrator')" >&2
 mkdir /root/.kube
 cp /etc/kubernetes/admin.conf /root/.kube/config
 chmod -R 600 /root/.kube
@@ -35,15 +37,13 @@ pwd=$PWD
 su -c "kubectl apply -f /etc/podsec/u7s/manifests/kube-flannel.yml"
 
 # Настройка $user на роль администратора кластера
-echo "Настройка $user на роль администратора кластера"
+echo "$(gettext 'Setting') $user $(gettext 'for the role of cluster administrator')" >&2
 cd /home/$user
 mkdir .kube
 cp /etc/kubernetes/admin.conf .kube/config
 group=$(id -g -n)
 chown -R $user:$group .kubechown -R $user:$user .kube
 chmod -R 0700 .kube
-
-#!/bin/sh
 
 if [ ! -f "/etc/kubernetes/audit/policy.yaml" ]
 then

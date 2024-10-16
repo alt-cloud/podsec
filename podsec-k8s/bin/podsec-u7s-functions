@@ -56,7 +56,7 @@ nsenter_main() {
 
 nsenter__nsenter_retry_loop() {
 	local max_trial=10
-	log_info_n "Entering RootlessKit namespaces: "
+	log_info_n "$(gettext 'Entering RootlessKit namespaces'): "
 	for ((i = 0; i < max_trial; i++)); do
 		rc=0
 		nsenter__nsenter echo OK 2>/dev/null || rc=$?
@@ -67,7 +67,7 @@ nsenter__nsenter_retry_loop() {
 		sleep 1
 	done
 	echo ""
-	log_error "nsenter failed after ${max_trial} attempts, RootlessKit not running?"
+	log_error "$(gettext 'nsenter failed after') ${max_trial} $(gettext 'attempts, RootlessKit not running')?"
 	return 1
 }
 
@@ -126,7 +126,7 @@ maskAddr() {
   mask=$2
   if [ $mask -eq 0 -o $mask -gt 32 ] 2>/dev/null
   then
-    echo "Неверная маска $mask" >&2
+		echo "$(gettext 'Incorrect mask') $mask" >&2
     exit
   fi
   let tail=32-$mask
@@ -136,7 +136,7 @@ maskAddr() {
   IFS=$ifs
   if [ $# -ne 4 ] 2>/dev/null
   then
-    echo "Неверный адрес $addr" >&2
+		echo "$(gettext 'Incorrect address') $addr" >&2
     exit
   fi
 
@@ -196,7 +196,7 @@ getExtDev() {
 	IFS=$ifs
 	if [ $# -ne 4 ]
 	then
-		echo "Некорректный адрес '$extIP'" >&2
+		echo "$(gettext 'Incorrect address') $extIP" >&2
 		exit
 	fi
 	ip a | grep $extIP |
@@ -234,7 +234,7 @@ getCidr() {
 	IFS=$ifs
 	if [ $# -ne 4 ]
 	then
-		echo "Некорректный адрес --service-cidr '$cidr'" >&1
+		echo "$(gettext 'Incorrect address') --service-cidr '$cidr'" >&2
 		exit 1
 	fi
 # 	echo $cidr $serviceMask
@@ -369,7 +369,7 @@ function installKubeadm() {
 	fi
 	if [ "${U7S_KUBEVERSION:0:1}" != 'v' ]
 	then
-		echo "Значение переменной U7S_KUBEVERSION должно начитаться с символа 'v'"
+		echo "$(gettext 'Variable value') U7S_KUBEVERSION $(gettext 'must start with a symbol') 'v'" >&2
 		exit
 	fi
 	pkgNames=
@@ -381,12 +381,12 @@ function installKubeadm() {
 			kubePatchVersionByKubeadm=${KubePatchVersionByKubeadm:1}
 			kubeMinorVersionByKubeadm=$(getMinorVersion $kubePatchVersionByKubeadm)
 			KubeMinorVersionByKubeadm="v$kubeMinorVersionByKubeadm"
-			echo "Предупреждение: команда kubeadm версии $kubePatchVersionByKubeadm уже установлена"
+			echo "$(gettext 'Warning'): $(gettext 'version of kubeadm command') $kubePatchVersionByKubeadm $(gettext 'already installed')" >&2
 			if [ "$KubeMinorVersionByKubeadm" != "$KubeMinorVersion" ]
 			then
 				pkgNames+=" kubernetes${KubeMinorVersionByKubeadm:1}-kubeadm"
 			else
-				echo "Минорная версия $U7S_KUBEVERSION kubeadm совпадает с устанавленной $KubeMinorVersionByKubeadm"
+			echo "$(gettext 'Minor version') $U7S_KUBEVERSION kubeadm $(gettext 'matches the established one') $KubeMinorVersionByKubeadm" >&2
 			fi
 		fi
 		if [ -f '/usr/bin/crio' ]
@@ -395,19 +395,19 @@ function installKubeadm() {
 			KubePatchVersionByCrio="v$kubePatchVersionByCrio"
 			kubeMinorVersionByCrio=$(getMinorVersion $kubePatchVersionByCrio)
 			KubeMinorVersionByCrio="v$kubeMinorVersionByCrio"
-			echo "Предупреждение: команда crio версии $kubePatchVersionByCrio уже установлена"
+			echo "$(gettext 'Warning'): $(gettext 'command crio version') $kubePatchVersionByCrio $(gettext 'already installed')" >&2
 			if [ "${kubeMinorVersionByCrio}" != "$kubeMinorVersion" ]
 			then
 				pkgNames+=" kubernetes${kubeMinorVersionByCrio}-crio cri-o${kubeMinorVersionByCrio} cri-tools${kubeMinorVersionByCrio}"
 			else
-				echo "Минорная версия ${kubeMinorVersionByCrio} crio совпадает с устанавливаемой"
+			echo "$(gettext 'Minor version') ${kubeMinorVersionByCrio} crio $(gettext 'matches the established one') $KubeMinorVersionByKubeadm" >&2
 			fi
 		fi
   fi
 
 	if [[ "$kubeMinorVersion" < '1.26' ]]
 	then
-		echo "Минорная версия kubeadm $kubeMinorVersion менее 1.26 не поддерживается"
+		echo "$(gettext 'Minor version')  kubeadm $kubeMinorVersion $(gettext 'less than 1.26 is not supported')" >&2
 		exit 1
 	fi
 	minorDelta=0
@@ -426,16 +426,16 @@ function installKubeadm() {
 	if [ -n "$installPkgNames" ]
 	then
 		installPkgNames+=" cri-tools$kubeMinorVersion"
-		echo "Установка пакетов $installPkgNames"
+		echo "$(gettext 'Installing packages') $installPkgNames" >&2
 		until apt-get install -y $installPkgNames 2>/dev/null
 		do
-			echo "Версия $kubeMinorVersion пакетов $installPkgNames недоступна"
+			echo "$(gettext 'Version') $kubeMinorVersion $(gettext 'packages') $installPkgNames $(gettext 'unavailable')" >&2
 			kubeMinorVersion=$(decreaseMinorVersion $kubeMinorVersion)
 			installPkgNames="kubernetes$kubeMinorVersion-kubeadm  kubernetes$kubeMinorVersion-crio kubernetes$kubeMinorVersion-kubelet"
-			echo "Пытаемся установить предыдущую минорную версию $kubeMinorVersion пакетов $installPkgNames"
+			echo "$(gettext 'Trying to install a previous minor version') $kubeMinorVersion $(gettext 'packages') $installPkgNames" >&2
 			if [[ "$kubeMinorVersion" < '1.26' ]]
 			then
-				echo "Минорная версия kubeadm $kubeMinorVersion менее 1.26 не поддерживается"
+				echo "$(gettext 'Minor version of kubeadm') $kubeMinorVersion $(gettext 'less than 1.26 is not supported')" >&2
 				exit 1
 			fi
 			let minorDelta+=1
@@ -443,7 +443,7 @@ function installKubeadm() {
 		usermod -G kube,systemd-journal,podman u7s-admin
 		if [ $minorDelta -gt 1 ]
 		then
-			echo "Предупреждение: Минорная версия kubeadm меньше минорной версии kubernetes-образов более чем на один релиз. Возможны проблемы с разворачиванием" >&2
+			echo "$(gettext 'Warning'): $(gettext 'The kubeadm minor version is more than one release behind the kubernetes image minor version. Deployment issues may occur')" >&2
 		fi
 	fi
 }
@@ -619,7 +619,7 @@ function getKuberImages() {
   imageList=$(/usr/bin/kubeadm --kubernetes-version=$U7S_KUBEVERSION --image-repository $U7S_REGISTRY_PLATFORM config images list 2>/dev/null)
   if [ -z "$imageList" ]
   then
-    echo "Kubernet-версия $U7S_KUBEVERSION не поддерживается"
+		echo "$(gettext 'Kubernet version') $U7S_KUBEVERSION  $(gettext 'not supported')" >&2
     exit 1
   fi
   imageList+=" $U7S_ARCHIMAGES"
@@ -642,25 +642,26 @@ function getKuberImages() {
 
     if checkKubernetesPatchVersions $minorVersion $imageWithoutRegistryAndTag $imageTag
     then
-      echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag доступна. Загружаем... " >&2
+			echo "$(gettext 'Image version') $imageWithoutRegistryAndTag $(gettext 'with tag') $imageTag $(gettext 'available. Loading...')" >&2
       skopeo --override-arch $arch copy\
 				docker://$fullImage\
 				containers-storage:[$storage]$fullImage 2>/dev/null  || :
     else
-      echo "Версия образа $imageWithoutRegistryAndTag с тегом $imageTag недоступна" >&2
+			echo "$(gettext 'Image version') $imageWithoutRegistryAndTag  $(gettext 'with tag') $imageTag $(gettext 'unavailable')" >&2
       if [ "$U7S_SETAVAILABLEIMAGES" != 'yes' ]
       then
 				lastPatchVerison=$(getKuberLastPatchVersion $minorVersion $imageWithoutRegistryAndTag)
 				if [ -z "$lastPatchVerison" ]
 				then
-					echo "В рамках указанной минорной версии $minorVersion нет доступных образов"
-					echo -ne "Доступны следующие минорные версии: "
+					echo "$(gettext 'Within the specified minor version') $minorVersion $(gettext 'no images available')" >&2
+					echo  -ne "$(gettext 'The following minor versions are available'): " >&2
 					getKubernetesMinorVersions $imageWithoutRegistryAndTag
-					echo -ne "и следующие patch-версии образов: "
+					echo -ne "$(gettext 'and the following patch versions of images'): " >&2
 					getKubernetesPatchVersions $imageWithoutRegistryAndTag
-					echo -ne "Для установки одной из указанных версий образов укажите выбранную версию образа в переменной среды:\nexport U7S_KUBEVERSION=...\n"
+					echo -ne "$(gettext 'To install one of the specified image versions, specify the selected image version in the environment variable')\nexport U7S_KUBEVERSION=...\n" >&2
+# 					echo -ne "Для установки одной из указанных версий образов укажите выбранную версию образа в переменной среды:\nexport U7S_KUBEVERSION=...\n"
 				else
-					echo -ne "Для установки последних patch-версий $lastPatchVerison образов установите переменнyю среды:\nexport U7S_KUBEVERSION=$lastPatchVerison\nили\nexport U7S_SETAVAILABLEIMAGES=yes\n" >&2
+					echo -ne "$(gettext 'To install the latest patch versions') $lastPatchVerison $(gettext 'images set environment variable'):\nexport U7S_KUBEVERSION=$lastPatchVerison\n$(gettext 'or')\nexport U7S_KUBEVERSION=$lastPatchVerison\n" >&2
 				fi
         exit 1
       else
@@ -672,11 +673,11 @@ function getKuberImages() {
         repoImageLastTag=$(getKuberLastPatchVersion "$mVersion" $imageWithoutRegistryAndTag)
         if [ -z "$repoImageLastTag" ]
         then
-					echo "В рамках миновной версии $mVersion образы $imageWithoutRegistryAndTag отсутсвуют"
+					echo -ne "$(gettext 'Within the framework of the minor version') $mVersion $(gettext 'images') $imageWithoutRegistryAndTag $(gettext 'are absent')" >&2
 					exit 1
         fi
         imageWithNewTag="$imageWithoutTag:$repoImageLastTag"
-        echo "Выбран доступный на регистраторе $U7S_REGISTRY последний тег :$repoImageLastTag" >&2
+        echo -ne "$(gettext 'Selected available on the registry') $U7S_REGISTRY $(gettext 'last tag') $repoImageLastTag" >&2
         # Загрузка образа в rootless каталог образов
         skopeo --override-arch $arch\
 					copy docker://$imageWithNewTag\
@@ -728,7 +729,11 @@ function getKuberImages() {
 if [ -z "$U7S_FLANNEL_TAG" ]
 then
   flannelTag=$(getKuberLastPatchVersion 'v' "${prefix}flannel" 2>/dev/null)
-  if [ -z "$flannelTag" ]; then echo "Образ ${prefix}flannel на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+  if [ -z "$flannelTag" ];
+  then
+		echo "$(gettext 'Image') ${prefix}flannel $(gettext 'on registry') $U7S_REGISTRY $(gettext 'unavailable')" >&2
+		exit;
+	fi
   U7S_FLANNEL_TAG=$flannelTag
   flannelImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel:$flannelTag"
 else
@@ -743,7 +748,11 @@ flannelCniPluginTag=$3
 if [ -z "$U7S_FLANNELCNIPLUGIN_TAG" ]
 then
   U7S_FLANNELCNIPLUGIN_TAG=$flannelCniPluginTag
-  if [ -z "$flannelCniPluginTag" ]; then echo "Образ ${prefix}flannel-cni-plugin на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+  if [ -z "$flannelCniPluginTag" ];
+  then
+		echo "$(gettext 'Image') ${prefix}flannel-cni-plugin $(gettext 'on registry') $U7S_REGISTRY $(gettext 'unavailable')" >&2
+		exit;
+	fi
   flannelCNIImage="$U7S_FLANNEL_REGISTRY/${prefix}flannel-cni-plugin:$flannelCniPluginTag"
 else
   flannelCNIImage="$flannelCniPluginRegistry/$flannelCniPluginImage:$flannelCniPluginTag"
@@ -754,21 +763,25 @@ skopeo --override-arch $arch copy docker://$flannelCNIImage containers-storage:[
   then
     # U7S_CERTMANAGER_TAG="v1.9.1"
     U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
-    if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+    if [ -z "$U7S_CERTMANAGER_TAG" ];
+    then
+			echo "$(gettext 'Image') ${prefix}cert-manager-controller $(gettext 'on registry') $U7S_REGISTRY $(gettext 'unavailable')" >&2
+			exit;
+		fi
 
     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"  || :
+    echo -ne "\n--------------------------\n$(gettext 'Loading the image') $certManagesImage\n"  || :
     skopeo --override-arch $arch copy\
 			docker://$certManagesImage\
 			containers-storage:[$storage]$certManagesImage  || :
 
     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" 2>/dev/null
+    echo -ne "\n--------------------------\n$(gettext 'Loading the image') $certManagesImage\n" >&2
     skopeo --override-arch $arch copy\
 			docker://$certManagesImage\
 			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
 
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"
+    echo -ne "\n--------------------------\n$(gettext 'Loading the image') $certManagesImage\n" >&2
     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
     skopeo --override-arch $arch copy\
 			docker://$certManagesImage\
@@ -776,19 +789,19 @@ skopeo --override-arch $arch copy docker://$flannelCNIImage containers-storage:[
 
   fi
 
-  echo "Для образа flannel выбран образ с тегом $U7S_FLANNEL_TAG"
+  echo "$(gettext 'For the image') flannel $(gettext 'image with tag selected') $U7S_FLANNEL_TAG" >&2
   export U7S_FLANNEL_IMAGE="${prefix}flannel:$U7S_FLANNEL_TAG"
 
-  echo "Для образа flannel-cni-plugin выбран образ с тегом $U7S_FLANNELCNIPLUGIN_TAG"
+  echo "$(gettext 'For the image') flannel-cni-plugin $(gettext 'image with tag selected') $U7S_FLANNELCNIPLUGIN_TAG" >&2
   export U7S_FLANNEL_CNI_IMAGE="${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
 
-  echo "Для образа cert-manager-controller выбран образ с тегом $U7S_CERTMANAGER_TAG"
+  echo "$(gettext 'For the image') cert-manager-controller $(gettext 'image with tag selected') $U7S_CERTMANAGER_TAG" >&2
   export U7S_CERTMANAGER_CONTROLLER_IMAGE="$U7S_PLATFORM/cert-manager-controller:$U7S_CERTMANAGER_TAG"
 
-  echo "Для образа cert-manager-cainjector выбран образ с тегом $U7S_CERTMANAGER_TAG"
+  echo "$(gettext 'For the image') cert-manager-cainjector $(gettext 'image with tag selected') $U7S_CERTMANAGER_TAG" >&2
   export U7S_CERTMANAGER_CAINJECTOR_IMAGE="$U7S_PLATFORM/cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
 
-  echo "Для образа cert-manager-webhook выбран образ с тегом $U7S_CERTMANAGER_TAG"
+   echo "$(gettext 'For the image') cert-manager-webhook $(gettext 'image with tag selected') $U7S_CERTMANAGER_TAG" >&2
   export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
 
 	eval chown -R $user:$user ~$user/.local
@@ -831,7 +844,7 @@ function checkNetCrossing {
 			maskedAddr=$(maskAddr "$addr" "$minMask")
 			if [ "$maskedAddr" = "$maskedNet" ]
 			then
-				echo "Интерфейс $dev поддерживает сеть $AddrMask пересекающуюся с внутренней сетью $net kubernetes кластера"
+				echo "$(gettext 'Interface') $dev $(gettext 'supports network') $AddrMask $(gettext 'intersecting with the internal network') $net $(gettext 'kubernetes cluster')" >&2
 				exit 1
 			fi
 		done

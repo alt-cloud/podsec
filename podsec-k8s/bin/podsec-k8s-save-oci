@@ -12,24 +12,27 @@
 # Так как скрипт производит загрузку образов различных архитектур
 # последняя загруженная в containers-storage: архитектура может отличаться от текущей архитектуры процессора
 # При необходимости нужно будет произвести перезагрузку образов для рабочей архитектуры процессора
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s'
 
+PROGRAMM=$0
 if [ $# -le 1 ]
 then
-  echo "Не указан каталог архивирования образов"
-  echo -ne "Формат:\n\t$0 <каталог_архивирования_образов> <архитектура>,<архитектура>,...|all\n"
+  echo "$(gettext 'Image archiving directory not specified')" >&2
+  echo "$(gettext 'Format'):\n\t$PROGRAMM $(gettext '<image_archiving_directory> <architecture>,<architecture>'),...|all\n')" >&2
   exit 1
 fi
 
 if [ $# -lt 2 ]
 then
-  echo "Не указан список архитектур"
-  echo -ne "Формат:\n\t$0 <каталог_архивирования_образов> <архитектура>,<архитектура>,...|all\n"
+  echo "$(gettext 'No list of architectures specified')" >&2
+  echo "$(gettext 'Format'):\n\t$PROGRAMM $(gettext '<image_archiving_directory> <architecture>,<architecture>'),...|all\n')" >&2
   exit 1
 fi
 
 if [ $USER != 'root' -o $(id -u) != 0 -o $(id -g) != 0 ]
 then
-  echo "Скрипт $0 должен запускаться от пользователя root"
+  echo "$(gettext 'Script') $PROGRAMM $(gettext 'must be run as root user')" >&2
   exit 1
 fi
 
@@ -51,8 +54,8 @@ then
   shift
   if [ "$platform" != "$U7S_PLATFORM" ]
   then
-    echo "Текущая платформа $U7S_PLATFORM не совпадает с загружаемой"
-    echo "Продолжать? (Yes/no)"
+    echo "$(gettext 'Current platform') $U7S_PLATFORM $(gettext 'does not match the downloaded one')" >&2
+    echo "$(gettext 'Continue')? (Yes/no)" >&2
     read answer
     if [ "$answer" == 'n' ]
     then
@@ -65,13 +68,13 @@ fi
 case $arch in
   amd64 | arm64 | arm | ppc64le | 386) :;;
   *)
-    echo "Неизвестная архитектура $arch";
-    echo "Допустимые: amd64, arm64, arm, ppc64le, 386"
-    echo -ne "Формат:\n\t$0 каталог_разворачивания_архивов архитектура [платформа]\n"
+    echo "$(gettext 'Unknown architecture') $arch" >&2
+    echo "$(gettext 'Acceptable:') : amd64, arm64, arm, ppc64le, 386" >&2
+    echo "$(gettext 'Format'):\n\t$PROGRAMM $(gettext '<image_archiving_directory> <architecture>,<architecture>'),...|all\n')" >&2
     exit 2
 esac
 
-echo "Загрузка kubernetes-образов архитектуры $arch платформы $U7S_PLATFORM"
+echo "$(gettext 'Downloading kubernetes images of architecture') $arch $(gettext 'platforms') $U7S_PLATFORM" >&2
 storage="share/usernetes/images/$U7S_PLATFORM/$arch"
 eval mkdir -p ~$USER/.local/$storage
 
