@@ -138,6 +138,7 @@ sysconfdir ?= /etc
 bindir ?= $(prefix)/bin
 libexecdir ?= $(prefix)/libexec
 datadir ?= $(prefix)/share
+localedir ?= $(datadir)/locale/ru/LC_MESSAGES
 docdir ?= $(datadir)/doc/podsec
 mandir ?= $(datadir)/man
 man1dir ?= $(mandir)/man1
@@ -168,6 +169,7 @@ install: all
 	cd ./podsec/bin;$(INSTALL) -m755 $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec/bin;$(INSTALL) -m644 $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec/man;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec/po; msgfmt  podsec.po -o podsec.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec.mo $(DESTDIR)/$(localedir)/
 	# PODSEC-K8S
 	cd ./podsec-k8s/bin;$(INSTALL) -m755 $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/bin;$(INSTALL) -m644 $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
@@ -181,6 +183,7 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes/containers
+	cd ./podsec-k8s/po; msgfmt  podsec-k8s.po -o podsec-k8s.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-k8s.mo $(DESTDIR)/$(localedir)/
 
 	# bin
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
@@ -211,10 +214,13 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(unitdir)/user@.service.d/
 	$(INSTALL) -m644 usernetes/services/etc_systemd_system_user@.service.d_delegate.conf $(DESTDIR)$(unitdir)/user@.service.d/delegate.conf
 	$(INSTALL) -m644 usernetes/services/u7s.service $(DESTDIR)$(unitdir)/u7s.service
+
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/man;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+	cd ./podsec-k8s-rbac/po; msgfmt  podsec-k8s-rbac.po -o podsec-k8s-rbac.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-k8s-rbac.mo $(DESTDIR)/$(localedir)/
+
 	# PODSEC-INOTIFY
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
@@ -226,6 +232,7 @@ install: all
 	$(INSTALL) -D -m0644 $(PODSEC_NAGIOS_CONF) $(DESTDIR)$(sysconfdir)/nagios/templates/podsec-services.cfg
 	$(INSTALL) -D -m0644 $(PODSEC_NRPE_CONF) $(DESTDIR)$(sysconfdir)/nagios/nrpe-commands/podsec-commands.cfg
 	for f in $(PODSEC_NAGWAD_FILTERS); do $(INSTALL) -D -m0644 $$f $(DESTDIR)$(sysconfdir)/nagwad/$${f##*/}; done
+	cd ./podsec-inotify/po; msgfmt  podsec-inotify.po -o podsec-inotify.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-inotify.mo $(DESTDIR)/$(localedir)/
 
 clean:
 
