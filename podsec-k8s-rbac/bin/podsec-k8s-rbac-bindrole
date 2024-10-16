@@ -1,11 +1,13 @@
 #!/bin/sh
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s-rbac'
 
 cmdname=$(basename $0)
 . podsec-k8s-rbac-functions
 
 if [ $# -lt 4 -o $# -gt 5 ]
 then
-  echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]"
+  echo -ne "$(gettext 'Format':)\n$cmdname $(gettext 'username') role|clusterrole|role=clusterrole $(gettext 'role') $(gettext 'role_bundle_name') [namespace]" >&2
   exit 1
 fi
 
@@ -28,7 +30,7 @@ fi
 
 if [ -z "$isSystem" -a ! -d /home/$user  ]
 then
-  echo "Пользователь $user не существует"
+  echo -ne "$(gettext 'User') $user $(gettext 'does not exist')" >&2
   exit 1
 fi
 
@@ -39,20 +41,21 @@ case $bindedRoleType in
     roleType="role"
     bindedRoleType='clusterrole'
     break;;
-  *) echo "Неверный тип кластерной роли $bindedRoleType";
-    echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]";
+  *)
+    echo "$(gettext 'Invalid cluster role type') $bindedRoleType" >&2
+    echo -ne "$(gettext 'Format':)\n$cmdname $(gettext 'username') role|clusterrole|role=clusterrole $(gettext 'role') $(gettext 'role_bundle_name') [namespace]" >&2
     exit 1
 esac
 
 if [ -n "$namespace" -a "$roleType" == 'clusterrole' ]
 then
-  echo "namespace неприменимо к кластерной роли"
+  echo "$(gettext 'namespace is not applicable to cluster role')" >&2
   exit 1
 fi
 
 if [ -z "$namespace" -a  "$roleType" == 'role' ]
 then
-  echo "При привязке обычной роли необходимо указать namespace"
+   echo "$(gettext 'When binding a regular role, you must specify a namespace')"  >&2
   exit 1
 fi
 
@@ -60,11 +63,11 @@ if ! kubectl $namespace get ${bindedRoleType} $roleName >/dev/null 2>&1
 then
   if [ "$roleType" == 'clusterrole' ]
   then
-    roleTxt="Кластерная роль"
+    roleTxt="$(gettext 'Cluster role')"
   else
-    roleTxt="Роль"
+    roleTxt="$(gettext 'Role')"
   fi
-  echo "$roleTxt '$roleName' отсутствует"
+  echo "$roleTxt '$roleName' $(gettext 'absent')" >&2
   exit 1
 fi
 

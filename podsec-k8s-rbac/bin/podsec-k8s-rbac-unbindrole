@@ -1,11 +1,13 @@
 #!/bin/sh
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s-rbac'
 
-cmdname=$0
+cmdname=$(basename $0)
 . podsec-k8s-rbac-functions
 
 if [ $# -lt 4 -o $# -gt 5 ]
 then
-  echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]"
+  echo -ne "$(gettext 'Format'):\n$cmdname $(gettext 'username') role|clusterrole|role=clusterrole $(gettext 'role') $(gettext 'role_bundle_name') [namespace]" >&2
   exit 1
 fi
 
@@ -28,7 +30,7 @@ fi
 
 if [ -z "$isSystem" -a ! -d /home/$user  ]
 then
-  echo "Пользователь $user не существует"
+  echo "$(gettext 'User') $user $(gettext 'does not exist')" >&2
   exit 1
 fi
 
@@ -39,13 +41,14 @@ case $bindedRoleType in
     roleType="role"
     bindedRoleType='clusterrole'
     break;;
-  *) echo "Неверный тип кластерной роли $bindedRoleType";
-    echo -ne "Формат:\n$0 имя_пользователя role|clusterrole|role=clusterrole роль имя_связки_роли [namespace]";
+  *)
+    echo "$(gettext 'Invalid cluster role type') $bindedRoleType" >&2
+  echo -ne "$(gettext 'Format':)\n$cmdname $(gettext 'username') role|clusterrole|role=clusterrole $(gettext 'role') $(gettext 'role_bundle_name') [namespace]" >&2
 esac
 
 if [ -n "$namespace" -a $roleType == 'clusterrole' ]
 then
-  echo "namespace неприменимо к кластерной роли"
+  echo "namespace $namespace $(gettext 'not applicable to cluster role')" >&2
   exit 1
 fi
 
@@ -53,18 +56,18 @@ if ! roleNameDesc=$(kubectl $namespace get ${roleType}binding $bindName -o json 
 then
   if [ $roleType == 'clusterrole' ]
   then
-    roleTxt="Кластерная роль"
+    roleTxt="$(gettext 'Cluster role')"
   else
-    roleTxt="Роль"
+    roleTxt="$(gettext 'Role')"
   fi
-  echo "$roleTxt '$roleName' отсутствует"
+  echo "$roleTxt '$roleName' $(gettext 'absent')" >&2
   exit 1
 fi
 
 deletedSubjects=$(echo $roleNameDesc | jq '[.subjects[] | select(.name!="'$user'")]')
 if [ -z "$deletedSubjects" ]
 then
-  echo "Пользователь $user отсутствует в связке роли $bindName"
+  echo "$(gettext 'User') $user $(gettext 'missing from the role link') $bindName" >&2
   exit 1
 else
   if [ "$deletedSubjects" == '[]' ]

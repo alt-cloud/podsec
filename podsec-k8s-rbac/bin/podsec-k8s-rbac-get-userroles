@@ -1,14 +1,19 @@
 #!/bin/sh
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s-rbac'
 
+export PROGRAMM=$0
 if [ $# -lt 1 -a $# -gt 2 ]
 then
-  echo -ne "Неверное число параметров.\nФормат:\n$0 пользователь [showRules]\n"
+  echo  "$(gettext 'Invalid number of parameters'):" >&2
+  echo -ne "$(gettext 'Format':)\n$PROGRAMM $(gettext 'user') [showRules]\n" >&2
   exit 1
 fi
 
 if [ $# -eq 2 -a "$2" != 'showRules' ]
 then
-  echo -ne "Неверный второй параметр.\nФормат:\n$0 пользователь [showRules]\n"
+  echo "$(gettext 'Invalid second parameter')." >&2
+  echo -ne "$(gettext 'Format':)\n$PROGRAMM $(gettext 'user') [showRules]\n" >&2
   exit 1
 fi
 user=$1
@@ -29,7 +34,6 @@ then
     clusterRole+=",\"unbindCmd\":\"$unbindCmd\""
     if [ "$showRules" == 'showRules' ]
     then
-      # echo "Правила роли:"
       rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
       clusterRole+=",\"rules\":$rules"
     fi
@@ -38,32 +42,6 @@ then
   done
 fi
 clusterRoles="\"clusterRoles\":[$clusterRoles]"
-
-# roles=
-# set -- $(kubectl get rolebinding  -o json 2>/dev/null |
-#   jq '.items[] | select((.subjects!=null and .subjects[].name=="'$user'")) | .metadata.name,.roleRef.kind,.roleRef.name')
-# if [ $# -ge 3 ]
-# then
-#   while [ $# -gt 0 ]
-#   do
-#     bindName=${1:1:-1}
-#     roleType=${2:1:-1}
-#     roleName=${3:1:-1}
-#     shift;shift;shift
-#     role="\"bindName\":\"$bindName\",\"roleType\":\"$roleType\",\"roleName\":\"$roleName\""
-#     unbindCmd="podsec-k8s-rbac-unbindrole $user role $roleName $bindName"
-#     role+=",\"unbindCmd\":\"$unbindCmd\""
-#     if [ "$showRules" == 'showRules' ]
-#     then
-#       # echo "Правила роли:"
-#       rules=$(kubectl get $roleType $roleName -o json | jq '.rules')
-#       role+=",\"rules\":$rules"
-#     fi
-#     roles+=${roles:+,}
-#     roles+="{$role}"
-#   done
-# fi
-# allnamespaceRoles="\"allNamespaces\":[$roles]"
 
 namespaceRoles=
 for namespace in $(kubectl get ns -o json | jq '.items[].metadata.name')

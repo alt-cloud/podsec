@@ -1,0 +1,245 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.1.10-alt1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-10-14 15:21+0500\n"
+"PO-Revision-Date: 2024-10-14 15:21+0500\n"
+"Last-Translator: Kostarev Alexey <kaf@basealt.ru>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: podsec-k8s-rbac-bindrole:10 podsec-k8s-rbac-bindrole:49
+#: podsec-k8s-rbac-unbindrole:10 podsec-k8s-rbac-unbindrole:49
+msgid "username"
+msgstr "пользователь"
+
+#: podsec-k8s-rbac-bindrole:10 podsec-k8s-rbac-bindrole:49
+#: podsec-k8s-rbac-unbindrole:10 podsec-k8s-rbac-unbindrole:49
+msgid "role"
+msgstr "роль"
+
+#: podsec-k8s-rbac-bindrole:10 podsec-k8s-rbac-bindrole:49
+#: podsec-k8s-rbac-unbindrole:10 podsec-k8s-rbac-unbindrole:49
+msgid "role_bundle_name"
+msgstr "имя_связки_роли"
+
+#: podsec-k8s-rbac-bindrole:34 podsec-k8s-rbac-create-user:29
+#: podsec-k8s-rbac-functions:21 podsec-k8s-rbac-functions:37
+#: podsec-k8s-rbac-unbindrole:78
+msgid "User"
+msgstr "Пользователь"
+
+#: podsec-k8s-rbac-bindrole:34 podsec-k8s-rbac-unbindrole:34
+msgid "does not exist"
+msgstr "не существует"
+
+#: podsec-k8s-rbac-bindrole:47 podsec-k8s-rbac-unbindrole:47
+msgid "Invalid cluster role type"
+msgstr "Неверный тип кластерной роли"
+
+#: podsec-k8s-rbac-bindrole:56
+msgid "namespace is not applicable to cluster role"
+msgstr "namespace неприменимо к кластерной роли"
+
+#: podsec-k8s-rbac-bindrole:63
+msgid "When binding a regular role, you must specify a namespace"
+msgstr "При привязке обычной роли необходимо указать namespace"
+
+#: podsec-k8s-rbac-bindrole:72 podsec-k8s-rbac-unbindrole:64
+msgid "Cluster role"
+msgstr "Кластерная роль"
+
+#: podsec-k8s-rbac-bindrole:75 podsec-k8s-rbac-unbindrole:67
+msgid "Role"
+msgstr "Роль"
+
+#: podsec-k8s-rbac-bindrole:78 podsec-k8s-rbac-create-kubeconfig:45
+#: podsec-k8s-rbac-unbindrole:70
+msgid "absent"
+msgstr "отсутствует"
+
+#: podsec-k8s-rbac-create-kubeconfig:11 podsec-k8s-rbac-create-remoteplace:7
+#: podsec-k8s-rbac-create-user:19
+msgid "Format"
+msgstr "Формат"
+
+#: podsec-k8s-rbac-create-kubeconfig:11 podsec-k8s-rbac-create-user:19
+#: podsec-k8s-rbac-get-userroles:9 podsec-k8s-rbac-get-userroles:17
+#: podsec-k8s-rbac-unbindrole:34
+msgid "user"
+msgstr "пользователь"
+
+#: podsec-k8s-rbac-create-kubeconfig:45
+msgid "directory"
+msgstr "каталог"
+
+#: podsec-k8s-rbac-create-kubeconfig:52
+msgid "No rights to access the directory"
+msgstr "Нет прав на доступ в каталог"
+
+#: podsec-k8s-rbac-create-kubeconfig:58
+msgid "Creating a personal"
+msgstr "Создание личного"
+
+#: podsec-k8s-rbac-create-kubeconfig:58
+msgid "key"
+msgstr "ключа"
+
+#: podsec-k8s-rbac-create-kubeconfig:63 podsec-k8s-rbac-create-kubeconfig:67
+msgid "Private key file"
+msgstr "Файл личного ключа"
+
+#: podsec-k8s-rbac-create-kubeconfig:63 podsec-k8s-rbac-create-kubeconfig:76
+#: podsec-k8s-rbac-create-kubeconfig:133 podsec-k8s-rbac-create-kubeconfig:192
+msgid "not created"
+msgstr "не создан"
+
+#: podsec-k8s-rbac-create-kubeconfig:67 podsec-k8s-rbac-create-kubeconfig:80
+#: podsec-k8s-rbac-create-kubeconfig:137 podsec-k8s-rbac-create-kubeconfig:189
+msgid "created"
+msgstr "создан"
+
+#: podsec-k8s-rbac-create-kubeconfig:71
+msgid "Creating a Certificate Signing Request"
+msgstr "Создание запроса на подпись сертификата"
+
+#: podsec-k8s-rbac-create-kubeconfig:76 podsec-k8s-rbac-create-kubeconfig:80
+msgid "Certificate Signing Request file"
+msgstr "Файл запроса на подпись сертификата"
+
+#: podsec-k8s-rbac-create-kubeconfig:88
+msgid "Writing CSR certificate signing request to cluster"
+msgstr "Запись запроса на подпись сертификата"
+
+#: podsec-k8s-rbac-create-kubeconfig:106
+msgid "Certificate signing request failed"
+msgstr "Запрос на подпись сертификата не выполнен"
+
+#: podsec-k8s-rbac-create-kubeconfig:108
+msgid "Status"
+msgstr "Статус"
+
+#: podsec-k8s-rbac-create-kubeconfig:114
+msgid "Confirming the Certificate Signing Request"
+msgstr "Подтверждение запроса на подпись сертификата"
+
+#: podsec-k8s-rbac-create-kubeconfig:121
+msgid "Certificate verification request failed"
+msgstr "Запрос на подтверждение сертификата не выполнен"
+
+#: podsec-k8s-rbac-create-kubeconfig:128
+msgid "Creating a certificate"
+msgstr "Создание сертификата"
+
+#: podsec-k8s-rbac-create-kubeconfig:133 podsec-k8s-rbac-create-kubeconfig:137
+msgid "Certificate"
+msgstr "Сертификат"
+
+#: podsec-k8s-rbac-create-kubeconfig:141
+msgid "Checking the correctness of the certificate"
+msgstr "Проверка корректности сертификата"
+
+#: podsec-k8s-rbac-create-kubeconfig:148
+msgid "The users private key does not match the generated certificate"
+msgstr "Личный ключ пользователя не соответствуют сгенерированному сертификату"
+
+#: podsec-k8s-rbac-create-kubeconfig:158
+msgid "Enter user password"
+msgstr "Введите пароль пользователя"
+
+#: podsec-k8s-rbac-create-kubeconfig:158
+msgid "in a cluster"
+msgstr "в кластере"
+
+#: podsec-k8s-rbac-create-kubeconfig:164
+msgid "Copying certificate failed"
+msgstr "Копирование сертификата неудачное"
+
+#: podsec-k8s-rbac-create-kubeconfig:175
+msgid "Request to get server API version failed"
+msgstr "Запрос на получение API-версии сервера не прошел"
+
+#: podsec-k8s-rbac-create-kubeconfig:181
+msgid "Generating a user configuration file"
+msgstr "Формирование файла конфигурации пользователя"
+
+#: podsec-k8s-rbac-create-kubeconfig:189 podsec-k8s-rbac-create-kubeconfig:192
+msgid "User configuration file"
+msgstr "Файл конфигурации пользователя"
+
+#: podsec-k8s-rbac-create-kubeconfig:198
+msgid "Adding context to created user"
+msgstr "Добавление контекста созданного пользователя"
+
+#: podsec-k8s-rbac-create-kubeconfig:203
+msgid "context added"
+msgstr "контекст добавлен"
+
+#: podsec-k8s-rbac-create-remoteplace:7
+msgid "cluster"
+msgstr "кластера"
+
+#: podsec-k8s-rbac-create-user:7
+msgid "The script must be run by a user with rights"
+msgstr "Скрипт должен запускаться пользователем с правами"
+
+#: podsec-k8s-rbac-create-user:13
+msgid "In variable"
+msgstr "В переменной"
+
+#: podsec-k8s-rbac-create-user:13
+msgid "no privileged command launch directories"
+msgstr "нет каталогов запуска привелигированных команд"
+
+#: podsec-k8s-rbac-create-user:13
+msgid "Use"
+msgstr "Используйте"
+
+#: podsec-k8s-rbac-create-user:13
+msgid "instead of"
+msgstr "вместо"
+
+#: podsec-k8s-rbac-create-user:29
+msgid "exists"
+msgstr "существует"
+
+#: podsec-k8s-rbac-functions:10
+msgid "missing from the system"
+msgstr "отсутствует в системе"
+
+#: podsec-k8s-rbac-functions:44
+msgid "Enter password of user"
+msgstr "Введите пароль пользователя"
+
+#: podsec-k8s-rbac-functions:54 podsec-k8s-rbac-functions:70
+msgid "Cluster is unavailable"
+msgstr "Кластер недоступен"
+
+#: podsec-k8s-rbac-functions:54 podsec-k8s-rbac-functions:70
+msgid "configuration file"
+msgstr "файл конфигурации"
+
+#: podsec-k8s-rbac-get-userroles:8
+msgid "Invalid number of parameters"
+msgstr "Неверное число параметров"
+
+#: podsec-k8s-rbac-get-userroles:16
+msgid "Invalid second parameter"
+msgstr "Неверный второй параметр"
+
+#: podsec-k8s-rbac-unbindrole:55
+msgid "not applicable to cluster role"
+msgstr "неприменимо к кластерной роли"
+
+#: podsec-k8s-rbac-unbindrole:78
+msgid "missing from the role link"
+msgstr "отсутствует в связке роли"

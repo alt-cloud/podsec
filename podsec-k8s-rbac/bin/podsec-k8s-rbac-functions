@@ -5,6 +5,7 @@ setEnv() {
   USERDIR="/home/$user"
   if [ ! -d $USERDIR ]
   then
+    echo "$(gettext'User') $user $(gettext 'missing from the system')" >&2
     echo "Пользователь $user отсутствует в системе" >&2
     exit 1
   fi
@@ -15,14 +16,14 @@ setEnv() {
 setUserKubeconfigAccess() {
   if ! id -nG | grep wheel >/dev/null 2>&1
   then
-    echo "Пользователь не входит в группу wheel" >&2
+    echo "$(gettext 'User') $gettext('not included in the group') wheel" >&2
     exit 1
   fi
   slist=; n=1; while [ $n -le 64 ]; do slist+=" $n"; let n=$n+1; done
   trap "while ! su - -c 'chmod 700 $KUBECONFIGDIR'; do :; done" $slist
   if [ "$(id -u)" -ne 0 ]
   then
-    echo "Введите пароль пользователя root"
+    echo "$(gettext 'Enter password of user') root" >&2
   fi
   while ! su - -c "chmod 770 $KUBECONFIGDIR"; do :; done
 }
@@ -30,13 +31,13 @@ setUserKubeconfigAccess() {
 unsetUserKubeconfigAccess() {
   if ! id -nG | grep wheel >/dev/null 2>&1
   then
-    echo "Пользователь не входит в группу wheel" >&2
+    echo "$(gettext 'User') $gettext('not included in the group') wheel" >&2
     exit 1
   fi
   user=$1
   if [ "$(id -u)" -ne 0 ]
   then
-    echo "Введите пароль пользователя root"
+    echo "$(gettext 'Enter password of user') root" >&2
   fi
   while ! su - -c "chown -R $user:k8s $KUBECONFIGDIR;chmod 700 $KUBECONFIGDIR"; do :; done
 }
@@ -45,7 +46,7 @@ getClusterIP() {
   clusterURL=$(kubectl config  view -o json | jq '.clusters[0].cluster.server')
   if [ -z "$clusterURL" ]
   then
-    echo "Кластер недоступен (файл конфигурации $KUBECONFIGFILE)"
+    echo "$(gettext 'Cluster is unavailable') ($(gettext 'configuration file') $KUBECONFIGFILE)" >&2
     exit 1
   fi
   clusterURL=${clusterURL:1:-1}
@@ -60,7 +61,7 @@ getClusterName() {
   clusterName=$(kubectl config  view -o json | jq '.clusters[0].name')
   if [ -z "$clusterName" ]
   then
-    echo "Кластер недоступен (файл конфигурации $KUBECONFIGFILE)"
+    echo "$(gettext 'Cluster is unavailable') ($(gettext 'configuration file') $KUBECONFIGFILE)" >&2
     exit 1
   fi
   echo $clusterName

@@ -1,18 +1,20 @@
 #!/bin/sh
-
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s-rbac'
+export PROGRAMM=$0
 if [ $(id -u) -ne 0 ]
 then
-  echo "Скрипт должен запускаться пользователем с правами root"
+  echo "$(gettext 'The script must be run by a user with rights') root" >&2
   exit 1
 fi
 if ! echo $PATH | grep /usr/sbin >/dev/null 2>&1
 then
-  echo "В тропе PATH нет каталогов запуска привелигированных команд. Используйте 'su - ...' вместо 'su ...'"
+  echo "$(gettext 'In variable') PATH $(gettext 'no privileged command launch directories'). $(gettext 'Use') 'su - ...' $(gettext 'instead of') 'su ...'" >&2
   exit 1
 fi
 if [ $# -eq 0 -o $# -gt 1 ]
 then
-  echo "Формат вызова: $0 <пользователь>" >&2
+  echo "$(gettext 'Format'):\n)$PROGRAMM <$(gettext 'user')>" >&2
   exit 1
 fi
 user=$1
@@ -21,7 +23,7 @@ export USERDIR=/home/$user
 
 if [ -d $USERDIR ]
 then
-  echo "Пользователь $user существует" >&2
+  echo "$(gettext 'User') $user $(gettext 'exists')" >&2
   exit 1
 fi
 groupadd -r k8s 2>/dev/null
