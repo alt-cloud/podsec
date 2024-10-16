@@ -1,8 +1,10 @@
 #!/bin/sh
-
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-k8s-rbac'
+export PROGRAMM=$0
 if [ $# -ne 1 ]
 then
-  echo "Формат вызова: $0 <IP_кластера>"
+  echo "$(gettext 'Format'): <IP_$(gettext 'cluster')>" >&2
   exit 1
 fi
 
