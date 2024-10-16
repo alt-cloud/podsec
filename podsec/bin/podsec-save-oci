@@ -12,17 +12,21 @@
 # При необходимости нужно будет произвести перезагрузку образов для рабочей архитектуры процессора
 #set -x
 
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec'
+export cmd=$1
+
 if [ $# -lt 1 ]
 then
-  echo "Не указан каталог архивирования образов"
-  echo -ne "Формат:\n\t$0  <каталог_архивирования_образов> <архитектура>,<архитектура>,...|all <транспорт> <образ> ..."
+  echo "$(gettext 'Image archiving directory not specified')\n" >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_deployment_directory [architecture ...] [transport] [image] ...')\n" >&2
   exit 1
 fi
 
 if [ $# -eq 1 ]
 then
-  echo "Не указан список образов"
-  echo -ne "Формат:\n\t$0  <каталог_архивирования_образов> <архитектура>,<архитектура>,...|all <транспорт>  <образ> ..."
+  echo "$(gettext 'No list of images specified')" >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_deployment_directory [architecture ...] [transport] [image] ...')\n" >&2
   exit 1
 fi
 
@@ -40,7 +44,7 @@ images=$*
 
 if [ -d $ociDir ]
 then
-  echo "OCI-каталог уже существует"
+  echo $(gettext 'OCI catalog already exists') >&2
   exit 1
 fi
 
@@ -54,14 +58,15 @@ case $archs in
     IFS=$ifs
     archs=$*
     IFS=$ifs
+    export arch
     for arch in $archs
     do
       case $1 in
         amd64 | arm64 | arm | ppc64le | 386) :;;
         *)
-          echo "Неизвестная архитектура $arch";
-          echo "Допустимые: amd64, arm64, arm, ppc64le, 386"
-          echo -ne "Формат:\n\t$0 каталог_разворачивания_архивов [архитектура ...] [транспорт]  [образ] ...\n"
+          echo "$(gettext 'Unknown architecture') $arch" >&2
+          echo "$(gettext 'Allowed: amd64, arm64, arm, ppc64le, 386')" >&2
+          echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_deployment_directory [architecture ...] [transport] [image] ...')\n" >&2
           exit 2
       esac
     done
@@ -70,10 +75,10 @@ esac
 mkdir $ociDir
 if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
 then
-  storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
+  export storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
   if [ ! -d $storage ]
   then
-    echo "Каталог $storage отсутствует. Копирование существующих образов  пользователя u7s-admin невозможно."
+    echo "$(gettext 'Directory') $storage $(gettext 'is missing. Copying existing images of user u7s-admin is not possible.')" >&2
   fi
 fi
 
@@ -85,9 +90,10 @@ do
   then
     mkdir $ociArchDir
   fi
+  export image
   for image in $images
   do
-    echo -ne "\n------------------------\nАрхивация образа $image\n"
+    echo "\n------------------------\n$(gettext 'Archiving the image') $image\n" >&2
     Image="$regName/$image"
     podman image rm $image >/dev/null 2>&1
 #     if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
@@ -108,7 +114,7 @@ do
       containers-storage:$Image\
       oci:$ociArchDir:$image  2>/dev/null
   done
-  echo -ne "\n------------------------\nАрхивания и сжатие образов\n"
+  echo "\n------------------------\n$(gettext 'Archiving and compressing images\n')" >&2
   tar cvCf $ociDir -  $arch | xz -9v > $ociArchDir.tar.xz
   rm -rf $ociArchDir
 done

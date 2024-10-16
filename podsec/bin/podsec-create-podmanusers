@@ -1,31 +1,28 @@
 #!/bin/sh
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec'
 
+export cmd=$0
 if [ $(id -u) -ne 0 ]
 then
-  echo "Скрипт должен запускаться пользователем с правами root"
+  echo $(gettext 'The script must be run by a user with root rights.')  >&2
   exit 1
 fi
 
 if [ $# -eq 0 ]
 then
-  echo -ne "Формат:\n$0 <username> ...\n"
+  echo -ne "$(gettext 'Format'):\n$cmd <$(gettext 'username')> ...\n" >&2
   exit 1
 fi
 groupadd -r podman 2>/dev/null
+export user
 for user
 do
   adduser $user -g podman
-  echo "Введите пароль пользователя '$user':"
+  echo "$(gettext 'Enter the password for user') '$user':" >&2
   passwd $user
   cd /home/$user
   mkdir -p .config/containers
-#   cat <<EOF > .config/containers/storage.conf
-# [storage]
-# driver = "overlay"
-# [storage.options.overlay]
-# mount_program = "/usr/bin/fuse-overlayfs"
-# mountopt = "nodev,metacopy=on"
-# EOF
   chmod -R 500 .config/containers
   chown -R $user:podman .config/containers
   chattr +i -R .config/containers
