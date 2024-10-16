@@ -1,0 +1,250 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.1.10-alt1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-10-14 15:21+0500\n"
+"PO-Revision-Date: 2024-10-14 15:21+0500\n"
+"Last-Translator: Kostarev Alexey <kaf@basealt.ru>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: podsec-inotify-build-invulnerable-image:13
+msgid "Format"
+msgstr "Формат"
+
+#: podsec-inotify-build-invulnerable-image:41
+msgid "Building image"
+msgstr "Построение образа"
+
+#: podsec-inotify-build-invulnerable-image:41
+msgid "failed"
+msgstr "закончилось неуспешно"
+
+#: podsec-inotify-build-invulnerable-image:41
+msgid "Image analysis is skipped."
+msgstr "Анализ образа пропускается"
+
+#: podsec-inotify-check-containers:77
+msgid "in home directory"
+msgstr "в домашнем каталоге"
+
+#: podsec-inotify-check-containers:81
+msgid "in configuration directory"
+msgstr "в каталоге конфигурации"
+
+#: podsec-inotify-check-containers:89
+msgid "An event"
+msgstr "Событие"
+
+#: podsec-inotify-check-containers:89
+msgid "occurred in the container"
+msgstr "произошло в контейнере"
+
+#: podsec-inotify-check-containers:89
+msgid "on the file"
+msgstr "в файле"
+
+#: podsec-inotify-check-images:13 podsec-inotify-check-policy:16
+msgid "plugin must be run as root user"
+msgstr "plugin должен запускаться с правами пользователя root"
+
+#: podsec-inotify-check-images:55
+msgid "have registry that do not support electronic signatures"
+msgstr "имеют регистраторы не поддерживающие электронную подпись"
+
+#: podsec-inotify-check-images:56
+msgid "users have registry that do not support electronic signatures"
+msgstr "пользователи имеют регистраторы не поддерживающие электронную подпись"
+
+#: podsec-inotify-check-images:80
+msgid "have unsigned images"
+msgstr "имеют неподписанные образы"
+
+#: podsec-inotify-check-images:81
+msgid "users have unsigned images"
+msgstr "пользователи имеют неподписанные образы"
+
+#: podsec-inotify-check-images:108
+msgid "users have images outside of supported policies"
+msgstr "пользователи имеют образы вне поддерживаемых политик"
+
+#: podsec-inotify-check-images:127 podsec-inotify-check-images:133
+#: podsec-inotify-check-policy:64 podsec-inotify-check-policy:89
+#: podsec-inotify-check-policy:114 podsec-inotify-check-policy:140
+#: podsec-inotify-check-policy:165 podsec-inotify-check-policy:190
+msgid "Users"
+msgstr "Пользователи"
+
+#: podsec-inotify-check-images:127 podsec-inotify-check-images:133
+msgid "have images that violate established policies"
+msgstr "имеют образы нарушающие установленные политики"
+
+#: podsec-inotify-check-images:134 podsec-inotify-check-policy:310
+msgid "There are users"
+msgstr "Есть пользователи"
+
+#: podsec-inotify-check-images:151 podsec-inotify-check-policy:332
+msgid "Containerization policies are not violated"
+msgstr "Политики контейнеризации не нарушены"
+
+#: podsec-inotify-check-kubeapi:22
+msgid "Invalid number of parameters"
+msgstr "Неверное число параметров"
+
+#: podsec-inotify-check-kubeapi:57
+msgid "Detected requests to the kubernetes cluster with excess authority"
+msgstr "Обнаружен запрос к кластеру kubernetes с превышением полномочий"
+
+#: podsec-inotify-check-kubeapi:64
+msgid "Invalid value for 1st parameter"
+msgstr "Неверное значение 1-го параметра"
+
+#: podsec-inotify-check-policy:63
+msgid "outside the podman group"
+msgstr "вне группы podman"
+
+#: podsec-inotify-check-policy:64
+msgid "have images but are not in the podman group"
+msgstr "имеют образы, но не входят в группу podman"
+
+#: podsec-inotify-check-policy:88
+msgid "capable of receiving any image"
+msgstr "способные получать любой образ"
+
+#: podsec-inotify-check-policy:89
+msgid ""
+"have defaultPolicy!=reject in policy.json but are not in the podman_dev group"
+msgstr "имеют в policy.json defaultPolicy!=reject, но не входят в группу podman_dev"
+
+#: podsec-inotify-check-policy:113
+msgid "capable of getting a local image without a signature"
+msgstr "способные получать локальный образ без подписи"
+
+#: podsec-inotify-check-policy:114
+msgid ""
+"do not have registry.local in the list of registries for which the presence "
+"of digital image signature is checked"
+msgstr "не имеют registry.local в списке регистраторов для которых проверяется наличие электронной подписи образов"
+
+#: podsec-inotify-check-policy:139
+msgid "capable of receiving any image without a signature"
+msgstr "cпособные получать любой образ без подписи"
+
+#: podsec-inotify-check-policy:140
+msgid ""
+"have registries in the policy for which the presence of an electronic image "
+"signature is not checked"
+msgstr "имеют в политике регистраторы для которых не проверяется наличие электронной подписи образов"
+
+#: podsec-inotify-check-policy:164
+msgid "capable of receiving any image via prohibited transport"
+msgstr "способные получать любой образ через запрещенный транспорт"
+
+#: podsec-inotify-check-policy:165
+msgid "have transports other than docker in the list of supported transports"
+msgstr "имеют в списке поддерживаемых транспорты отличные от docker"
+
+#: podsec-inotify-check-policy:189
+msgid "not using a local signature store"
+msgstr "не использующие локальный хранитель подписей"
+
+#: podsec-inotify-check-policy:190
+msgid ""
+"do not use the signature store http://sigstore.local:81/sigstore/ as the "
+"default signature store"
+msgstr "не используют хранилище подписей  http://sigstore.local:81/sigstore/ как хранилище подписей по умолчанию"
+
+#: podsec-inotify-check-policy:241
+msgid "included in the wheel group"
+msgstr "входящие в группу wheel"
+
+#: podsec-inotify-check-policy:242 podsec-inotify-functions:53
+msgid "the"
+msgstr " "
+
+#: podsec-inotify-check-policy:242
+msgid "users are members of the podman and wheel groups"
+msgstr "входят в группы 'podman' и 'wheel'"
+
+#: podsec-inotify-check-policy:262
+msgid "without a config file"
+msgstr "не имеющих конфигурационного файла"
+
+#: podsec-inotify-check-policy:263
+msgid "users do not have config file"
+msgstr "пользователи не имеют конфигурационного файла"
+
+#: podsec-inotify-check-policy:283
+msgid "able to change configuration"
+msgstr "способные изменить конфигурацию"
+
+#: podsec-inotify-check-policy:284
+msgid "users have writable configuration directory"
+msgstr "пользователи имеют открытым для записи каталог конфигурации"
+
+#: podsec-inotify-check-policy:309
+msgid "Violation of user containerization policies"
+msgstr "Нарушение политик контейнеризации пользователей"
+
+#: podsec-inotify-check-vuln:24
+msgid "Vulnerabilities found in image"
+msgstr "Найдены уязвимости в образе"
+
+#: podsec-inotify-check-vuln:24
+#, sh-format
+msgid "of user"
+msgstr "пользователя"
+
+#: podsec-inotify-functions:30
+msgid "The trivy vulnerability analysis command failed"
+msgstr "Команда анализа уязвимостей trivy закончилась неуспешно"
+
+#: podsec-inotify-functions:36 podsec-inotify-functions:86
+msgid "Image"
+msgstr "Образ"
+
+#: podsec-inotify-functions:36 podsec-inotify-functions:86
+msgid "has been deleted"
+msgstr "удален"
+
+#: podsec-inotify-functions:53 podsec-inotify-functions:65
+#: podsec-inotify-functions:75
+msgid "In the image"
+msgstr "В образе"
+
+#: podsec-inotify-functions:53
+msgid "no vulnerabilities found"
+msgstr "уязвимости не обнаружены"
+
+#: podsec-inotify-functions:65 podsec-inotify-functions:75
+msgid "of the user"
+msgstr "пользователя"
+
+#: podsec-inotify-functions:65
+msgid "critical and high vulnerabilities were discovered"
+msgstr "обнаружены критические и высокие уязвимости"
+
+#: podsec-inotify-functions:68
+msgid "critical vulnerabilities have been discovered"
+msgstr "обнаружены критические уязвимости"
+
+#: podsec-inotify-functions:75
+msgid "high vulnerabilities found"
+msgstr "обнаружены высокие уязвимости"
+
+#: podsec-inotify-functions:92
+msgid "Vulnerabilities were found in the image"
+msgstr "Обнаружены уязвимости в образе"
+
+#: podsec-inotify-functions:92
+msgid "but none were high or critical"
+msgstr "но нет высоких или критических"

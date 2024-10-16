@@ -1,5 +1,8 @@
 #!/bin/bash
 # Функция возвращает список образов в кеше podman rootfull
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-inotify'
+
 export U7S_TRIVY_SERVER
 
 source podsec-inotify-functions
@@ -18,7 +21,7 @@ trivyUserImages() {
     if [ "$?" -gt 0  -a -n "$MAILTO" ]
     then
       echo "$message" |
-      mail -s "Vulnerabilities found in image '$image'  of user $user" "$MAILTO"
+      mail -s "$(gettext 'Vulnerabilities found in image') $image $(gettext 'of user') $user" "$MAILTO"
     fi
   done
 }
