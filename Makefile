@@ -142,6 +142,7 @@ localedir ?= $(datadir)/locale/ru/LC_MESSAGES
 docdir ?= $(datadir)/doc/podsec
 mandir ?= $(datadir)/man
 man1dir ?= $(mandir)/man1
+man1rudir ?= $(mandir)/ru/man1
 localstatedir ?= /var/lib
 userunitdir ?= $(prefix)/lib/systemd/user
 unitdir ?= /lib/systemd/system
@@ -165,16 +166,26 @@ install: all
 	# 	ls -lR
 	$(MKDIR_P) -m755 $(DESTDIR)$(bindir)
 	$(MKDIR_P) -m755 $(DESTDIR)$(man1dir)
+	$(MKDIR_P) -m755 $(DESTDIR)$(man1rudir)
+
 	# PODSEC
 	cd ./podsec/bin;$(INSTALL) -m755 $(PODSEC_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec/bin;$(INSTALL) -m644 $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec/man;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec/man/en;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir); ls -l $(DESTDIR)$(man1dir)
+# 	cd ./podsec/man/ru;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1rudir); ls -l $(DESTDIR)$(man1rudir)
+	cd ./podsec/man/en;xz $(PODSEC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec/man/ru;xz $(PODSEC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	cd ./podsec/po; msgfmt  podsec.po -o podsec.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec.mo $(DESTDIR)/$(localedir)/
+
 	# PODSEC-K8S
 	cd ./podsec-k8s/bin;$(INSTALL) -m755 $(PODSEC_K8S_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/bin;$(INSTALL) -m644 $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s/man;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-k8s/man/en;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-k8s/man/ru;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1rudir)/
+	cd ./podsec-k8s/man/en;xz $(PODSEC_K8S_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec-k8s/man/ru;xz $(PODSEC_K8S_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/kubernetes/manifests
+
 	# PODSEC-K8S USERNETES
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/log/kubeapi/
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/podsec/u7s/etcd
@@ -218,14 +229,20 @@ install: all
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s-rbac/man;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-k8s-rbac/man/en;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-k8s-rbac/man/ru;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1rudir)/
+	cd ./podsec-k8s-rbac/man/en;xz $(PODSEC_K8S_RBAC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec-k8s-rbac/man/ru;xz $(PODSEC_K8S_RBAC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	cd ./podsec-k8s-rbac/po; msgfmt  podsec-k8s-rbac.po -o podsec-k8s-rbac.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-k8s-rbac.mo $(DESTDIR)/$(localedir)/
 
 	# PODSEC-INOTIFY
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PLUGINS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m755 $(PODSEC_INOTIFY_PROGRAMMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-inotify/man;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-inotify/man/en;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-inotify/man/ru;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1rudir)/
+	cd ./podsec-inotify/man/en;xz $(PODSEC_INOTIFY_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec-inotify/man/ru;xz $(PODSEC_INOTIFY_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	cd ./podsec-inotify/services;$(INSTALL) -m644 $(PODSEC_INOTIFY_UNITS) $(DESTDIR)/$(unitdir)/
 	$(INSTALL) -D -m0644 $(PODSEC_ICINGA2_CONF) $(DESTDIR)$(sysconfdir)/icinga2/conf.d/podsec.conf
 	$(INSTALL) -D -m0644 $(PODSEC_ICINGA2_JSON) $(DESTDIR)$(docdir)/podsec-icinga2.json

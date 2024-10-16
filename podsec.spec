@@ -139,7 +139,7 @@ various Podsec events.
 %makeinstall_std unitdir=%_unitdir modulesloaddir=%_modules_loaddir
 
 # JSON templates are packaged using %%doc:
-rm -f %buildroot%_datadir/doc/podsec/podsec-icinga2.json
+rm -fv %buildroot%_datadir/doc/podsec/podsec-icinga2.json
 
 %pre
 groupadd -r -f podman >/dev/null 2>&1 ||:
@@ -153,7 +153,7 @@ mkdir -p %u7s_admin_homedir
 # merge usernetes & podman graphroot
 mkdir -p %u7s_admin_homedir/.local/share/usernetes/containers 2>&1 ||:
 cd %u7s_admin_homedir/.local/share
-if [ -d containers ]; then mv containers containers.old; rm -rf containers.old; fi
+if [ -d containers ]; then mv containers containers.old; rm -rfv containers.old; fi
 ln -sf usernetes/containers . 2>&1 ||:
 cd %u7s_admin_homedir/.local/share/usernetes/containers
 chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
@@ -182,6 +182,11 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %attr(0755,root,root) %_bindir/podsec-get-platform
 %attr(0755,root,root) %_bindir/podsec-load-sign-oci
 %attr(0755,root,root) %_bindir/podsec-policy-functions
+%_mandir/ru/man1/podsec-create-imagemakeruser.1.xz
+%_mandir/ru/man1/podsec-create-podmanusers.1.xz
+%_mandir/ru/man1/podsec-create-policy.1.xz
+%_mandir/ru/man1/podsec-create-services.1.xz
+%_mandir/ru/man1/podsec-load-sign-oci.1.xz
 %_mandir/man1/podsec-create-imagemakeruser.1.xz
 %_mandir/man1/podsec-create-podmanusers.1.xz
 %_mandir/man1/podsec-create-policy.1.xz
@@ -218,6 +223,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
 %dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log/kubeapi
 %config  %attr(0640, root, root) %_modules_loaddir/u7s.conf
+%_mandir/ru/man1/podsec-u7s-kubeadm.1.xz
 %_mandir/man1/podsec-u7s-kubeadm.1.xz
 %_userunitdir/kubelet.service
 %_userunitdir/rootlesskit.service
@@ -267,6 +273,12 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %_bindir/podsec-k8s-rbac-functions
 %_bindir/podsec-k8s-rbac-get-userroles
 %_bindir/podsec-k8s-rbac-unbindrole
+%_mandir/ru/man1/podsec-k8s-rbac-bindrole.1.xz
+%_mandir/ru/man1/podsec-k8s-rbac-create-kubeconfig.1.xz
+%_mandir/ru/man1/podsec-k8s-rbac-create-remoteplace.1.xz
+%_mandir/ru/man1/podsec-k8s-rbac-create-user.1.xz
+%_mandir/ru/man1/podsec-k8s-rbac-get-userroles.1.xz
+%_mandir/ru/man1/podsec-k8s-rbac-unbindrole.1.xz
 %_mandir/man1/podsec-k8s-rbac-bindrole.1.xz
 %_mandir/man1/podsec-k8s-rbac-create-kubeconfig.1.xz
 %_mandir/man1/podsec-k8s-rbac-create-remoteplace.1.xz
@@ -283,6 +295,12 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %attr(0700,root,root) %_bindir/podsec-inotify-check-policy
 %_bindir/podsec-inotify-check-vuln
 %_bindir/podsec-inotify-functions
+%_mandir/ru/man1/podsec-inotify-build-invulnerable-image.1.xz
+%_mandir/ru/man1/podsec-inotify-check-containers.1.xz
+%_mandir/ru/man1/podsec-inotify-check-images.1.xz
+%_mandir/ru/man1/podsec-inotify-check-kubeapi.1.xz
+%_mandir/ru/man1/podsec-inotify-check-policy.1.xz
+%_mandir/ru/man1/podsec-inotify-check-vuln.1.xz
 %_mandir/man1/podsec-inotify-build-invulnerable-image.1.xz
 %_mandir/man1/podsec-inotify-check-containers.1.xz
 %_mandir/man1/podsec-inotify-check-images.1.xz
@@ -304,7 +322,9 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %attr(0700,root,root) %_bindir/podsec-save-oci
 %attr(0700,root,root) %_bindir/podsec-k8s-save-oci
 %_mandir/man1/podsec-k8s-save-oci.1.xz
+%_mandir/ru/man1/podsec-k8s-save-oci.1.xz
 %_mandir/man1/podsec-save-oci.1.xz
+%_mandir/ru/man1/podsec-save-oci.1.xz
 
 %files icinga
 %doc podsec-inotify/monitoring/podsec-icinga2.json
