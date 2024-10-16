@@ -1,4 +1,8 @@
 #!/bin/sh
+export cmd=$0
+
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec'
 
 source podsec-functions
 source podsec-get-platform
@@ -9,24 +13,24 @@ mes=$(isSigstoreServer)
 if [ -n "$mes" ]
 then
   echo $mes >&2
-  echo "Загрузка образов невозможна"
+  echo $(gettext 'Unable to load images')  >&2
   exit 1
 fi
 
 if ! id | grep -q podman_dev
 then
-  echo "Скрипт вызывается пользователем не входящим в группу podman_dev" >&2
+  echo $(gettext 'The script is called by a user not included in the podman_dev group') >&2
   exit 1
 fi
 
 if [ $# -ne 4 -a $# -ne 3 ]
 then
-  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\n"  >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_file_name architecture EMail_signer [registry/path]')\n" >&2
   exit 1
 fi
 
-archive=$1
-arch=$2
+export archive=$1
+export arch=$2
 # regName=$(basename $3)
 signBy="${3}"
 if [ $# -eq 3 ]
@@ -37,8 +41,8 @@ else
   dir=$(dirname $4)
   if [ $dir == '.' ]
   then
-    echo "Отсутствует тропа после имени регистратора"
-    echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\n"  >&2
+    echo $(gettext 'Missing path after registry name') | envsubst >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_file_name architecture EMail_signer registry/path')\n" >&2
     exit 1
   fi
   base="$(basename $4)"
@@ -49,25 +53,25 @@ baselen=${#base}
 
 if [ ! -f $archive ]
 then
-  echo "Архив $archive отсутствует"
-  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\n"  >&2
+  echo "$(gettext 'Archive') $archive $(gettext 'is missing')" >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_file_name architecture EMail_signer registry/path')\n" >&2
   exit 1
 fi
 
 case $arch in
 amd64 | arm64 | arm | ppc64le | 386) :;;
 *)
-  echo "Неизвестная архитектура $arch" >&2
-  echo "Допустимые: amd64, arm64, arm, ppc64le, 386" >&2
-  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\n"  >&2
+  echo "$(gettext 'Unknown architecture') $arch" >&2
+  echo $(gettext 'Allowed: amd64, arm64, arm, ppc64le, 386') >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_file_name architecture EMail_signer registry/path')\n" >&2
   exit 3
   ;;
 esac
 
 if [ -z "$regName" ]
 then
-  echo "Не указано имя регистратора" >&2
-  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\n"  >&2
+  echo $(gettext 'Registry name not specified')  >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_file_name architecture EMail_signer registry/path')\n" >&2
   exit 4
 fi
 
@@ -78,8 +82,8 @@ set -- $1
 IFS=$ifs
 if [ $# -eq 1 ]
 then
-  echo "Имя регистратора должно содержать точку (.) в имени" >&2
-  echo -ne "Формат:\n\t$0 имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\n"  >&2
+  echo $(gettext 'The registry name must contain a period (.) in the name')  >&2
+  echo -ne "$(gettext 'Format'):\n\t$cmd $(gettext 'archive_file_name architecture EMail_signer registry/path')\n" >&2
   exit 5
 fi
 
@@ -90,21 +94,21 @@ if xz -d < $archive | tar xvCf $TMPDIR -
 then
   :;
 else
-  echo "Неуспешное разворачивание архива" >&2
+  echo $(gettext 'Unsuccessful archive unfolding')  >&2
   exit 6
 fi
 
 archDir="$TMPDIR/$arch"
 if [ ! -d $archDir ]
 then
-  echo "Неверный формат архива. Каталог архитектуры $arch отсутствует" >&2
+  echo "$(gettext 'Invalid archive format. Archive directory') $arch $(gettext 'is missing')" >&2
   exit 7
 fi
 
 archIndexFile="$archDir/index.json"
 if [ ! -f "$archIndexFile" ]
 then
-  echo "Неверный формат архива. Индексный файл архива $arch/index.json отсутствует" >&2
+  echo "$(gettext 'Invalid archive format. Architecture directory') $arch/index.json $(gettext 'is missing')" >&2
   exit 8
 fi
 
@@ -114,12 +118,11 @@ ifs=$IFS
 IFS=/
 set -- $image
 IFS=$ifs
-platform=$1
-
+export platform=$1
 if [ "$platform" != "$U7S_PLATFORM" ]
 then
-  echo "Текущая платформа $U7S_PLATFORM не совпадает c устанавливаемой $platform"
-  echo "Продолжать (y/N)?"
+  echo "$(gettext 'Current platform') $U7S_PLATFORM $(gettext 'does not match installed') $platform" >&2
+  echo $(gettext 'Continue (y/N)?') >&2
   read answer
   if [ "$answer" != "y" ]
   then
@@ -140,7 +143,7 @@ ImageList=""
 for image in $imagesList
 do
   image=${image:1:-1}
-  echo "Разворачивание образа $image в локальную систему"
+  echo "$(gettext 'Deploying the image') $image $(gettext 'to the local system')" >&2
   if [ "${image:0:$baselen}" == "$base" ]
   then
     image=${image:$baselen}
@@ -163,7 +166,7 @@ done
 
 for Image in $ImageList
 do
-  echo "Подпись и передача образа $Image в регистратор"
+  echo "$(gettext 'Signing and transferring the') $Image $(gettext 'to the registry')" >&2
   podman push --tls-verify=false --sign-by="$signBy" $Image
 done
 

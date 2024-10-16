@@ -1,0 +1,324 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.1.10-alt1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-10-14 15:21+0500\n"
+"PO-Revision-Date: 2024-10-14 15:21+0500\n"
+"Last-Translator: Kostarev Alexey <kaf@basealt.ru>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: podsec-create-imagemakeruser:15 podsec-create-podmanusers:22
+msgid "Enter the password for user"
+msgstr "Введите пароль пользователя"
+
+#: podsec-create-imagemakeruser:15
+msgid "the container image developer"
+msgstr "разработчика  образов контейнеров"
+
+#: podsec-create-imagemakeruser:44
+msgid "Public key not found"
+msgstr "Не найден открытый ключ"
+
+#: podsec-create-imagemakeruser:84
+msgid "Invalid repository path description format for user"
+msgstr "Неверный формат описания тропы репозитория для пользователя"
+
+#: podsec-create-imagemakeruser:84 podsec-create-podmanusers:14
+#: podsec-create-policy:10 podsec-create-policy:17 podsec-load-sign-oci:28
+#: podsec-load-sign-oci:45 podsec-load-sign-oci:57 podsec-load-sign-oci:66
+#: podsec-load-sign-oci:74 podsec-load-sign-oci:86 podsec-save-oci:22
+#: podsec-save-oci:29 podsec-save-oci:69
+msgid "Format"
+msgstr "Формат"
+
+#: podsec-create-imagemakeruser:102
+msgid "Two matching repository paths"
+msgstr "Две совпадающие тропы репозитория"
+
+#: podsec-create-imagemakeruser:115 podsec-create-podmanusers:8
+msgid "The script must be run by a user with root rights."
+msgstr "Скрипт должен запускаться пользователем с правами root"
+
+#: podsec-create-imagemakeruser:122
+msgid ""
+"Check if the current server is a server that supports the registry (registry."
+"local) and the image signing server (sigstore.local)"
+msgstr "Проверка. Является ли текущий сервер сервером, поддерживающий регистратор (registry.local) и сервер подписи образов (sigstore.local)"
+
+#: podsec-create-imagemakeruser:127
+msgid ""
+"It is not possible to create users of the container image developer class"
+msgstr "Создание пользователей класса 'разработчик образов контейнеров' невозможно"
+
+#: podsec-create-imagemakeruser:135
+msgid "Signature server directory /var/sigstore/ not created"
+msgstr "Не создан каталог /var/sigstore/ сервера подписей"
+
+#: podsec-create-imagemakeruser:136
+msgid "Call the podsec-create-policy script to initialize it"
+msgstr "Вызовите скрипт podsec-create-policy для его инициализации"
+
+#: podsec-create-podmanusers:14
+msgid "username"
+msgstr "имя_пользователя"
+
+#: podsec-create-policy:9
+msgid "The IP address of the registry and signature server is not specified"
+msgstr "Не указан IP-адрес регистратора и сервера подписей"
+
+#: podsec-create-policy:10 podsec-create-policy:17
+msgid "<ip_address_of_registrar_and_signature_server>"
+msgstr "<ip-адрес_регистратора_и_сервера_подписей>"
+
+#: podsec-create-policy:16
+msgid ""
+"Only one IP address of the registry and signature server must be specified."
+msgstr "Должен быть указан только один IP-адрес регистратора и сервера подписей\\n"
+
+#: podsec-create-policy:25
+msgid "The IP address of the registry and signature server must not be local"
+msgstr "IP-адрес регистратора и сервера подписей не должен быть локальным"
+
+#: podsec-create-policy:34 podsec-create-policy:43
+msgid "Invalid IP address"
+msgstr "Некорректный IP-адрес"
+
+#: podsec-create-policy:75
+msgid ""
+"Domains registry.local sigstore.local trivy.local are already bound to IP "
+"address"
+msgstr "Домены registry.local sigstore.local trivy.local уже привязаны к IP адресу"
+
+#: podsec-create-policy:76
+msgid "Remove the binding and run the script again"
+msgstr "Удалите привязку и запустите скрипт заново"
+
+#: podsec-create-policy:81
+msgid ""
+"Adding a binding of domains registry.local sigstore.local trivy.local to IP "
+"address"
+msgstr "Добавление привязки доменов registry.local sigstore.local trivy.local к IP адресу"
+
+#: podsec-create-policy:86
+msgid "Creating podman group"
+msgstr "Создание группы podman"
+
+#: podsec-create-policy:88
+msgid "Initializing the"
+msgstr "Инициализация"
+
+#: podsec-create-policy:88
+msgid ""
+"directory and subdirectories for storing public keys and image signatures"
+msgstr "каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов"
+
+#: podsec-create-policy:91
+msgid "Creating the directory and subdirectories"
+msgstr "Создание каталога и подкаталогов"
+
+#: podsec-create-policy:96
+msgid "Creating the podman_dev group"
+msgstr "Создание группы podman_dev"
+
+#: podsec-create-policy:118
+msgid "Creating with preservation of the previous policy file"
+msgstr "Создание с сохранением предыдущего файла политик"
+
+#: podsec-create-policy:142
+msgid "Creating with preservation of the previous file"
+msgstr "Создание с сохранением предыдущего файла"
+
+#: podsec-create-policy:142
+msgid "description of access to public keys of signatories"
+msgstr "описания доступа к открытым ключам подписантов"
+
+#: podsec-create-policy:158
+msgid "Adding insecure access to the registry.local registry in the"
+msgstr "Добавление insecure-доступа к регистратору registry.local в"
+
+#: podsec-create-services:11
+msgid "Services cannot be started"
+msgstr "Запуск сервисов невозможен"
+
+#: podsec-create-services:32
+msgid "Service httpd2 is running and conflicts with docker-registry"
+msgstr "Сервис httpd2 запущен и конфликтует с docker-registry"
+
+#: podsec-create-services:33
+msgid "Service httpd2 stopped"
+msgstr "Сервис httpd2 остановлен"
+
+#: podsec-functions:12
+msgid ""
+"Domains registry.local sigstore.local in the file /etc/hosts are bound to a "
+"remote server with ip"
+msgstr "Домены registry.local sigstore.local в файле /etc/hosts привязаны к удаленному серверу с ip"
+
+#: podsec-functions:15
+msgid ""
+"Domains registry.local sigstore.local are not specified in the /etc/hosts "
+"file."
+msgstr "Домены registry.local sigstore.local в файле /etc/hosts не указаны"
+
+#: podsec-functions:16
+msgid "Run the podsec-create-policy script"
+msgstr "Запустите скрипт podsec-create-policy"
+
+#: podsec-get-platform:9
+msgid "The platform"
+msgstr "Платформа"
+
+#: podsec-get-platform:9
+msgid "is predefined by the variable U7S_PLATFORM. This value is taken."
+msgstr "преопределена переменной U7S_PLATFORM. Принимается это значение."
+
+#: podsec-load-sign-oci:16
+msgid "Unable to load images"
+msgstr "Невозможно загрузить образ"
+
+#: podsec-load-sign-oci:22
+msgid "The script is called by a user not included in the podman_dev group"
+msgstr "Скрипт вызывается пользователем не входящим в группу podman_dev"
+
+#: podsec-load-sign-oci:28 podsec-load-sign-oci:45 podsec-load-sign-oci:57
+#: podsec-load-sign-oci:66 podsec-load-sign-oci:74 podsec-load-sign-oci:86
+msgid "archive_file_name architecture EMail_signer [registry/path]"
+msgstr "имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]"
+
+#: podsec-load-sign-oci:44
+msgid "Missing path after registry name"
+msgstr "Отсутствует тропа после имени регистратора"
+
+#: podsec-load-sign-oci:56
+#, sh-format
+msgid "Archive"
+msgstr "Архив"
+
+msgid "is missing"
+msgstr "пропущен"
+
+#: podsec-load-sign-oci:64 podsec-save-oci:67
+msgid "Unknown architecture"
+msgstr "Неизвестная архитектура"
+
+#: podsec-load-sign-oci:65 podsec-save-oci:68
+msgid "Allowed: amd64, arm64, arm, ppc64le, 386"
+msgstr "Допустимые: amd64, arm64, arm, ppc64le, 386"
+
+#: podsec-load-sign-oci:73
+msgid "Registry name not specified"
+msgstr "Не указано имя регистратора"
+
+#: podsec-load-sign-oci:85
+msgid "The registry name must contain a period (.) in the name"
+msgstr "Имя регистратора должно содержать точку (.) в имени"
+
+#: podsec-load-sign-oci:97
+msgid "Unsuccessful archive unfolding"
+msgstr "Неуспешное разворачивание архива"
+
+#: podsec-load-sign-oci:104 podsec-load-sign-oci:111
+msgid "Invalid archive format. Archive directory"
+msgstr "Некорректный формат архива. Каталог архива"
+
+#: podsec-load-sign-oci:124
+msgid "Current platform"
+msgstr "Текущая платформа"
+
+#: podsec-load-sign-oci:124
+msgid "does not match installed"
+msgstr "не совпадает c устанавливаемой"
+
+#: podsec-load-sign-oci:125
+msgid "Continue (y/N)?"
+msgstr "Продолжать (y/N)?"
+
+#: podsec-load-sign-oci:141
+msgid "Deploying the image"
+msgstr "Разворачивание образа"
+
+#: podsec-load-sign-oci:141
+msgid "to the local system"
+msgstr "в локальную систему"
+
+#: podsec-load-sign-oci:157
+msgid "Signing and transferring the"
+msgstr "Подпись и передача образа"
+
+#: podsec-load-sign-oci:157
+msgid "to the registry"
+msgstr "в регистратор"
+
+#: podsec-policy-functions:119
+msgid "configPolicyFile has a default policy"
+msgstr "В configPolicyFile установлена политика по умолчанию"
+
+#: podsec-policy-functions:119
+msgid "set to something other than reject"
+msgstr "отличная от reject"
+
+#: podsec-policy-functions:131
+msgid "The YAML files"
+msgstr "YAML файлы"
+
+#: podsec-policy-functions:131
+msgid "are missing the URL of the default signature keeper default-docker.lookaside"
+msgstr "отсутствует URL хранителя подписи по умолчанию default-docker.lookaside"
+
+#: podsec-policy-functions:217 podsec-policy-functions:229
+msgid "Workstation"
+msgstr "Рабочее место"
+
+#: podsec-policy-functions:217 podsec-policy-functions:229
+msgid "user"
+msgstr "пользователь"
+
+#: podsec-policy-functions:217
+msgid "Images outside file policy"
+msgstr "Образы вне политики файла"
+
+#: podsec-policy-functions:229
+msgid "Images according to file policy"
+msgstr "Образы согласно политики файла"
+
+#: podsec-save-oci:21
+msgid "Image archiving directory not specified"
+msgstr "Не указан каталог архивирования образов"
+
+#: podsec-save-oci:22 podsec-save-oci:29 podsec-save-oci:69
+msgid "archive_deployment_directory [architecture ...] [transport] [image] ..."
+msgstr "<каталог_архивирования_образов> <архитектура>,<архитектура>,...|all <транспорт>  <образ> ..."
+
+#: podsec-save-oci:28
+msgid "No list of images specified"
+msgstr "Не указан список образов"
+
+#: podsec-save-oci:47
+msgid "OCI catalog already exists"
+msgstr "OCI-каталог уже существует"
+
+#: podsec-save-oci:81
+msgid "Directory"
+msgstr "Каталог"
+
+#: podsec-save-oci:81
+msgid "is missing. Copying existing images of user u7s-admin is not possible."
+msgstr "отсутствует. Копирование существующих образов  пользователя u7s-admin невозможно"
+
+#: podsec-save-oci:96
+msgid "Archiving the image"
+msgstr "Архивация образа"
+
+#: podsec-save-oci:117
+msgid "Archiving and compressing images\\n"
+msgstr "Архивания и сжатие образов"

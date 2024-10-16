@@ -1,24 +1,5 @@
 #!/bin/bash
 
-# Вспомогательные функции
-#
-# imagesTree
-# Преобразует список образов вида
-#  [
-#    "kaf1.local/flannel-cni-plugin@sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833",
-#    "news.local/flannel-cni-plugin@sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833",
-#    "news.local/etcd@sha256:381bb6ffd9194578d1801bf06ca10de9cf34ab833ff0bb76f5786f64b73de97a"
-#  ]
-# в дерево
-#  {
-#    "sha256:381bb6ffd9194578d1801bf06ca10de9cf34ab833ff0bb76f5786f64b73de97a": [
-#      "news.local/etcd"
-#    ],
-#    "sha256:e639aba6406e58405dda808b633db113324d0f1ed9f9b03612269a7d08b7b833": [
-#      "kaf1.local/flannel-cni-plugin",
-#      "news.local/flannel-cni-plugin"
-#    ]
-#  }
 imagesTree() {
   jq '[
     .[] |
@@ -117,10 +98,10 @@ checkPolicyConfig() {
   configPolicyFile=$1
   tab="\t"
 
-  configDir=$(dirname "$configPolicyFile")
+  export configDir=$(dirname "$configPolicyFile")
   ret="\"configDir\":\"$configDir\""
 
-  defaultPolicy=$(getDefaultPolicy "$configPolicyFile")
+  export defaultPolicy=$(getDefaultPolicy "$configPolicyFile")
   ret+="\n,$tab\"defaultPolicy\":\"$defaultPolicy\""
   if [ -n "$DEBUG" ]
   then
@@ -132,7 +113,7 @@ checkPolicyConfig() {
     ret+="\n,$tab\"incorrectDefaultPolicy\":\"$defaultPolicy\"\n"
     if [ -n "$DEBUG" ]
     then
-      echo -ne "В configPolicyFile установлена политика по умолчанию '$defaultPolicy' отличная от reject\n\n" >&2
+      echo -ne "$(gettext 'configPolicyFile has a default policy') $defaultPolicy $(gettext 'set to something other than reject')\n\n" >&2
     fi
   fi
 
@@ -144,7 +125,7 @@ checkPolicyConfig() {
     ret+="\n$tab,\"noDefaultSigStore\":\"true\"\n"
     if [ -n "$DEBUG" ]
     then
-      echo -ne "В YAML-файлах $configDir/registries.d/ отсутствует URL хранителя подписи по умолчанию default-docker.lookaside\n\n" >&2
+      echo "$(gettext 'The YAML files') $configDir/registries.d/* $(gettext 'are missing the URL of the default signature keeper default-docker.lookaside')\n\n" >&2
     fi
   fi
 
@@ -177,7 +158,7 @@ checkUserImages() {
   configDir=$(dirname "$configPolicyFile")
 #   configDir=$2
   tab="\\t\\t"
-  policyFile="$configDir/policy.json"
+  export policyFile="$configDir/policy.json"
   ret="\n$tab\"user\": \"$user\"\n"
   userPolicyConfig=$(checkPolicyConfig "$policyFile")
   ret+=",$userPolicyConfig"
@@ -220,11 +201,8 @@ $out  )
   TMPFILE="/tmp/checkImagesSignature.$$"
   echo -ne "$in" > $TMPFILE
   in=$(sh $TMPFILE )
-#   cp $TMPFILE "/tmp/in.$user"
-
   echo -ne "$out" > $TMPFILE
   out=$(sh $TMPFILE)
-#   cp $TMPFILE "/tmp/out.$user"
   rm -f $TMPFILE
 
   if [ -n "$out" ]
@@ -233,10 +211,9 @@ $out  )
     outPolicyImagesTree=$(echo -ne "$out" | imagesTree)
     if [ -n "$DEBUG" ]
     then
-      echo "Рабочее место $HOSTNAME, пользователь $user: Образы вне политики файла $policyFile:" >&2
+      echo "$(gettext 'Workstation') $HOSTNAME, $(gettext 'user') $user: $(gettext 'Images outside file policy') $policyFile:" >&2
       echo -ne "$outPolicyImages\n\n" >&2
     fi
-#     outPolicyImages=$(echo $outPolicyImages | jq .)
     ret+="\n,\"outPolicyImagesTree\": $outPolicyImagesTree"
   fi
 
@@ -246,10 +223,9 @@ $out  )
     inPolicyImagesTree=$(echo -ne "$in"  | imagesTree)
     if [ -n "$DEBUG" ]
     then
-      echo "Рабочее место $HOSTNAME, пользователь $user: Образы согласно политики файла $policyFile:" >&2
+      echo "$(gettext 'Workstation') $HOSTNAME, $(gettext 'user') $user: $(gettext 'Images according to file policy') $policyFile:" >&2
       echo -ne "$inPolicyImages\n\n" >&2
     fi
-#     inPolicyImages=$(echo $inPolicyImages | jq .)
     ret+="\n,\"inPolicyImagesTree\": $inPolicyImagesTree"
   fi
 
@@ -259,24 +235,6 @@ $out  )
   then
     images="$in $out"
   fi
-
-#   for image in $(echo $images | jq '.[]')
-#   do
-#     Image=${image:1:-1}
-#     if podman pull --tls-verify=false $Image >/dev/null 2>$TMPFILE
-#     then :; # echo "OK";
-#     else
-#       if [ -n "$DEBUG" ]
-#       then
-#         echo "Рабочее место $HOSTNAME, пользователь $user имеет некорректный образ:" >&2
-#         cat $TMPFILE >&2
-#         echo -ne "\n\n" >&2
-#       fi
-#       inCorrectImages+=$(echo ${inCorrectImages:+,})
-#       inCorrectImages+=$(tr "\n" ' '<$TMPFILE | jq --raw-input ". | {$image:.}"  )
-#     fi
-#   done
-#   ret+=",\"inCorrectImages\":[$inCorrectImages]"
 
   notSignedImages=
   signedImages=

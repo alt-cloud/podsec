@@ -5,14 +5,14 @@ isSigstoreServer() {
   if line="$(grep 'registry.local\|sigstore.local' /etc/hosts)"
   then
     set -- $line
-    ip=$1
+    export ip=$1
     if ! ip a | grep $ip >/dev/null 2>&1
     then
-      echo "Домены registry.local sigstore.local в файле /etc/hosts привязаны к удаленному серверу с ip $ip."
+      echo "$(gettext 'Domains registry.local sigstore.local in the file /etc/hosts are bound to a remote server with ip') $ip" >&2
     fi
   else
-    echo "Домены registry.local sigstore.local в файле /etc/hosts не указаны."
-    echo "Запустите скрипт podsec-create-policy."
+    echo $(gettext 'Domains registry.local sigstore.local are not specified in the /etc/hosts file.')  >&2
+    echo "$(gettext 'Run the podsec-create-policy script')."  >&2
   fi
 }
 

@@ -1,9 +1,11 @@
+#!/bin/sh
+
 # Устанавливает переменную U7S_PLATFORM
 # С 28.05.2025 установлена новая система именования образов - https://www.altlinux.org/Registry_(%D0%9D%D0%BE%D0%B2%D0%B0%D1%8F_%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%B0)
 function getPlatform() {
   if [ -n "$U7S_PLATFORM" ]
   then
-    echo "Версия платформы $U7S_PLATFORM преопределена переменной U7S_PLATFORM. Принимается это значение." >&2
+    echo "$(gettext 'The platform') $U7S_PLATFORM $(gettext 'is predefined by the variable U7S_PLATFORM. This value is taken.')" >&2
     return
   fi
   source /etc/os-release

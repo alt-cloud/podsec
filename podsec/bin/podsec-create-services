@@ -1,4 +1,6 @@
 #!/bin/sh
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec'
 
 . podsec-functions
 
@@ -6,7 +8,7 @@ mes=$(isSigstoreServer)
 if [ -n "$mes" ]
 then
   echo -ne $mes >&2
-  echo "Запуск сервисов невозможен." >&2
+  echo "$(gettext 'Services cannot be started')."  >&2
   exit 1
 fi
 
@@ -27,8 +29,8 @@ podman volume create registry
 sed -i -e 's|rootdirectory:.*|rootdirectory: /var/lib/containers/storage/volumes/registry/_data/|' -e 's/addr:.*/addr: :80/' /etc/docker-registry/config.yml
 if systemctl | grep httpd2 | grep running >/dev/null 2>&1
 then
-  echo "Сервис httpd2 запущен и конфликтует с docker-registry"
-  echo "Сервис httpd2 остановлен"
+  echo $(gettext 'Service httpd2 is running and conflicts with docker-registry')  >&2
+  echo $(gettext 'Service httpd2 stopped')  >&2
   systemctl disable --now httpd2
 fi
 systemctl enable --now docker-registry

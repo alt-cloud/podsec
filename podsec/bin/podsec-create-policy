@@ -1,25 +1,28 @@
 #!/bin/sh
 # Скрипт создает
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec'
 
+export cmd=$0
 if [ $# -lt 1 ]
 then
-  echo -ne "Не указан IP-адрес регистратора и сервера подписей\n"
-  echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>\n"
+  echo $(gettext 'The IP address of the registry and signature server is not specified') >&2
+  echo "$(gettext 'Format'):\n\t$cmd $(gettext '<ip_address_of_registrar_and_signature_server>')\n" >&2
   exit 1
 fi
 
 if [ $# -gt 1 ]
 then
-  echo -ne "Должен быть указан только один IP-адрес регистратора и сервера подписей\n"
-  echo -ne "Формат:\n\t$0 <ip-адрес_регистратора_и_сервера_подписей>\n"
+  echo $(gettext 'Only one IP address of the registry and signature server must be specified.') >&2
+  echo "$(gettext 'Format'):\n\t$cmd $(gettext '<ip_address_of_registrar_and_signature_server>')\n" >&2
   exit 1
 fi
 
-regIP=$1
+export regIP=$1
 
 case $regIP in
   '127.0.0.1')
-    echo "IP-адрес регистратора и сервера подписей не должен быть локальным: $regIP"
+    echo "$(gettext 'The IP address of the registry and signature server must not be local'): $regIP" >&2
     exit 1;;
 esac
 
@@ -28,7 +31,7 @@ set -- $regIP
 IFS=$ifs
 if [ $# -ne 4 ]
 then
-  echo "Некорректный IP-адрес: $regIP"
+  echo "$(gettext 'Invalid IP address'): $regIP" >&2
   exit 2
 fi
 
@@ -37,7 +40,7 @@ do
   if [[ "$a" =~ $re && "$a" -ge 0 && "$a" -lt 256 ]]
   then :;
   else
-  echo "Некорректный IP-адрес: $regIP"
+    echo "$(gettext 'Invalid IP address'): $regIP" >&2
     exit 3
   fi
 done
@@ -63,32 +66,34 @@ fi
 if line=$(grep $regIP /etc/hosts 2>/dev/null)
 then
   set -- $line
-  ip=$1
+  export ip=$1
   shift
   for domain
   do
     if [ "$domain" = 'registry.local' ] || [ "$domain" = 'sigstore.local' ] || [ "$domain" = 'trivy.local'  ]
     then
-      echo "Домены registry.local sigstore.local trivy.local уже привязаны к IP-адресу $ip" >&2
-      echo "Удалите привязку и запустите скрипт заново" >&2
+      echo "$(gettext 'Domains registry.local sigstore.local trivy.local are already bound to IP address') $ip" >&2
+      echo $(gettext 'Remove the binding and run the script again')  >&2
       exit 1
     fi
   done
+else
+  echo "$(gettext 'Adding a binding of domains registry.local sigstore.local trivy.local to IP address') $regIP" >&2
+  echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts
 fi
-echo "Добавление привязки доменов registry.local sigstore.local trivy.local к IP-адресу $regIP"
-echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts
 
 # Создание группы podman
-echo "Создание группы podman"
+echo $(gettext 'Creating podman group')  >&2
 groupadd -r podman >/dev/null 2>&1
-echo "Инициализация каталога /var/sigstore/ и подкаталогов хранения открытых ключей и подписей образов"
-# Создание каталога и подкаталогов  /var/sigstore/ если IP-адрес узла совпадает с IP-адресом сервера подписей storage.local
-echo "Создание каталога и подкаталогов  /var/sigstore/"
+echo "$(gettext 'Initializing the') /var/sigstore/ $(gettext 'directory and subdirectories for storing public keys and image signatures')" >&2
+
+# Создание каталога и подкаталогов /var/sigstore/ если IP-адрес узла совпадает с IP-адресом сервера подписей storage.local
+echo "$(gettext 'Creating the directory and subdirectories') /var/sigstore/" >&2
 mkdir -p -m 0775 /var/sigstore/keys/
 if [ -n "$localIP" ]
 then
   #IP-адрес узла совпадает с IP-адресом сервера подписей storage.local
-  echo "Создание группы podman_dev"
+  echo $(gettext 'Creating the podman_dev group') >&2
   groupadd -r podman_dev >/dev/null 2>&1
   # Создать каталог sogstore с подкаталогами
   chown root:podman_dev /var/sigstore/keys/
@@ -110,7 +115,7 @@ yesterday=$(date '+%Y-%m-%d_%H:%M:%S' -d "yesterday")
 now=$(date '+%Y-%m-%d_%H:%M:%S')
 
 # Создание с сохранением предыдущего файла политик /etc/containers/policy.json
-echo "Создание с сохранением предыдущего файла политик /etc/containers/policy.json"
+echo "$(gettext 'Creating with preservation of the previous policy file') /etc/containers/policy.json" >&2
 if [ ! -L $policyFile ]
 then :;
   mv $policyFile "policy_${yesterday}"
@@ -134,7 +139,7 @@ fi
 ln -sf $linkedPolicyFile $policyFile
 
 # Создание с сохранением предыдущего файла `/etc/containers/registries.d/default.yaml` описания доступа к открытым ключам подписантов
-echo "Создание с сохранением предыдущего файл /etc/containers/registries.d/default.yaml описания доступа к открытым ключам подписантов"
+echo "$(gettext 'Creating with preservation of the previous file') /etc/containers/registries.d/default.yaml $(gettext 'description of access to public keys of signatories')" >&2
 cd /etc/containers/registries.d
 defaultYaml='default.yaml'
 if [ ! -L $defaultYaml ]
@@ -150,7 +155,7 @@ ln -sf $linkedDefaultYaml $defaultYaml
 
 cd /etc/containers
 # Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf
-echo "Добавление insecure-доступа к регистратору registry.local в файле /etc/containers/registries.conf"
+echo "$(gettext 'Adding insecure access to the registry.local registry in the') /etc/containers/registries.conf file" >&2
 registriesConf="registries.conf"
 if [ ! -L $registriesConf ]
 then :;
