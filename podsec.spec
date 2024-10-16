@@ -343,6 +343,14 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 * Fri Oct 18 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt4
 - Debugged podsec/bin/podsec-create-policy: correct adding registry.local, change control of new[ug]idmap to>
 
+* Wed Oct 16 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.11-alt1
+- Added localization files to podsec.spec.
+- Added localization files to Makefile.
+- Added localization of the podsec-inotify package.
+- Added localization of the podsec-k8s-rbac package.
+- Added localization of the podsec-k8s package.
+- Added localization of the podsec package.
+
 * Fri Oct 11 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
 - Removed dependencies from the podsec-k8s package since the kubernetes version is determined when deploying the cluster.
 - Changed owners, access right of dirs, executable, configurations and usual files.
