@@ -767,25 +767,30 @@ skopeo --override-arch $arch copy docker://$flannelCNIImage containers-storage:[
 #   then
 #     # U7S_CERTMANAGER_TAG="v1.9.1"
 #     U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
-#     if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+#     if [ -z "$U7S_CERTMANAGER_TAG" ];
+#     then
+# 			echo "$(gettext 'Image') ${prefix}cert-manager-controller $(gettext 'on registry') $U7S_REGISTRY $(gettext 'unavailable')" >&2
+# 			exit;
+# 		fi
 #
 #     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
-#     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"  || :
+#     echo -ne "\n--------------------------\n$(gettext 'Loading the image') $certManagesImage\n"  || :
 #     skopeo --override-arch $arch copy\
 # 			docker://$certManagesImage\
 # 			containers-storage:[$storage]$certManagesImage  || :
 #
 #     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
-#     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" 2>/dev/null
+#     echo -ne "\n--------------------------\n$(gettext 'Loading the image') $certManagesImage\n" >&2
 #     skopeo --override-arch $arch copy\
 # 			docker://$certManagesImage\
 # 			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
 #
-#     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"
+#     echo -ne "\n--------------------------\n$(gettext 'Loading the image') $certManagesImage\n" >&2
 #     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
 #     skopeo --override-arch $arch copy\
 # 			docker://$certManagesImage\
 # 			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
+#
 #   fi
 
   echo "$(gettext 'For the image') flannel $(gettext 'image with tag selected') $U7S_FLANNEL_TAG" >&2
@@ -794,13 +799,13 @@ skopeo --override-arch $arch copy docker://$flannelCNIImage containers-storage:[
   echo "$(gettext 'For the image') flannel-cni-plugin $(gettext 'image with tag selected') $U7S_FLANNELCNIPLUGIN_TAG" >&2
   export U7S_FLANNEL_CNI_IMAGE="${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
 
-#   echo "Для образа cert-manager-controller выбран образ с тегом $U7S_CERTMANAGER_TAG"
+#   echo "$(gettext 'For the image') cert-manager-controller $(gettext 'image with tag selected') $U7S_CERTMANAGER_TAG" >&2
 #   export U7S_CERTMANAGER_CONTROLLER_IMAGE="$U7S_PLATFORM/cert-manager-controller:$U7S_CERTMANAGER_TAG"
 #
-#   echo "Для образа cert-manager-cainjector выбран образ с тегом $U7S_CERTMANAGER_TAG"
+#   echo "$(gettext 'For the image') cert-manager-cainjector $(gettext 'image with tag selected') $U7S_CERTMANAGER_TAG" >&2
 #   export U7S_CERTMANAGER_CAINJECTOR_IMAGE="$U7S_PLATFORM/cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
 #
-#   echo "Для образа cert-manager-webhook выбран образ с тегом $U7S_CERTMANAGER_TAG"
+#    echo "$(gettext 'For the image') cert-manager-webhook $(gettext 'image with tag selected') $U7S_CERTMANAGER_TAG" >&2
 #   export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
 
 	eval chown -R $user:$user ~$user/.local
