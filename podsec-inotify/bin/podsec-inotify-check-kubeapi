@@ -6,6 +6,8 @@
 #   и добавляется к файлу событий монтиринга /var/lib/podsec/log/kubeapi/forbidden.log
 #
 # - Передача накопленных в файле событий монтиринга /var/lib/podsec/log/kubeapi/forbidden.log системному админстратору
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-inotify'
 
 . podsec-policy-functions
 . podsec-inotify-functions
@@ -16,9 +18,8 @@ export PROGNAME=$(basename $0)
 
 if [ $# -ne 1 ]
 then
-  echo "Неверное число параметров" >&2
-  echo "Формат:
-$0 [-d | -m]"
+  echo $(gettext 'Invalid number of parameters')
+  echo -ne "$(gettext 'Format'):\n$PROGNAME [-d | -m]\n'" >&2
   exit 1
 fi
 
@@ -51,15 +52,14 @@ then
   then
     if [ -n "$MAILTO" ]
     then
-      mail -s "Detected requests to the kubernetes cluster with excess authority" root < $EVENTFILE
+      mail -s "$(gettext 'Detected requests to the kubernetes cluster with excess authority')" root < $EVENTFILE
     fi
     tail -1 $EVENTFILE | jq '.[0]' > $LASTEVENTTIMEFILE
     true > $EVENTFILE
   fi
 else
-  echo "Неверное значение 1-го параметра" >&2
-  echo "Формат:
-$0 [-d | -m]"
+  echo $(gettext 'Invalid value for 1st parameter') >&2
+  echo -ne "$(gettext 'Format:')\n$PROGNAME [-d | -m]\n'" >&2
   exit 1
 fi
 

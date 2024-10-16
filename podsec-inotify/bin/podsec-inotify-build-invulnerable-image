@@ -1,11 +1,15 @@
 #!/bin/bash
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-inotify'
+
 export U7S_TRIVY_SERVER
 
+export cmd=$0
 source podsec-inotify-functions
 getTrivyServer
 
 function format() {
-  echo -ne "Формат:\n$0 <имя_образа> [ <docker_файл> [ <каталог_контекста> [ <параметры_podman_build> ] ] ]\n"
+  echo "$(gettext 'Format'): $cmd <image_name> [ <docker file> [ <context directory> [ <podman build options> ] ] ]"
   exit 1
 }
 
@@ -15,7 +19,7 @@ then
 fi
 
 export PROGNAME=$(basename $0)
-container_name=$1
+export container_name=$1
 dockerfile=''
 
 if [ $# -gt 1 ]
@@ -32,7 +36,7 @@ then
     # Создание контейнера из Dockerfile, в $@ список переданных параметров для podman build
     if podman build "$@" -f "$dockerfile" -t "${container_name}" "$context"; then :;
     else
-        message="Построение образа ${container_name} закончилось неуспешно. Анализ образа пропускается."
+        message="$(gettext 'Building image') ${container_name} $(gettext 'failed'). $(gettext 'Image analysis is skipped'.)"
         echo "$message" >&2
         priority=6
         prefix='Fatal'

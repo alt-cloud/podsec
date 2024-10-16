@@ -1,4 +1,6 @@
 #!/bin/bash
+export TEXTDOMAINDIR='/usr/share/locale'
+export TEXTDOMAIN='podsec-inotify'
 
 export EVENTS="moved_from,create,delete,modify"
 export OVERLAYDIRS="/tmp/inotifyOverlays.tmp"
@@ -72,11 +74,11 @@ logevent() {
   priority=5
   if [ "$homedir" = '/home/' -o "$homedir" = '/root/' ]
   then
-    mes='in home directory'
+    mes="$(gettext 'in home directory')"
     prefix='Warning'
   elif [ "${dir:0:5}" = '/etc/' ]
   then
-    mes='in configuration directory'
+    mes="$(gettext 'in configuration directory')"
     prefix='Warning'
   else
     mes=''
@@ -84,7 +86,7 @@ logevent() {
     prefix='Critical'
   fi
   File="$dir$file"
-  message="An event $event occurred in the container $container $mes on the file $File"
+  message="$(gettext 'An event') $event $(gettext 'occurred in the container') $container $mes $(gettext 'on the file') $File"
   logger -p $priority -t "${PROGNAME}" "$prefix: $message"
 }
 
