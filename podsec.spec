@@ -433,6 +433,14 @@ Change access mode 0700 to ~u7s-admin/.local/..., /usr/libexec/podsec/u7s/bin/*.
 - Added dependency on nagwad-service to SPEC.
 - Added to SPEC dirs of u7s-admin user.
 
+* Wed Oct 16 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.11-alt1
+- Added localization files to podsec.spec.
+- Added localization files to Makefile.
+- Added localization of the podsec-inotify package.
+- Added localization of the podsec-k8s-rbac package.
+- Added localization of the podsec-k8s package.
+- Added localization of the podsec package.
+
 * Fri Oct 11 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
 - Removed dependencies from the podsec-k8s package since the kubernetes version is determined when deploying the cluster.
 - Changed owners, access right of dirs, executable, configurations and usual files.
