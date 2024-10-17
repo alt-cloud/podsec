@@ -5,7 +5,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.11
+Version: 1.2.0
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -326,6 +326,17 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.0-alt1
+- Created english md-catalogs podsec*/md/en.
+- Created russian md-catalogs podsec*/md/ru.
+- Moved russian md-files to podsec*/md/ru.
+- Translated russion md-files to english md-files in podsec*/md/en.
+- Created russian man-catalogs podsec*/man/ru.
+- Created english man-catalogs podsec*/man/en.
+- Removed russiian man pages.
+- Generated Russian and English man pages based on Russian and English md files.
+- Debugged podsec/bin/podsec-create-policy.
+
 * Wed Oct 16 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.11-alt1
 - Added localization files to podsec.spec.
 - Added localization files to Makefile.
