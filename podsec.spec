@@ -6,7 +6,7 @@
 
 Name: podsec
 Version: 1.2.0
-Release: alt1
+Release: alt2
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -18,6 +18,7 @@ Source: %name-%version.tar
 
 BuildRequires(pre): rpm-macros-systemd
 BuildRequires(pre): libsystemd-devel
+BuildRequires(pre): ronn
 Requires: podman >= 4.4.2
 Requires: shadow-submap >= 4.5
 Requires: nginx >= 1.22.1
@@ -326,6 +327,10 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.0-alt2
+- Removed man files from podsec*/man.
+- Adden generation man files to Makefile.
+
 * Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.0-alt1
 - Created english md-catalogs podsec*/md/en.
 - Created russian md-catalogs podsec*/md/ru.

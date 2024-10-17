@@ -10,7 +10,7 @@ podsec-inotify-check-kubeapi(1) -- скрипт мониторинга ауди�
 Скрипт производит мониторинг файла `/etc/kubernetes/audit/audit.log` аудита API-интерфейса `kube-apiserver`.
 
 Политика аудита располагается в файле `/etc/kubernetes/audit/policy.yaml`:
-<pre>
+```
 apiVersion: audit.k8s.io/v1
 kind: Policy
 omitManagedFields: true
@@ -71,7 +71,7 @@ rules:
 - level: Metadata
   omitStages:
   - RequestReceived
-</pre>
+```
 
 Текущие настройки производят логирование всех обращений "несистемных" пользователей (в том числе анонимных) к ресурсам `kubernetes`.
 
@@ -87,17 +87,17 @@ rules:
 В состав пакета кроме этого скрипта входят:
 
 - файл описания сервиса `/lib/systemd/system/podsec-inotify-check-kubeapi.service`. Для его запуска необходимо выполнить команды:
-  <pre>
+```
   # systemctl enable  podsec-inotify-check-kubeapi.service
   # systemctl start  podsec-inotify-check-kubeapi.service
-  </pre>
+```
 
 - Файла расписания `/lib/systemd/system/podsec-inotify-check-kubeapi-mail.timer`, задающий в параметре `OnCalendar` расписание запуска сервиса `/lib/systemd/system/podsec-inotify-check-kubeapi-mail.timer`. Таймер вызывается ежечасно.
 
 По умолчанию таймер запуска сервиса выключен. Для его включения наберите команду:
-<pre>
+```
 #  systemctl enable --now podsec-inotify-check-kubeapi-mail.timer
-</pre>
+```
 Если необходимо изменить режим запуска скрипта отредактируйте параметр `OnCalendar` файла расписания `podsec-inotify-check-kubeapi-mail.timer`.
 
 
