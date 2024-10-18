@@ -50,8 +50,8 @@ groupadd -r podman_dev >/dev/null 2>&1
 echo kernel.unprivileged_userns_clone=1 > /etc/sysctl.d/99-podman.conf
 sysctl -w kernel.unprivileged_userns_clone=1
 
-control newgidmap public
-control newuidmap public
+control newgidmap podmanonly
+control newuidmap podmanonly
 
 localIP=
 if ip a  | grep $regIP >/dev/null 2>&1
@@ -74,10 +74,9 @@ then
       exit 1
     fi
   done
-else
-  echo "Добавление привязки доменов registry.local sigstore.local trivy.local к IP-адресу $regIP"
-  echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts
 fi
+echo "Добавление привязки доменов registry.local sigstore.local trivy.local к IP-адресу $regIP"
+echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts
 
 # Создание группы podman
 echo "Создание группы podman"
