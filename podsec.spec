@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.8
-Release: alt3
+Release: alt4
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -305,6 +305,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Fri Oct 18 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt4
+- Debugged podsec/bin/podsec-create-policy: correct adding registry.local, change control of new[ug]idmap to>
+
 * Tue Oct 01 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt3
 - Added dir /etc/nagwad to SPEC
 
