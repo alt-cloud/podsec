@@ -1,12 +1,13 @@
 %define _unpackaged_files_terminate_build 1
 %define u7s_admin_usr u7s-admin
 %define u7s_admin_grp u7s-admin
+%define kubernetes_grp kube
 %define _libexecdir %_prefix/libexec
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.2.0
-Release: alt2
+Version: 1.2.1
+Release: alt1
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -19,23 +20,10 @@ Source: %name-%version.tar
 BuildRequires(pre): rpm-macros-systemd
 BuildRequires(pre): libsystemd-devel
 BuildRequires(pre): ronn
-Requires: podman >= 4.4.2
-Requires: shadow-submap >= 4.5
-Requires: nginx >= 1.22.1
-Requires: docker-registry >= 2.8.1
+
+Requires: nginx
+Requires: docker-registry
 Requires: pinentry-common
-Requires: jq
-Requires: yq
-Requires: skopeo >= 1.9.1
-Requires: wget
-Requires: coreutils
-Requires: conntrack-tools
-Requires: findutils
-Requires: iproute2
-Requires: iptables
-Requires: openssh-server
-Requires: curl
-Requires: nagwad-service
 
 %description
 This package contains utilities for:
@@ -52,14 +40,7 @@ This package contains utilities for:
 %package k8s
 Summary: Set of scripts for Kubernetes Security
 Group: Development/Other
-Requires: podsec >= %EVR
-Requires: rootlesskit >= 1.1.0
-Requires: slirp4netns >= 1.1.12
-Requires: crun >= 1.8.1
-Requires: systemd-container
-Requires: kubernetes-kubeadm
-Requires: kubernetes-client
-Requires: kubernetes-kubelet
+Requires: cri-tools
 
 %description k8s
 This package contains utilities for:
@@ -69,9 +50,6 @@ This package contains utilities for:
 %package k8s-rbac
 Summary: Set of scripts for Kubernetes RBAC
 Group: Development/Other
-Requires: podsec >= %EVR
-Requires: openssh-common
-Requires: sh
 
 %description k8s-rbac
 This package contains utilities for
@@ -82,13 +60,8 @@ This package contains utilities for
 %package inotify
 Summary: Set of scripts for security monitoring
 Group: Development/Other
-Requires: inotify-tools
-Requires: podsec >= %EVR
-Requires: openssh-server
-Requires: mailx
 Requires: trivy
 Requires: trivy-server
-Requires: psmisc
 
 %description inotify
 A set of scripts for  security monitoring by systemd timers
@@ -97,16 +70,14 @@ to monitor and identify security threats
 %package dev
 Summary: Set of scripts for podsec developers
 Group: Development/Other
-Requires: podsec >= %EVR
-Requires: podsec-k8s >= %EVR
 
 %description dev
 A set of scripts for developers
 
 %package icinga
 Summary: %name-inotify monitoring templates for Icinga 2
-Requires: nagwad-icinga-templates >= 0.11.2
 Group: Monitoring
+Requires: nagwad-icinga-templates >= 0.11.2
 
 %description icinga
 Monitoring templates for Icinga 2 defining services to monitor
@@ -114,8 +85,8 @@ various Podsec events.
 
 %package nagios
 Summary: %name-inotify monitoring templates for Nagios
-Requires: nagwad-nagios-templates >= 0.11.2
 Group: Monitoring
+Requires: nagwad-nagios-templates >= 0.11.2
 
 %description nagios
 Monitoring templates for Nagios defining services to monitor
@@ -139,7 +110,7 @@ groupadd -r -f podman_dev >/dev/null 2>&1 ||:
 
 %pre k8s
 groupadd -r -f %u7s_admin_grp  2>&1 ||:
-useradd -M -r -g %u7s_admin_grp -d %u7s_admin_homedir -G systemd-journal,podman \
+useradd -M -r -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
     -c 'usernet user account'  %u7s_admin_usr  2>&1 ||:
 mkdir -p %u7s_admin_homedir
 # merge usernetes & podman graphroot
@@ -165,15 +136,9 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %preun_systemd u7s.service
 
 %files
+%dir %_mandir/ru/man1
+%dir %_sysconfdir/nagwad/
 %_datadir/locale/ru/LC_MESSAGES/podsec.mo
-%attr(0700,root,root) %_bindir/podsec-create-imagemakeruser
-%attr(0700,root,root) %_bindir/podsec-create-podmanusers
-%attr(0700,root,root) %_bindir/podsec-create-policy
-%attr(0700,root,root) %_bindir/podsec-create-services
-%attr(0755,root,root) %_bindir/podsec-functions
-%attr(0755,root,root) %_bindir/podsec-get-platform
-%attr(0755,root,root) %_bindir/podsec-load-sign-oci
-%attr(0755,root,root) %_bindir/podsec-policy-functions
 %_mandir/ru/man1/podsec-create-imagemakeruser.1.xz
 %_mandir/ru/man1/podsec-create-podmanusers.1.xz
 %_mandir/ru/man1/podsec-create-policy.1.xz
@@ -187,74 +152,93 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagwad/podsec.sed
 %dir %_sysconfdir/podsec
 %dir %_libexecdir/podsec
-%dir %attr(0755,root,root) %_localstatedir/podsec
+%dir %_localstatedir/podsec
+%_bindir/podsec-functions
+%_bindir/podsec-get-platform
+%_bindir/podsec-load-sign-oci
+%_bindir/podsec-policy-functions
+%defattr (0700,root,root, -)
+%_bindir/podsec-create-imagemakeruser
+%_bindir/podsec-create-podmanusers
+%_bindir/podsec-create-policy
+%_bindir/podsec-create-services
+
 
 %files k8s
 %_datadir/locale/ru/LC_MESSAGES/podsec-k8s.mo
-%attr(0755,root,root) %_bindir/podsec-u7s-kubeadm
-%attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_bindir/podsec-u7s-functions
+%_bindir/podsec-u7s-kubeadm
+%_bindir/podsec-u7s-functions
 %_unitdir/u7s.service
 %_unitdir/user@.service.d/delegate.conf
-%dir %attr(0755,root,root) %_libexecdir/podsec/u7s
-%dir %attr(0755,root,root) %_libexecdir/podsec/u7s/bin
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubeadm
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/u7sinit.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/crio.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/init-crio.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/_kubeadm.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/_kubelet.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/rootlessctl
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/systemctl
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/u7s-start-stop.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubeadm.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubelet.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/nsenter_u7s
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/rootlesskit.sh
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log/kubeapi
-%config  %attr(0640, root, root) %_modules_loaddir/u7s.conf
+
+%config %_modules_loaddir/u7s.conf
+%dir %_mandir/ru/man1
 %_mandir/ru/man1/podsec-u7s-kubeadm.1.xz
 %_mandir/man1/podsec-u7s-kubeadm.1.xz
 %_userunitdir/kubelet.service
 %_userunitdir/rootlesskit.service
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/audit
-%config %_sysconfdir/podsec/u7s/audit/policy.yaml
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/cni_net.d
+
+%defattr (0700,%u7s_admin_usr,%u7s_admin_grp, 0700)
+%dir %_sysconfdir/podsec/u7s
+%dir %_sysconfdir/podsec/u7s/audit
+%dir %_sysconfdir/podsec/u7s/config
+%dir %_sysconfdir/podsec/u7s/config/cni_net.d
+%dir %_sysconfdir/podsec/u7s/config/flannel
+%dir %_sysconfdir/podsec/u7s/config/flannel/cni_net.d
+%dir %_sysconfdir/podsec/u7s/config/flannel/etcd
+%dir %_sysconfdir/podsec/u7s/config/kubeadm-configs
+%dir %_sysconfdir/podsec/u7s/env
+%dir %_sysconfdir/podsec/u7s/manifests/
+%dir %_sysconfdir/podsec/u7s/manifests/kube-flannel
+%dir %_sysconfdir/podsec/u7s/manifests/kube-flannel/*
+%dir %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*
+%dir %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*
+
+%dir %u7s_admin_homedir
+%dir %u7s_admin_homedir/.local
+%dir %u7s_admin_homedir/.local/share
+%dir %u7s_admin_homedir/.local/share/usernetes
+%dir %u7s_admin_homedir/.local/share/usernetes/containers
+
+%dir %_localstatedir/podsec/u7s
+%dir %_localstatedir/podsec/u7s/etcd
+%dir %_localstatedir/podsec/u7s/log
+%dir %_localstatedir/podsec/u7s/log/kubeapi
+%dir %_libexecdir/podsec/u7s
+%dir %_libexecdir/podsec/u7s/bin
+
+%_libexecdir/podsec/u7s/bin/kubeadm
+%_libexecdir/podsec/u7s/bin/u7sinit.sh
+%_libexecdir/podsec/u7s/bin/crio.sh
+%_libexecdir/podsec/u7s/bin/init-crio.sh
+%_libexecdir/podsec/u7s/bin/_kubeadm.sh
+%_libexecdir/podsec/u7s/bin/_kubelet.sh
+%_libexecdir/podsec/u7s/bin/rootlessctl
+%_libexecdir/podsec/u7s/bin/systemctl
+%_libexecdir/podsec/u7s/bin/u7s-start-stop.sh
+%_libexecdir/podsec/u7s/bin/kubeadm.sh
+%_libexecdir/podsec/u7s/bin/kubelet.sh
+%_libexecdir/podsec/u7s/bin/nsenter_u7s
+%_libexecdir/podsec/u7s/bin/rootlesskit.sh
+
+%defattr (0600,%u7s_admin_usr,%u7s_admin_grp, -)
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitClusterConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinClusterConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinControlPlaneConfijuration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeletConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeProxyConfiguration.yaml
+%config %_sysconfdir/podsec/u7s/env/u7s_flags
+%config %_sysconfdir/podsec/u7s/env/u7s_images
+%config %_sysconfdir/podsec/u7s/manifests/coredns.yaml
+%config %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*/kube-flannel.yml
 %config %_sysconfdir/podsec/u7s/config/cni_net.d/99-loopback.conf
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config
+%config %_sysconfdir/podsec/u7s/audit/policy.yaml
+%config %_sysconfdir/podsec/u7s/config/flannel/etcd/coreos.com_network_config
 %config %_sysconfdir/podsec/u7s/config/env
 %config %_sysconfdir/podsec/u7s/config/ENV
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/flannel
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/flannel/cni_net.d
 %config %_sysconfdir/podsec/u7s/config/flannel/cni_net.d/10-flannel.conflist
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/flannel/etcd
-%config %_sysconfdir/podsec/u7s/config/flannel/etcd/coreos.com_network_config
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs
-%config  %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitClusterConfiguration.yaml
-%config  %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs/InitConfiguration.yaml
-%config  %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinClusterConfiguration.yaml
-%config  %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinConfiguration.yaml
-%config  %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs/JoinControlPlaneConfijuration.yaml
-%config  %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeletConfiguration.yaml
-%config  %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/kubeadm-configs/KubeProxyConfiguration.yaml
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/env
-%config %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/env/u7s_flags
-%config %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/env/u7s_images
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/manifests/
-%config %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/manifests/coredns.yaml
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/manifests/kube-flannel
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*
-%dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*
-%config %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/manifests/kube-flannel/*/*/*/kube-flannel.yml
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local/share
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local/share/usernetes
-%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %u7s_admin_homedir/.local/share/usernetes/containers
 
 %files k8s-rbac
 %_datadir/locale/ru/LC_MESSAGES/podsec-k8s-rbac.mo
@@ -265,6 +249,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %_bindir/podsec-k8s-rbac-functions
 %_bindir/podsec-k8s-rbac-get-userroles
 %_bindir/podsec-k8s-rbac-unbindrole
+%dir %_mandir/ru/man1
 %_mandir/ru/man1/podsec-k8s-rbac-bindrole.1.xz
 %_mandir/ru/man1/podsec-k8s-rbac-create-kubeconfig.1.xz
 %_mandir/ru/man1/podsec-k8s-rbac-create-remoteplace.1.xz
@@ -279,14 +264,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %_mandir/man1/podsec-k8s-rbac-unbindrole.1.xz
 
 %files inotify
-%_datadir/locale/ru/LC_MESSAGES/podsec-inotify.mo
-%_bindir/podsec-inotify-build-invulnerable-image
-%attr(0700,root,root) %_bindir/podsec-inotify-check-containers
-%attr(0700,root,root) %_bindir/podsec-inotify-check-images
-%attr(0700,root,root) %_bindir/podsec-inotify-check-kubeapi
-%attr(0700,root,root) %_bindir/podsec-inotify-check-policy
-%_bindir/podsec-inotify-check-vuln
-%_bindir/podsec-inotify-functions
+%dir %_mandir/ru/man1
 %_mandir/ru/man1/podsec-inotify-build-invulnerable-image.1.xz
 %_mandir/ru/man1/podsec-inotify-check-containers.1.xz
 %_mandir/ru/man1/podsec-inotify-check-images.1.xz
@@ -310,13 +288,26 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %_unitdir/podsec-inotify-check-vuln.service
 %_unitdir/podsec-inotify-check-vuln.timer
 
+%_bindir/podsec-inotify-functions
+%_datadir/locale/ru/LC_MESSAGES/podsec-inotify.mo
+%_bindir/podsec-inotify-build-invulnerable-image
+%_bindir/podsec-inotify-check-vuln
+
+%defattr (0500,root, root, -)
+%_bindir/podsec-inotify-check-containers
+%_bindir/podsec-inotify-check-images
+%_bindir/podsec-inotify-check-kubeapi
+%_bindir/podsec-inotify-check-policy
+
 %files dev
-%attr(0700,root,root) %_bindir/podsec-save-oci
-%attr(0700,root,root) %_bindir/podsec-k8s-save-oci
+%dir %_mandir/ru/man1
 %_mandir/man1/podsec-k8s-save-oci.1.xz
 %_mandir/ru/man1/podsec-k8s-save-oci.1.xz
 %_mandir/man1/podsec-save-oci.1.xz
 %_mandir/ru/man1/podsec-save-oci.1.xz
+%defattr (0400,%u7s_admin_usr,%u7s_admin_grp, -)
+%_bindir/podsec-save-oci
+%_bindir/podsec-k8s-save-oci
 
 %files icinga
 %doc podsec-inotify/monitoring/podsec-icinga2.json
@@ -327,7 +318,8 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
-* Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.0-alt2
+
+* Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.1-alt1
 - Removed man files from podsec*/man.
 - Adden generation man files to Makefile.
 
