@@ -6,7 +6,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.2.1
+Version: 1.2.2
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -318,6 +318,11 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Thu Oct 24 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.2-alt1
+- Add kube group to user u7s-admin.
+- Optimized podsec.spec by using defattr.
+- Removed unnecessary Requires from podsec.spec.
+- Changed control for newuidmap, newgidmap from public to podmanonly.
 
 * Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.1-alt1
 - Removed man files from podsec*/man.
