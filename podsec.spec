@@ -6,8 +6,8 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.8
-Release: alt4
+Version: 1.1.9
+Release: alt1
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -305,6 +305,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Thu Oct 24 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.9-alt1
+- Removed cert-mansger's image support.
+
 * Fri Oct 18 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.8-alt4
 - Debugged podsec/bin/podsec-create-policy: correct adding registry.local, change control of new[ug]idmap to>
 
