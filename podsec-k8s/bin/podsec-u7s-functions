@@ -755,31 +755,30 @@ else
 fi
 skopeo --override-arch $arch copy docker://$flannelCNIImage containers-storage:[$storage]$flannelCNIImage
 
-  if [ -z "$U7S_CERTMANAGER_TAG" ]
-  then
-    # U7S_CERTMANAGER_TAG="v1.9.1"
-    U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
-    if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
-
-    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"  || :
-    skopeo --override-arch $arch copy\
-			docker://$certManagesImage\
-			containers-storage:[$storage]$certManagesImage  || :
-
-    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" 2>/dev/null
-    skopeo --override-arch $arch copy\
-			docker://$certManagesImage\
-			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
-
-    echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"
-    certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
-    skopeo --override-arch $arch copy\
-			docker://$certManagesImage\
-			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
-
-  fi
+#   if [ -z "$U7S_CERTMANAGER_TAG" ]
+#   then
+#     # U7S_CERTMANAGER_TAG="v1.9.1"
+#     U7S_CERTMANAGER_TAG=$(getKuberLastPatchVersion 'v' "${prefix}cert-manager-controller")
+#     if [ -z "$U7S_CERTMANAGER_TAG" ]; then echo "Образ ${prefix}cert-manager-controller на регистраторе $U7S_REGISTRY недоступен"; exit; fi
+#
+#     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-controller:$U7S_CERTMANAGER_TAG"
+#     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"  || :
+#     skopeo --override-arch $arch copy\
+# 			docker://$certManagesImage\
+# 			containers-storage:[$storage]$certManagesImage  || :
+#
+#     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
+#     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n" 2>/dev/null
+#     skopeo --override-arch $arch copy\
+# 			docker://$certManagesImage\
+# 			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
+#
+#     echo -ne "\n--------------------------\nЗагрузка образа $certManagesImage\n"
+#     certManagesImage="$U7S_REGISTRY/${prefix}cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+#     skopeo --override-arch $arch copy\
+# 			docker://$certManagesImage\
+# 			containers-storage:[$storage]$certManagesImage 2>/dev/null  || :
+#   fi
 
   echo "Для образа flannel выбран образ с тегом $U7S_FLANNEL_TAG"
   export U7S_FLANNEL_IMAGE="${prefix}flannel:$U7S_FLANNEL_TAG"
@@ -787,24 +786,30 @@ skopeo --override-arch $arch copy docker://$flannelCNIImage containers-storage:[
   echo "Для образа flannel-cni-plugin выбран образ с тегом $U7S_FLANNELCNIPLUGIN_TAG"
   export U7S_FLANNEL_CNI_IMAGE="${prefix}flannel-cni-plugin:$U7S_FLANNELCNIPLUGIN_TAG"
 
-  echo "Для образа cert-manager-controller выбран образ с тегом $U7S_CERTMANAGER_TAG"
-  export U7S_CERTMANAGER_CONTROLLER_IMAGE="$U7S_PLATFORM/cert-manager-controller:$U7S_CERTMANAGER_TAG"
-
-  echo "Для образа cert-manager-cainjector выбран образ с тегом $U7S_CERTMANAGER_TAG"
-  export U7S_CERTMANAGER_CAINJECTOR_IMAGE="$U7S_PLATFORM/cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
-
-  echo "Для образа cert-manager-webhook выбран образ с тегом $U7S_CERTMANAGER_TAG"
-  export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
+#   echo "Для образа cert-manager-controller выбран образ с тегом $U7S_CERTMANAGER_TAG"
+#   export U7S_CERTMANAGER_CONTROLLER_IMAGE="$U7S_PLATFORM/cert-manager-controller:$U7S_CERTMANAGER_TAG"
+#
+#   echo "Для образа cert-manager-cainjector выбран образ с тегом $U7S_CERTMANAGER_TAG"
+#   export U7S_CERTMANAGER_CAINJECTOR_IMAGE="$U7S_PLATFORM/cert-manager-cainjector:$U7S_CERTMANAGER_TAG"
+#
+#   echo "Для образа cert-manager-webhook выбран образ с тегом $U7S_CERTMANAGER_TAG"
+#   export U7S_CERTMANAGER_WEBHOOK_IMAGE="$U7S_PLATFORM/cert-manager-webhook:$U7S_CERTMANAGER_TAG"
 
 	eval chown -R $user:$user ~$user/.local
+
 
   export U7S_IMAGES+="
   $U7S_FLANNEL_IMAGE
   $U7S_FLANNEL_CNI_IMAGE
-  $U7S_CERTMANAGER_CONTROLLER_IMAGE
-  $U7S_CERTMANAGER_CAINJECTOR_IMAGE
-  $U7S_CERTMANAGER_WEBHOOK_IMAGE
   "
+
+#   export U7S_IMAGES+="
+#   $U7S_FLANNEL_IMAGE
+#   $U7S_FLANNEL_CNI_IMAGE
+#   $U7S_CERTMANAGER_CONTROLLER_IMAGE
+#   $U7S_CERTMANAGER_CAINJECTOR_IMAGE
+#   $U7S_CERTMANAGER_WEBHOOK_IMAGE
+#   "
 }
 
 function checkNetCrossing {
