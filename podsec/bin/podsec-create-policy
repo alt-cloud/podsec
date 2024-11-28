@@ -57,7 +57,7 @@ control newgidmap podmanonly
 control newuidmap podmanonly
 
 localIP=
-if ip a  | grep $regIP >/dev/null 2>&1
+if ip a  | grep "$regIP/" >/dev/null 2>&1
 then
   localIP='yes'
 fi
