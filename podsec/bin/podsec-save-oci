@@ -93,7 +93,7 @@ do
   export image
   for image in $images
   do
-    echo "\n------------------------\n$(gettext 'Archiving the image') $image\n" >&2
+    echo -ne "\n------------------------\n$(gettext 'Archiving the image') $image\n" >&2
     Image="$regName/$image"
     podman image rm $image >/dev/null 2>&1
 #     if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
@@ -114,7 +114,7 @@ do
       containers-storage:$Image\
       oci:$ociArchDir:$image  2>/dev/null
   done
-  echo "\n------------------------\n$(gettext 'Archiving and compressing images\n')" >&2
+  echo -ne "\n------------------------\n$(gettext 'Archiving and compressing images\n')" >&2
   tar cvCf $ociDir -  $arch | xz -9v > $ociArchDir.tar.xz
   rm -rf $ociArchDir
 done
