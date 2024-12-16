@@ -115,56 +115,15 @@ function setRPMRegistries() {
 function loadRpmPackages() {
   kubeVersions="$*"
   echo "$(gettext 'Loading RPM packages for') $kubeVersions"
-  export U7S_rpmDir='/tmp/RPMS'
-  mkdir -p $U7S_rpmDir
-  rm -f $U7S_rpmDir/*
-  listClassicRPMS=''
-  listNoarchRPMS=''
-  setRPMRegistries
-  curl --connect-timeout 600 -sk ${U7S_RPMRegistryClassic}/ -D $U7S_rpmDir/heads > $U7S_rpmDir/classicPkgs
-  if [ "$U7S_RPMRegistryClassic" != "$U7S_RPMRegistryNoarch" ]
-  then
-    curl --connect-timeout 600 -sk ${U7S_RPMRegistryNoarch}/  > $U7S_rpmDir/noarchPkgs
-  fi
-  set -- $(grep Content-Type: $U7S_rpmDir/heads)
-  contentType=$(echo $2 | tr -d '\r\n')
+  export U7S_rpmDir='/var/cache/apt/archives'
   for kubeVersion in $kubeVersions
   do
     kubeMinorVersion=$(getMinorVersion $kubeVersion)
-    if [ "$contentType" = 'application/json' ]
-    then
-      listClassicRPMS+=' '$(jq -r '.[] | select(.name[0:15]=="kubernetes'$kubeMinorVersion'-") | .name' $U7S_rpmDir/classicPkgs)
-      listClassicRPMS+=' '$(jq -r '.[] | select(.name[0:10]=="cri-o'$kubeMinorVersion'-") | .name' $U7S_rpmDir/classicPkgs)
-      listClassicRPMS+=' '$(jq -r '.[] | select(.name[0:10]=="cri-tools'$kubeMinorVersion'-") | .name' $U7S_rpmDir/classicPkgs)
-    else
-      listClassicRPMS+=' '$(grep kubernetes${kubeMinorVersion} $U7S_rpmDir/classicPkgs | sed -e 's|</a>.*||' -e 's|<a href=.*>||')
-      listClassicRPMS+=' '$(grep cri-o${kubeMinorVersion} $U7S_rpmDir/classicPkgs | sed -e 's|</a>.*||' -e 's|<a href=.*>||')
-      listClassicRPMS+=' '$(grep cri-tools${kubeMinorVersion} $U7S_rpmDir/classicPkgs | sed -e 's|</a>.*||' -e 's|<a href=.*>||')
-    fi
-
-    if [ "$U7S_RPMRegistryClassic" != "$U7S_RPMRegistryNoarch" ]
-    then
-      if [ "$contentType" = 'application/json' ]
-      then
-        listNoarchRPMS+=' '$(jq -r '.[] | select(.name[0:15]=="kubernetes'$kubeMinorVersion'-") | .name' U7S_rpmDir/noarchPkgs)
-      else
-        listClassicRPMS+=' '$(grep kubernetes${kubeMinorVersion} $U7S_rpmDir/noarchPkgs | sed -e 's|</a>.*||' -e 's|<a href=.*>||')
-      fi
-    fi
+    apt-get install -d -y \
+      kubernetes${kubeMinorVersion}-kubelet\
+      kubernetes${kubeMinorVersion}-common\
+      kubernetes${kubeMinorVersion}-kubeadm
   done
-  pushd $U7S_rpmDir
-  for pkg in $listClassicRPMS
-  do
-    echo "$(gettext 'Loading rpm package ') $pkg" >&2
-    curl -sk "$U7S_RPMRegistryClassic/$pkg" -o "$pkg"
-  done
-  for pkg in $listNoarchRPMS
-  do
-    echo "$(gettext 'Loading rpm package ') $pkg"
-    curl -sk "$U7S_RPMRegistryNoarch/$pkg" -o "$pkg" >&2
-  done
-#   rm -f $U7S_rpmDir/heads $U7S_rpmDir/noarchPkgs $U7S_rpmDir/classicPkgs
-  popd
   echo $U7S_rpmDir
 }
 
@@ -213,13 +172,40 @@ prevKubeMinorVersion=$kubeMinorVersion
 
 loadRpmPackages $nextKubeVersions
 
+TMPCMDFile="/tmp/cmd_$$.sh"
+echo '
+#!/bin/sh
+while [ "$(crictl ps -qa | wc -l)" -ne 0 ]
+do
+  for p in $(crictl pods -q);
+  do
+    if [ "$(crictl inspectp $p | jq -r .status.linux.namespaces.options.network)" != "NODE" ];
+    then
+      crictl rmp -f $p;
+    fi;
+  done
+  crictl rmp -fa
+  sleep 1
+done
+' > $TMPCMDFile
+
+for configFile in $(grep -rl c10f1 /var/lib/u7s-admin/.config/)
+do
+  sed -i -e 's/c10f1/c10f2/g' $configFile
+done
+
+for shellFile in $(grep -rl c10f1 /usr/libexec/podsec/u7s/bin/)
+do
+  sed -i -e 's/c10f1/c10f2/g' $shellFile
+done
+
 for kubeVersion in $nextKubeVersions
 do
   kubeMinorVersion=$(getMinorVersion $kubeVersion)
   echo -ne "\n\n---------------------------\n$(gettext 'Upgrading from kubernet version') $prevKubeMinorVersion $(gettext 'to version' $kubeVersion)\n"
   echo "$(gettext 'Installing kubeadm and kubelet for next kubernetes version ') $kubeVersion"
-  rpm -i --replacefiles --nodeps $U7S_rpmDir/kubernetes${kubeMinorVersion}-kubeadm-${kubeMinorVersion}.*.rpm
-  rpm -i --replacefiles --nodeps $U7S_rpmDir/kubernetes${kubeMinorVersion}-kubelet-${kubeMinorVersion}.*.rpm
+  rpm -i --replacefiles --nodeps $U7S_rpmDir/kubernetes${kubeMinorVersion}-kubeadm_${kubeMinorVersion}.*.rpm
+  rpm -i --replacefiles --nodeps $U7S_rpmDir/kubernetes${kubeMinorVersion}-kubelet_${kubeMinorVersion}.*.rpm
   kubeadmVersion=$(kubeadm version -o json | jq -r .clientVersion.gitVersion)
   kubeadmVersion=${kubeadmVersion:1}
   kubeadmMinorVersion=$(getMinorVersion $kubeadmVersion)
@@ -228,6 +214,8 @@ do
     echo "$(gettext 'kubeadm minor version') $kubeadmMinorVersion $(gettext 'does not match target minor version') $kubeMinorVersion"
     exit 1
   fi
+
+  echo "$(gettext 'Get registry path in current cluster')"
   eval clusterConfiguration=$(kubectl get -n kube-system configmaps kubeadm-config -o yaml | yq '.data.ClusterConfiguration')
   CURRENT_REGISTRYPATH=$(echo -e $clusterConfiguration | yq -r .imageRepository)
 
@@ -280,6 +268,7 @@ do
       done
     fi
   fi
+
   echo "$(gettext 'Updating cluster node services to version') $kubeVersion"
   echo "$(gettext 'Wait several minutes...')"
   machinectl shell u7s-admin@ \
@@ -288,56 +277,55 @@ do
 
   echo -ne "$(gettext 'Cordon node, remove node pods and containers')"
   kubectl cordon $HOSTNAME
-  kubectl drain $HOSTNAME --ignore-daemonsets --delete-emptydir-data
-  while killall kubelet 2>/dev/null; do sleep 1; done
-  TMPCMDFile="/tmp/cmd_$$.sh"
-  echo '
-while [ "$(crictl ps -qa | wc -l)" -ne 0 ]
-do
-  for p in $(crictl pods -q);
-  do
-    if [ "$(crictl inspectp $p | jq -r .status.linux.namespaces.options.network)" != "NODE" ];
-    then
-      crictl rmp -f $p;
-    fi;
-  done
-  crictl rmp -fa
-  sleep 1
-done
-' > $TMPCMDFile
+  if [[ "$kubeMinorVersion" > '1.29' ]]
+  then
+    kubectl drain $HOSTNAME --ignore-daemonsets --delete-emptydir-data
+    while killall kubelet 2>/dev/null; do sleep 1; done
 
-  machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s sh -x $TMPCMDFile
+
+    echo "$(gettext 'Remove all pods and containers')"
+    machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s sh -x $TMPCMDFile
+  fi
 # exit
     systemctl stop u7s
 
+#   if [[ "$kubeMinorVersion" = '1.27' ]]
+#   then
   listPrevRPMs=$(rpm -qa | grep 'cri-o
 cri-tools
-kubernetes')
-
-
+kubernetes' |
+  grep "${prevKubeMinorVersion}")
   echo "$(gettext 'Removing rpm packeges') $listPrevRPMs $(gettext 'of previous kubernetes version ') ${prevKubeMinorVersion}"
   rpm -e --nodeps $listPrevRPMs
+#   fi
 
-  pushd $U7S_rpmDir
 #   pushd /var/sigstore/rpms/
-  listNewRPMS=$(echo kubernetes${kubeMinorVersion}-* \
-    cri-o${kubeMinorVersion}-* \
-    cri-tools${kubeMinorVersion}-*\
-    cni-plugin-flannel-1.*\
-    cni-plugins-* \
-    )
-  if [[ $curMinorKubeVersion -gt '1.29' ]]
+  listNewRPMS="
+    kubernetes${kubeMinorVersion}-client
+    kubernetes${kubeMinorVersion}-common
+    kubernetes${kubeMinorVersion}-crio
+    kubernetes${kubeMinorVersion}-master
+    kubernetes${kubeMinorVersion}-node
+    cri-o${kubeMinorVersion}
+    cri-tools${kubeMinorVersion}
+    cni-plugin-flannel
+    "
+  if [[ "$kubeMinorVersion" > '1.28' ]]
   then
-    listNewRPMS+=$(echo crun-*)
+    listNewRPMS+="
+    cni-plugins
+    "
+  fi
+  if [[ "$kubeMinorVersion" > '1.29' ]]
+  then
+    listNewRPMS+="
+    crun
+    libcrun
+    runc
+    "
   fi
   echo "$(gettext 'Installing rpm packeges') $listNewRPMS $(gettext 'of new kubernetes version ') ${kubeMinorVersion}"
   apt-get install -y $listNewRPMS
-#   for pkg in cri-o${kubeMinorVersion}-* cri-tools${kubeMinorVersion}-*
-#   do
-#     echo "$(gettext 'Installing') $pkg $(gettext 'for next kubernetes version ') $kubeVersion"
-#     rpm -i --replacefiles --nodeps $pkg
-#   done
-  popd
 
   echo -ne "$(gettext 'Restart node services')"
   sleep 1
@@ -391,5 +379,14 @@ kubernetes')
     echo "$(gettext 'Exit')"
     exit 1
   fi
+  oldImageIds=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+  grep $prevKubeMinorVersion |
+  (
+  while read image tag id size
+  do
+    echo $id
+  done
+  ))
+  machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl rmi $oldImageIds
   prevKubeMinorVersion=$kubeMinorVersion
 done
