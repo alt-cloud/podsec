@@ -97,6 +97,23 @@ function getNextKubeVersions() {
   echo $ret
 }
 
+function getPrevKubeMinorVersions() {
+  curMinorKubeVersion=$1
+  prevMinorKubeVersion='1.26'
+  ret = ''
+  ifs=$IFS
+  while [[ "$prevMinorKubeVersion" < "$curMinorKubeVersion" ]]
+  do
+    ret+=" $prevMinorKubeVersion"
+    IFS=.
+    set -- $prevMinorKubeVersion
+    IFS=$ifs
+    let nextMinor=$2+1
+    prevMinorKubeVersion="$1.$nextMinor"
+  done
+  echo $ret
+}
+
 function setRPMRegistries() {
   if [ "$U7S_REGISTRY" = 'registry.local' ]
   then
@@ -148,6 +165,7 @@ export U7S_REGISTRYPATH="$U7S_REGISTRY/$U7S_PLATFORM"
 export kubeVersion=$(getCurrentKubeAPIVersion)
 export kubeMinorVersion=$(getMinorVersion $kubeVersion)
 nextKubeVersions=$(getNextKubeVersions $kubeMinorVersion "$toMinorVersion")
+prevKubeMinorVersions=$(getPrevKubeMinorVersions $kubeMinorVersion)
 if [ -n "$toMinorVersion" -a -z "$(echo $nextKubeVersions | tr ' ' '\n' | egrep ^$toMinorVersion)" ]
 then
   echo "$(gettext 'The specified final minor version') $toMinorVersion $(gettext 'is not available in the image repository.')"
@@ -275,6 +293,7 @@ do
     /usr/libexec/podsec/u7s/bin/nsenter_u7s \
       /usr/bin/kubeadm upgrade  apply -y ${kubeVersion}
 
+
   echo -ne "$(gettext 'Cordon node, remove node pods and containers')"
   kubectl cordon $HOSTNAME
   if [[ "$kubeMinorVersion" > '1.29' ]]
@@ -287,7 +306,20 @@ do
     machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s sh -x $TMPCMDFile
   fi
 # exit
-    systemctl stop u7s
+  systemctl stop u7s
+
+  if [[ "$kubeMinorVersion" > '1.30' ]]
+  then
+    for configFile in $(grep -rl 'pause:' /var/lib/u7s-admin/.config/)
+    do
+      sed -i -e 's/pause:3.9/pause:3.10/g' $configFile
+    done
+
+    for shellFile in $(grep -rl 'pause:' /usr/libexec/podsec/u7s/bin/)
+    do
+      sed -i -e 's/pause:3.9/pause:3.10/g' $shellFile
+    done
+  fi
 
 #   if [[ "$kubeMinorVersion" = '1.27' ]]
 #   then
@@ -371,8 +403,6 @@ kubernetes' |
 
   kubectl uncordon $HOSTNAME
 
-#   prevImages=$(machinectl shell u7s-admin@ /usr/bin/kubeadm config images list --image-repository=$U7S_REGISTRY 2>/dev/null)
-#   machinectl shell u7s-admin@ /usr/bin/crictl rmi $prevImages
   if [ -z "$(getCurrentKubeAPIVersion)" ]
   then
     echo "$(gettext 'kubernetes services down')"
@@ -380,13 +410,22 @@ kubernetes' |
     exit 1
   fi
   oldImageIds=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
-  grep $prevKubeMinorVersion |
-  (
-  while read image tag id size
-  do
-    echo $id
-  done
-  ))
+    grep $(echo $prevKubeMinorVersions | tr ' ' '\n') |
+    while read image tag id size; do echo $id; done
+    )
+  oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+    grep /coredns | sort -V -k 2 | head -n -1 |
+    while read image tag id size; do echo $id; done
+    )
+  oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+    grep /pause | sort -V -k 2 | head -n -1 |
+    while read image tag id size; do echo $id; done
+    )
+  oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+    grep /etcd | sort -V -k 2 | head -n -1 |
+    while read image tag id size; do echo $id; done
+    )
   machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl rmi $oldImageIds
   prevKubeMinorVersion=$kubeMinorVersion
+  prevKubeMinorVersions+=" $prevKubeMinorVersion"
 done
