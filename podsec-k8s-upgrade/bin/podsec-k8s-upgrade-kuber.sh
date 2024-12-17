@@ -1,148 +1,8 @@
 #!/bin/sh
+source podsec-k8s-upgrade-functions
 
 export TEXTDOMAINDIR='/usr/share/locale'
-export TEXTDOMAIN='podsec-k8s'
-
-function getCurrentFlannelVersion() {
-  ret=''
-  flannelImage=$(kubectl -n kube-flannel get daemonset.apps/kube-flannel-ds -o yaml |
-    yq '.spec.template.spec.containers[0].image')
-  if [ -n "$flannelImage" ]
-  then
-    flannelImage=$(basename $flannelImage)
-    ifs=$IFS; IFS=:; set -- $flannelImage; IFS=$ifs; ret=${2:1}
-  fi
-  echo -ne $ret
-}
-
-function getNodeCurrentKubeletVersion() {
-  ret=''
-  nodeKubeletVersion=$(kubectl get nodes -o json |
-    jq -r '.items[] | select(.metadata.name=="'$U7S_HOSTNAME'") | .status.nodeInfo.kubeletVersion')
-  if [ -n "$nodeKubeletVersion" ]
-  then
-    ret=${nodeKubeletVersion:1}
-  fi
-  echo -ne $ret
-}
-
-function getCurrentKubeAPIVersion() {
-  ret=''
-  kubeapiVersion=$(kubectl -n kube-system get pods -o json |
-    jq -r '.items[] | select(.metadata.name=="kube-apiserver-'${U7S_HOSTNAME}'") | .spec.containers[0].image')
-  if [ -n "$kubeapiVersion" ]
-  then
-    kubeapiVersion=$(basename $kubeapiVersion)
-    ifs=$IFS; IFS=:; set -- $kubeapiVersion; IFS=$ifs; ret=${2:1}
-  fi
-  echo -ne $ret
-}
-
-function getMinorVersion() {
-	ifs=$IFS
-	IFS=.
-	set -- $1
-	IFS=$ifs
-	echo "$1.$2"
-}
-
-function getPrevMinorVersion() {
-	ifs=$IFS
-	IFS=.
-	set -- $1
-	IFS=$ifs
-	let prev=$2-1
-	echo "$1.$prev"
-}
-
-function getNextKubeVersions() {
-  curMinorKubeVersion=$1
-  toMinorVersion=$2
-  if [ $U7S_REGISTRY == 'registry.local' ]
-  then
-    protocol='http'
-  else
-    protocol='https'
-  fi
-  kubeVersions=$(curl -sk $protocol://$U7S_REGISTRY/v2/${U7S_PLATFORM}/kube-apiserver/tags/list | jq -r .tags[] | sort -V)
-  ret=''
-  lastMinorKubeVersion=$curMinorKubeVersion
-  lastPatchKubeVersion=''
-  for kubeVersion in $kubeVersions
-  do
-    if [ "${kubeVersion:0:1}" != 'v' ]; then continue; fi
-    kubeVersion=${kubeVersion:1}
-    curMinor=$(getMinorVersion $kubeVersion)
-    if [[ "$curMinor" > "$curMinorKubeVersion" ]]
-    then
-      if [ -n "$lastPatchKubeVersion" -a "$curMinor" != "$lastMinorKubeVersion" ]
-      then
-        ret+="$lastPatchKubeVersion\n"
-      fi
-    else
-      continue
-    fi
-    if [ -n "${toMinorVersion}" ]
-    then
-      if [[ "${kubeVersion:0:${#toMinorVersion}}" > "${toMinorVersion}" ]]
-      then
-        break
-      fi
-    fi
-    lastPatchKubeVersion=$kubeVersion
-    lastMinorKubeVersion=$curMinor
-  done
-  ret+="$lastPatchKubeVersion\n"
-  ret="$(echo -ne "$ret" | sort -u)"
-  echo $ret
-}
-
-function getPrevKubeMinorVersions() {
-  curMinorKubeVersion=$1
-  prevMinorKubeVersion='1.26'
-  ret = ''
-  ifs=$IFS
-  while [[ "$prevMinorKubeVersion" < "$curMinorKubeVersion" ]]
-  do
-    ret+=" $prevMinorKubeVersion"
-    IFS=.
-    set -- $prevMinorKubeVersion
-    IFS=$ifs
-    let nextMinor=$2+1
-    prevMinorKubeVersion="$1.$nextMinor"
-  done
-  echo $ret
-}
-
-function setRPMRegistries() {
-  if [ "$U7S_REGISTRY" = 'registry.local' ]
-  then
-    apt-repo add 'rpm http://sigstore.local:81/kubernetes_upgrade x86_64 main'
-    export U7S_RPMRegistryClassic='http://sigstore.local:81/kubernetes_upgrade/x86_64/RPMS.main/'
-    export U7S_RPMRegistryNoarch='http://sigstore.local:81/kubernetes_upgrade/x86_64/RPMS.main/'
-  elif [ "${U7S_PLATFORM:0:8}" = 'k8s-c10f' ]
-  then
-    apt-repo add 'rpm [cert8] http://update.altsp.su/pub/distributions/ALTLinux c10f/branch/x86_64-i586 classic'
-    apt-repo add 'rpm [cert8] http://update.altsp.su/pub/distributions/ALTLinux c10f/branch/noarch classic'
-    export U7S_RPMRegistryClassic="http://update.altsp.su/${U7S_PLATFORM:4}/branch/x86_64/RPMS.classic"
-    export U7S_RPMRegistryNoarch="http://update.altsp.su/${U7S_PLATFORM:4}/branch/noarch/RPMS.classic"
-  fi
-}
-
-function loadRpmPackages() {
-  kubeVersions="$*"
-  echo "$(gettext 'Loading RPM packages for') $kubeVersions"
-  export U7S_rpmDir='/var/cache/apt/archives'
-  for kubeVersion in $kubeVersions
-  do
-    kubeMinorVersion=$(getMinorVersion $kubeVersion)
-    apt-get install -d -y \
-      kubernetes${kubeMinorVersion}-kubelet\
-      kubernetes${kubeMinorVersion}-common\
-      kubernetes${kubeMinorVersion}-kubeadm
-  done
-  echo $U7S_rpmDir
-}
+export TEXTDOMAIN='podsec-k8s-upgrade'
 
 # MAIN
 
@@ -158,9 +18,9 @@ then
   toMinorVersion=$1
 fi
 export U7S_HOSTNAME=$(hostname)
-export U7S_REGISTRY='registry.local'
+export U7S_REGISTRY=$(getRegistry)
 # export U7S_PLATFORM_1_26='k8s-c10f1'
-export U7S_PLATFORM='k8s-c10f2'
+export U7S_PLATFORM=$(getPlatform)
 export U7S_REGISTRYPATH="$U7S_REGISTRY/$U7S_PLATFORM"
 export kubeVersion=$(getCurrentKubeAPIVersion)
 export kubeMinorVersion=$(getMinorVersion $kubeVersion)
@@ -268,12 +128,14 @@ do
     if [ "$currentFlannelVersion" != "$toFlannelVersion" ]
     then
       echo "$(gettext 'Upgrads flannel from') $currentFlannelVersion $(gettext 'to') $toFlannelVersion"
-      echo "$(gettext 'Remove rpm package cni-plugin-flannel-1.      kubectl -n kube-flannel delete daemonset.apps/kube-flannel-ds
-      kubectl apply -f http://sigstore.local:81/manifests/kube-flannel/0/25/1/kube-flannel.yml1.2')"
+      echo "$(gettext 'Remove rpm package cni-plugin-flannel-1.1.2')"
+      kubectl -n kube-flannel delete daemonset.apps/kube-flannel-ds
       rpm -e --replacefiles --nodeps  cni-plugin-flannel-1.1.2
       chown u7s-admin:u7s-admin -R /usr/libexec/cni/
       rm -f /usr/libexec/cni/flannel
-
+      curl http://sigstore.local:81/manifests/kube-flannel/0/25/1/kube-flannel.yml |
+      sed -e "s|docker.io/flannel|${U7S_REGISTRY}/${U7S_PLATFORM}|g" |
+      kubectl apply -f -
       while :;
       do
         numberReady=$(kubectl  -n kube-flannel get daemonset.apps/kube-flannel-ds -o json | jq -r '.status.numberReady')
