@@ -51,7 +51,11 @@ apt-repo add 'rpm cdrom:[ALT SP Server 10.2 11100-01 x86_64 build 2024-11-07]/ A
 apt-repo rm 'rpm http://sigstore.local:81/kubernetes_upgrade x86_64 main'
 apt-repo rm 'rpm cdrom:[ALT SP Server 11100-01 x86_64 build 2023-05-29]/ ALTLinux main'
 apt-get update
-systectl stop u7s
-apt-get -y dist-upgrade
+systemctl stop u7s
+rpm -e --nodeps flannel
+rpm -e --nodeps cni-plugin-flannel
+chown u7s-admin:u7s-admin /etc/cni/net.d/
+apt-get -y dist-upgrade --fix-broken
 control newuidmap public
 control newgidmap public
+systemctl start u7s
