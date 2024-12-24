@@ -18,11 +18,26 @@ then
   toMinorVersion=$1
 fi
 export U7S_HOSTNAME=$(hostname)
+export isControlPlane=$(kubectl get nodes -o yaml |
+  yq '.items[] |
+  select(.metadata.name=="'$U7S_HOSTNAME'") |
+  .metadata.labels |
+  has("node-role.kubernetes.io/control-plane")')
+if [ -z "$isControlPlane" ]
+then
+  echo "$(gettext 'The node with name') $U7S_HOSTNAME $(gettext 'cannot be determined. Make sure the node name output by hostname matches the node name listed by kubectl get nodes'.)"
+  exit 1
+fi
+export flannelImage=$(kubectl get  -n kube-flannel daemonset.apps/kube-flannel-ds  -o json |
+  jq  -r '.spec.template.spec.containers[0].image')
+ifs=$IFS; IFS=:; set -- $flannelImage; IFS=$ifs
+export flannelTag=$2
+
 export U7S_REGISTRY=$(getRegistry)
 # export U7S_PLATFORM_1_26='k8s-c10f1'
 export U7S_PLATFORM=$(getPlatform)
 export U7S_REGISTRYPATH="$U7S_REGISTRY/$U7S_PLATFORM"
-export kubeVersion=$(getCurrentKubeAPIVersion)
+export kubeVersion=$(getCurrentKubeadmVersion)
 export kubeMinorVersion=$(getMinorVersion $kubeVersion)
 nextKubeVersions=$(getNextKubeVersions $kubeMinorVersion "$toMinorVersion")
 prevKubeMinorVersions=$(getPrevKubeMinorVersions $kubeMinorVersion)
@@ -84,8 +99,7 @@ do
   echo "$(gettext 'Installing kubeadm and kubelet for next kubernetes version ') $kubeVersion"
   rpm -i --replacefiles --nodeps $U7S_rpmDir/kubernetes${kubeMinorVersion}-kubeadm_${kubeMinorVersion}.*.rpm
   rpm -i --replacefiles --nodeps $U7S_rpmDir/kubernetes${kubeMinorVersion}-kubelet_${kubeMinorVersion}.*.rpm
-  kubeadmVersion=$(kubeadm version -o json | jq -r .clientVersion.gitVersion)
-  kubeadmVersion=${kubeadmVersion:1}
+  kubeadmVersion=$(getCurrentKubeadmVersion)
   kubeadmMinorVersion=$(getMinorVersion $kubeadmVersion)
   if [ "$kubeMinorVersion" != "$kubeadmMinorVersion" ]
   then
@@ -123,6 +137,7 @@ do
 
   if [[ "$kubeMinorVersion" > '1.26' ]]
   then
+    chown u7s-admin:u7s-admin  /usr/libexec/cni
     currentFlannelVersion=$(getCurrentFlannelVersion)
     toFlannelVersion='1.25.1'
     if [ "$currentFlannelVersion" != "$toFlannelVersion" ]
@@ -226,24 +241,25 @@ kubernetes' |
   systemctl start u7s
   machinectl shell u7s-admin@ /usr/bin/systemctl --user start kubelet
 
-  echo -ne "$(gettext 'Waiting for kubeapi node services to come up') ."
-  sleep 1
-  while :;
-  do
-    currentKubeAPIVersion=$(getCurrentKubeAPIVersion)
-    currentKubeAPIVersion=$(getMinorVersion $currentKubeAPIVersion)
-    if [ -n "$currentKubeAPIVersion" ]
-    then
-      if [ "$currentKubeAPIVersion" != "${kubeMinorVersion}" ]
-      then
-        echo "$(gettext 'The kubeapi version') $currentKubeAPIVersion $(gettext 'on the node') $U7S_HOSTNAME $(gettext 'does not match the target version') $kubeMinorVersion" >&2
-      else
-        break
-      fi
-    fi
-    echo -ne .
-    sleep 1
-  done
+
+#   echo -ne "$(gettext 'Waiting for kubeapi node services to come up') ."
+#   sleep 1
+#   while :;
+#   do
+#     currentKubeAPIVersion=$(getCurrentKubeAPIVersion)
+#     currentKubeAPIVersion=$(getMinorVersion $currentKubeAPIVersion)
+#     if [ -n "$currentKubeAPIVersion" ]
+#     then
+#       if [ "$currentKubeAPIVersion" != "${kubeMinorVersion}" ]
+#       then
+#         echo "$(gettext 'The kubeapi version') $currentKubeAPIVersion $(gettext 'on the node') $U7S_HOSTNAME $(gettext 'does not match the target version') $kubeMinorVersion" >&2
+#       else
+#         break
+#       fi
+#     fi
+#     echo -ne .
+#     sleep 1
+#   done
 
   echo -ne "$(gettext 'Waiting for kubelet node services to come up') ."
   while :;
@@ -263,31 +279,69 @@ kubernetes' |
     sleep 1
   done
 
+#   requiredNodeImages=$(getRequiredNodeImages $kubeVersion $isControlPlane)
+#   currentNodeImages=$(kubectl get -n kube-system all -o json |
+#     jq -r '.items[] |
+#       select(.spec.nodeName=="'$U7S_HOSTNAME'") |
+#       .spec.containers[].image')
+#
+#   echo -ne "$(gettext 'Waiting for kube node services to come up') ."
+#   sleep 5
+#   while :;
+#   do
+#     ifs=$IFS
+#     complete='yes'
+#     for requiredNodeImage in $requiredNodeImages
+#     do
+#       IFS=:; set -- $requiredNodeImage; IFS=$ifs; image=$1; version=$2 # выделить имя и версию
+#       if [ "${version:0:1}" = 'v' ]; then version=${version:1}; fi
+#       currentKubeServiceVerion=$(getCurrentKubeServiceVerion $image)
+#       if [ "$currentKubeServiceVerion" != "$version" ]
+#       then
+#         if [ -n "$currentKubeServiceVerion" ]
+#         then
+#           echo "$(gettext 'Service version of') $image $(gettext 'not equal to target' $version.)"
+#         else
+#           echo "$(gettext 'Service') $image $(gettext 'is not ready'.)"
+#         fi
+#         complete=''
+#       else
+#         echo "$(gettext 'Service version of') $image $(gettext 'is equal to target' $version.)"
+#       fi
+#       if [ -n "$complete" ]; then break; fi
+#       sleep 1
+#       echo -ne "\n\n"
+#     done
+#   done
+
+
   kubectl uncordon $HOSTNAME
 
-  if [ -z "$(getCurrentKubeAPIVersion)" ]
-  then
-    echo "$(gettext 'kubernetes services down')"
-    echo "$(gettext 'Exit')"
-    exit 1
-  fi
-  oldImageIds=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
-    grep $(echo $prevKubeMinorVersions | tr ' ' '\n') |
-    while read image tag id size; do echo $id; done
-    )
-  oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
-    grep /coredns | sort -V -k 2 | head -n -1 |
-    while read image tag id size; do echo $id; done
-    )
-  oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
-    grep /pause | sort -V -k 2 | head -n -1 |
-    while read image tag id size; do echo $id; done
-    )
-  oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
-    grep /etcd | sort -V -k 2 | head -n -1 |
-    while read image tag id size; do echo $id; done
-    )
-  machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl rmi $oldImageIds
+#   if [ -z "$(getCurrentKubeAPIVersion)" ]
+#   then
+#     echo "$(gettext 'kubernetes services down')"
+#     echo "$(gettext 'Exit')"
+#     exit 1
+#   fi
+
+  # Find and remove old images
+#   oldImageIds=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+#     grep $(echo $prevKubeMinorVersions | tr ' ' '\n') |
+#     while read image tag id size; do echo $id; done
+#     )
+#   oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+#     grep /coredns | sort -V -k 2 | head -n -1 |
+#     while read image tag id size; do echo $id; done
+#     )
+#   oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+#     grep /pause | sort -V -k 2 | head -n -1 |
+#     while read image tag id size; do echo $id; done
+#     )
+#   oldImageIds+=$(machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl images |
+#     grep /etcd | sort -V -k 2 | head -n -1 |
+#     while read image tag id size; do echo $id; done
+#     )
+#   machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s /usr/bin/crictl rmi $oldImageIds
   prevKubeMinorVersion=$kubeMinorVersion
   prevKubeMinorVersions+=" $prevKubeMinorVersion"
 done
