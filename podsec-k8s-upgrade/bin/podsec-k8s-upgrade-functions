@@ -11,6 +11,30 @@ function getPlatform() {
   echo 'k8s-c10f2'
 }
 
+function getRequiredNodeImages() {
+  kubeVersion=$1
+  isControlPlane=$2
+  requiredNodeImages=$(machinectl shell u7s-admin@ \
+    /usr/libexec/podsec/u7s/bin/nsenter_u7s \
+      /usr/bin/kubeadm -v 0  config images list \
+        --image-repository=$U7S_REGISTRYPATH \
+        --kubernetes-version=v${kubeVersion} 2>/dev/null |
+        grep $U7S_REGISTRYPATH |
+        tr -d '\r')
+  for Image in $requiredNodeImages
+  do
+    image=$(basename $Image)
+    if [ "$isControlPlane" = 'false' -a ${image:0:10} != 'kube-proxy' ]; then continue; fi # Для WORKER только kube-proxy
+    echo $image
+  done |
+  sort
+}
+
+function getCurrentKubeadmVersion() {
+  kubeadmVersion=$(kubeadm version -o json | jq -r .clientVersion.gitVersion)
+  echo ${kubeadmVersion:1}
+}
+
 function getCurrentFlannelVersion() {
   ret=''
   flannelImage=$(kubectl -n kube-flannel get daemonset.apps/kube-flannel-ds -o yaml |
@@ -42,6 +66,20 @@ function getCurrentKubeAPIVersion() {
   then
     kubeapiVersion=$(basename $kubeapiVersion)
     ifs=$IFS; IFS=:; set -- $kubeapiVersion; IFS=$ifs; ret=${2:1}
+  fi
+  echo -ne $ret
+}
+
+function getCurrentKubeServiceVerion() {
+  serviceName=$1
+  ret=''
+  kubeapiVersion=$(kubectl -n kube-system get pods -o json |
+    jq -r '.items[] | select(.metadata.name=="'$serviceName'-'${U7S_HOSTNAME}'") | .spec.containers[0].image')
+  if [ -n "$kubeapiVersion" ]
+  then
+    kubeapiVersion=$(basename $kubeapiVersion)
+    ifs=$IFS; IFS=:; set -- $kubeapiVersion; IFS=$ifs; ret=${2}
+    if [ "${ret:0:1}" = 'v' ]; then ret=${ret:1}; fi
   fi
   echo -ne $ret
 }
