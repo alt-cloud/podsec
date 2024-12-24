@@ -70,6 +70,24 @@ function getCurrentKubeAPIVersion() {
   echo -ne $ret
 }
 
+
+function getKubeProxyMinorVerion() {
+  node=$1
+  ret=''
+  kubeProxyImage=$(
+    kubectl  get all -A -o json |
+    jq -r '
+      .items[] |
+      select(.metadata.generateName=="kube-proxy-") |
+      if .spec.nodeName=="'$node'" then .spec.containers[0].image
+      else empty
+      end'
+    )
+  kubeProxyImage=$(basename $kubeProxyImage)
+  ifs=$IFS; IFS=:; set -- $kubeapiVersion; IFS=$ifs; ret=${2:1}
+  echo $ret
+}
+
 function getCurrentKubeServiceVerion() {
   serviceName=$1
   ret=''
@@ -188,4 +206,28 @@ function loadRpmPackages() {
       kubernetes${kubeMinorVersion}-kubeadm
   done
   echo $U7S_rpmDir
+}
+
+function listCordonedNodes() {
+  ret=$(kubectl  get nodes -o json |
+    jq -r '
+      .items[] |
+      if .spec.unschedulable!=null
+      then .metadata.name
+      else empty
+      end')
+      echo -ne $ret
+}
+
+function getDeltaMinorVersions() {
+  minor1=$1
+  minor2=$2
+  ifs=$IFS;IFS=.;
+  set -- $minor1
+  let Minor1=$1*1000+$2
+  set -- $minor2
+  let Minor2=$1*1000+$2
+  IFS=$ifs
+  let ret=$Minor1-$Minor2
+  echo $ret
 }

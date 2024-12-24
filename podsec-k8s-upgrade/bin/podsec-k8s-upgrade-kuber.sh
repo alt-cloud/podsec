@@ -6,18 +6,38 @@ export TEXTDOMAIN='podsec-k8s-upgrade'
 
 # MAIN
 
-if [ $# -gt 1 ]
+if [ $# -gt 2 -o $# -eq 0 ]
 then
   echo "$(gettext 'Format:')"
-  echo -ne "\t$0 [toMinorVersion]\n"
+  echo -ne "\t$0 masterNodeName [toMinorVersion]\n"
   exit 1
 fi
-toMinorVersion=''
-if [ $# -eq 1 ]
+masterNodeName=$1
+export nodeNames=$(kubectl  get nodes -o json | jq -r '.items[].metadata.name')
+U7S_MasterNodeName=''
+U7S_SlaveNodeNames=''
+for nodeName in $nodeNames
+do
+  if [ "$nodeName" = "$masterNodeName" ]
+  then
+    U7S_MasterNodeName=$masterNodeName
+  else
+    U7S_SlaveNodeNames+=" $nodeName"
+  fi
+done
+if [ -z "$U7S_MasterNodeName" ]
 then
-  toMinorVersion=$1
+  echo "$(gettext 'Master node') $masterNodeName $(gettext 'absent in cluster nodes'): $nodeNames"
+  exit 1
 fi
 export U7S_HOSTNAME=$(hostname)
+
+
+toMinorVersion=''
+if [ $# -eq 2 ]
+then
+  toMinorVersion=$2
+fi
 export isControlPlane=$(kubectl get nodes -o yaml |
   yq '.items[] |
   select(.metadata.name=="'$U7S_HOSTNAME'") |
@@ -47,7 +67,13 @@ then
   exit 1
 fi
 
-export prevImages=$(machinectl shell u7s-admin@ /usr/bin/kubeadm config images list --image-repository=$U7S_REGISTRY | grep $U7S_REGISTRY | tr -d '\r')
+chown u7s-admin:u7s-admin  /usr/libexec/cni
+
+export prevImages=$(
+  machinectl shell u7s-admin@ /usr/bin/kubeadm config images list --image-repository=$U7S_REGISTRY |
+  grep $U7S_REGISTRY |
+  tr -d '\r'
+)
 echo "kubeVersion $kubeVersion
 kubeMinorVersion=$kubeMinorVersion
 nextKubeVersions=$nextKubeVersions
@@ -107,24 +133,27 @@ do
     exit 1
   fi
 
-  echo "$(gettext 'Get registry path in current cluster')"
-  eval clusterConfiguration=$(kubectl get -n kube-system configmaps kubeadm-config -o yaml | yq '.data.ClusterConfiguration')
-  CURRENT_REGISTRYPATH=$(echo -e $clusterConfiguration | yq -r .imageRepository)
-
-  if [ "$CURRENT_REGISTRYPATH" != "$U7S_REGISTRYPATH" ]
+  if [ "$U7S_MasterNodeName" = "U7S_HOSTNAME" ] #MASTER NODE
   then
-    echo "$(gettext 'Current platform does') $CURRENT_REGISTRYPATH $(gettext 'not match target') $U7S_REGISTRYPATH"
-    echo "$(gettext 'Update kubeadm-config to') $U7S_REGISTRYPATH"
-    kubectl get -n kube-system configmaps kubeadm-config -o yaml |
-    sed  -e "s|${CURRENT_REGISTRYPATH}|${U7S_REGISTRYPATH}|" |
-    kubectl apply -n kube-system  -f -
-    if [ -f "~u7s-admin/.config/usernetes/init.yaml" ]
+    echo "$(gettext 'Get registry path in current cluster')"
+    eval clusterConfiguration=$(kubectl get -n kube-system configmaps kubeadm-config -o yaml | yq '.data.ClusterConfiguration')
+    CURRENT_REGISTRYPATH=$(echo -e $clusterConfiguration | yq -r .imageRepository)
+
+    if [ "$CURRENT_REGISTRYPATH" != "$U7S_REGISTRYPATH" ]
     then
-      machinectl shell u7s-admin@ /bin/sed -i -e "s|${CURRENT_REGISTRYPATH}|${U7S_REGISTRYPATH}|" ~u7s-admin/.config/usernetes/init.yaml
-    fi
-    if [ -f "~u7s-admin/.config/usernetes/join.yaml" ]
-    then
-      machinectl shell u7s-admin@ /bin/sed -i -e "s|${CURRENT_REGISTRYPATH}|${U7S_REGISTRYPATH}|" ~u7s-admin/.config/usernetes/join.yaml
+      echo "$(gettext 'Current platform does') $CURRENT_REGISTRYPATH $(gettext 'not match target') $U7S_REGISTRYPATH"
+      echo "$(gettext 'Update kubeadm-config to') $U7S_REGISTRYPATH"
+      kubectl get -n kube-system configmaps kubeadm-config -o yaml |
+      sed  -e "s|${CURRENT_REGISTRYPATH}|${U7S_REGISTRYPATH}|" |
+      kubectl apply -n kube-system  -f -
+      if [ -f "~u7s-admin/.config/usernetes/init.yaml" ]
+      then
+        machinectl shell u7s-admin@ /bin/sed -i -e "s|${CURRENT_REGISTRYPATH}|${U7S_REGISTRYPATH}|" ~u7s-admin/.config/usernetes/init.yaml
+      fi
+      if [ -f "~u7s-admin/.config/usernetes/join.yaml" ]
+      then
+        machinectl shell u7s-admin@ /bin/sed -i -e "s|${CURRENT_REGISTRYPATH}|${U7S_REGISTRYPATH}|" ~u7s-admin/.config/usernetes/join.yaml
+      fi
     fi
   fi
 
@@ -135,34 +164,101 @@ do
         --image-repository=$U7S_REGISTRYPATH \
         --kubernetes-version=v${kubeVersion}
 
-  if [[ "$kubeMinorVersion" > '1.26' ]]
+
+  if [ "$U7S_MasterNodeName" = "U7S_HOSTNAME" ] #MASTER NODE
   then
-    chown u7s-admin:u7s-admin  /usr/libexec/cni
-    currentFlannelVersion=$(getCurrentFlannelVersion)
-    toFlannelVersion='1.25.1'
-    if [ "$currentFlannelVersion" != "$toFlannelVersion" ]
+    if [[ "$kubeMinorVersion" > '1.26' ]]
     then
-      echo "$(gettext 'Upgrads flannel from') $currentFlannelVersion $(gettext 'to') $toFlannelVersion"
-      echo "$(gettext 'Remove rpm package cni-plugin-flannel-1.1.2')"
-      kubectl -n kube-flannel delete daemonset.apps/kube-flannel-ds
-      rpm -e --replacefiles --nodeps  cni-plugin-flannel-1.1.2
-      chown u7s-admin:u7s-admin -R /usr/libexec/cni/
-      rm -f /usr/libexec/cni/flannel
-      curl http://sigstore.local:81/manifests/kube-flannel/0/25/1/kube-flannel.yml |
-      sed -e "s|docker.io/flannel|${U7S_REGISTRY}/${U7S_PLATFORM}|g" |
-      kubectl apply -f -
-      while :;
-      do
-        numberReady=$(kubectl  -n kube-flannel get daemonset.apps/kube-flannel-ds -o json | jq -r '.status.numberReady')
-        if [ "$numberReady" -gt 0 ] 2>/dev/null
-        then
-          break
-        fi
-        echo "$(gettext 'Waiting for service') kube-flannel:0.25.1 $(gettext 'to be restored')"
-        sleep 1
-      done
+      currentFlannelVersion=$(getCurrentFlannelVersion)
+      toFlannelVersion='1.25.1'
+      if [ "$currentFlannelVersion" != "$toFlannelVersion" ]
+      then
+        echo "$(gettext 'Upgrads flannel from') $currentFlannelVersion $(gettext 'to') $toFlannelVersion"
+        echo "$(gettext 'Remove rpm package cni-plugin-flannel-1.1.2')"
+        kubectl -n kube-flannel delete daemonset.apps/kube-flannel-ds
+        rpm -e --replacefiles --nodeps  cni-plugin-flannel-1.1.2
+        chown u7s-admin:u7s-admin -R /usr/libexec/cni/
+        rm -f /usr/libexec/cni/flannel
+        curl http://sigstore.local:81/manifests/kube-flannel/0/25/1/kube-flannel.yml |
+        sed -e "s|docker.io/flannel|${U7S_REGISTRY}/${U7S_PLATFORM}|g" |
+        kubectl apply -f -
+        while :;
+        do
+          numberReady=$(kubectl  -n kube-flannel get daemonset.apps/kube-flannel-ds -o json | jq -r '.status.numberReady')
+          if [ "$numberReady" -gt 0 ] 2>/dev/null
+          then
+            break
+          fi
+          echo "$(gettext 'Waiting for service') kube-flannel:0.25.1 $(gettext 'to be restored')"
+          sleep 1
+        done
+      fi
     fi
   fi
+
+  if [ "$U7S_MasterNodeName" = "U7S_HOSTNAME" ] #MASTER NODE
+  then
+    sameVesions=''
+    while [ -z "$sameVesions" ]
+    do
+      sameVesions='yes'
+      for slaveNode in $U7S_SlaveNodeNames
+      do
+        slaveKubeProxyMinorVersion=$(getKubeProxyMinorVerion $slaveNode)
+        deltaMinorVersions=$(getDeltaMinorVersions "$kubeMinorVersion" "$slaveKubeProxyMinorVersion")
+        if [ "$deltaMinorVersions" -eq 1 ]; then :;
+        elif [ "$deltaMinorVersions" -gt 1 ]
+        then
+          sameVesions=''
+          if [ "$deltaMinorVersions" -gt 2 ]
+          then
+            echo "$(gettext 'The deploying minor version') $kubeMinorVersion $(gettext 'of the master node') $U7S_MasterNodeName $(gettext 'is more than 1 higher, than the node') $slaveNode $(gettext 'version') $slaveKubeProxyMinorVersion"
+            echo "$(gettext 'There may be problems upgrating the cluster.')"
+          fi
+          echo "$(gettext 'Waiting for the deployed minor version') $slaveKubeProxyMinorVersion $(gettext 'of the node') $slaveNode $(gettext 'to be updated to') $kubeMinorVersion"
+          sleep 10
+          break
+        elif [ "$deltaMinorVersions" -eq 0 ]
+        then
+          echo "$(gettext 'The deploying minor version') $kubeMinorVersion $(gettext 'of the master node') $U7S_MasterNodeName $(gettext 'is equal the node') $slaveNode $(gettext 'version') $slaveKubeProxyMinorVersion"
+        else
+          echo "$(gettext 'The deploying minor version') $kubeMinorVersion $(gettext 'of the master node') $U7S_MasterNodeName $(gettext 'is more than 1 lower, than the node') $slaveNode $(gettext 'version') $slaveKubeProxyMinorVersion"
+          echo "$(gettext 'There may be problems upgrating the cluster.')"
+        fi
+      done
+    done
+  else # WORKER OR ControlPlane Node
+    masterKubeProxyMinorVersion=$(getKubeProxyMinorVerion $U7S_MasterNodeName)
+    deltaMinorVersions=$(getDeltaMinorVersions "$kubeMinorVersion" "$masterKubeProxyMinorVersion")
+    while [ "$deltaMinorVersions" -gt 0 ]
+    do
+      if [ "$deltaMinorVersions" -gt 1 ]
+      then
+        echo "$(gettext 'The deploying minor version') $kubeMinorVersion $(gettext 'of the  node') $U7S_HOSTNAME $(gettext 'is more than 1 higher, than the master node') $U7S_MasterNodeName $(gettext 'version') $masterKubeProxyMinorVersion"
+        echo "$(gettext 'There may be problems upgrating the cluster.')"
+      fi
+      echo "$(gettext 'Waiting for the deployed version') $masterKubeProxyMinorVersion $(gettext 'of the master node') $U7S_MasterNodeName $(gettext 'to be updated to') $kubeMinorVersion"
+      sleep 10
+      masterKubeProxyMinorVersion=$(getKubeProxyMinorVerion $U7S_MasterNodeName)
+      deltaMinorVersions=$(getDeltaMinorVersions "$kubeMinorVersion" "$masterKubeProxyMinorVersion")
+    done
+    if [ "$deltaMinorVersions" -lt 0 ]
+    then
+      echo "$(gettext 'The deploying minor version') $kubeMinorVersion $(gettext 'of the  node') $U7S_HOSTNAME $(gettext 'is more than 1 higher, than the master node') $U7S_MasterNodeName $(gettext 'version') $masterKubeProxyMinorVersion"
+      echo "$(gettext 'There may be problems upgrating the cluster.')"
+    fi
+  fi
+
+  cordonedNodes=$(listCordonedNodes)
+  while [ -n "$cordonedNodes" ]
+  do
+    echo "$(gettext 'Waiting for uncordon nodes:') $cordonedNodes"
+    sleep 5
+    cordonedNodes=$(listCordonedNodes)
+  done
+
+  echo -ne "$(gettext 'Cordon node') $HOSTNAME"
+  kubectl cordon $HOSTNAME
 
   echo "$(gettext 'Updating cluster node services to version') $kubeVersion"
   echo "$(gettext 'Wait several minutes...')"
@@ -171,14 +267,11 @@ do
       /usr/bin/kubeadm upgrade  apply -y ${kubeVersion}
 
 
-  echo -ne "$(gettext 'Cordon node, remove node pods and containers')"
-  kubectl cordon $HOSTNAME
   if [[ "$kubeMinorVersion" > '1.29' ]]
   then
+    echo -ne "$(gettext 'Remove node pods and containers')"
     kubectl drain $HOSTNAME --ignore-daemonsets --delete-emptydir-data
     while killall kubelet 2>/dev/null; do sleep 1; done
-
-
     echo "$(gettext 'Remove all pods and containers')"
     machinectl shell u7s-admin@ /usr/libexec/podsec/u7s/bin/nsenter_u7s sh -x $TMPCMDFile
   fi
@@ -242,25 +335,6 @@ kubernetes' |
   machinectl shell u7s-admin@ /usr/bin/systemctl --user start kubelet
 
 
-#   echo -ne "$(gettext 'Waiting for kubeapi node services to come up') ."
-#   sleep 1
-#   while :;
-#   do
-#     currentKubeAPIVersion=$(getCurrentKubeAPIVersion)
-#     currentKubeAPIVersion=$(getMinorVersion $currentKubeAPIVersion)
-#     if [ -n "$currentKubeAPIVersion" ]
-#     then
-#       if [ "$currentKubeAPIVersion" != "${kubeMinorVersion}" ]
-#       then
-#         echo "$(gettext 'The kubeapi version') $currentKubeAPIVersion $(gettext 'on the node') $U7S_HOSTNAME $(gettext 'does not match the target version') $kubeMinorVersion" >&2
-#       else
-#         break
-#       fi
-#     fi
-#     echo -ne .
-#     sleep 1
-#   done
-
   echo -ne "$(gettext 'Waiting for kubelet node services to come up') ."
   while :;
   do
@@ -278,42 +352,6 @@ kubernetes' |
     echo -ne .
     sleep 1
   done
-
-#   requiredNodeImages=$(getRequiredNodeImages $kubeVersion $isControlPlane)
-#   currentNodeImages=$(kubectl get -n kube-system all -o json |
-#     jq -r '.items[] |
-#       select(.spec.nodeName=="'$U7S_HOSTNAME'") |
-#       .spec.containers[].image')
-#
-#   echo -ne "$(gettext 'Waiting for kube node services to come up') ."
-#   sleep 5
-#   while :;
-#   do
-#     ifs=$IFS
-#     complete='yes'
-#     for requiredNodeImage in $requiredNodeImages
-#     do
-#       IFS=:; set -- $requiredNodeImage; IFS=$ifs; image=$1; version=$2 # выделить имя и версию
-#       if [ "${version:0:1}" = 'v' ]; then version=${version:1}; fi
-#       currentKubeServiceVerion=$(getCurrentKubeServiceVerion $image)
-#       if [ "$currentKubeServiceVerion" != "$version" ]
-#       then
-#         if [ -n "$currentKubeServiceVerion" ]
-#         then
-#           echo "$(gettext 'Service version of') $image $(gettext 'not equal to target' $version.)"
-#         else
-#           echo "$(gettext 'Service') $image $(gettext 'is not ready'.)"
-#         fi
-#         complete=''
-#       else
-#         echo "$(gettext 'Service version of') $image $(gettext 'is equal to target' $version.)"
-#       fi
-#       if [ -n "$complete" ]; then break; fi
-#       sleep 1
-#       echo -ne "\n\n"
-#     done
-#   done
-
 
   kubectl uncordon $HOSTNAME
 
