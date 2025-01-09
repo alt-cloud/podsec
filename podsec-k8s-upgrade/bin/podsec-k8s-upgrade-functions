@@ -47,10 +47,51 @@ function getCurrentFlannelVersion() {
   echo -ne $ret
 }
 
+function isVersion() {
+  version=$1
+	ifs=$IFS
+	IFS=.
+	set -- $version
+	IFS=$ifs
+	major=$1
+	if [ "${major:0:1}" = 'v' ]; then major=${major:1}; fi
+	minor=$2
+	patch=$3
+	if [[ "$major" -gt 0 && "$minor" -gt 0  && "$patch" -gt 0 ]]
+	then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function getKubeletNodeVerion() {
+  node=$1
+  ret=$(kubectl get nodes -o json |
+    jq -r  '.items[] | select(.metadata.name=="'$node'") | .status.nodeInfo.kubeletVersion')
+  while ! isVersion $ret
+  do
+    echo "$(gettext 'Waiting to be ready for node') $node" >&2
+    sleep 5
+    ret=$(kubectl get nodes -o json |
+      jq -r  '.items[] | select(.metadata.name=="'$node'") | .status.nodeInfo.kubeletVersion')
+  done
+  echo $ret
+}
+
+function getKubeletMinorVerion() {
+  node=$1
+  ret=$(getKubeletNodeVerion $node)
+  if [ -n "$ret" ]
+  then
+    ret=$(getMinorVersion $ret)
+  fi
+  echo -ne $ret
+}
+
 function getNodeCurrentKubeletVersion() {
   ret=''
-  nodeKubeletVersion=$(kubectl get nodes -o json |
-    jq -r '.items[] | select(.metadata.name=="'$U7S_HOSTNAME'") | .status.nodeInfo.kubeletVersion')
+  nodeKubeletVersion=$(getKubeletNodeVerion $U7S_HOSTNAME)
   if [ -n "$nodeKubeletVersion" ]
   then
     ret=${nodeKubeletVersion:1}
@@ -62,6 +103,7 @@ function getCurrentKubeAPIVersion() {
   ret=''
   kubeapiVersion=$(kubectl -n kube-system get pods -o json |
     jq -r '.items[] | select(.metadata.name=="kube-apiserver-'${U7S_HOSTNAME}'") | .spec.containers[0].image')
+
   if [ -n "$kubeapiVersion" ]
   then
     kubeapiVersion=$(basename $kubeapiVersion)
@@ -84,8 +126,8 @@ function getKubeProxyMinorVerion() {
       end'
     )
   kubeProxyImage=$(basename $kubeProxyImage)
-  ifs=$IFS; IFS=:; set -- $kubeapiVersion; IFS=$ifs; ret=${2:1}
-  echo $ret
+  ifs=$IFS; IFS=:; set -- $kubeProxyImage; IFS=$ifs; ret=${2:1}
+  echo -ne $ret
 }
 
 function getCurrentKubeServiceVerion() {
@@ -103,11 +145,15 @@ function getCurrentKubeServiceVerion() {
 }
 
 function getMinorVersion() {
+  if [ -z "$1" ]; then echo -ne ''; fi
 	ifs=$IFS
 	IFS=.
 	set -- $1
 	IFS=$ifs
-	echo "$1.$2"
+	major=$1
+	if [ "${major:0:1}" = 'v' ]; then major=${major:1}; fi
+	minor=$2
+	echo -ne "$major.$minor"
 }
 
 function getPrevMinorVersion() {
@@ -116,7 +162,7 @@ function getPrevMinorVersion() {
 	set -- $1
 	IFS=$ifs
 	let prev=$2-1
-	echo "$1.$prev"
+	echo -ne "$1.$prev"
 }
 
 function getNextKubeVersions() {
@@ -175,7 +221,7 @@ function getPrevKubeMinorVersions() {
     let nextMinor=$2+1
     prevMinorKubeVersion="$1.$nextMinor"
   done
-  echo $ret
+  echo -ne $ret
 }
 
 function setRPMRegistries() {
@@ -195,7 +241,7 @@ function setRPMRegistries() {
 
 function loadRpmPackages() {
   kubeVersions="$*"
-  echo "$(gettext 'Loading RPM packages for') $kubeVersions"
+  echo "$(gettext 'Loading RPM packages for') $kubeVersions" >&2
   export U7S_rpmDir='/var/cache/apt/archives'
   for kubeVersion in $kubeVersions
   do
@@ -229,5 +275,5 @@ function getDeltaMinorVersions() {
   let Minor2=$1*1000+$2
   IFS=$ifs
   let ret=$Minor1-$Minor2
-  echo $ret
+  echo -ne $ret
 }
