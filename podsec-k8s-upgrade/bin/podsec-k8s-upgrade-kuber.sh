@@ -1,6 +1,6 @@
 
 #!/bin/sh
-source podsec-k8s-upgrade-functions
+source ./podsec-k8s-upgrade-functions
 
 export TEXTDOMAINDIR='/usr/share/locale'
 export TEXTDOMAIN='podsec-k8s-upgrade'
