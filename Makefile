@@ -173,6 +173,10 @@ install: all
 	cd ./podsec/bin;$(INSTALL) -m644 $(PODSEC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec/md/en; for page in $(PODSEC_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1dir)/$${page}.1.xz"; done
 	cd ./podsec/md/ru; for page in $(PODSEC_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1rudir)/$${page}.1.xz"; done
+# 	cd ./podsec/man/en;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1dir); ls -l $(DESTDIR)$(man1dir)
+# 	cd ./podsec/man/ru;$(INSTALL) -m644 $(PODSEC_MAN1_PAGES) $(DESTDIR)$(man1rudir); ls -l $(DESTDIR)$(man1rudir)
+	cd ./podsec/man/en;xz $(PODSEC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec/man/ru;xz $(PODSEC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	cd ./podsec/po; msgfmt  podsec.po -o podsec.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec.mo $(DESTDIR)/$(localedir)/
 
 	# PODSEC-K8S
@@ -180,6 +184,10 @@ install: all
 	cd ./podsec-k8s/bin;$(INSTALL) -m644 $(PODSEC_K8S_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s/md/en; for page in $(PODSEC_K8S_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1dir)/$${page}.1.xz"; done
 	cd ./podsec-k8s/md/ru; for page in $(PODSEC_K8S_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1rudir)/$${page}.1.xz"; done
+# 	cd ./podsec-k8s/man/en;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-k8s/man/ru;$(INSTALL) -m644 $(PODSEC_K8S_MAN1_PAGES) $(DESTDIR)$(man1rudir)/
+	cd ./podsec-k8s/man/en;xz $(PODSEC_K8S_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec-k8s/man/ru;xz $(PODSEC_K8S_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	$(MKDIR_P) -m755 $(DESTDIR)$(sysconfdir)/kubernetes/manifests
 
 	# PODSEC-K8S USERNETES
@@ -227,6 +235,10 @@ install: all
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/md/en; for page in $(PODSEC_K8S_RBAC_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1dir)/$${page}.1.xz"; done
 	cd ./podsec-k8s-rbac/md/ru; for page in $(PODSEC_K8S_RBAC_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1rudir)/$${page}.1.xz"; done
+# 	cd ./podsec-k8s-rbac/man/en;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-k8s-rbac/man/ru;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1rudir)/
+	cd ./podsec-k8s-rbac/man/en;xz $(PODSEC_K8S_RBAC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec-k8s-rbac/man/ru;xz $(PODSEC_K8S_RBAC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	cd ./podsec-k8s-rbac/po; msgfmt  podsec-k8s-rbac.po -o podsec-k8s-rbac.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-k8s-rbac.mo $(DESTDIR)/$(localedir)/
 
 	# PODSEC-INOTIFY
@@ -235,6 +247,10 @@ install: all
 	cd ./podsec-inotify/bin;$(INSTALL) -m644 $(PODSEC_INOTIFY_FUNCTIONS) $(DESTDIR)$(bindir)/
 	cd ./podsec-inotify/md/en; for page in $(PODSEC_INOTIFY_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1dir)/$${page}.1.xz"; done
 	cd ./podsec-inotify/md/ru; for page in $(PODSEC_INOTIFY_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1rudir)/$${page}.1.xz"; done
+# 	cd ./podsec-inotify/man/en;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-inotify/man/ru;$(INSTALL) -m644 $(PODSEC_INOTIFY_MAN1_PAGES) $(DESTDIR)$(man1rudir)/
+	cd ./podsec-inotify/man/en;xz $(PODSEC_INOTIFY_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec-inotify/man/ru;xz $(PODSEC_INOTIFY_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	cd ./podsec-inotify/services;$(INSTALL) -m644 $(PODSEC_INOTIFY_UNITS) $(DESTDIR)/$(unitdir)/
 	$(INSTALL) -D -m0644 $(PODSEC_ICINGA2_CONF) $(DESTDIR)$(sysconfdir)/icinga2/conf.d/podsec.conf
 	$(INSTALL) -D -m0644 $(PODSEC_ICINGA2_JSON) $(DESTDIR)$(docdir)/podsec-icinga2.json
