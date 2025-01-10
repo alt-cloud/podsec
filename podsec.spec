@@ -371,6 +371,22 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 - Created russian man-catalogs podsec*/man/ru.
 - Created english man-catalogs podsec*/man/en.
 - Removed russiian man pages.
+* Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.0-alt1
+- Added man pages to Makefile and podsec.spec.
+- Added man pages to Makefile and podsec.spec.
+- Created russian md-catalogs podsec*/md/ru.
+- Moved russian md-files to podsec*/md/ru.
+- Created english md-catalogs podsec*/md/en.
+- Translated russion md-files to english md-files in podsec*/md/en.
+- Created russian man-catalogs podsec*/man/ru.
+- Created english man-catalogs podsec*/man/en.
+- Generated Russian and English man pages based on Russian and English md files.
+- Created russian md-catalogs podsec*/md/ru.
+- Moved russian md-files to podsec*/md/ru.
+- Created english md-catalogs podsec*/md/en.
+- Translated russion md-files to english md-files in podsec*/md/en.
+- Created russian man-catalogs podsec*/man/ru.
+- Created english man-catalogs podsec*/man/en.
 - Generated Russian and English man pages based on Russian and English md files.
 - Debugged podsec/bin/podsec-create-policy.
 
