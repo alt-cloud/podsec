@@ -6,7 +6,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.2.2
+Version: 1.2.3
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -371,6 +371,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 - Created russian man-catalogs podsec*/man/ru.
 - Created english man-catalogs podsec*/man/en.
 - Removed russiian man pages.
+
 * Thu Oct 17 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.0-alt1
 - Added man pages to Makefile and podsec.spec.
 - Added man pages to Makefile and podsec.spec.
