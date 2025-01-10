@@ -1,3 +1,4 @@
+
 #!/bin/sh
 source podsec-k8s-upgrade-functions
 
@@ -82,6 +83,7 @@ export flannelImage=$(kubectl get  -n kube-flannel daemonset.apps/kube-flannel-d
   jq  -r '.spec.template.spec.containers[0].image')
 ifs=$IFS; IFS=:; set -- $flannelImage; IFS=$ifs
 export flannelTag=$2
+
 export U7S_REGISTRY=$(getRegistry)
 # export U7S_PLATFORM_1_26='k8s-c10f1'
 export U7S_PLATFORM=$(getPlatform)
@@ -103,7 +105,6 @@ export prevImages=$(
   grep $U7S_REGISTRY |
   tr -d '\r'
 )
-
 echo "kubeVersion $kubeVersion
 kubeMinorVersion=$kubeMinorVersion
 nextKubeVersions=$nextKubeVersions
@@ -208,6 +209,8 @@ do
       /usr/bin/kubeadm -v 9  config images pull \
         --image-repository=$U7S_REGISTRYPATH \
         --kubernetes-version=v${kubeVersion}
+
+
 #   if [ "$U7S_MasterNodeName" = "$U7S_HOSTNAME" ] #MASTER NODE
 #   then
     if [[ "$kubeMinorVersion" > '1.26' ]]
@@ -392,25 +395,8 @@ kubernetes' |
   systemctl start u7s
   machinectl shell u7s-admin@ /usr/bin/systemctl --user start kubelet
 
+
   echo -ne "$(gettext 'Waiting for kubelet node services to come up')." >&2
-  sleep 1
-  while :;
-  do
-    currentKubeAPIVersion=$(getCurrentKubeAPIVersion)
-    currentKubeAPIVersion=$(getMinorVersion $currentKubeAPIVersion)
-    if [ -n "$currentKubeAPIVersion" ]
-    then
-      if [ "$currentKubeAPIVersion" != "${kubeMinorVersion}" ]
-      then
-        echo "$(gettext 'The kubeapi version') $currentKubeAPIVersion $(gettext 'on the node') $U7S_HOSTNAME $(gettext 'does not match the target version') $kubeMinorVersion" >&2
-      else
-        break
-      fi
-    fi
-    echo -ne .
-    sleep 1
-  done
-  echo -ne "$(gettext 'Waiting for kubelet node services to come up') ."
   while :;
   do
     nodeCurrentKubeletVersion=$(getNodeCurrentKubeletVersion)
@@ -444,7 +430,7 @@ kubernetes' |
   fi
 
   kubectl uncordon $HOSTNAME
-  if [ "$U7S_NodeRole" = 'controlplane' ]
+ if [ "$U7S_NodeRole" = 'controlplane' ]
   then
     echo $(gettext 'Untaint node') $HOSTNAME >&2
     kubectl taint nodes $HOSTNAME node-role.kubernetes.io/control-plane:NoSchedule-
@@ -477,6 +463,3 @@ kubernetes' |
   prevKubeMinorVersion=$kubeMinorVersion
   prevKubeMinorVersions+=" $prevKubeMinorVersion"
 done
-
-
-

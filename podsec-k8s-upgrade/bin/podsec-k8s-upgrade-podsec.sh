@@ -1,4 +1,3 @@
-#!/bin/sh
 
 source podsec-k8s-upgrade-functions
 
@@ -56,12 +55,6 @@ rpm -e --nodeps flannel
 rpm -e --nodeps cni-plugin-flannel
 chown u7s-admin:u7s-admin /etc/cni/net.d/
 apt-get -y dist-upgrade --fix-broken
-control newuidmap public
-control newgidmap public
-systemctl start u7s
-apt-get -y dist-upgrade
-control newuidmap public
-control newgidmap public
 control newuidmap public
 control newgidmap public
 systemctl start u7s

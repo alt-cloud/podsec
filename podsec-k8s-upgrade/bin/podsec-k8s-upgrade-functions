@@ -91,6 +91,7 @@ function getKubeletMinorVerion() {
 
 function getNodeCurrentKubeletVersion() {
   ret=''
+  nodeKubeletVersion=$(getKubeletNodeVerion $U7S_HOSTNAME)
   if [ -n "$nodeKubeletVersion" ]
   then
     ret=${nodeKubeletVersion:1}
@@ -102,6 +103,7 @@ function getCurrentKubeAPIVersion() {
   ret=''
   kubeapiVersion=$(kubectl -n kube-system get pods -o json |
     jq -r '.items[] | select(.metadata.name=="kube-apiserver-'${U7S_HOSTNAME}'") | .spec.containers[0].image')
+
   if [ -n "$kubeapiVersion" ]
   then
     kubeapiVersion=$(basename $kubeapiVersion)
@@ -109,6 +111,7 @@ function getCurrentKubeAPIVersion() {
   fi
   echo -ne $ret
 }
+
 
 function getKubeProxyMinorVerion() {
   node=$1
