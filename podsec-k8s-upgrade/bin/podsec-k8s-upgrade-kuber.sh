@@ -14,6 +14,7 @@ then
 fi
 masterNodeName=$1
 export U7S_HOSTNAME=$(hostname)
+<<<<<<< HEAD
 NodesJSON="$(kubectl get nodes  -o json)"
 export nodeNames=$(echo $NodesJSON | jq -r '.items[].metadata.name')
 controlPlaneNames=$(echo $NodesJSON | jq '.items[].metadata | select(.labels."node-role.kubernetes.io/control-plane"!=null)|.name')
@@ -83,6 +84,8 @@ export flannelImage=$(kubectl get  -n kube-flannel daemonset.apps/kube-flannel-d
 ifs=$IFS; IFS=:; set -- $flannelImage; IFS=$ifs
 export flannelTag=$2
 
+=======
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
 export U7S_REGISTRY=$(getRegistry)
 # export U7S_PLATFORM_1_26='k8s-c10f1'
 export U7S_PLATFORM=$(getPlatform)
@@ -213,6 +216,7 @@ do
 #   then
     if [[ "$kubeMinorVersion" > '1.26' ]]
     then
+<<<<<<< HEAD
       currentFlannelVersion=$(getCurrentFlannelVersion)
       toFlannelVersion='0.25.1'
       if [ "$currentFlannelVersion" != "$toFlannelVersion" ]
@@ -250,6 +254,18 @@ do
     do
       readyNodes=0
       for slaveNode in $U7S_SlaveNodeNames
+=======
+      echo "$(gettext 'Upgrads flannel from') $currentFlannelVersion $(gettext 'to') $toFlannelVersion"
+      echo "$(gettext 'Remove rpm package cni-plugin-flannel-1.1.2')"
+      kubectl -n kube-flannel delete daemonset.apps/kube-flannel-ds
+      rpm -e --replacefiles --nodeps  cni-plugin-flannel-1.1.2
+      chown u7s-admin:u7s-admin -R /usr/libexec/cni/
+      rm -f /usr/libexec/cni/flannel
+      curl http://sigstore.local:81/manifests/kube-flannel/0/25/1/kube-flannel.yml |
+      sed -e "s|docker.io/flannel|${U7S_REGISTRY}/${U7S_PLATFORM}|g" |
+      kubectl apply -f -
+      while :;
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
       do
         slaveKubeLetMinorVersion=$(getKubeletMinorVerion $slaveNode)
         deltaMinorVersions=$(getDeltaMinorVersions "$kubeMinorVersion" "$slaveKubeLetMinorVersion")

@@ -51,6 +51,7 @@ apt-repo add 'rpm cdrom:[ALT SP Server 10.2 11100-01 x86_64 build 2024-11-07]/ A
 apt-repo rm 'rpm http://sigstore.local:81/kubernetes_upgrade x86_64 main'
 apt-repo rm 'rpm cdrom:[ALT SP Server 11100-01 x86_64 build 2023-05-29]/ ALTLinux main'
 apt-get update
+<<<<<<< HEAD
 systemctl stop u7s
 rpm -e --nodeps flannel
 rpm -e --nodeps cni-plugin-flannel
@@ -59,3 +60,9 @@ apt-get -y dist-upgrade --fix-broken
 control newuidmap public
 control newgidmap public
 systemctl start u7s
+=======
+systectl stop u7s
+apt-get -y dist-upgrade
+control newuidmap public
+control newgidmap public
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)

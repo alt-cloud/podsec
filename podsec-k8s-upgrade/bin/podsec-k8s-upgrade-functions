@@ -11,6 +11,7 @@ function getPlatform() {
   echo 'k8s-c10f2'
 }
 
+<<<<<<< HEAD
 function getRequiredNodeImages() {
   kubeVersion=$1
   isControlPlane=$2
@@ -35,6 +36,8 @@ function getCurrentKubeadmVersion() {
   echo ${kubeadmVersion:1}
 }
 
+=======
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
 function getCurrentFlannelVersion() {
   ret=''
   flannelImage=$(kubectl -n kube-flannel get daemonset.apps/kube-flannel-ds -o yaml |
@@ -47,6 +50,7 @@ function getCurrentFlannelVersion() {
   echo -ne $ret
 }
 
+<<<<<<< HEAD
 function isVersion() {
   version=$1
 	ifs=$IFS
@@ -92,6 +96,12 @@ function getKubeletMinorVerion() {
 function getNodeCurrentKubeletVersion() {
   ret=''
   nodeKubeletVersion=$(getKubeletNodeVerion $U7S_HOSTNAME)
+=======
+function getNodeCurrentKubeletVersion() {
+  ret=''
+  nodeKubeletVersion=$(kubectl get nodes -o json |
+    jq -r '.items[] | select(.metadata.name=="'$U7S_HOSTNAME'") | .status.nodeInfo.kubeletVersion')
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
   if [ -n "$nodeKubeletVersion" ]
   then
     ret=${nodeKubeletVersion:1}
@@ -103,7 +113,10 @@ function getCurrentKubeAPIVersion() {
   ret=''
   kubeapiVersion=$(kubectl -n kube-system get pods -o json |
     jq -r '.items[] | select(.metadata.name=="kube-apiserver-'${U7S_HOSTNAME}'") | .spec.containers[0].image')
+<<<<<<< HEAD
 
+=======
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
   if [ -n "$kubeapiVersion" ]
   then
     kubeapiVersion=$(basename $kubeapiVersion)
@@ -112,6 +125,7 @@ function getCurrentKubeAPIVersion() {
   echo -ne $ret
 }
 
+<<<<<<< HEAD
 
 function getKubeProxyMinorVerion() {
   node=$1
@@ -146,14 +160,21 @@ function getCurrentKubeServiceVerion() {
 
 function getMinorVersion() {
   if [ -z "$1" ]; then echo -ne ''; fi
+=======
+function getMinorVersion() {
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
 	ifs=$IFS
 	IFS=.
 	set -- $1
 	IFS=$ifs
+<<<<<<< HEAD
 	major=$1
 	if [ "${major:0:1}" = 'v' ]; then major=${major:1}; fi
 	minor=$2
 	echo -ne "$major.$minor"
+=======
+	echo "$1.$2"
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
 }
 
 function getPrevMinorVersion() {
@@ -162,7 +183,11 @@ function getPrevMinorVersion() {
 	set -- $1
 	IFS=$ifs
 	let prev=$2-1
+<<<<<<< HEAD
 	echo -ne "$1.$prev"
+=======
+	echo "$1.$prev"
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
 }
 
 function getNextKubeVersions() {
@@ -221,7 +246,11 @@ function getPrevKubeMinorVersions() {
     let nextMinor=$2+1
     prevMinorKubeVersion="$1.$nextMinor"
   done
+<<<<<<< HEAD
   echo -ne $ret
+=======
+  echo $ret
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
 }
 
 function setRPMRegistries() {
@@ -241,7 +270,11 @@ function setRPMRegistries() {
 
 function loadRpmPackages() {
   kubeVersions="$*"
+<<<<<<< HEAD
   echo "$(gettext 'Loading RPM packages for') $kubeVersions" >&2
+=======
+  echo "$(gettext 'Loading RPM packages for') $kubeVersions"
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
   export U7S_rpmDir='/var/cache/apt/archives'
   for kubeVersion in $kubeVersions
   do
@@ -253,6 +286,7 @@ function loadRpmPackages() {
   done
   echo $U7S_rpmDir
 }
+<<<<<<< HEAD
 
 function listCordonedNodes() {
   ret=$(kubectl  get nodes -o json |
@@ -277,3 +311,5 @@ function getDeltaMinorVersions() {
   let ret=$Minor1-$Minor2
   echo -ne $ret
 }
+=======
+>>>>>>> 14b80c7 (The functions have been moved to the script podsec-k8s-upgrade-functions and script podsec-k8s-upgrade-podsec.sh has been added to upgrade c10f1 to c10f2)
