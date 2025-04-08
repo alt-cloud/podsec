@@ -165,6 +165,7 @@ function getPrevMinorVersion() {
 	echo -ne "$1.$prev"
 }
 
+# Вывести список последующих доступных минорных версий
 function getNextKubeVersions() {
   curMinorKubeVersion=$1
   toMinorVersion=$2
@@ -203,7 +204,7 @@ function getNextKubeVersions() {
     lastMinorKubeVersion=$curMinor
   done
   ret+="$lastPatchKubeVersion\n"
-  ret="$(echo -ne "$ret" | sort -u)"
+  ret="$(echo -ne "$ret" | sort -uV)"
   echo $ret
 }
 
