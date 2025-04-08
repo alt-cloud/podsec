@@ -6,7 +6,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.1.9
+Version: 1.1.10
 Release: alt1
 
 Summary: Set of scripts for Podman Security
@@ -305,6 +305,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Tue Apr 08 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
+- Add podsec-k8s-upgrade package - upgrade kubernetes versions on cluster
+
 * Thu Oct 24 2024 Alexey Kostarev <kaf@altlinux.org> 1.1.9-alt1
 - Removed cert-mansger's image support.
 
