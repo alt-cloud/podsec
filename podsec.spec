@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.10
-Release: alt1
+Release: alt2
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -56,9 +56,9 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-Requires: kubernetes-kubeadm
-Requires: kubernetes-crio
-Requires: cri-tools
+Requires: kubernetes1.32-kubeadm
+Requires: kubernetes1.32-crio
+Requires: cri-tools1.32
 %filter_from_requires /\/usr\/bin\/crio/d
 %filter_from_requires /\/usr\/bin\/kubeadm/d
 %filter_from_requires /\/usr\/bin\/kubectl/d
@@ -305,6 +305,10 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Tue May 20 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt2
+- Tuned podsec-k8s-upgrade scripts for c10f2
+- Added podsec-k8s-upgrade-init.sh script
+
 * Tue Apr 08 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
 - Add podsec-k8s-upgrade package - upgrade kubernetes versions on cluster
 
