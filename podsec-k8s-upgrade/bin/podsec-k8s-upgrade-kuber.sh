@@ -218,7 +218,6 @@ do
         --image-repository=$U7S_REGISTRYPATH \
         --kubernetes-version=v${kubeVersion}
 
-
 #   if [ "$U7S_MasterNodeName" = "$U7S_HOSTNAME" ] #MASTER NODE
 #   then
     if [[ "$kubeMinorVersion" > '1.26' ]]
@@ -249,7 +248,6 @@ do
       fi
     fi
 #   fi
-
 
 #   if [ "$U7S_MasterNodeName" = "$U7S_HOSTNAME" ] #MASTER NODE
 #   then
