@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.10
-Release: alt4
+Release: alt5
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -305,6 +305,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt5
+- Deleted untested scripts from podsec-k8s-upgrade
+
 * Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt4
 - Added support new images prefix c10f for k8s-c10f1, k8s-c10f2
 
