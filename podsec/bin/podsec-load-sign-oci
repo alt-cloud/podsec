@@ -115,7 +115,13 @@ IFS=/
 set -- $image
 IFS=$ifs
 platform=$1
-if [ "$platform" != "$U7S_PLATFORM" ]
+if [ "${U7S_PLATFORM:0:4}" = 'k8s-' ] # Convert k8s-c10fx to c10f platform
+then
+  PLATFORM=${U7S_PLATFORM:4:4}
+else
+  PLATFORM=${U7S_PLATFORM}
+fi
+if [ "$platform" != "$PLATFORM" ]
 then
   echo "Текущая платформа $U7S_PLATFORM не совпадает c устанавливаемой $platform"
   echo "Продолжать (y/N)?"
@@ -145,6 +151,13 @@ do
     Image="registry.local/$image"
   fi
   skopeo --override-arch $arch copy oci:$archDir:$ociImage containers-storage:$Image
+  if [ $PLATFORM = 'c10f' ]
+  then
+    oldImage="$U7S_PLATFORM${image:4}"
+    OldImage="registry.local/$oldImage"
+    ImageList+=" $OldImage"
+    podman tag  $Image $OldImage
+  fi
   ImageList+=" $Image"
 done
 
