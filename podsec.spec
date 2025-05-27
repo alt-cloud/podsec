@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.10
-Release: alt3
+Release: alt4
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -305,6 +305,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt4
+- Added support new images prefix c10f for k8s-c10f1, k8s-c10f2
+
 * Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt3
 - Added kube-flannel/0/26/7/kube-flannel.yml manifest
 
