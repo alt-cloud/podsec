@@ -281,7 +281,7 @@ function tuneAudit() {
 export U7S_REGISTRY_PLATFORM U7S_REGISTRY
 # Функция устанавливает имя регистратора обрвзов в переменнную U7S_REGISTRY_PLATFORM
 function setRegistryName() {
-	export U7S_ALTREGISTRY="registry.altlinux.org"
+  export U7S_ALTREGISTRY="registry.altlinux.org"
   if [  ! -z "${U7S_REGISTRY+x}" -a ${#U7S_REGISTRY} -eq 0  ]
   then
 		export U7S_REGISTRY="registry.k8s.io"
@@ -298,10 +298,14 @@ function setRegistryName() {
 	U7S_REGISTRY_PLATFORM=$U7S_REGISTRY
 	if [ -n "$U7S_PLATFORM" ]
 	then
-		U7S_REGISTRY_PLATFORM+="/$U7S_PLATFORM"
+		if [ ${U7S_PLATFORM:0:8} = 'k8s-c10f' ]
+		then
+			U7S_REGISTRY_PLATFORM+="/c10f"
+		else
+			U7S_REGISTRY_PLATFORM+="/$U7S_PLATFORM"
+		fi
 	fi
-	getKuberLastPatchVersion
-# 	source /etc/podsec/u7s/env/u7s_images
+# 	getKuberLastPatchVersion
 	export U7S_REGISTRY_PLATFORM
 }
 

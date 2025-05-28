@@ -115,23 +115,23 @@ IFS=/
 set -- $image
 IFS=$ifs
 platform=$1
-if [ "${U7S_PLATFORM:0:4}" = 'k8s-' ] # Convert k8s-c10fx to c10f platform
-then
-  PLATFORM=${U7S_PLATFORM:4:4}
-else
-  PLATFORM=${U7S_PLATFORM}
-fi
-if [ "$platform" != "$PLATFORM" ]
+
+if [ "$platform" != "$U7S_PLATFORM" ]
 then
   echo "Текущая платформа $U7S_PLATFORM не совпадает c устанавливаемой $platform"
   echo "Продолжать (y/N)?"
   read answer
   if [ "$answer" != "y" ]
   then
-    exit 1
+      exit 1
   else
-   base="$platform/"
-   baselen=${#base}
+    if [ ${platform:0:4} = 'k8s-' ]
+    then
+      echo "C 31.08.2025 префикс k8- в имени образа не поддерживается (см. https://www.altlinux.org/Registry_(%D0%9D%D0%BE%D0%B2%D0%B0%D1%8F_%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%B0))"
+      exit 1
+    fi
+    base="$platform/"
+    baselen=${#base}
   fi
 fi
 
@@ -151,12 +151,12 @@ do
     Image="registry.local/$image"
   fi
   skopeo --override-arch $arch copy oci:$archDir:$ociImage containers-storage:$Image
-  if [ $PLATFORM = 'c10f' ]
+  if [ "$base" = 'c10f/' ]
   then
-    oldImage="$U7S_PLATFORM${image:4}"
+    oldImage="k8s-c10f2/${image:5}"
     OldImage="registry.local/$oldImage"
     ImageList+=" $OldImage"
-    podman tag  $Image $OldImage
+    podman tag $Image $OldImage
   fi
   ImageList+=" $Image"
 done

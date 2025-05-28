@@ -1,4 +1,5 @@
 # Устанавливает переменную U7S_PLATFORM
+# С 28.05.2025 установлена новая система именования образов - https://www.altlinux.org/Registry_(%D0%9D%D0%BE%D0%B2%D0%B0%D1%8F_%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%B0)
 function getPlatform() {
   if [ -n "$U7S_PLATFORM" ]
   then
@@ -8,12 +9,11 @@ function getPlatform() {
   source /etc/os-release
   if [ -n "$ALT_BRANCH_ID" ]
   then
-    if [ "$ALT_BRANCH_ID"  == 'sisyphus' ]
+    if [ ${ALT_BRANCH_ID:0:4} = 'c10f' ]
     then
-      export U7S_PLATFORM="k8s-sisyphus";
-    else
-      export U7S_PLATFORM="k8s-$ALT_BRANCH_ID"
+      ALT_BRANCH_ID='c10f'
     fi
+    export U7S_PLATFORM="$ALT_BRANCH_ID"
   else
     ifs=$IFS
     IFS=:
@@ -26,9 +26,9 @@ function getPlatform() {
     IFS=$ifs
     version=$1
     case $platform in
-      spserver) export U7S_PLATFORM="k8s-c${version}f1"; break;;
-      sisyphus) export U7S_PLATFORM="k8s-sisyphus"; break;;
-      *) export U7S_PLATFORM="k8s-p${version}"; break;;
+      spserver) export U7S_PLATFORM="c10f"; break;;
+      sisyphus) export U7S_PLATFORM="sisyphus"; break;;
+      *) export U7S_PLATFORM="p${version}"; break;;
     esac
   fi
 }
