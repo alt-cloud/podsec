@@ -7,7 +7,7 @@
 
 Name: podsec
 Version: 1.1.10
-Release: alt6
+Release: alt7
 
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -305,6 +305,9 @@ echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" >> %u7s_admin_homedir/.bas
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Thu May 29 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt7
+- Fixed a bug in naming alias images with a prefix k8s-c10fN
+
 * Wed May 28 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt6
 - Transition from prefix k8s- to prefix without prefix, k8s-c10f2 -> c10f
 
