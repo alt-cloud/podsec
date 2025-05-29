@@ -153,7 +153,7 @@ do
   skopeo --override-arch $arch copy oci:$archDir:$ociImage containers-storage:$Image
   if [ "$base" = 'c10f/' ]
   then
-    oldImage="k8s-c10f2/${image:5}"
+    oldImage="k8s-c10f2/${ociImage:5}"
     OldImage="registry.local/$oldImage"
     ImageList+=" $OldImage"
     podman tag $Image $OldImage
