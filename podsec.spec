@@ -5,7 +5,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.2.0
+Version: 1.3.0
 Release: alt1
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -335,6 +335,11 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Tue Jul 22 2025 Alexey Kostarev <kaf@altlinux.org> 1.3.0-alt1
+* Tue Jul 22 2025 Alexey Kostarev <kaf@altlinux.org> 1.2.0-alt1
+- Merge to sisyphus 1.2.x branch (localization, correct spec's changelog)
+- Add functions and comments to podsec-k8s-upgrade-functions, podsec-k8s-upgrade-kuber.sh
+
 * Thu May 29 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt7
 - Fixed a bug in naming alias images with a prefix k8s-c10fN
 
