@@ -7,9 +7,41 @@ function getRegistry() {
   echo 'registry.local'
 }
 
+# Устанавливает переменную U7S_PLATFORM
 function getPlatform() {
-  echo 'k8s-c10f2'
+  if [ -n "$U7S_PLATFORM" ]
+  then
+    echo "Версия платформы $U7S_PLATFORM преопределена переменной U7S_PLATFORM. Принимается это значение." >&2
+    return
+  fi
+  source /etc/os-release
+  if [ -n "$ALT_BRANCH_ID" ]
+  then
+    if [ "$ALT_BRANCH_ID"  == 'sisyphus' ]
+    then
+      export U7S_PLATFORM="k8s-sisyphus";
+    else
+      export U7S_PLATFORM="k8s-$ALT_BRANCH_ID"
+    fi
+  else
+    ifs=$IFS
+    IFS=:
+    set -- $CPE_NAME
+    IFS=$ifs
+    platform=$4
+    version=$5
+    IFS=.
+    set -- $version
+    IFS=$ifs
+    version=$1
+    case $platform in
+      spserver) export U7S_PLATFORM="k8s-c${version}f1"; break;;
+      sisyphus) export U7S_PLATFORM="k8s-sisyphus"; break;;
+      *) export U7S_PLATFORM="k8s-p${version}"; break;;
+    esac
+  fi
 }
+
 
 function getRequiredNodeImages() {
   kubeVersion=$1
@@ -165,6 +197,7 @@ function getPrevMinorVersion() {
 	echo -ne "$1.$prev"
 }
 
+# Вывести список последующих доступных минорных версий
 function getNextKubeVersions() {
   curMinorKubeVersion=$1
   toMinorVersion=$2
@@ -203,7 +236,7 @@ function getNextKubeVersions() {
     lastMinorKubeVersion=$curMinor
   done
   ret+="$lastPatchKubeVersion\n"
-  ret="$(echo -ne "$ret" | sort -u)"
+  ret="$(echo -ne "$ret" | sort -uV)"
   echo $ret
 }
 
@@ -277,3 +310,41 @@ function getDeltaMinorVersions() {
   let ret=$Minor1-$Minor2
   echo -ne $ret
 }
+
+function getMembersOfPodsecDev() {
+  if members=$(getent group podman_dev) 2</dev/null
+  then
+    ifs=$IFS
+    IFS=:
+    set -- $members
+    IFS=$ifs
+    while [ $# -gt 1 ]; do shift; done
+    echo $1
+  else
+    echo ''
+  fi
+}
+
+function getPGPMemberOfPodsecDev() {
+  members=$(getMembersOfPodsecDev)
+  ifs=$IFS
+  IFS=,
+  set -- $members
+  IFS=$ifs
+  for user
+  do
+    if machinectl shell $user@ /usr/bin/gpg2 -k | grep uid >/dev/null 2>&1
+    then
+      echo $user
+      return
+    fi
+  done
+}
+
+function getUserGPGUid() {
+  set -- $(machinectl shell $user@ /bin/gpg -k | grep uid)
+  shift
+  echo $@
+}
+
+

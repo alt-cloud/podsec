@@ -1,4 +1,6 @@
 #!/bin/sh
+# Скрипт обеспечивает синхронное обновление версий kubernetes с версии 1,26 и далее
+
 source ./podsec-k8s-upgrade-functions
 
 export TEXTDOMAINDIR='/usr/share/locale'
@@ -16,8 +18,10 @@ masterNodeName=$1
 export U7S_HOSTNAME=$(hostname)
 NodesJSON="$(kubectl get nodes  -o json)"
 export nodeNames=$(echo $NodesJSON | jq -r '.items[].metadata.name')
-controlPlaneNames=$(echo $NodesJSON | jq '.items[].metadata | select(.labels."node-role.kubernetes.io/control-plane"!=null)|.name')
-export U7s_WorkerNames=$(echo $NodesJSON | jq '.items[].metadata | select(.labels."node-role.kubernetes.io/control-plane"==null)| .name')
+controlPlaneNames=$(echo $NodesJSON |
+  jq '.items[].metadata | select(.labels."node-role.kubernetes.io/control-plane"!=null)|.name')
+export U7s_WorkerNames=$(echo $NodesJSON |
+  jq '.items[].metadata | select(.labels."node-role.kubernetes.io/control-plane"==null)| .name')
 export U7S_NodeRole=''
 export U7S_MasterNodeName=''
 export U7S_SlaveNodeNames=''
@@ -37,9 +41,11 @@ done
 
 if [ -z "$U7S_MasterNodeName" ]
 then
-  echo "$(gettext 'Master node') $masterNodeName $(gettext 'absent in cluster nodes'): $nodeNames"  >&2
+  echo "$(gettext 'Master node') $masterNodeName $(gettext 'absent in cluster nodes'): $nodeNames" >&2
   exit 1
 fi
+
+echo "$(gettext 'Master node') $masterNodeName" >&2
 
 if [ -z "$U7S_NodeRole" ]
 then
@@ -48,6 +54,9 @@ then
 fi
 
 
+# Опрееделить переменные
+# U7S_ControlPlaneNames - список controlplane-узлов
+# U7S_NodeRole - роль узла: controlplane, worker
 export U7S_ControlPlaneNames=''
 for nodeName in $controlPlaneNames
 do
@@ -209,7 +218,6 @@ do
         --image-repository=$U7S_REGISTRYPATH \
         --kubernetes-version=v${kubeVersion}
 
-
 #   if [ "$U7S_MasterNodeName" = "$U7S_HOSTNAME" ] #MASTER NODE
 #   then
     if [[ "$kubeMinorVersion" > '1.26' ]]
@@ -240,7 +248,6 @@ do
       fi
     fi
 #   fi
-
 
 #   if [ "$U7S_MasterNodeName" = "$U7S_HOSTNAME" ] #MASTER NODE
 #   then
@@ -462,6 +469,3 @@ kubernetes' |
   prevKubeMinorVersion=$kubeMinorVersion
   prevKubeMinorVersions+=" $prevKubeMinorVersion"
 done
-
-
-
