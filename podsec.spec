@@ -6,7 +6,7 @@
 
 Name: podsec
 Version: 1.1.20
-Release: alt1
+Release: alt2
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -34,6 +34,7 @@ Requires: iptables
 Requires: openssh-server
 Requires: curl
 Requires: nagwad-service
+Requires: trivy
 
 %description
 This package contains utilities for:
@@ -335,6 +336,10 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Fri Aug 01 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.20-alt2
+- Added dependency on trivy package
+- Resolved OVE-20250801-0001 (See commit 856439077a9293644f4a10d257bd530cb9946563: Removed dependency on kubernetes version)
+
 * Thu Jul 31 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.20-alt1
 - Merged 1.2.x branch of sisyphus into 1.1.10-alt7 branch of c10f2
 
