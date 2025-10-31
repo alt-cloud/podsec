@@ -48,6 +48,21 @@ then
   exit 1
 fi
 
+
+if [ ! -d /root/.config/containers ]
+then
+  mkdir -p /root/.config/containers
+fi
+
+if [ -f /root/.config/containers/policy.json ]
+then
+  mv /root/.config/containers/policy.json /root/.config/containers/policy_prev.json
+fi
+
+echo '{"default":[{"type":"insecureAcceptAnything"}]}' |
+jq . > /root/.config/containers/policy.json
+
+
 regName=$U7S_ALTREGISTRY
 
 case $archs in
@@ -73,14 +88,14 @@ case $archs in
 esac
 
 mkdir $ociDir
-if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
-then
-  export storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
-  if [ ! -d $storage ]
-  then
-    echo "$(gettext 'Directory') $storage $(gettext 'is missing. Copying existing images of user u7s-admin is not possible.')" >&2
-  fi
-fi
+#if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
+#then
+#  export storage="/var/lib/u7s-admin/.local/share/usernetes/containers/storage/"
+#  if [ ! -d $storage ]
+#  then
+#    echo "$(gettext 'Directory') $storage $(gettext 'is missing. Copying existing images of user u7s-admin is not possible.')" >&2
+#  fi
+#fi
 
 for arch in $archs
 do
@@ -98,6 +113,10 @@ do
     podman image rm $image >/dev/null 2>&1
 #     if [ -n "$PODSECSAVE_USEEXISTINGIMAGES" ]
 #     then
+#       skopeo --override-arch $arch copy\
+#        --remove-signatures --dest-oci-accept-uncompressed-layers\
+#        ${transport}${Image}\
+#        oci:$ociArchDir:$image  2>/dev/null
       skopeo --override-arch $arch copy\
         --remove-signatures --dest-oci-accept-uncompressed-layers\
         ${transport}${Image}\
@@ -118,3 +137,8 @@ do
   tar cvCf $ociDir -  $arch | xz -9v > $ociArchDir.tar.xz
   rm -rf $ociArchDir
 done
+
+if [ -f /root/.config/containers/policy_prev.json ]
+then
+  mv /root/.config/containers/policy_prev.json /root/.config/containers/policy.json
+fi

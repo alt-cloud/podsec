@@ -36,6 +36,21 @@ then
   exit 1
 fi
 
+if [ ! -d /root/.config/containers ]
+then
+  mkdir -p /root/.config/containers
+fi
+
+if [ -f /root/.config/containers/policy.json ]
+then
+  mv /root/.config/containers/policy.json /root/.config/containers/policy_prev.json
+fi
+
+echo '{"default":[{"type":"insecureAcceptAnything"}]}' |
+jq . > /root/.config/containers/policy.json
+
+
+
 ociDir=$1
 arch=$2
 shift;shift
@@ -87,4 +102,10 @@ getKuberImages $arch $storage $USER
 
 
 # U7S_IMAGES+=" $@"
-podsec-save-oci $ociDir "$arch" "containers-storage:[$storage]"  $U7S_IMAGES
+podsec-save-oci $ociDir "$arch" ""  $U7S_IMAGES
+
+if [ -f /root/.config/containers/policy_prev.json ]
+then
+  mv /root/.config/containers/policy_prev.json /root/.config/containers/policy.json
+fi
+
