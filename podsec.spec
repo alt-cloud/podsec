@@ -6,12 +6,7 @@
 
 Name: podsec
 Version: 1.1.10
-<<<<<<< HEAD
 Release: alt7
-=======
-Release: alt1
-
->>>>>>> 981277d (podsec-1.1.10-alt1)
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -61,7 +56,6 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-
 # Avoid automatic addition of dependencies on the latest version of kubernetes packages
 # kubernetes1.xx-crio, kubernetes1.xx-kubeadm, kubernetes1.xx-kubectl, kubernetes1.xx-kubelet
 # and their installation during apt-get install podsec-k8s,
@@ -72,6 +66,9 @@ Requires: systemd-container
 %filter_from_requires /\/usr\/bin\/kubectl/d
 %filter_from_requires /\/usr\/bin\/kubelet/d
 %filter_from_requires /\/etc\/kubernetes\/kubelet/d
+# Requires: kubernetes-kubeadm
+# Requires: kubernetes-client
+# Requires: kubernetes-kubelet
 
 %description k8s
 This package contains utilities for:
