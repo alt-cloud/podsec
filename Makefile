@@ -191,7 +191,6 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes/containers
 	cd ./podsec-k8s/po; msgfmt  podsec-k8s.po -o podsec-k8s.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-k8s.mo $(DESTDIR)/$(localedir)/
-
 	# bin
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
 	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)$(libexecdir)/podsec/u7s/; tar xvzf $(TMPFILE);
