@@ -6,7 +6,7 @@
 
 Name: podsec
 Version: 1.1.20
-Release: alt2
+Release: alt3
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -378,6 +378,11 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+
+* Fri Oct 31 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.20-alt3
+- Tuned podsec-k8s-save-oci, podsec-save-oci scripts.
+- Added 0/27/3/kube-flannel.yml manifest.
+- Resolved CVE-2025-4563, CVE-2025-4563 in kubernetes version 1.33
 
 * Fri Aug 01 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.20-alt2
 - Added dependency on trivy package
