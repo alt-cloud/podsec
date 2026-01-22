@@ -6,8 +6,8 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.2.2
-Release: alt1
+Version: 1.1.10
+Release: alt3
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -330,15 +330,16 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
-<<<<<<< HEAD
-=======
+
+* Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt3
+- Added kube-flannel/0/26/7/kube-flannel.yml manifest
+
 * Tue May 20 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt2
 - Tuned podsec-k8s-upgrade scripts for c10f2
 - Added podsec-k8s-upgrade-init.sh script
 
 * Tue Apr 08 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
 - Add podsec-k8s-upgrade package - upgrade kubernetes versions on cluster
->>>>>>> 462228a (1.1.10-alt2)
 
 * Thu Oct 24 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.2-alt1
 - Add kube group to user u7s-admin.
