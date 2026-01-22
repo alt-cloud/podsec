@@ -331,6 +331,9 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 
 %changelog
 
+* Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt4
+- Added support new images prefix c10f for k8s-c10f1, k8s-c10f2
+
 * Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt3
 - Added kube-flannel/0/26/7/kube-flannel.yml manifest
 
