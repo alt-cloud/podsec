@@ -167,6 +167,14 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %dir %_mandir/ru/man1
 %dir %_sysconfdir/nagwad/
 %_datadir/locale/ru/LC_MESSAGES/podsec.mo
+%attr(0700,root,root) %_bindir/podsec-create-imagemakeruser
+%attr(0700,root,root) %_bindir/podsec-create-podmanusers
+%attr(0700,root,root) %_bindir/podsec-create-policy
+%attr(0700,root,root) %_bindir/podsec-create-services
+%attr(0755,root,root) %_bindir/podsec-functions
+%attr(0755,root,root) %_bindir/podsec-get-platform
+%attr(0755,root,root) %_bindir/podsec-load-sign-oci
+%attr(0755,root,root) %_bindir/podsec-policy-functions
 %_mandir/ru/man1/podsec-create-imagemakeruser.1.xz
 %_mandir/ru/man1/podsec-create-podmanusers.1.xz
 %_mandir/ru/man1/podsec-create-policy.1.xz
@@ -217,6 +225,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
 %dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log/kubeapi
 %config  %attr(0640, root, root) %_modules_loaddir/u7s.conf
+%_mandir/ru/man1/podsec-u7s-kubeadm.1.xz
 %_mandir/man1/podsec-u7s-kubeadm.1.xz
 %_userunitdir/kubelet.service
 %_userunitdir/rootlesskit.service
@@ -307,6 +316,14 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 
 %files inotify
 %dir %_mandir/ru/man1
+%_datadir/locale/ru/LC_MESSAGES/podsec-inotify.mo
+%_bindir/podsec-inotify-build-invulnerable-image
+%attr(0700,root,root) %_bindir/podsec-inotify-check-containers
+%attr(0700,root,root) %_bindir/podsec-inotify-check-images
+%attr(0700,root,root) %_bindir/podsec-inotify-check-kubeapi
+%attr(0700,root,root) %_bindir/podsec-inotify-check-policy
+%_bindir/podsec-inotify-check-vuln
+%_bindir/podsec-inotify-functions
 %_mandir/ru/man1/podsec-inotify-build-invulnerable-image.1.xz
 %_mandir/ru/man1/podsec-inotify-check-containers.1.xz
 %_mandir/ru/man1/podsec-inotify-check-images.1.xz
