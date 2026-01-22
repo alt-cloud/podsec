@@ -1,7 +1,6 @@
 %define _unpackaged_files_terminate_build 1
 %define u7s_admin_usr u7s-admin
 %define u7s_admin_grp u7s-admin
-%define kubernetes_grp kube
 %define _libexecdir %_prefix/libexec
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
@@ -57,9 +56,12 @@ Requires: rootlesskit >= 1.1.0
 Requires: slirp4netns >= 1.1.12
 Requires: crun >= 1.8.1
 Requires: systemd-container
-Requires: kubernetes1.32-kubeadm
-Requires: kubernetes1.32-crio
-Requires: cri-tools1.32
+
+# Avoid automatic addition of dependencies on the latest version of kubernetes packages
+# kubernetes1.xx-crio, kubernetes1.xx-kubeadm, kubernetes1.xx-kubectl, kubernetes1.xx-kubelet
+# and their installation during apt-get install podsec-k8s,
+# since the required (latest or specified) version of packages
+# is installed during cluster initialization using the podsec kubeadm script
 %filter_from_requires /\/usr\/bin\/crio/d
 %filter_from_requires /\/usr\/bin\/kubeadm/d
 %filter_from_requires /\/usr\/bin\/kubectl/d
@@ -134,7 +136,7 @@ groupadd -r -f podman_dev >/dev/null 2>&1 ||:
 
 %pre k8s
 groupadd -r -f %u7s_admin_grp  2>&1 ||:
-useradd -M -r -g %u7s_admin_grp -d %u7s_admin_homedir -G %kubernetes_grp,systemd-journal,podman \
+useradd -M -r -g %u7s_admin_grp -d %u7s_admin_homedir -G systemd-journal,podman \
     -c 'usernet user account'  %u7s_admin_usr  2>&1 ||:
 mkdir -p %u7s_admin_homedir
 # merge usernetes & podman graphroot
@@ -195,30 +197,24 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %_unitdir/user@.service.d/delegate.conf
 %dir %attr(0755,root,root) %_libexecdir/podsec/u7s
 %dir %attr(0755,root,root) %_libexecdir/podsec/u7s/bin
-%_libexecdir/podsec/u7s/bin/crio.sh
-%_libexecdir/podsec/u7s/bin/init-crio.sh
-%_libexecdir/podsec/u7s/bin/kubeadm
-%_libexecdir/podsec/u7s/bin/_kubeadm.sh
-%_libexecdir/podsec/u7s/bin/kubeadm.sh
-%_libexecdir/podsec/u7s/bin/_kubelet.sh
-%_libexecdir/podsec/u7s/bin/kubelet.sh
-%_libexecdir/podsec/u7s/bin/nsenter_u7s
-%_libexecdir/podsec/u7s/bin/rootlessctl
-%_libexecdir/podsec/u7s/bin/rootlesskit.sh
-%_libexecdir/podsec/u7s/bin/systemctl
-%_libexecdir/podsec/u7s/bin/u7sinit.sh
-%_libexecdir/podsec/u7s/bin/u7s-start-stop.sh
-%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/_*.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubeadm
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/u7sinit.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/crio.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/init-crio.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/_kubeadm.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/_kubelet.sh
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/rootlessctl
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/systemctl
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/u7s-start-stop.sh
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubeadm.sh
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubelet.sh
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/nsenter_u7s
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/rootlesskit.sh
-%dir %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
-%dir %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
-%dir %attr(0755,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
-%_localstatedir/podsec/u7s/log/kubeapi
-%_modules_loaddir/u7s.conf
-%_mandir/man1/podsec-k8s-create-master.1.xz
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log
+%dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/log/kubeapi
+%config  %attr(0640, root, root) %_modules_loaddir/u7s.conf
 %_mandir/man1/podsec-u7s-kubeadm.1.xz
 %_userunitdir/kubelet.service
 %_userunitdir/rootlesskit.service
