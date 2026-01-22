@@ -15,6 +15,7 @@ source podsec-get-platform
 getPlatform # Устанавливает переменную U7S_PLATFORM
 installKubeadm # Устанавливает требуемую доступную версию kubeadm и переменную U7S_KUBEVERSION при ее отсутствии
 setRegistryName # устанавливает имя регистратора образов в переменнную U7S_REGISTRY_PLATFORM
+usermod -G kube -a u7s-admin
 
 source /etc/podsec/u7s/env/u7s_flags
 
