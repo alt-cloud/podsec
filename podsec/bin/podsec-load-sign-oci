@@ -149,6 +149,13 @@ do
     Image="registry.local/$image"
   fi
   skopeo --override-arch $arch copy oci:$archDir:$ociImage containers-storage:$Image
+  if [ $PLATFORM = 'c10f' ]
+  then
+    oldImage="$U7S_PLATFORM${image:4}"
+    OldImage="registry.local/$oldImage"
+    ImageList+=" $OldImage"
+    podman tag  $Image $OldImage
+  fi
   ImageList+=" $Image"
 done
 
