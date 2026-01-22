@@ -1,0 +1,40 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-K8S\-CREATE\-MASTER" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-k8s\-create\-master\fR \- инициализация мастер\-узла rootfull\-kubernetes
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-create\-master имя_пользователя_с_административными_правами\fR
+.SH "DESCRIPTION"
+Скрипт производит:
+.IP "\[ci]" 4
+Настройку /etc/crio/crio\.conf на использование в качестве образа pause \fBregistry\.local/k8s\-c10f1/pause:3\.9\fR
+.IP "\[ci]" 4
+Запуск сервиса \fBkubelet\fR
+.IP "\[ci]" 4
+Инициализацию \fBmaster\-узла\fR кластера
+.IP "\[ci]" 4
+Настройку \fBroot\fR на роль \fIадминистратора кластера\fR
+.IP "\[ci]" 4
+Настройка \fBуказанного пользователя\fR на роль \fIадминистратора кластера\fR
+.IP "\[ci]" 4
+Настройка аудита API\-сервиса kubernetes\.
+.IP "" 0
+.P
+После окончания работы скрипта не забудьте скопировать из вывода этапа инициализации кластера строку подключения рабочих узлов \fBkubeadm join xx\.xx\.xx\.xx:6443 \-\-token \|\.\|\.\|\. \-\-discovery\-token\-ca\-cert\-hash sha256:\|\.\|\.\|\.\fR Эту команду в дальнейшем надо будет использовать для подключения рабочих узлов кластера\.
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-create\-master securityadmin\fR
+.SH "SECURITY CONSIDERATIONS"
+.IP "\[ci]" 4
+Для работ в качестве \fIадминистратора безопасности средства контейнеризации\fR необходимо на master\-узле создать пользователя (например \fBsecurityadmin\fR) принадлежащего группам \fBpodman\fR, \fBwheel\fR\.
+.IP "\[ci]" 4
+Так как все работа с кластером производится по REST\-интерфейсу, то для обеспечения повышенных мер безопасности следует заводить \fBВСЕХ пользователей\fR, включая \fIадминистратора безопасности средства контейнеризации\fR \fBВНЕ узлов кластера\fR\. Для работы с кластером достаточно команды \fBkubectl\fR, входящую в пакет \fBkubernetes\-client\fR\.
+.IP "" 0
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Kubernetes \fIhttps://www\.altlinux\.org/Kubernetes\fR;
+.IP "\[ci]" 4
+Настройка аудита API\-сервиса \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+.IP "" 0
+.SH "AUTHOR"
+Костарев Алексей, Базальт СПО kaf@basealt\.ru

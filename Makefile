@@ -125,10 +125,10 @@ PODSEC_NRPE_CONF = \
 
 TMPFILE  := $(shell mktemp)
 
-PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS)
-PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS)
-PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS)
-PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY_PLUGINS) $(PODSEC_INOTIFY_PROGRAMMS)
+PODSEC_MAN1_PAGES = $(PODSEC_PROGRAMMS:=.1)
+PODSEC_K8S_MAN1_PAGES = $(PODSEC_K8S_PROGRAMS:=.1)
+PODSEC_K8S_RBAC_MAN1_PAGES = $(PODSEC_K8S_RBAC_PROGRAMS:=.1)
+PODSEC_INOTIFY_MAN1_PAGES = $(PODSEC_INOTIFY_PLUGINS:=.1) $(PODSEC_INOTIFY_PROGRAMMS:=.1)
 
 MANPAGES = $(PODSEC_MAN1_PAGES) $(PODSEC_K8S_MAN1_PAGES) $(PODSEC_K8S_RBAC_MAN1_PAGES)
 
@@ -195,6 +195,7 @@ install: all
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes
 	$(MKDIR_P) $(DESTDIR)$(localstatedir)/u7s-admin/.local/share/usernetes/containers
 	cd ./podsec-k8s/po; msgfmt  podsec-k8s.po -o podsec-k8s.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-k8s.mo $(DESTDIR)/$(localedir)/
+
 	# bin
 	$(MKDIR_P) $(DESTDIR)$(libexecdir)/podsec/u7s/bin
 	cd ./usernetes/; tar cvzf $(TMPFILE) ./bin; cd $(DESTDIR)$(libexecdir)/podsec/u7s/; tar xvzf $(TMPFILE);
@@ -228,8 +229,10 @@ install: all
 	# PODSEC-K8S-RBAC
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m755 $(PODSEC_K8S_RBAC_PROGRAMS) $(DESTDIR)$(bindir)/
 	cd ./podsec-k8s-rbac/bin;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_FUNCTIONS) $(DESTDIR)$(bindir)/
-	cd ./podsec-k8s-rbac/md/en; for page in $(PODSEC_K8S_RBAC_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1dir)/$${page}.1.xz"; done
-	cd ./podsec-k8s-rbac/md/ru; for page in $(PODSEC_K8S_RBAC_MAN1_PAGES); do ronn -r $${page}.md --pipe | xz > "$(DESTDIR)$(man1rudir)/$${page}.1.xz"; done
+# 	cd ./podsec-k8s-rbac/man/en;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1dir)/
+# 	cd ./podsec-k8s-rbac/man/ru;$(INSTALL) -m644 $(PODSEC_K8S_RBAC_MAN1_PAGES) $(DESTDIR)$(man1rudir)/
+	cd ./podsec-k8s-rbac/man/en;xz $(PODSEC_K8S_RBAC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1dir);ls -l . $(DESTDIR)$(man1dir)
+	cd ./podsec-k8s-rbac/man/ru;xz $(PODSEC_K8S_RBAC_MAN1_PAGES); cp -f *.xz $(DESTDIR)$(man1rudir);ls -l . $(DESTDIR)$(man1rudir)
 	cd ./podsec-k8s-rbac/po; msgfmt  podsec-k8s-rbac.po -o podsec-k8s-rbac.mo; $(MKDIR_P) -m755 $(DESTDIR)/$(localedir)/;$(INSTALL) -m755 podsec-k8s-rbac.mo $(DESTDIR)/$(localedir)/
 
 	# PODSEC-INOTIFY

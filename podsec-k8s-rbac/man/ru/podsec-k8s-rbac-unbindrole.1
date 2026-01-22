@@ -1,0 +1,43 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-K8S\-RBAC\-UNBINDROLE" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-k8s\-rbac\-unbindrole\fR \- отвязывание пользователя от кластерной или обычной роли
+.SH "SYNOPSIS"
+\fBpodsec\-k8s\-rbac\-unbindrole имя_пользователя role|clusterrole роль имя_связки_роли [namespace]\fR
+.SH "DESCRIPTION"
+Скрипт производит отвязку роли от кластерной или обычной роли, созданной командой \fBpodsec\-k8s\-rbac\-bindrole\fR\. Полный текст команды можно получить в выводе команды \fBpodsec\-k8s\-rbac\-get\-userroles\fR в поле \fBunbindCmd\fR\. Если в указанном \fBимя_связки_роли\fR объекте класса \fBrolebindings\fR или \fBclusterrolebindings\fR еще остаются пользователи \- объект модифицируется\. Если список становится пуст \- объект удаляется\.
+.SH "OPTIONS"
+.IP "\[ci]" 4
+\fBимя_пользователя\fR должно быть создано командой \fBpodsec\-k8s\-rbac\-create\-user\fR и сконфигурировано на доступ к кластеру командой \fBpodsec\-k8s\-rbac\-create\-kubeconfig\fR;
+.IP "\[ci]" 4
+\fBтип роли\fR может принимать следующие значения:
+.IP "" 0
+.P
+\~\~\~\~* \fBrole\fR \- пользователь привязывается к \fBобычной роли\fR с именем \fB<роль>\fR (параметр \fBnamespace\fR в этом случае обязателен);
+.P
+\~\~\~\~* \fBclusterrole\fR \- пользователь привязывается к \fBкластерной роли\fR используя \fBкластерную роль\fR с именем \fB<роль>\fR (параметр \fBnamespace\fR в этом случае должен отсутствовать)\.
+.IP "\[ci]" 4
+\fBроль\fR \- имя обычной или кластерной роли в зависимости от предыдущего параметра;
+.IP "\[ci]" 4
+\fBимя_связки_роли\fR \- имя объекта класса \fBrolebindings\fR или \fBclusterrolebindings\fR в зависимости от параметра \fBтип роли\fR\. В рамках этого объекта к кластерной или обычной роли могут быть привязаны несколько пользователей\.
+.IP "\[ci]" 4
+\fBnamespace\fR \- имя \fBnamespace\fR для обычной роли\.
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-k8s\-rbac\-unbindrole k8s\-user1 clusterrole view sysview\fR
+.SH "SECURITY CONSIDERATIONS"
+.SH "SEE ALSO"
+.IP "\[ci]" 4
+Генерация сертификатов, создание рабочих мест администратора безопасности средства контейнеризации, администраторов информационной (автоматизированной) системы и назначение им RBAC\-ролей \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/README\.md\fR;
+.IP "\[ci]" 4
+Описание основных классов ролей кластера (Roles, ClusterRoles) и механизмов из связываения с субъектами \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/rolesDescribe\.md\fR;
+.IP "\[ci]" 4
+Настройка рабочих мест администраторов информационной (автоматизированной) системы (ClusterRole) \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+.IP "\[ci]" 4
+Настройка рабочих мест администраторов проектов (Role) \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR;
+.IP "\[ci]" 4
+Настройка других ролей \fIhttps://github\.com/alt\-cloud/podsec/blob/master/k8s/RBAC/addUser/clusterroleBinding\.md\fR\.
+.IP "" 0
+.SH "AUTHOR"
+Костарев Алексей, Базальт СПО kaf@basealt\.ru

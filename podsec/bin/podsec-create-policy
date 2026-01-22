@@ -77,9 +77,6 @@ then
       exit 1
     fi
   done
-else
-  echo "$(gettext 'Adding a binding of domains registry.local sigstore.local trivy.local to IP address') $regIP" >&2
-  echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts
 fi
 echo "$(gettext 'Adding a binding of domains registry.local sigstore.local trivy.local to IP address') $regIP" >&2
 echo "$regIP registry.local sigstore.local trivy.local" >> /etc/hosts

@@ -1,0 +1,38 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-LOAD\-SIGN\-OCI" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-load\-sign\-oci\fR \- разворачивание образов из сжатого \fBxz\-oci\-архива\fR, их подпись и помещение на регистратор
+.SH "SYNOPSIS"
+\fBpodsec\-load\-sign\-oci имя_архивного_файла архитектура EMail_подписанта [регистратор/тропа]\fR
+.SH "DESCRIPTION"
+Скрипт:
+.IP "\[ci]" 4
+извлекает из сжатого \fBxz\-oci\-архива\fR образы,
+.IP "\[ci]" 4
+разворачивает их в файловой системе,
+.IP "\[ci]" 4
+подписывает и помещает на регистратор по указаной тропе\.
+.IP "" 0
+.SH "OPTIONS"
+.IP "1." 4
+\fBАрхив oci\-файла\fR, передаваемый первым параметром должен быть сжат компрессором \fBxz\fR\.
+.IP "2." 4
+\fBИмя архитектуры\fR должно принадлежать списку \fBamd64\fR, \fBarm64\fR, \fBarm\fR, \fBppc64le\fR, \fB386\fR\.
+.IP "3." 4
+\fBEMail_подписанта\fR должно быть указано в подписи пользователя и указывается без обрамляющих скобок \fB<>\fR\.
+.IP "4." 4
+\fBрегистратор/тропа\fR должна содержать имя подкаталога регистратора\. Формат \fBрегистратор\fR недопустим Если \fBрегистратор/тропа\fR не указана, принимается тропа \fBregistry\.local/k8s\-c10f1\fR
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-load\-sign\-oci /mnt/cdrom/containers/amd64\.tar\.xz amd64 immklocal@baseat\.ru registry\.local\fR
+.P
+\fBpodsec\-load\-sign\-oci /mnt/cdrom/containers/amd64\.tar\.xz amd64 immkk8s@baseat\.ru\fR
+.SH "SECURITY CONSIDERATIONS"
+.IP "\[ci]" 4
+Данный скрипт должен запускаться только на узле с доменами \fBregistry\.local\fR, \fBsigstore\-local\fR\. Если это не так, скрипт прекращает свою работу\.
+.IP "\[ci]" 4
+Скрипт должен вызываться пользователем входящим в группу \fBpodman_dev\fR\.
+.IP "" 0
+.SH "AUTHOR"
+Костарев Алексей, Базальт СПО kaf@basealt\.ru

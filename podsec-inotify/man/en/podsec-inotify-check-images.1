@@ -1,0 +1,207 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-INOTIFY\-CHECK\-IMAGES" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-inotify\-check\-images\fR \- The plugin checks images for compliance with the containerization policies on the node
+.P
+## SYNOPSIS
+.P
+\fBpodsec\-inotify\-check\-images [\-v[vv]] [\-a interval] [\-f interval] \-c interval \-h interval [\-m interval] х\-w intervalъ [\-l interval] [\-d interval] [\-M EMail]\fR
+.SH "DESCRIPTION"
+The plugin checks images for compliance with the containerization policies on the node\. The check is based on the following parameters:
+.TS
+allbox;
+l l.
+User control parameter	Metric weight
+presence of registrars in the user policy that do not support electronic signature	101
+presence of unsigned images in the image cache	102
+presence of images in the cache outside the supported policies	103
+.TE
+.P
+All metric weights are summed up and a final metric is formed\.
+.SH "OPTIONS"
+If the \fB\-M Email\fR flag is specified, the final message is sent to the specified user\.
+.P
+The danger level is determined at startup by the flags:
+.TP
+for system logs:
+
+.IP "" 4
+.nf
+Level name |Level| Prefix   | Flag | Recommended interval value
+\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+emergency  | 7   | Crash    | `\-a` | do not specify
+fatal      | 6   | Fatal    | `\-f` | do not specify
+critical   | 5   | Critical | `\-c` | 100
+high       | 4   | Heigh    | `\-h` | 0
+medium     | 3   | Middle   | `\-m` | do not specify
+low        | 2   | Low      | `\-l` | do not specify
+debug      | 1   | Debug    | `\-d` | do not specify
+.fi
+.IP "" 0
+.TP
+for the \fBicigna\fR server:
+
+.IP "" 4
+.nf
+Level name |Level| Prefix   | Flag | Recommended interval value
+\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+critical   |  2  | Critical | `\-c` | 100
+warning    |  1  | Warning  | `\-w` | 0
+.fi
+.IP "" 0
+.P
+Any parameter may be missing\. In this case, it is not considered when viewing the compliance of the received metric with the intervals\.
+.P
+The parameter values ​​have the interval format described in the nagios documentation: Threshold and Ranges \fIhttps://nagios\-plugins\.org/doc/guidelines\.html#THRESHOLDFORMAT\fR\.
+.P
+General description:
+.P
+\fB[@]start:end\fR
+.P
+Notes:
+.IP "\[ci]" 4
+\fBstart\fR \(<= \fBend\fR
+.IP "\[ci]" 4
+\fBstart\fR and \fB:\fR are not required if \fBstart=0\fR
+.IP "\[ci]" 4
+if the interval is specified in the format \fBstart:\fR and the end is not specified, then the end of the interval is considered to be infinity \fBꝏ\fR
+.IP "\[ci]" 4
+to indicate negative infinity (\fB\-ꝏ\fR) use \fB~\fR
+.IP "\[ci]" 4
+the trigger fires when the metric value is \fBOUTSIDE THE SPECIFIED INTERVAL\fR (\fBstart and end points are included in the interval\fR)
+.IP "\[ci]" 4
+if the interval begins with the \fB@\fR symbol, then the condition is inverted \- the trigger fires when the metric value is \fBIN THE SPECIFIED INTERVAL\fR (start and end points are included in the interval)
+.IP "" 0
+.P
+Examples of possible formats:
+.IP "" 4
+.nf
+Interval format | Description of the trigger condition
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+100             | metrica < 0 || metrica > 100 (outside the range 0\-100)
+100:            | metrica < 100 (outside the range 100\-ꝏ)
+~:100           | metrica > 100 (outside the range \-ꝏ\-100)
+20\-100          | metrica < 20 || metrica > 100 (outside the range 20\-100)
+@20\-100         | metrica >= 20 && metrica <= 100 (in the range 20\-100)
+.fi
+.IP "" 0
+.SS "System logs"
+For system logs, the danger level is determined for each message\. The danger level intervals specified by the parameters are viewed in order from highest to lowest\. The message level is determined by the first match found (remember that the trigger is triggered when the metric is OUTSIDE the interval)\. If no match is found, the message is not output to the system log\.
+.P
+Based on the level found, the priority of the message and its tag (prefix) are determined\. A message with the specified priority and tag is sent to the system log using the logger command:
+.IP "" 4
+.nf
+# logger \-p priority \-t tag "tag: message"
+.fi
+.IP "" 0
+.P
+In addition to the main message for \fBicigna\fR, the following are generated:
+.IP "\[ci]" 4
+a list of offending users;
+.IP "\[ci]" 4
+shortened messages for detail level \fB1\fR\.
+.IP "" 0
+.SS "icigna logs"
+The formats of messages and exit codes of the plugin are described in Plugin Output for Nagios \fIhttps://nagios\-plugins\.org/doc/guidelines\.html#PLUGOUTPUT\fR\.
+.P
+The severity level for icigna logs is determined by the TOTAL metric\. The total metric is determined to determine the level and compared with the intervals specified by the flags
+.IP "\[ci]" 4
+\fB\-c\fR \- \fBCritical\fR
+.IP "\[ci]" 4
+\fB\-w\fR \- \fBWarning\fR
+.IP "" 0
+.P
+If no match is found, \fBicigna\fR prints the message:
+.IP "" 4
+.nf
+POLICY OK: Containerization policies are not violated
+.fi
+.IP "" 0
+.P
+The program exit code (which is processed on the \fBicigna\fR server side) is \fB0\fR\.
+.P
+The log format for \fBnagios\fR depends on the level of detail specified by the \fB\-v[vv]\fR flag (see Verbose Output \fIhttps://nagios\-plugins\.org/doc/guidelines\.html#AEN41\fR):
+.IP "" 4
+.nf
+Flag | Level
+\-\-\-\-\-|\-\-\-\-\-\-\-\-
+none | 0
+\-v   | 1
+\-vv  | 2
+\-vvv | 3
+\|\.\|\.\|\.  | 3
+.fi
+.IP "" 0
+.P
+For all levels, a prefix message of the following format is generated:
+.IP "" 4
+.nf
+POLICY $prefix:
+.fi
+.IP "" 0
+.P
+Where \fBprefix\fR takes the following values ​​depending on the severity level:
+.IP "\[ci]" 4
+\fB\-c\fR \- \fBCritical\fR
+.IP "\[ci]" 4
+\fB\-w\fR \- \fBWarning\fR
+.IP "" 0
+.P
+If the level of detail is \fB0\fR, a shortened message is output\.
+.IP "" 4
+.nf
+POLICY $prefix: Violation of user containerization policies \fIusers\fR
+.fi
+.IP "" 0
+.P
+Where \fBusers\fR is a list of users for whom violations were detected\.
+.P
+If the detail level is \fB1\fR, then the first detail level from the list of shortened messages generated during the formation of system logs is added to the message with the prefix \fIThere are users:\fR\.
+.IP "" 4
+.nf
+POLICY $prefix: Violation of user containerization policies $users | There are users:
+shortened message
+\|\.\|\.\|\.
+.fi
+.IP "" 0
+.P
+If the detail level is \fB2\fR, then the second detail level from the list of full messages generated during the formation of system logs is added to the message\.
+.IP "" 4
+.nf
+POLICY $prefix: Violation of user containerization policies $users | There are users:
+shortened message
+\|\.\|\.\|\.
+shortened message |
+full message
+\|\.\|\.\|\.
+.fi
+.IP "" 0
+.P
+After displaying messages, the plugin exits with the exit code:
+.IP "\[ci]" 4
+\fBCritical\fR \- \fB2\fR
+.IP "\[ci]" 4
+\fBWarning\fR \- \fB1\fR
+.IP "" 0
+.SS "Starting the service via systemd/Timers"
+In addition to running the script via \fBnagios\fR, the script can be run via \fBsystemd/Timers\fR\.
+.P
+The package includes the systemd files \fBpodsec\-inotify\-check\-images\.service\fR, \fBpodsec\-inotify\-check\-images\.timer\fR\. The service file \fBpodsec\-inotify\-check\-images\.service\fR describes a line in the \fBExecStart\fR parameter describing the startup mode of the \fBpodsec\-inotify\-check\-images\fR script\. The script is run with the flags \fB\-vvv \-c 100\fR \- display detailed information, all messages have a level of \fBc\fR \- critical\. If incorrect policy settings are detected during the script\'s operation, they are written to the system log and sent by mail to the system administrator (\fBroot\fR)\.
+.P
+The schedule for starting the \fBpodsec\-inotify\-check\-images\.service\fR service is described in the \fBOnCalendar\fR parameter of the \fBpodsec\-inotify\-check\-images\.timer\fR schedule file\. The service is called every hour\.
+.P
+By default, the service start timer is disabled\. To enable it, enter the command:
+.IP "" 4
+.nf
+# systemctl enable \-\-now podsec\-inotify\-check\-images\.timer
+.fi
+.IP "" 0
+.P
+If you need to change the script startup mode, edit the \fBOnCalendar\fR parameter of the \fBpodsec\-inotify\-check\-images\.timer\fR schedule file\.
+.SH "EXAMPLES"
+\fBpodsec\-inotify\-check\-images \-vvv \-w 0 \-h 0 \-c 100\fR
+.SH "SECURITY CONSIDERATIONS"
+.SH "SEE ALSO"
+.SH "AUTHOR"
+Kostarev Alexey, Basalt LLC kaf@basealt\.ru

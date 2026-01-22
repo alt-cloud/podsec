@@ -1,0 +1,44 @@
+.\" generated with Ronn-NG/v0.9.1
+.\" http://github.com/apjanke/ronn-ng/tree/0.9.1
+.TH "PODSEC\-CREATE\-IMAGEMAKERUSER" "1" "October 2024" ""
+.SH "NAME"
+\fBpodsec\-create\-imagemakeruser\fR \- create container image maker users
+.SH "SYNOPSIS"
+\fBpodsec\-create\-imagemakeruser [username[@repo_path]] \|\.\|\.\|\.\fR
+.SH "DESCRIPTION"
+The script creates container image maker users with the following rights: \- change the password set by the containerization tool security administrator; \- create, modify, and delete container images\.
+.P
+When creating each user, you must specify: \- \fBuser password\fR;
+.IP "\[ci]" 4
+\fBkey type\fR: \fBRSA\fR, \fBDSA and Elgamal\fR, \fBDSA (signing only)\fR, \fBRSA (signing only)\fR, \fBkey available on the card\fR;
+.IP "\[ci]" 4
+\fBkey expiration date\fR;
+.IP "\[ci]" 4
+\fBfull name\fR;
+.IP "\[ci]" 4
+\fBEmail\fR (used later to sign images);
+.IP "\[ci]" 4
+\fBnote\fR;
+.IP "\[ci]" 4
+\fBpassword for signing images\fR\.
+.IP "" 0
+.P
+The script must be called after calling the \fBpodsec\-create\-policy\fR script ## OPTIONS The list of users and the registrar paths for which they sign images are passed as parameters in the format: \fBusername@repository_path\fR \- The list must not contain users with the same paths\.
+.IP "\[ci]" 4
+If the user is the only one and the path is not specified, then the \fBregistry\.local\fR path is accepted \- If the user name is not specified, the name \fBimagemaker@registry\.local\fR is accepted as the first parameter\.
+.IP "" 0
+.SH "EXAMPLES"
+\fBpodsec\-create\-imagemakeruser immkk8s@registry\.local/k8s\-c10f1 imklocal@registry\.local immkalt@registry\.altlinux\.org\fR Three users with signing rights are created: \- \fBimmkk8s\fR \- local kubernetes images with the path \fBregistry\.local/k8s\-c10f1\fR;
+.IP "\[ci]" 4
+\fBimklocal\fR \- local \fBregistry\.local\fR images except kubernetes images \- \fBimmkalt\fR \- registrar images \fBregistry\.altlinux\.org\fR ## SECURITY CONSIDERATIONS \- This script should only be run on a node with the \fBregistry\.local\fR , \fBsigstore\-local\fR domains\. If this is not the case, the script stops\.
+.IP "\[ci]" 4
+Image developers must control the list of signed images themselves\. If the user \fBimklocal\fR signs an image with the path \fBregistry\.local/k8s\-c10f1\fR, then the deployment of this image will fail, since the public key of the user \fBimmkk8s\fR will be used for signature verification, not ` imklocal`\.
+.IP "\[ci]" 4
+All users created in the cluster must be located on the same server with the \fBstorage\.local\fR domain\. The WEB server for image signatures must also be deployed there\.
+.IP "\[ci]" 4
+All public keys of users are located in the \fB/var/sigstore/keys/\fR directory and must be copied to each server in the cluster to the \fB/var/sigstore/keys/\fR directory \- Image signatures are stored in the ` /var/sigstore/sigstore/\fBdirectory with the registrar names discarded\. if the system controls signatures of images from different registrars (for example:\fRregistry\.altlinux\.org\fBand\fRregistry\.local\fB) and the image\fRregistry\.local/k8s\-c10f1/pause:3\.9\fBwith\fR@sha256 =347a15493d0a38d9ce74f23ea9f081583728a20dbdc11d7c17ef286d9cade3ec\fBis signed, then all images with this\fRsha256\fBwill be considered signed:\fRregistry\.altlinux\.orh/k8s\-c10f1/pause:3\.9`, \|\.\|\.\|\. ## SEE ALSO \- Con tainer image maker \fIhttps://github\.com/alt\-cloud/podsec/tree/master/SigningImages\fR\.
+.IP "\[ci]" 4
+Description of periodic integrity monitoring of container images and containerization tool settings \fIhttps://github\.com/alt\-cloud/podsec/tree/master/ImageSignatureVerification\fR
+.IP "" 0
+.SH "AUTHOR"
+Aleksey Kostarev, Basealt LLC kaf@basealt\.ru
