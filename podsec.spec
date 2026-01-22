@@ -40,6 +40,19 @@ This package contains utilities for:
 Summary: Set of scripts for Kubernetes Security
 Group: Development/Other
 Requires: cri-tools
+Requires: podsec >= %EVR
+Requires: rootlesskit >= 1.1.0
+Requires: slirp4netns >= 1.1.12
+Requires: crun >= 1.8.1
+Requires: systemd-container
+Requires: kubernetes1.32-kubeadm
+Requires: kubernetes1.32-crio
+Requires: cri-tools1.32
+%filter_from_requires /\/usr\/bin\/crio/d
+%filter_from_requires /\/usr\/bin\/kubeadm/d
+%filter_from_requires /\/usr\/bin\/kubectl/d
+%filter_from_requires /\/usr\/bin\/kubelet/d
+%filter_from_requires /\/etc\/kubernetes\/kubelet/d
 
 %description k8s
 This package contains utilities for:
@@ -317,6 +330,15 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+<<<<<<< HEAD
+=======
+* Tue May 20 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt2
+- Tuned podsec-k8s-upgrade scripts for c10f2
+- Added podsec-k8s-upgrade-init.sh script
+
+* Tue Apr 08 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt1
+- Add podsec-k8s-upgrade package - upgrade kubernetes versions on cluster
+>>>>>>> 462228a (1.1.10-alt2)
 
 * Thu Oct 24 2024 Alexey Kostarev <kaf@altlinux.org> 1.2.2-alt1
 - Add kube group to user u7s-admin.
