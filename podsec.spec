@@ -8,7 +8,6 @@
 Name: podsec
 Version: 1.2.2
 Release: alt1
-
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
