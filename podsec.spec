@@ -331,6 +331,9 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 
 %changelog
 
+* Wed May 28 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt6
+- Transition from prefix k8s- to prefix without prefix, k8s-c10f2 -> c10f
+
 * Tue May 27 2025 Alexey Kostarev <kaf@altlinux.org> 1.1.10-alt5
 - Deleted untested scripts from podsec-k8s-upgrade
 
