@@ -6,7 +6,7 @@
 
 Name: podsec
 Version: 1.3.0
-Release: alt2
+Release: alt3
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -337,6 +337,9 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Fri Feb 06 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.0-alt3
+- Add PATH "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" to .profile
+
 * Thu Jan 22 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.0-alt2
 - Add setting group kube for u7s-admin user after installing kubernetes packages
 
