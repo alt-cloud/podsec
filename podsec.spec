@@ -151,6 +151,7 @@ groupadd -r -f %u7s_admin_grp  2>&1 ||:
 useradd -M -r -g %u7s_admin_grp -d %u7s_admin_homedir -G systemd-journal,podman \
     -c 'usernet user account'  %u7s_admin_usr  2>&1 ||:
 mkdir -p %u7s_admin_homedir
+echo "export PATH=/usr/libexec/podsec/u7s/bin/:$PATH" > %u7s_admin_homedir/.profile
 # merge usernetes & podman graphroot
 mkdir -p %u7s_admin_homedir/.local/share/usernetes/containers 2>&1 ||:
 cd %u7s_admin_homedir/.local/share
