@@ -219,6 +219,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubeadm.sh
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/kubelet.sh
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/nsenter_u7s
+%attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/rootlesskit-ports
 %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_libexecdir/podsec/u7s/bin/rootlesskit.sh
 %dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s
 %dir %attr(0700,%u7s_admin_usr,%u7s_admin_grp) %_localstatedir/podsec/u7s/etcd
@@ -230,6 +231,7 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %_userunitdir/kubelet.service
 %_userunitdir/rootlesskit.service
 %dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s
+%config(noreplace) %attr(0600, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/rootlesskit-ports.conf
 %dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/audit
 %config %_sysconfdir/podsec/u7s/audit/policy.yaml
 %dir %attr(0700, %u7s_admin_usr,%u7s_admin_grp) %_sysconfdir/podsec/u7s/config/cni_net.d
@@ -337,6 +339,9 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
+* Mon Jul 13 2026 Danila Shabalin <shabalin.danila@gmail.com> 1.3.0-alt3
+- Added persistent RootlessKit port forwards configuration for u7s.
+
 * Thu Apr 09 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.1-alt0
 - Add kube-flannel.yaml manifests for 0.28.1, 0.28.2 versions
 

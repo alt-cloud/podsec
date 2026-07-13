@@ -1,0 +1,62 @@
+#!/bin/sh
+
+: ${U7S_ROOTLESSCTL:=rootlessctl}
+: ${U7S_ROOTLESSKIT_PORTS_CONF:=/etc/podsec/u7s/rootlesskit-ports.conf}
+
+u7s_rootlesskit_log_info() {
+	if type log_info >/dev/null 2>&1; then
+		log_info "$@"
+	else
+		echo "[INFO] $*" >&2
+	fi
+}
+
+u7s_rootlesskit_log_error() {
+	if type log_error >/dev/null 2>&1; then
+		log_error "$@"
+	else
+		echo "[ERROR] $*" >&2
+	fi
+}
+
+u7s_rootlesskit_add_port() {
+	local socket=$1
+	local spec=$2
+
+	if ! "$U7S_ROOTLESSCTL" --socket "$socket" add-ports "$spec"; then
+		u7s_rootlesskit_log_error "Failed to add RootlessKit port: $spec"
+		return 1
+	fi
+}
+
+u7s_rootlesskit_normalize_port_spec() {
+	sed -e 's/[[:space:]]*#.*$//' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'
+}
+
+u7s_rootlesskit_add_ports_from_file() {
+	local file=$1
+	local socket=$2
+	local line
+	local line_no=0
+	local spec
+
+	if [ ! -e "$file" ]; then
+		return 0
+	fi
+	if [ ! -f "$file" ]; then
+		u7s_rootlesskit_log_error "RootlessKit ports config is not a regular file: $file"
+		return 1
+	fi
+
+	while IFS= read -r line || [ -n "$line" ]; do
+		line_no=$((line_no + 1))
+		spec=$(printf '%s\n' "$line" | u7s_rootlesskit_normalize_port_spec)
+		if [ -z "$spec" ]; then
+			continue
+		fi
+		if ! u7s_rootlesskit_add_port "$socket" "$spec"; then
+			u7s_rootlesskit_log_error "Invalid persistent RootlessKit port in $file:$line_no: $spec"
+			return 1
+		fi
+	done <"$file"
+}

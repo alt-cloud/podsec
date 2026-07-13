@@ -469,6 +469,12 @@ master?](https://stackoverflow.com/questions/51126164/how-do-i-find-the-join-com
 
     $ nsenter_u7s rootlessctl add-ports 0.0.0.0:&lt;port>:&lt;port>/tcp
 
+Этот способ добавляет проброс только в текущий запущенный экземпляр
+`rootlesskit`. Чтобы проброс автоматически восстанавливался после
+перезапуска `u7s.service` или `rootlesskit`, добавьте строку в
+`/etc/podsec/u7s/rootlesskit-ports.conf` в том же формате, например
+`0.0.0.0:30443:30443/tcp`.
+
 Сервисы типа `NodePort` из за их небольшого диапазона и
 \"нестабильности\" портов при переносе решения в другой кластер довольно
 редко используются. Рекомендуется вместо них использовать сервисы типа
@@ -883,6 +889,10 @@ ingress-контроллера](Файл:Ingress.png "840px|безрамки|ц�
 сеть `kubernetes`:
 
     nsenter_u7s rootlessctl add-ports 0.0.0.0:31000:31000/tcp
+
+Для сохранения этого проброса после перезапуска `u7s.service` или
+`rootlesskit` добавьте `0.0.0.0:31000:31000/tcp` в
+`/etc/podsec/u7s/rootlesskit-ports.conf`.
 
 ### Настройка Ingress-правил {#настройка_ingress_правил}
 

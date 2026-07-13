@@ -3,6 +3,8 @@
 # * $U7S_ROOTLESSKIT_FLAGS
 # set -x
 source podsec-u7s-functions
+u7s_rootlesskit_bin_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+source "$u7s_rootlesskit_bin_dir/rootlesskit-ports"
 
 source $envFile
 
@@ -99,10 +101,10 @@ else
 	fi
 	for port in $ports
 	do
-		rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/tcp"
+		u7s_rootlesskit_add_port "$rk_state_dir/api.sock" "0.0.0.0:${port}:${port}/tcp"
 	done
-	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:8472:8472/udp
-	rootlessctl --socket $rk_state_dir/api.sock add-ports 0.0.0.0:6053:53/udp
+	u7s_rootlesskit_add_port "$rk_state_dir/api.sock" 0.0.0.0:8472:8472/udp
+	u7s_rootlesskit_add_port "$rk_state_dir/api.sock" 0.0.0.0:6053:53/udp
 
   # Пробросить порты для CNI-нтерфейсов
 	cniTCPPorts=
@@ -115,12 +117,13 @@ else
 	esac
 	for port in $cniTCPPorts
 	do
-		rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/tcp"
+		u7s_rootlesskit_add_port "$rk_state_dir/api.sock" "0.0.0.0:${port}:${port}/tcp"
 	done
 	for port in $cniUDPPorts
 	do
-		rootlessctl --socket $rk_state_dir/api.sock add-ports "0.0.0.0:${port}:${port}/udp"
+		u7s_rootlesskit_add_port "$rk_state_dir/api.sock" "0.0.0.0:${port}:${port}/udp"
 	done
+	u7s_rootlesskit_add_ports_from_file "$U7S_ROOTLESSKIT_PORTS_CONF" "$rk_state_dir/api.sock"
 
 	# Обеспечить выделение статичесикх IP-адресов для tap0 интерфейсов и роутнг пакетов до них
 	until /sbin/ip a add ${U7S_EXTIP}/32 dev tap0; do sleep 1; done

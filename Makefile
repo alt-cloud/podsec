@@ -67,6 +67,9 @@ USERNETES_ENVS = \
 	u7s_images \
 	u7s_flags
 
+USERNETES_ROOTLESSKIT_PORTS_CONF = \
+	rootlesskit-ports.conf
+
 USERNETES_FUNCTIONS = \
 	common/common.inc.sh
 
@@ -202,6 +205,7 @@ install: all
 	# /etc/podsec/u7s
 	$(MKDIR_P) $(DESTDIR)$(sysconfdir)/podsec/u7s/config;
 	cd ./usernetes/config; tar cvzf  $(TMPFILE) $(USERNETES_CONFIGS);cd $(DESTDIR)$(sysconfdir)/podsec/u7s/config;tar xvzf $(TMPFILE);
+	cd ./usernetes; $(INSTALL) -m644 $(USERNETES_ROOTLESSKIT_PORTS_CONF) $(DESTDIR)$(sysconfdir)/podsec/u7s
 	# modules-load.
 	$(MKDIR_P) $(DESTDIR)$(modulesloaddir)
 	cp usernetes/config/modules-load.d/u7s.conf $(DESTDIR)$(modulesloaddir)/
