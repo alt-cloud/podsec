@@ -5,8 +5,12 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
+<<<<<<< HEAD
+Version: 1.3.2
+=======
 Version: 1.3.1
-Release: alt0
+>>>>>>> f7f6897 (1.3.1-alt1)
+Release: alt1
 Summary: Set of scripts for Podman Security
 License: GPLv2+
 Group: Development/Other
@@ -339,10 +343,11 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
-* Mon Jul 13 2026 Danila Shabalin <shabalin.danila@gmail.com> 1.3.0-alt3
-- Added persistent RootlessKit port forwards configuration for u7s.
+  * Thu Aug 13 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.2-alt1
+  - Added persistent RootlessKit port forwards configuration for u7s
+    (patch by Danila Shabalin).
 
-* Thu Apr 09 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.1-alt0
+* Thu Apr 09 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.1-alt1
 - Add kube-flannel.yaml manifests for 0.28.1, 0.28.2 versions
 
 * Fri Feb 06 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.0-alt3
