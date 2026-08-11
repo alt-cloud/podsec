@@ -27,6 +27,11 @@ fi
 
 uid=$(id -u u7s-admin)
 socket="unix:///run/user/$uid/usernetes/crio/crio.sock"
+pod_infra_container_image=''
+if kubelet --help | grep -- '^ *--pod-infra-container-image' >/dev/null
+then
+	pod_infra_container_image="--pod-infra-container-image=$U7S_REGISTRY/$U7S_PAUSE_IMAGE"
+fi
 
 kubelet \
 	--cert-dir /etc/kubernetes/pki \
@@ -35,5 +40,5 @@ kubelet \
 	--kubeconfig "/etc/kubernetes/kubelet.conf" \
 	--config $kubelet_config \
 	--container-runtime-endpoint=$socket \
-	--pod-infra-container-image="$U7S_REGISTRY/$U7S_PAUSE_IMAGE" \
+	 $pod_infra_container_image\
 	$@
