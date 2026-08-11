@@ -5,11 +5,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-<<<<<<< HEAD
 Version: 1.3.2
-=======
-Version: 1.3.1
->>>>>>> f7f6897 (1.3.1-alt1)
 Release: alt1
 Summary: Set of scripts for Podman Security
 License: GPLv2+

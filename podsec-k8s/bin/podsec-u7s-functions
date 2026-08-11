@@ -879,6 +879,13 @@ function getKubeFlannelFile() {
   echo $file
 }
 
+function getImageTag() {
+	ifs=$IFS IFS=:
+	set -- $1
+	IFS=$ifs
+	echo $2
+}
+
 function getFlannelCniPluginName() {
 	kubeFlannelFile=$(getKubeFlannelFile $1)
 	cniPluginImage=$(yq -y 'select(.kind=="DaemonSet").spec.template.spec.initContainers[0]' $kubeFlannelFile |  yq -r '.image')

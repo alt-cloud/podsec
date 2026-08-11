@@ -15,6 +15,7 @@ KUBEADM_CONFIGS_DIR=/etc/podsec/u7s/config/kubeadm-configs
 configFile="$XDG_CONFIG_HOME/usernetes/$cmd.yaml"
 host=$(hostname)
 TMPFILE=$(mktemp "/tmp/kubeadm.XXXXXX")
+ETCD_TAG=$(getImageTag $U7S_ETCD_IMAGE)
 
 (
 if [ "$cmd" = 'init' ]
