@@ -5,7 +5,7 @@
 %define u7s_admin_homedir %_localstatedir/%u7s_admin_usr
 
 Name: podsec
-Version: 1.3.2
+Version: 1.3.3
 Release: alt1
 Summary: Set of scripts for Podman Security
 License: GPLv2+
@@ -339,7 +339,12 @@ chown -R %u7s_admin_usr:%u7s_admin_grp %u7s_admin_homedir
 %config(noreplace) %_sysconfdir/nagios/nrpe-commands/podsec-commands.cfg
 
 %changelog
-  * Thu Aug 13 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.2-alt1
+* Thu Aug 13 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.3-alt1
+- Tuned --pod-infra-container-image flag in _kubelet.sh - is absent in kube version >= v1.35
+- Added "name": "loopback" in 99-loopback.conf
+- Added ETCD_TAG. ETCD_IMAGE variable
+
+* Thu Aug 13 2026 Alexey Kostarev <kaf@altlinux.org> 1.3.2-alt1
   - Added persistent RootlessKit port forwards configuration for u7s
     (patch by Danila Shabalin).
 
